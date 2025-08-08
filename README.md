@@ -1,21 +1,11 @@
 # JIIT Campus Updates
 
-[![Astro](https://img.shields.io/badge/Frontend-Astro-FF5D01?logo=astro&logoColor=white)](https://astro.build/)  
-[![Bun](https://img.shields.io/badge/Runtime-Bun-000000?logo=bun&logoColor=white)](https://bun.sh/)  
-[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)  
-[![MongoDB](https://img.shields.io/badge/Database-MongoDB-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)  
-[![LangChain](https://img.shields.io/badge/AI-LangChain-1C3C3C)](https://www.langchain.com/)  
-[![LangGraph](https://img.shields.io/badge/AI-LangGraph-1C3C3C)](https://www.langchain.com/langgraph)  
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)  
-[![Daily Updates](https://img.shields.io/badge/Updates-Daily%20at%209%20AM%20IST-brightgreen)](#update-schedule)  
-[![Deployment Status](https://img.shields.io/badge/Status-Active-success)](#)  
+[![Astro](https://img.shields.io/badge/Frontend-Astro-FF5D01?logo=astro&logoColor=white)](https://astro.build/)  [![Bun](https://img.shields.io/badge/Runtime-Bun-000000?logo=bun&logoColor=white)](https://bun.sh/)  [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)  [![MongoDB](https://img.shields.io/badge/Database-MongoDB-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)  [![LangChain](https://img.shields.io/badge/AI-LangChain-1C3C3C)](https://www.langchain.com/)  [![LangGraph](https://img.shields.io/badge/AI-LangGraph-1C3C3C)](https://www.langchain.com/langgraph)
 
----
 
 **JIIT Campus Updates** is a centralized web platform designed to keep students informed about the latest placement opportunities and campus activities at Jaypee Institute of Information Technology (JIIT).  
 The platform automatically refreshes its data every day at **9:00 AM IST**, ensuring that students always have access to the most recent updates.
 
----
 
 ## Features
 
@@ -31,7 +21,6 @@ The platform automatically refreshes its data every day at **9:00 AM IST**, ensu
 - **Search and Filter**  
   Quickly find relevant updates using search and category filters.
 
----
 
 ## Tech Stack
 
@@ -49,7 +38,6 @@ The platform automatically refreshes its data every day at **9:00 AM IST**, ensu
 **Automation**  
 - Cron jobs for scheduled daily refresh
 
----
 
 ## Installation
 
@@ -100,8 +88,6 @@ The platform automatically refreshes its data every day at **9:00 AM IST**, ensu
    bun run dev
    ```
 
----
-
 ## Project Structure
 
 ```
@@ -122,21 +108,18 @@ jiit-campus-updates/
 └── README.md
 ```
 
----
 
 ## Update Schedule
 
 The backend uses a scheduled job to fetch and update placement and campus activity data every day at **9:00 AM IST**.  
 This ensures that the platform always displays the latest information.
 
----
 
 ## Contributing
 
 Contributions are welcome. Please fork the repository and submit a pull request with your changes.  
 For major changes, open an issue first to discuss what you would like to change.
 
----
 
 ## License
 
