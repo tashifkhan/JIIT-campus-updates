@@ -171,8 +171,8 @@ export default function JobsPage() {
 	const maxCgpa = useMemo(() => {
 		const cgpaValues = jobs.flatMap(j => 
 			j.eligibility_marks
-				.filter(mark => mark.level.toLowerCase().includes('ug') || mark.level.toLowerCase().includes('overall'))
-				.map(mark => mark.criteria / 10) // Convert percentage to CGPA (assuming 10% = 1 CGPA)
+				.filter(mark => mark.level.toLowerCase() === 'ug')
+				.map(mark => mark.criteria) // UG is already in CGPA out of 10
 		);
 		return Math.ceil(Math.max(...cgpaValues, 0) * 10) / 10 || 10; // Round to 1 decimal, default to 10
 	}, [jobs]);
@@ -212,12 +212,11 @@ export default function JobsPage() {
 			
 			// CGPA filter
 			if (minCgpa > 0) {
-				const jobMinCgpa = Math.min(
-					...job.eligibility_marks
-						.filter(mark => mark.level.toLowerCase().includes('ug') || mark.level.toLowerCase().includes('overall'))
-						.map(mark => mark.criteria / 10) // Convert percentage to CGPA
-				);
-				if (isFinite(jobMinCgpa) && jobMinCgpa > minCgpa) return false;
+				const ugMarks = job.eligibility_marks.filter(mark => mark.level.toLowerCase() === 'ug');
+				if (ugMarks.length > 0) {
+					const jobMinCgpa = Math.min(...ugMarks.map(mark => mark.criteria)); // UG is already in CGPA
+					if (jobMinCgpa > minCgpa) return false;
+				}
 			}
 			
 			return true;
@@ -545,15 +544,39 @@ export default function JobsPage() {
 									</div>
 								</div>
 
-								<div className="bg-red-50 border border-red-200 rounded-lg p-3">
-									<div className="flex items-center">
-										<ClockIcon className="w-4 h-4 mr-2 text-red-600" />
-										<span className="text-sm font-medium text-red-700">
-											{job.deadline ? (
-												<>Deadline: {formatDate(job.deadline)}</>
-											) : (
-												<>No deadline specified</>
-											)}
+								{/* CGPA and Deadline Row */}
+								<div className="grid grid-cols-2 gap-3">
+									{(() => {
+										const ugMark = job.eligibility_marks.find(mark => mark.level.toLowerCase() === 'ug');
+										return ugMark ? (
+											<div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+												<div className="flex items-center">
+													<UsersIcon className="w-4 h-4 mr-2 text-purple-600" />
+													<span className="text-sm font-medium text-purple-600">Min CGPA</span>
+												</div>
+												<span className="text-lg font-bold text-purple-700 block">
+													{ugMark.criteria.toFixed(1)}/10
+												</span>
+											</div>
+										) : (
+											<div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+												<div className="flex items-center">
+													<UsersIcon className="w-4 h-4 mr-2 text-gray-400" />
+													<span className="text-sm font-medium text-gray-500">CGPA</span>
+												</div>
+												<span className="text-sm text-gray-500 block">
+													Not specified
+												</span>
+											</div>
+										);
+									})()}
+									<div className="bg-red-50 border border-red-200 rounded-lg p-3">
+										<div className="flex items-center">
+											<ClockIcon className="w-4 h-4 mr-2 text-red-600" />
+											<span className="text-sm font-medium text-red-600">Deadline</span>
+										</div>
+										<span className="text-sm font-semibold text-red-700 block mt-1">
+											{job.deadline ? formatDate(job.deadline) : "No deadline"}
 										</span>
 									</div>
 								</div>
@@ -641,7 +664,10 @@ export default function JobsPage() {
 															>
 																<span className="text-amber-700">{mark.level}:</span>
 																<span className="font-semibold text-amber-800">
-																	{mark.criteria}%
+																	{mark.level.toLowerCase() === 'ug' 
+																		? `${mark.criteria.toFixed(1)}/10 CGPA`
+																		: `${mark.criteria}%`
+																	}
 																</span>
 															</div>
 														))}
