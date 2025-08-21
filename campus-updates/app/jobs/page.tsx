@@ -414,7 +414,7 @@ export default function JobsPage() {
 							</div>
 						</div>
 
-						<div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:items-center">
+						<div className="grid grid-cols-1 md:grid-cols-5 gap-4 md:items-end">
 							<div className="space-y-2">
 								<div className="text-sm text-gray-600 flex items-center justify-between">
 									<span>Minimum package (LPA)</span>
@@ -438,17 +438,81 @@ export default function JobsPage() {
 										{cgpaRange[0].toFixed(1)} - {cgpaRange[1].toFixed(1)}
 									</span>
 								</div>
-								<Slider
-									min={0}
-									max={10}
-									step={0.1}
-									value={cgpaRange}
-									onValueChange={(v) => setCgpaRange([v[0] ?? 0, v[1] ?? 10])}
-									className="w-full"
-								/>
-								<div className="flex justify-between text-xs text-gray-500">
-									<span>0.0</span>
-									<span>10.0</span>
+								<div className="grid grid-cols-2 gap-2">
+									<Input
+										type="number"
+										min="0"
+										max="10"
+										step="0.1"
+										value={cgpaRange[0].toFixed(1)}
+										onChange={(e) => {
+											const minVal = Math.max(
+												0,
+												Math.min(10, parseFloat(e.target.value) || 0)
+											);
+											setCgpaRange([minVal, Math.max(minVal, cgpaRange[1])]);
+										}}
+										placeholder="Min"
+										className="text-sm h-9"
+									/>
+									<Input
+										type="number"
+										min="0"
+										max="10"
+										step="0.1"
+										value={cgpaRange[1].toFixed(1)}
+										onChange={(e) => {
+											const maxVal = Math.max(
+												0,
+												Math.min(10, parseFloat(e.target.value) || 10)
+											);
+											setCgpaRange([Math.min(cgpaRange[0], maxVal), maxVal]);
+										}}
+										placeholder="Max"
+										className="text-sm h-9"
+									/>
+								</div>
+							</div>
+
+							<div className="space-y-2">
+								<div className="text-sm text-gray-600">Quick CGPA Filters</div>
+								<div className="flex gap-1 flex-wrap">
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={() => setCgpaRange([6.0, 8.0])}
+										className={`text-xs h-7 px-2 ${
+											cgpaRange[0] === 6.0 && cgpaRange[1] === 8.0
+												? "bg-blue-100 border-blue-300 text-blue-700"
+												: "hover:bg-gray-50"
+										}`}
+									>
+										6.0-8.0
+									</Button>
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={() => setCgpaRange([7.0, 9.0])}
+										className={`text-xs h-7 px-2 ${
+											cgpaRange[0] === 7.0 && cgpaRange[1] === 9.0
+												? "bg-blue-100 border-blue-300 text-blue-700"
+												: "hover:bg-gray-50"
+										}`}
+									>
+										7.0-9.0
+									</Button>
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={() => setCgpaRange([0, 10])}
+										className={`text-xs h-7 px-2 ${
+											cgpaRange[0] === 0 && cgpaRange[1] === 10
+												? "bg-blue-100 border-blue-300 text-blue-700"
+												: "hover:bg-gray-50"
+										}`}
+									>
+										All
+									</Button>
 								</div>
 							</div>
 
