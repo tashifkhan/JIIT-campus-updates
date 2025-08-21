@@ -7,8 +7,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-	DropdownMenu,
+impo											const {
+												summaryMarkdown,
+												hiringSteps,
+												ctcMarkdown,
+												company,
+												role,
+												ctcAmount,
+											} = extractShortlistingSections(
+												notice.formatted_message
+											);pdownMenu,
 	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
 	DropdownMenuLabel,
@@ -32,6 +40,12 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
+import { CircleDollarSignIcon } from "lucide-react";
 
 interface Notice {
 	id: string;
@@ -156,7 +170,7 @@ export default function HomePage() {
 			.filter(Boolean);
 		const summary: string[] = [];
 		const hiringSteps: string[] = [];
-		const companyRole: { company?: string; role?: string } = {};
+		const companyRole: { company?: string; role?: string; ctcAmount?: string } = {};
 		let ctcLines: string[] = [];
 		let inHiring = false;
 		let inCTC = false;
@@ -164,22 +178,29 @@ export default function HomePage() {
 		const isStudentLine = (l: string) =>
 			/\(\d{7,}\)/.test(l) || /\b\d{7,}\b/.test(l);
 
-		// Try to capture company/role from common patterns
+		// Try to capture company/role/ctc from common patterns
 		for (const l of lines.slice(0, 6)) {
 			const m1 = l.match(/Company\s*:\s*([^|]+?)(?:\s*\||$)/i);
 			if (m1) companyRole.company = m1[1].trim();
 			const m2 = l.match(/Role\s*:\s*([^|]+?)(?:\s*\||$)/i);
 			if (m2) companyRole.role = m2[1].trim();
+			const m3 = l.match(/CTC\s*:\s*([0-9.]+)\s*(LPA|lacs?)/i);
+			if (m3) companyRole.ctcAmount = `${m3[1]} ${m3[2].toUpperCase()}`;
 		}
 
 		for (const l of lines) {
 			const lower = l.toLowerCase();
+			// Remove common markdown symbols for easier matching
+			const plain = lower.replace(/[>*_`~#:\\-]+/g, "").trim();
 			if (/^hiring process\s*:/.test(lower)) {
 				inHiring = true;
 				inCTC = false;
 				continue;
 			}
-			if (/^(ctc|package|compensation|salary component)/i.test(l)) {
+			if (
+				/^(ctc|package|compensation|salary component)/i.test(l) ||
+				/^(ctc|package|compensation|salary component)/i.test(plain)
+			) {
 				inCTC = true;
 				inHiring = false;
 				ctcLines.push(l);
@@ -205,6 +226,16 @@ export default function HomePage() {
 		// Build concise summary: limit to first 3 paragraphs
 		const summaryMarkdown = summary.slice(0, 6).join("\n\n");
 		const ctcMarkdown = ctcLines.join("\n");
+		
+		// Try to extract CTC amount from the notice data if not found in text
+		if (!companyRole.ctcAmount && notice.matched_job) {
+			// Look for package info in the notice object
+			const packageMatch = (notice as any).package;
+			if (packageMatch) {
+				companyRole.ctcAmount = packageMatch.includes('LPA') ? packageMatch : `${packageMatch} LPA`;
+			}
+		}
+		
 		return {
 			summaryMarkdown,
 			hiringSteps: hiringSteps.filter(Boolean),
@@ -379,7 +410,7 @@ export default function HomePage() {
 												return (
 													<>
 														{(company || role) && (
-															<div className="flex flex-wrap gap-2">
+															<div className="flex flex-wrap gap-2 items-center">
 																{company && (
 																	<Badge variant="secondary">
 																		Company: {company}
@@ -389,6 +420,30 @@ export default function HomePage() {
 																	<Badge variant="secondary">
 																		Role: {role}
 																	</Badge>
+																)}
+																{ctcMarkdown && (
+																	<Popover>
+																		<PopoverTrigger asChild>
+																			<Button
+																				variant="secondary"
+																				size="sm"
+																				type="button"
+																				className="ml-auto"
+																			>
+																				<CircleDollarSignIcon className="w-3 h-3 mr-1" />
+																				{ctcAmount || "CTC"}
+																			</Button>
+																		</PopoverTrigger>
+																		<PopoverContent className="md:w-96 max-w-[90vw] max-h-[60vh] overflow-auto">
+																			<div className="prose prose-sm max-w-none text-gray-800">
+																				<ReactMarkdown
+																					remarkPlugins={[remarkGfm]}
+																				>
+																					{ctcMarkdown}
+																				</ReactMarkdown>
+																			</div>
+																		</PopoverContent>
+																	</Popover>
 																)}
 															</div>
 														)}
