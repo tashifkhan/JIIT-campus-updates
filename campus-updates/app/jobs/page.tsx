@@ -16,6 +16,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
+	DialogClose,
 } from "@/components/ui/dialog";
 import {
 	DropdownMenu,
@@ -36,6 +37,7 @@ import {
 	ChevronDownIcon,
 	ChevronUpIcon,
 	DownloadIcon,
+	XIcon,
 } from "lucide-react";
 
 interface Job {
@@ -622,7 +624,7 @@ export default function JobsPage() {
 					</CardContent>
 				</Card>
 
-				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+				<div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
 					{filteredJobs.map((job) => (
 						<Card
 							key={job.id}
@@ -723,8 +725,8 @@ export default function JobsPage() {
 								) : null}
 							</CardHeader>
 
-							<CardContent className="space-y-4 pt-0">
-								<div className="grid grid-cols-2 gap-3">
+							<CardContent className="space-y-3 md:space-y-4 pt-0">
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 									<div
 										className="border rounded-lg p-3"
 										style={{
@@ -780,7 +782,7 @@ export default function JobsPage() {
 								</div>
 
 								{/* CGPA and Deadline Row */}
-								<div className="grid grid-cols-2 gap-3">
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 									{(() => {
 										const ugMark = job.eligibility_marks.find(
 											(mark) => mark.level.toLowerCase() === "ug"
@@ -887,36 +889,53 @@ export default function JobsPage() {
 										</Button>
 									</DialogTrigger>
 									<DialogContent
-										className="max-w-4xl max-h-[80vh] overflow-y-auto card-theme"
+										className="max-w-none md:max-w-4xl max-h-[80vh] md:max-h-[80vh] h-screen md:h-auto w-screen md:w-auto overflow-y-auto card-theme p-4 md:p-6"
 										style={{
 											backgroundColor: "var(--card-bg)",
 											borderColor: "var(--border-color)",
 										}}
 									>
-										<DialogHeader>
-											<DialogTitle
-												className="text-xl font-bold flex items-center gap-2"
-												style={{ color: "var(--text-color)" }}
-											>
-												<BuildingIcon
-													className="w-5 h-5"
-													style={{ color: "var(--accent-color)" }}
-												/>
-												{job.job_profile} at {job.company}
-											</DialogTitle>
-											<DialogDescription
-												style={{ color: "var(--label-color)" }}
-											>
-												{job.placement_category} • Posted on{" "}
-												{formatDate(job.createdAt)}
-											</DialogDescription>
+										<DialogHeader className="mobile-dialog-header">
+											<div className="flex items-start justify-between">
+												<div className="flex-1">
+													<DialogTitle
+														className="text-lg md:text-xl font-bold flex items-center gap-2"
+														style={{ color: "var(--text-color)" }}
+													>
+														<BuildingIcon
+															className="w-4 h-4 md:w-5 md:h-5"
+															style={{ color: "var(--accent-color)" }}
+														/>
+														<span className="line-clamp-2">
+															{job.job_profile} at {job.company}
+														</span>
+													</DialogTitle>
+													<DialogDescription
+														className="text-sm mt-1"
+														style={{ color: "var(--label-color)" }}
+													>
+														{job.placement_category} • Posted on{" "}
+														{formatDate(job.createdAt)}
+													</DialogDescription>
+												</div>
+												<DialogClose asChild>
+													<Button
+														variant="ghost"
+														size="sm"
+														className="md:hidden flex-shrink-0 ml-2"
+														style={{ color: "var(--text-color)" }}
+													>
+														<XIcon className="w-5 h-5" />
+													</Button>
+												</DialogClose>
+											</div>
 										</DialogHeader>
 
-										<div className="space-y-6 mt-4">
+										<div className="space-y-4 md:space-y-6 mt-4 mobile-dialog-content">
 											{/* Key Info Cards */}
-											<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+											<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
 												<div
-													className="border rounded-lg p-4"
+													className="border rounded-lg p-3 md:p-4"
 													style={{
 														backgroundColor: "var(--primary-color)",
 														borderColor: "var(--border-color)",
@@ -1016,8 +1035,11 @@ export default function JobsPage() {
 													Job Description
 												</h4>
 												<div
-													className="text-sm prose prose-sm max-w-none"
-													style={{ color: "var(--text-color)" }}
+													className="text-sm prose prose-sm max-w-none job-description-content"
+													style={{
+														color: "var(--text-color)",
+														wordBreak: "break-word",
+													}}
 													dangerouslySetInnerHTML={{
 														__html: job.job_description,
 													}}
@@ -1025,9 +1047,9 @@ export default function JobsPage() {
 											</div>
 
 											{/* Eligibility */}
-											<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+											<div className="grid grid-cols-1 gap-3 md:gap-4">
 												<div
-													className="border rounded-lg p-4"
+													className="border rounded-lg p-3 md:p-4"
 													style={{
 														backgroundColor: "var(--primary-color)",
 														borderColor: "var(--border-color)",
@@ -1164,7 +1186,7 @@ export default function JobsPage() {
 
 											{job.package_info && (
 												<div
-													className="border rounded-lg p-4"
+													className="border rounded-lg p-4 job-description-content"
 													style={{
 														backgroundColor: "var(--primary-color)",
 														borderColor: "var(--border-color)",
@@ -1178,10 +1200,14 @@ export default function JobsPage() {
 													</h4>
 													<p
 														className="text-sm"
-														style={{ color: "var(--text-color)" }}
-													>
-														{job.package_info}
-													</p>
+														style={{
+															color: "var(--text-color)",
+															wordBreak: "break-word",
+														}}
+														dangerouslySetInnerHTML={{
+															__html: job.package_info,
+														}}
+													></p>
 												</div>
 											)}
 										</div>

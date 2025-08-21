@@ -157,4 +157,179 @@
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
+  
+  /* Job Description HTML Table Styling with Primary Colors */
+  .job-description-content table {
+    width: 100% !important;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.875rem;
+    border: 2px solid hsl(var(--primary));
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    table-layout: auto;
+  }
+  
+  .job-description-content table th,
+  .job-description-content table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid hsl(var(--primary) / 0.2);
+    border-right: 1px solid hsl(var(--primary) / 0.2);
+    color: var(--text-color);
+    word-wrap: break-word;
+    vertical-align: top;
+    line-height: 1.4;
+  }
+  
+  .job-description-content table th {
+    background-color: hsl(var(--primary));
+    font-weight: 600;
+    color: hsl(var(--primary-foreground));
+    border-bottom: 2px solid hsl(var(--primary) / 0.8);
+  }
+  
+  .job-description-content table tbody tr {
+    background-color: var(--card-bg);
+    transition: background-color 0.2s ease;
+  }
+  
+  .job-description-content table tbody tr:nth-child(even) {
+    background-color: hsl(var(--primary) / 0.05);
+  }
+  
+  .job-description-content table tbody tr:hover {
+    background-color: hsl(var(--primary) / 0.1);
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+  }
+  
+  .job-description-content table td:last-child,
+  .job-description-content table th:last-child {
+    border-right: none;
+  }
+  
+  .job-description-content table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  /* Fix for malformed HTML tables */
+  .job-description-content table[width] {
+    width: 100% !important;
+  }
+  
+  .job-description-content table td[width],
+  .job-description-content table th[width] {
+    width: auto !important;
+    max-width: none !important;
+  }
+  
+  .job-description-content table td[colspan],
+  .job-description-content table th[colspan] {
+    text-align: center;
+  }
+  
+  /* Ensure table content is visible */
+  .job-description-content table * {
+    color: inherit !important;
+  }
+  
+  /* Style nested elements in tables */
+  .job-description-content table h4 {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: inherit;
+  }
+  
+  /* Style strong tags in job descriptions */
+  .job-description-content strong {
+    color: hsl(var(--primary));
+    font-weight: 600;
+  }
+  
+  .job-description-content p {
+    margin: 0.5rem 0;
+    line-height: 1.6;
+  }
+  
+  /* Handle broken table structures */
+  .job-description-content {
+    overflow-x: auto;
+  }
+  
+  /* Handle specific width attributes from HTML */
+  .job-description-content table[width] {
+    width: 100% !important;
+  }
+  
+  .job-description-content table td[width],
+  .job-description-content table th[width] {
+    width: auto !important;
+  }
+  
+  /* Responsive table styling */
+  @media (max-width: 768px) {
+    .job-description-content table {
+      font-size: 0.75rem;
+      margin: 0.5rem 0;
+    }
+    
+    .job-description-content table th,
+    .job-description-content table td {
+      padding: 0.5rem;
+      max-width: 150px;
+    }
+  }
+  
+  /* Mobile modal styling */
+  @media (max-width: 768px) {
+    /* Make dialog overlay cover full screen on mobile */
+    [data-radix-dialog-overlay] {
+      background-color: rgba(0, 0, 0, 0.8) !important;
+    }
+    
+    /* Make dialog content full screen on mobile */
+    [data-radix-dialog-content] {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: none !important;
+      max-height: none !important;
+      border-radius: 0 !important;
+      margin: 0 !important;
+      transform: none !important;
+    }
+    
+    /* Adjust dialog header for mobile */
+    .mobile-dialog-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem;
+      margin: -1rem -1rem 1rem -1rem;
+    }
+    
+    /* Adjust spacing for mobile content */
+    .mobile-dialog-content {
+      padding: 0 1rem 2rem 1rem;
+    }
+    
+    /* Text utilities for mobile */
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.3;
+    }
+  }
 }
