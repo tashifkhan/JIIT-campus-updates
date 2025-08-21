@@ -185,7 +185,12 @@ export default function HomePage() {
 
 			// Categorize lines
 			if (inEligibility && !line.match(/posted\s*by/i)) {
-				eligibilityLines.push(cleanLine);
+				// Extra cleaning for eligibility text to remove markdown formatting
+				const cleanEligibilityLine = cleanLine
+					.replace(/^\*\*|\*\*$/g, "") // Remove bold markdown
+					.replace(/\*\*/g, "") // Remove any remaining asterisks
+					.trim();
+				eligibilityLines.push(cleanEligibilityLine);
 			} else if (inHiring && !line.match(/posted\s*by/i)) {
 				hiringLines.push(cleanLine);
 			} else if (
@@ -740,16 +745,25 @@ export default function HomePage() {
 																						Eligible Branches:
 																					</span>
 																					<div className="flex flex-wrap gap-1 mt-1">
-																						{criteria.value.map(
-																							(course: string, i: number) => (
-																								<Badge
-																									key={i}
-																									variant="outline"
-																									className="text-xs bg-white border-amber-300"
-																								>
-																									{course.trim()}
-																								</Badge>
+																						{Array.isArray(criteria.value) ? (
+																							criteria.value.map(
+																								(course: string, i: number) => (
+																									<Badge
+																										key={i}
+																										variant="outline"
+																										className="text-xs bg-white border-amber-300"
+																									>
+																										{course.trim()}
+																									</Badge>
+																								)
 																							)
+																						) : (
+																							<Badge
+																								variant="outline"
+																								className="text-xs bg-white border-amber-300"
+																							>
+																								{String(criteria.value).trim()}
+																							</Badge>
 																						)}
 																					</div>
 																				</div>
