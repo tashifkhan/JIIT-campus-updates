@@ -88,29 +88,47 @@ export default function HomePage() {
 
 	// Parse and structure the formatted message for better display
 	const parseFormattedMessage = (message: string, category: string) => {
-		const lines = message.split('\n').map(line => line.trim()).filter(Boolean);
-		let title = '';
-		let body = '';
-		let eligibility = '';
-		let hiringProcess = '';
-		let deadline = '';
-		let location = '';
-		let ctc = '';
-		let company = '';
-		let role = '';
+		// Remove congratulations text and student lists from shortlisting notices
+		let processedMessage = message;
+		if (category.toLowerCase().includes("shortlisting")) {
+			processedMessage = message
+				.replace(/Congratulations to the following students:\s*/gi, "")
+				// Remove entire student list section - names with enrollment numbers
+				.replace(/^[A-Za-z\s]+\s*\(\d+\)\s*$/gm, "")
+				// Remove lines that are just names and numbers (more flexible pattern)
+				.replace(/^[A-Z][A-Za-z\s]*\s*\(\d{6,}\)\s*$/gm, "")
+				// Remove any remaining standalone enrollment numbers
+				.replace(/^\(\d{6,}\)\s*$/gm, "")
+				// Remove empty lines that might be left behind
+				.replace(/^\s*$/gm, "");
+		}
+
+		const lines = processedMessage
+			.split("\n")
+			.map((line) => line.trim())
+			.filter(Boolean);
+		let title = "";
+		let body = "";
+		let eligibility = "";
+		let hiringProcess = "";
+		let deadline = "";
+		let location = "";
+		let ctc = "";
+		let company = "";
+		let role = "";
 
 		// Extract title (first line, removing markdown and emojis)
 		if (lines.length > 0) {
 			title = lines[0]
-				.replace(/^\*\*|\*\*$/g, '') // Remove markdown bold
-				.replace(/^#+\s*/, '') // Remove markdown headers
-				.replace(/📢|🎉|⚠️|💼/g, '') // Remove emojis
-				.replace(/Job Posting|Shortlisting Update|Update/gi, '') // Remove category text
+				.replace(/^\*\*|\*\*$/g, "") // Remove markdown bold
+				.replace(/^#+\s*/, "") // Remove markdown headers
+				.replace(/📢|🎉|⚠️|💼/g, "") // Remove emojis
+				.replace(/Job Posting|Shortlisting Update|Update/gi, "") // Remove category text
 				.trim();
 		}
 
 		// Parse content by sections
-		let currentSection = '';
+		let currentSection = "";
 		let bodyLines = [];
 		let eligibilityLines = [];
 		let hiringLines = [];
@@ -119,29 +137,32 @@ export default function HomePage() {
 
 		for (let i = 1; i < lines.length; i++) {
 			const line = lines[i];
-			const cleanLine = line.replace(/^\*\*|\*\*$/g, '').replace(/^#+\s*/, '');
+			const cleanLine = line.replace(/^\*\*|\*\*$/g, "").replace(/^#+\s*/, "");
 
 			// Extract key info
 			if (line.match(/\*\*Company:\*\*\s*(.+)/i)) {
-				company = line.match(/\*\*Company:\*\*\s*(.+)/i)?.[1] || '';
+				company = line.match(/\*\*Company:\*\*\s*(.+)/i)?.[1] || "";
 				continue;
 			}
 			if (line.match(/\*\*Role:\*\*\s*(.+)/i)) {
-				role = line.match(/\*\*Role:\*\*\s*(.+)/i)?.[1] || '';
+				role = line.match(/\*\*Role:\*\*\s*(.+)/i)?.[1] || "";
 				continue;
 			}
 			if (line.match(/\*\*CTC:\*\*\s*(.+)/i)) {
-				ctc = line.match(/\*\*CTC:\*\*\s*(.+)/i)?.[1] || '';
+				ctc = line.match(/\*\*CTC:\*\*\s*(.+)/i)?.[1] || "";
 				continue;
 			}
 			if (line.match(/\*\*Location:\*\*\s*(.+)/i)) {
-				location = line.match(/\*\*Location:\*\*\s*(.+)/i)?.[1] || '';
+				location = line.match(/\*\*Location:\*\*\s*(.+)/i)?.[1] || "";
 				continue;
 			}
 
 			// Extract deadline
 			if (line.match(/⚠️.*deadline/i) || line.match(/deadline/i)) {
-				deadline = line.replace(/⚠️|\*\*/g, '').replace(/deadline:?\s*/i, '').trim();
+				deadline = line
+					.replace(/⚠️|\*\*/g, "")
+					.replace(/deadline:?\s*/i, "")
+					.trim();
 				continue;
 			}
 
@@ -167,15 +188,17 @@ export default function HomePage() {
 				eligibilityLines.push(cleanLine);
 			} else if (inHiring && !line.match(/posted\s*by/i)) {
 				hiringLines.push(cleanLine);
-			} else if (!line.match(/company:|role:|ctc:|location:|posted\s*by|on:/i) && 
-					   !line.match(/📢|🎉|job posting|shortlisting update/i)) {
+			} else if (
+				!line.match(/company:|role:|ctc:|location:|posted\s*by|on:/i) &&
+				!line.match(/📢|🎉|job posting|shortlisting update/i)
+			) {
 				bodyLines.push(cleanLine);
 			}
 		}
 
-		body = bodyLines.join('\n').trim();
-		eligibility = eligibilityLines.join('\n').trim();
-		hiringProcess = hiringLines.join('\n').trim();
+		body = bodyLines.join("\n").trim();
+		eligibility = eligibilityLines.join("\n").trim();
+		hiringProcess = hiringLines.join("\n").trim();
 
 		return {
 			title,
@@ -186,77 +209,85 @@ export default function HomePage() {
 			location,
 			ctc,
 			company,
-			role
+			role,
 		};
 	};
 
 	// Format eligibility criteria for display
 	const formatEligibility = (eligibilityText: string) => {
 		if (!eligibilityText) return null;
-		
-		const lines = eligibilityText.split('\n').map(line => line.trim()).filter(Boolean);
+
+		const lines = eligibilityText
+			.split("\n")
+			.map((line) => line.trim())
+			.filter(Boolean);
 		const criteria = [];
-		
+
 		for (const line of lines) {
 			// Parse course requirements
 			if (line.match(/courses?:|branches?:/i)) {
-				const coursesMatch = line.match(/courses?:\s*(.+)/i) || line.match(/branches?:\s*(.+)/i);
+				const coursesMatch =
+					line.match(/courses?:\s*(.+)/i) || line.match(/branches?:\s*(.+)/i);
 				if (coursesMatch) {
 					criteria.push({
-						type: 'courses',
-						value: coursesMatch[1].split(',').map(c => c.trim())
+						type: "courses",
+						value: coursesMatch[1].split(",").map((c) => c.trim()),
 					});
 				}
 			}
 			// Parse CGPA/marks requirements
 			else if (line.match(/cgpa|marks|percentage/i)) {
-				const marksMatch = line.match(/(\w+).*?(\d+\.?\d*)\s*(cgpa|%|percent)/i);
+				const marksMatch = line.match(
+					/(\w+).*?(\d+\.?\d*)\s*(cgpa|%|percent)/i
+				);
 				if (marksMatch) {
 					criteria.push({
-						type: 'marks',
+						type: "marks",
 						level: marksMatch[1],
 						value: marksMatch[2],
-						unit: marksMatch[3]
+						unit: marksMatch[3],
 					});
 				}
 			}
 			// Parse other requirements
 			else if (line.match(/no\s*backlogs?/i)) {
 				criteria.push({
-					type: 'requirement',
-					value: 'No backlogs'
+					type: "requirement",
+					value: "No backlogs",
 				});
-			}
-			else if (line.trim() && !line.match(/^-|^\*|^\d+\./)) {
+			} else if (line.trim() && !line.match(/^-|^\*|^\d+\./)) {
 				criteria.push({
-					type: 'general',
-					value: line.replace(/^-\s*|\*\s*/, '').trim()
+					type: "general",
+					value: line.replace(/^-\s*|\*\s*/, "").trim(),
 				});
 			}
 		}
-		
+
 		return criteria;
 	};
 
 	// Format hiring process for display
 	const formatHiringProcess = (hiringText: string) => {
 		if (!hiringText) return [];
-		
-		const lines = hiringText.split('\n').map(line => line.trim()).filter(Boolean);
+
+		const lines = hiringText
+			.split("\n")
+			.map((line) => line.trim())
+			.filter(Boolean);
 		const steps = [];
-		
+
 		for (const line of lines) {
 			let step = line
-				.replace(/^\d+\.?\s*/, '') // Remove numbering
-				.replace(/^-\s*/, '') // Remove dashes
-				.replace(/^\*\s*/, '') // Remove asterisks
+				.replace(/^\d+\.?\s*/, "") // Remove numbering
+				.replace(/^-\s*/, "") // Remove dashes
+				.replace(/^\*\s*/, "") // Remove asterisks
 				.trim();
-			
+
 			if (step && !step.match(/^hiring|^process|^flow/i)) {
 				steps.push(step);
 			}
 		}
-		
+
 		return steps;
 	};
 
@@ -597,23 +628,28 @@ export default function HomePage() {
 												)}
 											</div>
 											{notice.createdAt && (
-												<span>
-													{notice.category.toLowerCase().includes("shortlisting") 
-														? formatDateOnly(notice.createdAt)
-														: formatDateTime(notice.createdAt)
-													}
-												</span>
+												<span>{formatDateTime(notice.createdAt)}</span>
 											)}
 										</div>
 									)}
 								</CardHeader>
 								<CardContent className="pt-0">
 									{(() => {
-										const parsedMessage = parseFormattedMessage(notice.formatted_message, notice.category);
-										const eligibilityCriteria = formatEligibility(parsedMessage.eligibility);
-										const hiringSteps = formatHiringProcess(parsedMessage.hiringProcess);
+										const parsedMessage = parseFormattedMessage(
+											notice.formatted_message,
+											notice.category
+										);
+										const eligibilityCriteria = formatEligibility(
+											parsedMessage.eligibility
+										);
+										const hiringSteps = formatHiringProcess(
+											parsedMessage.hiringProcess
+										);
 
-										if (notice.category === "update" || notice.category === "job posting") {
+										if (
+											notice.category === "update" ||
+											notice.category === "job posting"
+										) {
 											return (
 												<div className="space-y-4">
 													{/* Title */}
@@ -626,18 +662,25 @@ export default function HomePage() {
 													)}
 
 													{/* Company, Role, CTC Info */}
-													{(parsedMessage.company || parsedMessage.role || parsedMessage.ctc) && (
+													{(parsedMessage.company ||
+														parsedMessage.role ||
+														parsedMessage.ctc) && (
 														<div className="bg-blue-50 rounded-lg p-4 border border-blue-200 mb-4">
 															<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
 																{parsedMessage.company && (
 																	<div className="flex items-center">
 																		<BuildingIcon className="w-4 h-4 mr-2 text-blue-600" />
-																		<span className="font-medium text-blue-800">{parsedMessage.company}</span>
+																		<span className="font-medium text-blue-800">
+																			{parsedMessage.company}
+																		</span>
 																	</div>
 																)}
 																{parsedMessage.role && (
 																	<div className="flex items-center">
-																		<Badge variant="secondary" className="bg-white text-blue-700">
+																		<Badge
+																			variant="secondary"
+																			className="bg-white text-blue-700"
+																		>
 																			{parsedMessage.role}
 																		</Badge>
 																	</div>
@@ -645,7 +688,9 @@ export default function HomePage() {
 																{parsedMessage.ctc && (
 																	<div className="flex items-center">
 																		<CircleDollarSignIcon className="w-4 h-4 mr-2 text-green-600" />
-																		<span className="font-semibold text-green-700">{parsedMessage.ctc}</span>
+																		<span className="font-semibold text-green-700">
+																			{parsedMessage.ctc}
+																		</span>
 																	</div>
 																)}
 															</div>
@@ -657,8 +702,12 @@ export default function HomePage() {
 														<div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
 															<div className="flex items-center">
 																<CalendarIcon className="w-5 h-5 mr-2 text-red-600" />
-																<span className="font-semibold text-red-800">Deadline: </span>
-																<span className="text-red-700 ml-1 font-medium">{parsedMessage.deadline}</span>
+																<span className="font-semibold text-red-800">
+																	Deadline:{" "}
+																</span>
+																<span className="text-red-700 ml-1 font-medium">
+																	{parsedMessage.deadline}
+																</span>
 															</div>
 														</div>
 													)}
@@ -675,43 +724,57 @@ export default function HomePage() {
 													)}
 
 													{/* Eligibility Criteria */}
-													{eligibilityCriteria && eligibilityCriteria.length > 0 && (
-														<div className="bg-amber-50 rounded-lg border border-amber-200 p-4">
-															<h4 className="font-semibold text-amber-900 mb-3 flex items-center">
-																<UsersIcon className="w-4 h-4 mr-2" />
-																Eligibility Criteria
-															</h4>
-															<div className="space-y-3">
-																{eligibilityCriteria.map((criteria, idx) => (
-																	<div key={idx}>
-																		{criteria.type === 'courses' && (
-																			<div>
-																				<span className="text-sm font-medium text-amber-800">Eligible Branches:</span>
-																				<div className="flex flex-wrap gap-1 mt-1">
-																					{criteria.value.map((course: string, i: number) => (
-																						<Badge key={i} variant="outline" className="text-xs bg-white border-amber-300">
-																							{course.trim()}
-																						</Badge>
-																					))}
+													{eligibilityCriteria &&
+														eligibilityCriteria.length > 0 && (
+															<div className="bg-amber-50 rounded-lg border border-amber-200 p-4">
+																<h4 className="font-semibold text-amber-900 mb-3 flex items-center">
+																	<UsersIcon className="w-4 h-4 mr-2" />
+																	Eligibility Criteria
+																</h4>
+																<div className="space-y-3">
+																	{eligibilityCriteria.map((criteria, idx) => (
+																		<div key={idx}>
+																			{criteria.type === "courses" && (
+																				<div>
+																					<span className="text-sm font-medium text-amber-800">
+																						Eligible Branches:
+																					</span>
+																					<div className="flex flex-wrap gap-1 mt-1">
+																						{criteria.value.map(
+																							(course: string, i: number) => (
+																								<Badge
+																									key={i}
+																									variant="outline"
+																									className="text-xs bg-white border-amber-300"
+																								>
+																									{course.trim()}
+																								</Badge>
+																							)
+																						)}
+																					</div>
 																				</div>
-																			</div>
-																		)}
-																		{criteria.type === 'marks' && (
-																			<div className="flex items-center text-sm">
-																				<span className="font-medium text-amber-800 mr-2">{criteria.level}:</span>
-																				<span className="text-amber-700">{criteria.value} {criteria.unit}</span>
-																			</div>
-																		)}
-																		{(criteria.type === 'requirement' || criteria.type === 'general') && (
-																			<div className="text-sm text-amber-700">
-																				• {criteria.value}
-																			</div>
-																		)}
-																	</div>
-																))}
+																			)}
+																			{criteria.type === "marks" && (
+																				<div className="flex items-center text-sm">
+																					<span className="font-medium text-amber-800 mr-2">
+																						{criteria.level}:
+																					</span>
+																					<span className="text-amber-700">
+																						{criteria.value} {criteria.unit}
+																					</span>
+																				</div>
+																			)}
+																			{(criteria.type === "requirement" ||
+																				criteria.type === "general") && (
+																				<div className="text-sm text-amber-700">
+																					• {criteria.value}
+																				</div>
+																			)}
+																		</div>
+																	))}
+																</div>
 															</div>
-														</div>
-													)}
+														)}
 
 													{/* Hiring Process */}
 													{hiringSteps.length > 0 && (
@@ -722,11 +785,16 @@ export default function HomePage() {
 															</h4>
 															<div className="space-y-2">
 																{hiringSteps.map((step, idx) => (
-																	<div key={idx} className="flex items-center text-sm">
+																	<div
+																		key={idx}
+																		className="flex items-center text-sm"
+																	>
 																		<div className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold flex items-center justify-center mr-3 flex-shrink-0">
 																			{idx + 1}
 																		</div>
-																		<span className="text-purple-800">{step}</span>
+																		<span className="text-purple-800">
+																			{step}
+																		</span>
 																	</div>
 																))}
 															</div>
@@ -747,7 +815,9 @@ export default function HomePage() {
 													)}
 
 													{/* Company and Role Header */}
-													{(parsedMessage.company || parsedMessage.role || parsedMessage.ctc) && (
+													{(parsedMessage.company ||
+														parsedMessage.role ||
+														parsedMessage.ctc) && (
 														<div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-4 border border-blue-100">
 															<div className="flex flex-wrap gap-3 items-center justify-between">
 																<div className="flex flex-wrap gap-2">
@@ -802,7 +872,10 @@ export default function HomePage() {
 															collapsible
 															className="w-full bg-white rounded-lg border border-gray-200"
 														>
-															<AccordionItem value="hiring" className="border-b-0">
+															<AccordionItem
+																value="hiring"
+																className="border-b-0"
+															>
 																<AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
 																	<div className="flex items-center">
 																		<CalendarIcon className="w-4 h-4 mr-2 text-blue-600" />
@@ -836,7 +909,7 @@ export default function HomePage() {
 															</h3>
 														</div>
 													)}
-													
+
 													{/* Body Content */}
 													<div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
 														<div className="prose prose-sm max-w-none text-gray-800">
