@@ -71,7 +71,7 @@ export default function JobsPage() {
 	const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
 	const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
 	const [minPackageLpa, setMinPackageLpa] = useState<number>(0);
-	const [minCgpa, setMinCgpa] = useState<number>(0);
+	const [cgpaRange, setCgpaRange] = useState<[number, number]>([0, 10]);
 	const [openOnly, setOpenOnly] = useState<boolean>(false);
 
 	useEffect(() => {
@@ -169,17 +169,18 @@ export default function JobsPage() {
 		[jobs]
 	);
 	const maxCgpa = useMemo(() => {
-		const cgpaValues = jobs.flatMap(j => 
-			j.eligibility_marks
-				.filter(mark => mark.level.toLowerCase() === 'ug')
-				.map(mark => mark.criteria) // UG is already in CGPA out of 10
+		const cgpaValues = jobs.flatMap(
+			(j) =>
+				j.eligibility_marks
+					.filter((mark) => mark.level.toLowerCase() === "ug")
+					.map((mark) => mark.criteria) // UG is already in CGPA out of 10
 		);
 		return Math.ceil(Math.max(...cgpaValues, 0) * 10) / 10 || 10; // Round to 1 decimal, default to 10
 	}, [jobs]);
 	// Reset min when max changes
 	useEffect(() => {
 		setMinPackageLpa(0);
-		setMinCgpa(0);
+		setCgpaRange([0, 10]);
 	}, [maxPackageLpa, maxCgpa]);
 
 	const now = Date.now();
@@ -209,16 +210,20 @@ export default function JobsPage() {
 			}
 			const lpa = (job.package || 0) / 100000;
 			if (lpa < minPackageLpa) return false;
-			
+
 			// CGPA filter
-			if (minCgpa > 0) {
-				const ugMarks = job.eligibility_marks.filter(mark => mark.level.toLowerCase() === 'ug');
+			if (cgpaRange[0] > 0 || cgpaRange[1] < 10) {
+				const ugMarks = job.eligibility_marks.filter(
+					(mark) => mark.level.toLowerCase() === "ug"
+				);
 				if (ugMarks.length > 0) {
-					const jobMinCgpa = Math.min(...ugMarks.map(mark => mark.criteria)); // UG is already in CGPA
-					if (jobMinCgpa > minCgpa) return false;
+					const jobMinCgpa = Math.min(...ugMarks.map((mark) => mark.criteria)); // UG is already in CGPA
+					// Job is suitable if its minimum requirement falls within user's CGPA range
+					if (jobMinCgpa < cgpaRange[0] || jobMinCgpa > cgpaRange[1])
+						return false;
 				}
 			}
-			
+
 			return true;
 		});
 	}, [
@@ -229,7 +234,7 @@ export default function JobsPage() {
 		selectedGenders,
 		selectedCourses,
 		minPackageLpa,
-		minCgpa,
+		cgpaRange,
 		openOnly,
 		now,
 	]);
@@ -241,7 +246,7 @@ export default function JobsPage() {
 		setSelectedGenders([]);
 		setSelectedCourses([]);
 		setMinPackageLpa(0);
-		setMinCgpa(0);
+		setCgpaRange([0, 10]);
 		setOpenOnly(false);
 	};
 
@@ -428,18 +433,23 @@ export default function JobsPage() {
 
 							<div className="space-y-2">
 								<div className="text-sm text-gray-600 flex items-center justify-between">
-									<span>Minimum CGPA</span>
+									<span>CGPA Range</span>
 									<span className="font-medium text-gray-900">
-										{minCgpa.toFixed(1)}+
+										{cgpaRange[0].toFixed(1)} - {cgpaRange[1].toFixed(1)}
 									</span>
 								</div>
 								<Slider
 									min={0}
-									max={Math.max(maxCgpa, 10)}
+									max={10}
 									step={0.1}
-									value={[minCgpa]}
-									onValueChange={(v) => setMinCgpa(v[0] ?? 0)}
+									value={cgpaRange}
+									onValueChange={(v) => setCgpaRange([v[0] ?? 0, v[1] ?? 10])}
+									className="w-full"
 								/>
+								<div className="flex justify-between text-xs text-gray-500">
+									<span>0.0</span>
+									<span>10.0</span>
+								</div>
 							</div>
 
 							<div className="flex items-center gap-2">
@@ -470,7 +480,10 @@ export default function JobsPage() {
 
 				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 					{filteredJobs.map((job) => (
-						<Card key={job.id} className="hover:shadow-xl transition-all duration-300 border-0 shadow-md bg-gradient-to-br from-white to-gray-50">
+						<Card
+							key={job.id}
+							className="hover:shadow-xl transition-all duration-300 border-0 shadow-md bg-gradient-to-br from-white to-gray-50"
+						>
 							<CardHeader className="pb-4">
 								<div className="flex items-start justify-between mb-3">
 									<div className="flex-1">
@@ -479,13 +492,17 @@ export default function JobsPage() {
 										</CardTitle>
 										<div className="flex items-center text-gray-600 mb-3">
 											<BuildingIcon className="w-4 h-4 mr-2 text-blue-600" />
-											<span className="font-semibold text-blue-700">{job.company}</span>
+											<span className="font-semibold text-blue-700">
+												{job.company}
+											</span>
 										</div>
 									</div>
 									<div className="text-right">
 										<Badge
 											variant="outline"
-											className={`${getCategoryColor(job.placement_category_code)} font-medium`}
+											className={`${getCategoryColor(
+												job.placement_category_code
+											)} font-medium`}
 										>
 											{job.placement_category}
 										</Badge>
@@ -513,7 +530,10 @@ export default function JobsPage() {
 													</Badge>
 												))}
 											{job.eligibility_courses.length > 3 && (
-												<Badge variant="outline" className="text-[10px] border-blue-300">
+												<Badge
+													variant="outline"
+													className="text-[10px] border-blue-300"
+												>
 													+{job.eligibility_courses.length - 3} more
 												</Badge>
 											)}
@@ -527,7 +547,9 @@ export default function JobsPage() {
 									<div className="bg-green-50 border border-green-200 rounded-lg p-3">
 										<div className="flex items-center">
 											<IndianRupeeIcon className="w-4 h-4 mr-2 text-green-600" />
-											<span className="text-sm font-medium text-green-600">Package</span>
+											<span className="text-sm font-medium text-green-600">
+												Package
+											</span>
 										</div>
 										<span className="text-lg font-bold text-green-700 block">
 											{formatPackage(job.package)}
@@ -536,7 +558,9 @@ export default function JobsPage() {
 									<div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
 										<div className="flex items-center">
 											<MapPinIcon className="w-4 h-4 mr-2 text-blue-600" />
-											<span className="text-sm font-medium text-blue-600">Location</span>
+											<span className="text-sm font-medium text-blue-600">
+												Location
+											</span>
 										</div>
 										<span className="text-sm font-semibold text-blue-700 block mt-1">
 											{job.location}
@@ -547,12 +571,16 @@ export default function JobsPage() {
 								{/* CGPA and Deadline Row */}
 								<div className="grid grid-cols-2 gap-3">
 									{(() => {
-										const ugMark = job.eligibility_marks.find(mark => mark.level.toLowerCase() === 'ug');
+										const ugMark = job.eligibility_marks.find(
+											(mark) => mark.level.toLowerCase() === "ug"
+										);
 										return ugMark ? (
 											<div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
 												<div className="flex items-center">
 													<UsersIcon className="w-4 h-4 mr-2 text-purple-600" />
-													<span className="text-sm font-medium text-purple-600">Min CGPA</span>
+													<span className="text-sm font-medium text-purple-600">
+														Min CGPA
+													</span>
 												</div>
 												<span className="text-lg font-bold text-purple-700 block">
 													{ugMark.criteria.toFixed(1)}/10
@@ -562,7 +590,9 @@ export default function JobsPage() {
 											<div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
 												<div className="flex items-center">
 													<UsersIcon className="w-4 h-4 mr-2 text-gray-400" />
-													<span className="text-sm font-medium text-gray-500">CGPA</span>
+													<span className="text-sm font-medium text-gray-500">
+														CGPA
+													</span>
 												</div>
 												<span className="text-sm text-gray-500 block">
 													Not specified
@@ -573,7 +603,9 @@ export default function JobsPage() {
 									<div className="bg-red-50 border border-red-200 rounded-lg p-3">
 										<div className="flex items-center">
 											<ClockIcon className="w-4 h-4 mr-2 text-red-600" />
-											<span className="text-sm font-medium text-red-600">Deadline</span>
+											<span className="text-sm font-medium text-red-600">
+												Deadline
+											</span>
 										</div>
 										<span className="text-sm font-semibold text-red-700 block mt-1">
 											{job.deadline ? formatDate(job.deadline) : "No deadline"}
@@ -600,16 +632,19 @@ export default function JobsPage() {
 												{job.job_profile} at {job.company}
 											</DialogTitle>
 											<DialogDescription className="text-gray-600">
-												{job.placement_category} • Posted on {formatDate(job.createdAt)}
+												{job.placement_category} • Posted on{" "}
+												{formatDate(job.createdAt)}
 											</DialogDescription>
 										</DialogHeader>
-										
+
 										<div className="space-y-6 mt-4">
 											{/* Key Info Cards */}
 											<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 												<div className="bg-green-50 border border-green-200 rounded-lg p-4">
 													<div className="flex items-center justify-between">
-														<span className="text-sm text-green-600 font-medium">Package</span>
+														<span className="text-sm text-green-600 font-medium">
+															Package
+														</span>
 														<IndianRupeeIcon className="w-4 h-4 text-green-600" />
 													</div>
 													<p className="text-lg font-bold text-green-700">
@@ -618,7 +653,9 @@ export default function JobsPage() {
 												</div>
 												<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
 													<div className="flex items-center justify-between">
-														<span className="text-sm text-blue-600 font-medium">Location</span>
+														<span className="text-sm text-blue-600 font-medium">
+															Location
+														</span>
 														<MapPinIcon className="w-4 h-4 text-blue-600" />
 													</div>
 													<p className="text-lg font-semibold text-blue-700">
@@ -627,11 +664,15 @@ export default function JobsPage() {
 												</div>
 												<div className="bg-red-50 border border-red-200 rounded-lg p-4">
 													<div className="flex items-center justify-between">
-														<span className="text-sm text-red-600 font-medium">Deadline</span>
+														<span className="text-sm text-red-600 font-medium">
+															Deadline
+														</span>
 														<ClockIcon className="w-4 h-4 text-red-600" />
 													</div>
 													<p className="text-lg font-semibold text-red-700">
-														{job.deadline ? formatDate(job.deadline) : "No deadline"}
+														{job.deadline
+															? formatDate(job.deadline)
+															: "No deadline"}
 													</p>
 												</div>
 											</div>
@@ -662,12 +703,13 @@ export default function JobsPage() {
 																key={idx}
 																className="flex justify-between text-sm"
 															>
-																<span className="text-amber-700">{mark.level}:</span>
+																<span className="text-amber-700">
+																	{mark.level}:
+																</span>
 																<span className="font-semibold text-amber-800">
-																	{mark.level.toLowerCase() === 'ug' 
+																	{mark.level.toLowerCase() === "ug"
 																		? `${mark.criteria.toFixed(1)}/10 CGPA`
-																		: `${mark.criteria}%`
-																	}
+																		: `${mark.criteria}%`}
 																</span>
 															</div>
 														))}
