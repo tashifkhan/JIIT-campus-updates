@@ -7,16 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-impo											const {
-												summaryMarkdown,
-												hiringSteps,
-												ctcMarkdown,
-												company,
-												role,
-												ctcAmount,
-											} = extractShortlistingSections(
-												notice.formatted_message
-											);pdownMenu,
+import {
+	DropdownMenu,
 	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
 	DropdownMenuLabel,
@@ -31,6 +23,7 @@ import {
 	TrendingUpIcon,
 	ChevronDownIcon,
 	ChevronUpIcon,
+	CircleDollarSignIcon,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -45,7 +38,6 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import { CircleDollarSignIcon } from "lucide-react";
 
 interface Notice {
 	id: string;
@@ -162,7 +154,7 @@ export default function HomePage() {
 	};
 
 	// Extract sections from a shortlisting message for better display
-	const extractShortlistingSections = (text: string) => {
+	const extractShortlistingSections = (text: string, noticeData?: any) => {
 		const src = (text || "").replace(/\r/g, "\n");
 		const lines = src
 			.split(/\n+/)
@@ -170,7 +162,8 @@ export default function HomePage() {
 			.filter(Boolean);
 		const summary: string[] = [];
 		const hiringSteps: string[] = [];
-		const companyRole: { company?: string; role?: string; ctcAmount?: string } = {};
+		const companyRole: { company?: string; role?: string; ctcAmount?: string } =
+			{};
 		let ctcLines: string[] = [];
 		let inHiring = false;
 		let inCTC = false;
@@ -226,16 +219,18 @@ export default function HomePage() {
 		// Build concise summary: limit to first 3 paragraphs
 		const summaryMarkdown = summary.slice(0, 6).join("\n\n");
 		const ctcMarkdown = ctcLines.join("\n");
-		
+
 		// Try to extract CTC amount from the notice data if not found in text
-		if (!companyRole.ctcAmount && notice.matched_job) {
+		if (!companyRole.ctcAmount && noticeData?.matched_job) {
 			// Look for package info in the notice object
-			const packageMatch = (notice as any).package;
+			const packageMatch = (noticeData as any).package;
 			if (packageMatch) {
-				companyRole.ctcAmount = packageMatch.includes('LPA') ? packageMatch : `${packageMatch} LPA`;
+				companyRole.ctcAmount = packageMatch.includes("LPA")
+					? packageMatch
+					: `${packageMatch} LPA`;
 			}
 		}
-		
+
 		return {
 			summaryMarkdown,
 			hiringSteps: hiringSteps.filter(Boolean),
@@ -355,7 +350,7 @@ export default function HomePage() {
 					</CardContent>
 				</Card>
 
-				<div className="space-y-4">
+				<div className="space-y-6">
 					{filteredNotices.map((notice) => {
 						const IconComponent = categoryIcons[notice.category] ?? BellIcon;
 						const parsed =
@@ -371,32 +366,47 @@ export default function HomePage() {
 						return (
 							<Card
 								key={notice.id}
-								className="border-l-4 border-l-blue-500 hover:shadow-md transition-shadow"
+								className={`border-l-4 hover:shadow-lg transition-all duration-200 ${
+									notice.category === "job posting"
+										? "border-l-blue-500"
+										: notice.category === "shortlisting"
+										? "border-l-green-500"
+										: "border-l-orange-500"
+								}`}
 							>
-								<CardContent className="p-6">
-									<div className="flex items-start justify-between mb-3">
+								<CardHeader className="pb-3">
+									<div className="flex items-center justify-between">
 										<Badge
 											variant="outline"
-											className={
+											className={`${
 												categoryColors[notice.category] ??
 												"bg-gray-50 text-gray-700 border-gray-200"
-											}
+											} px-3 py-1`}
 										>
-											<IconComponent className="w-3 h-3 mr-1" />
+											<IconComponent className="w-3 h-3 mr-2" />
 											{notice.category.charAt(0).toUpperCase() +
 												notice.category.slice(1)}
 										</Badge>
+										{notice.createdAt && (
+											<span className="text-xs text-gray-500">
+												{new Date(notice.createdAt).toLocaleDateString()}
+											</span>
+										)}
 									</div>
+								</CardHeader>
+								<CardContent className="pt-0">
 
 									{notice.category === "update" ||
 									notice.category === "job posting" ? (
-										<div className="prose prose-sm max-w-none text-gray-800">
-											<ReactMarkdown remarkPlugins={[remarkGfm]}>
-												{notice.formatted_message}
-											</ReactMarkdown>
+										<div className="space-y-4">
+											<div className="prose prose-sm max-w-none text-gray-800 bg-gray-50 rounded-lg p-4">
+												<ReactMarkdown remarkPlugins={[remarkGfm]}>
+													{notice.formatted_message}
+												</ReactMarkdown>
+											</div>
 										</div>
 									) : notice.category === "shortlisting" ? (
-										<div className="space-y-3">
+										<div className="space-y-4">
 											{(() => {
 												const {
 													summaryMarkdown,
@@ -404,88 +414,125 @@ export default function HomePage() {
 													ctcMarkdown,
 													company,
 													role,
+													ctcAmount,
 												} = extractShortlistingSections(
-													notice.formatted_message
+													notice.formatted_message,
+													notice
 												);
 												return (
 													<>
-														{(company || role) && (
-															<div className="flex flex-wrap gap-2 items-center">
-																{company && (
-																	<Badge variant="secondary">
-																		Company: {company}
-																	</Badge>
-																)}
-																{role && (
-																	<Badge variant="secondary">
-																		Role: {role}
-																	</Badge>
-																)}
-																{ctcMarkdown && (
-																	<Popover>
-																		<PopoverTrigger asChild>
-																			<Button
+														{/* Company and Role Header */}
+														{(company || role || ctcAmount) && (
+															<div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-4 border border-blue-100">
+																<div className="flex flex-wrap gap-3 items-center justify-between">
+																	<div className="flex flex-wrap gap-2">
+																		{company && (
+																			<Badge
 																				variant="secondary"
-																				size="sm"
-																				type="button"
-																				className="ml-auto"
+																				className="bg-white text-blue-700 border-blue-200"
 																			>
-																				<CircleDollarSignIcon className="w-3 h-3 mr-1" />
-																				{ctcAmount || "CTC"}
-																			</Button>
-																		</PopoverTrigger>
-																		<PopoverContent className="md:w-96 max-w-[90vw] max-h-[60vh] overflow-auto">
-																			<div className="prose prose-sm max-w-none text-gray-800">
-																				<ReactMarkdown
-																					remarkPlugins={[remarkGfm]}
+																				<BuildingIcon className="w-3 h-3 mr-1" />
+																				{company}
+																			</Badge>
+																		)}
+																		{role && (
+																			<Badge
+																				variant="secondary"
+																				className="bg-white text-green-700 border-green-200"
+																			>
+																				{role}
+																			</Badge>
+																		)}
+																	</div>
+																	{ctcMarkdown && ctcAmount && (
+																		<Popover>
+																			<PopoverTrigger asChild>
+																				<Button
+																					variant="default"
+																					size="sm"
+																					type="button"
+																					className="bg-green-600 hover:bg-green-700 text-white font-medium"
 																				>
-																					{ctcMarkdown}
-																				</ReactMarkdown>
-																			</div>
-																		</PopoverContent>
-																	</Popover>
-																)}
+																					<CircleDollarSignIcon className="w-3 h-3 mr-1" />
+																					{ctcAmount}
+																				</Button>
+																			</PopoverTrigger>
+																			<PopoverContent className="w-80 max-w-[90vw] max-h-[60vh] overflow-auto">
+																				<div className="space-y-2">
+																					<h4 className="font-semibold text-gray-900">
+																						Package Details
+																					</h4>
+																					<div className="prose prose-sm max-w-none text-gray-700">
+																						<ReactMarkdown
+																							remarkPlugins={[remarkGfm]}
+																						>
+																							{ctcMarkdown}
+																						</ReactMarkdown>
+																					</div>
+																				</div>
+																			</PopoverContent>
+																		</Popover>
+																	)}
+																</div>
 															</div>
 														)}
+
+														{/* Summary Content */}
 														{summaryMarkdown && (
-															<div className="prose prose-sm max-w-none text-gray-800">
-																<ReactMarkdown remarkPlugins={[remarkGfm]}>
-																	{summaryMarkdown}
-																</ReactMarkdown>
+															<div className="bg-white rounded-lg border border-gray-200 p-4">
+																<div className="prose prose-sm max-w-none text-gray-800">
+																	<ReactMarkdown remarkPlugins={[remarkGfm]}>
+																		{summaryMarkdown}
+																	</ReactMarkdown>
+																</div>
 															</div>
 														)}
+
+														{/* Collapsible Sections */}
 														{(hiringSteps.length > 0 || ctcMarkdown) && (
 															<Accordion
 																type="single"
 																collapsible
-																className="w-full"
+																className="w-full bg-white rounded-lg border border-gray-200"
 															>
 																{hiringSteps.length > 0 && (
-																	<AccordionItem value="hiring">
-																		<AccordionTrigger>
-																			Hiring Process
+																	<AccordionItem value="hiring" className="border-b-0">
+																		<AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
+																			<div className="flex items-center">
+																				<CalendarIcon className="w-4 h-4 mr-2 text-blue-600" />
+																				Hiring Process
+																			</div>
 																		</AccordionTrigger>
-																		<AccordionContent>
-																			<ul className="list-disc pl-5 space-y-1 text-sm text-gray-800">
-																				{hiringSteps.map((s, i) => (
-																					<li key={i}>{s}</li>
-																				))}
-																			</ul>
+																		<AccordionContent className="px-4 pb-4">
+																			<div className="bg-blue-50 rounded-lg p-3">
+																				<ol className="list-decimal pl-5 space-y-2 text-sm text-gray-800">
+																					{hiringSteps.map((s, i) => (
+																						<li key={i} className="leading-relaxed">
+																							{s}
+																						</li>
+																					))}
+																				</ol>
+																			</div>
 																		</AccordionContent>
 																	</AccordionItem>
 																)}
 																{ctcMarkdown && (
-																	<AccordionItem value="ctc">
-																		<AccordionTrigger>
-																			Compensation & Benefits
+																	<AccordionItem value="ctc" className="border-b-0">
+																		<AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
+																			<div className="flex items-center">
+																				<CircleDollarSignIcon className="w-4 h-4 mr-2 text-green-600" />
+																				Compensation & Benefits
+																			</div>
 																		</AccordionTrigger>
-																		<AccordionContent>
-																			<div className="prose prose-sm max-w-none text-gray-800">
-																				<ReactMarkdown
-																					remarkPlugins={[remarkGfm]}
-																				>
-																					{ctcMarkdown}
-																				</ReactMarkdown>
+																		<AccordionContent className="px-4 pb-4">
+																			<div className="bg-green-50 rounded-lg p-3">
+																				<div className="prose prose-sm max-w-none text-gray-800">
+																					<ReactMarkdown
+																						remarkPlugins={[remarkGfm]}
+																					>
+																						{ctcMarkdown}
+																					</ReactMarkdown>
+																				</div>
 																			</div>
 																		</AccordionContent>
 																	</AccordionItem>
@@ -497,151 +544,168 @@ export default function HomePage() {
 											})()}
 										</div>
 									) : (
-										<div className="text-gray-800 leading-relaxed">
-											{notice.formatted_message}
+										<div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+											<div className="text-gray-800 leading-relaxed">
+												{notice.formatted_message}
+											</div>
 										</div>
 									)}
 
 									{hasShortlistedStudents && (
-										<div className="mb-4">
-											<div className="flex items-center justify-between mb-3">
-												<div className="flex items-center">
-													<UsersIcon className="w-4 h-4 mr-2 text-green-600" />
-													<span className="font-medium text-gray-900">
-														{students.length} Students Shortlisted
-													</span>
+										<div className="border-t border-gray-200 pt-4">
+											<div className="bg-green-50 rounded-lg p-4 border border-green-200">
+												<div className="flex items-center justify-between mb-3">
+													<div className="flex items-center">
+														<UsersIcon className="w-5 h-5 mr-2 text-green-600" />
+														<span className="font-semibold text-green-800">
+															{students.length} Students Shortlisted
+														</span>
+													</div>
+													<Button
+														variant="outline"
+														size="sm"
+														type="button"
+														aria-expanded={expandedNotice === notice.id}
+														onClick={() =>
+															setExpandedNotice((prev) =>
+																prev === notice.id ? null : notice.id
+															)
+														}
+														className="bg-white hover:bg-green-50 border-green-300"
+													>
+														{expandedNotice === notice.id ? (
+															<>
+																Hide List{" "}
+																<ChevronUpIcon className="w-3 h-3 ml-1" />
+															</>
+														) : (
+															<>
+																View List{" "}
+																<ChevronDownIcon className="w-3 h-3 ml-1" />
+															</>
+														)}
+													</Button>
 												</div>
-												<Button
-													variant="outline"
-													size="sm"
-													type="button"
-													aria-expanded={expandedNotice === notice.id}
-													onClick={() =>
-														setExpandedNotice((prev) =>
-															prev === notice.id ? null : notice.id
-														)
-													}
-												>
-													{expandedNotice === notice.id ? (
-														<>
-															Hide List{" "}
-															<ChevronUpIcon className="w-3 h-3 ml-1" />
-														</>
-													) : (
-														<>
-															View List{" "}
-															<ChevronDownIcon className="w-3 h-3 ml-1" />
-														</>
-													)}
-												</Button>
-											</div>
 
-											{expandedNotice === notice.id && (
-												<div className="bg-gray-50 rounded-lg p-4">
-													<div className="flex items-center justify-between mb-2">
-														<div className="text-sm text-gray-600">
-															Download or copy the shortlisted students.
+												{expandedNotice === notice.id && (
+													<div className="bg-white rounded-lg border border-green-200 p-4">
+														<div className="flex items-center justify-between mb-4">
+															<h4 className="font-medium text-gray-900">
+																Shortlisted Students
+															</h4>
+															<Button
+																variant="outline"
+																size="sm"
+																type="button"
+																onClick={() => {
+																	const rows = [
+																		[
+																			"Name",
+																			"Enrollment Number",
+																			"Email",
+																			"Venue",
+																		],
+																		...students.map((s: any) => [
+																			s.name,
+																			s.enrollment_number,
+																			s.email || "",
+																			s.venue || "",
+																		]),
+																	];
+																	const csv = rows
+																		.map((r) =>
+																			r
+																				.map(
+																					(c) =>
+																						'"' +
+																						String(c).replace(/"/g, '""') +
+																						'"'
+																				)
+																				.join(",")
+																		)
+																		.join("\n");
+																	const blob = new Blob([csv], {
+																		type: "text/csv;charset=utf-8;",
+																	});
+																	const url = URL.createObjectURL(blob);
+																	const a = document.createElement("a");
+																	a.href = url;
+																	a.download = "shortlist.csv";
+																	a.click();
+																	URL.revokeObjectURL(url);
+																}}
+																className="bg-green-600 text-white hover:bg-green-700"
+															>
+																📥 Export CSV
+															</Button>
 														</div>
-														<Button
-															variant="outline"
-															size="sm"
-															type="button"
-															onClick={() => {
-																const rows = [
-																	[
-																		"Name",
-																		"Enrollment Number",
-																		"Email",
-																		"Venue",
-																	],
-																	...students.map((s: any) => [
-																		s.name,
-																		s.enrollment_number,
-																		s.email || "",
-																		s.venue || "",
-																	]),
-																];
-																const csv = rows
-																	.map((r) =>
-																		r
-																			.map(
-																				(c) =>
-																					'"' +
-																					String(c).replace(/"/g, '""') +
-																					'"'
-																			)
-																			.join(",")
-																	)
-																	.join("\n");
-																const blob = new Blob([csv], {
-																	type: "text/csv;charset=utf-8;",
-																});
-																const url = URL.createObjectURL(blob);
-																const a = document.createElement("a");
-																a.href = url;
-																a.download = "shortlist.csv";
-																a.click();
-																URL.revokeObjectURL(url);
-															}}
-														>
-															Export CSV
-														</Button>
-													</div>
-													<div className="overflow-x-auto max-h-96 overflow-y-auto">
-														<table className="w-full text-sm">
-															<thead className="sticky top-0 bg-gray-100">
-																<tr className="border-b border-gray-200">
-																	<th className="text-left py-2 font-medium text-gray-700">
-																		Name
-																	</th>
-																	<th className="text-left py-2 font-medium text-gray-700">
-																		Enrollment Number
-																	</th>
-																	<th className="text-left py-2 font-medium text-gray-700">
-																		Email
-																	</th>
-																	<th className="text-left py-2 font-medium text-gray-700">
-																		Venue
-																	</th>
-																</tr>
-															</thead>
-															<tbody>
-																{students.map((student: any, idx: number) => (
-																	<tr
-																		key={idx}
-																		className={
-																			"border-b border-gray-100 last:border-b-0 " +
-																			(idx % 2 ? "bg-white" : "bg-gray-50")
-																		}
-																	>
-																		<td className="py-2 text-gray-900">
-																			{student.name}
-																		</td>
-																		<td className="py-2 text-gray-600 font-mono text-xs">
-																			{student.enrollment_number}
-																		</td>
-																		<td className="py-2 text-gray-600 text-xs">
-																			{student.email ?? "-"}
-																		</td>
-																		<td className="py-2 text-gray-600 text-xs">
-																			{student.venue ?? "-"}
-																		</td>
+														<div className="overflow-x-auto max-h-80 overflow-y-auto border border-gray-200 rounded-lg">
+															<table className="w-full text-sm">
+																<thead className="sticky top-0 bg-green-100 border-b border-green-200">
+																	<tr>
+																		<th className="text-left py-3 px-4 font-semibold text-green-800">
+																			Name
+																		</th>
+																		<th className="text-left py-3 px-4 font-semibold text-green-800">
+																			Enrollment
+																		</th>
+																		<th className="text-left py-3 px-4 font-semibold text-green-800">
+																			Email
+																		</th>
+																		<th className="text-left py-3 px-4 font-semibold text-green-800">
+																			Venue
+																		</th>
 																	</tr>
-																))}
-															</tbody>
-														</table>
+																</thead>
+																<tbody>
+																	{students.map((student: any, idx: number) => (
+																		<tr
+																			key={idx}
+																			className={`border-b border-gray-100 last:border-b-0 hover:bg-gray-50 ${
+																				idx % 2 ? "bg-white" : "bg-gray-50"
+																			}`}
+																		>
+																			<td className="py-3 px-4 text-gray-900 font-medium">
+																				{student.name}
+																			</td>
+																			<td className="py-3 px-4 text-gray-600 font-mono text-sm">
+																				{student.enrollment_number}
+																			</td>
+																			<td className="py-3 px-4 text-gray-600 text-sm">
+																				{student.email ?? "-"}
+																			</td>
+																			<td className="py-3 px-4 text-gray-600 text-sm">
+																				{student.venue ?? "-"}
+																			</td>
+																		</tr>
+																	))}
+																</tbody>
+															</table>
+														</div>
 													</div>
-												</div>
-											)}
+												)}
+											</div>
 										</div>
 									)}
 
 									{notice.matched_job && (
-										<div className="mt-4 p-3 bg-gray-50 rounded-lg">
-											<p className="text-sm font-medium text-gray-700">
-												Related Job: {notice.matched_job.company} -{" "}
-												{notice.matched_job.job_profile}
-											</p>
+										<div className="border-t border-gray-200 pt-4">
+											<div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+												<div className="flex items-start">
+													<BellIcon className="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
+													<div>
+														<h4 className="font-medium text-blue-900 mb-1">
+															Related Job Posting
+														</h4>
+														<p className="text-sm text-blue-800">
+															<span className="font-medium">
+																{notice.matched_job.company}
+															</span>{" "}
+															- {notice.matched_job.job_profile}
+														</p>
+													</div>
+												</div>
+											</div>
 										</div>
 									)}
 
