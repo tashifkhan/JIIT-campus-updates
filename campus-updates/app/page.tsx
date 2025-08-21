@@ -1,10 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
 	CalendarIcon,
 	BuildingIcon,
@@ -14,6 +24,8 @@ import {
 	ChevronDownIcon,
 	ChevronUpIcon,
 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Notice {
 	id: string;
@@ -26,6 +38,7 @@ interface Notice {
 	extracted: any;
 	formatted_message: string;
 	createdAt?: number;
+	content?: string;
 	shortlisted_students?: Array<{
 		name: string;
 		enrollment_number: string;
@@ -48,6 +61,10 @@ export default function HomePage() {
 	const [notices, setNotices] = useState<Notice[]>([]);
 	const [expandedNotice, setExpandedNotice] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
+	// Filters
+	const [query, setQuery] = useState("");
+	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+	const [onlyShortlisted, setOnlyShortlisted] = useState(false);
 
 	useEffect(() => {
 		fetch("/data/notices.json")
@@ -60,6 +77,25 @@ export default function HomePage() {
 				setLoading(false);
 			});
 	}, []);
+
+	// Derived options and filtered list
+	const allCategories = useMemo(
+		() => Array.from(new Set(notices.map((n) => n.category))).sort(),
+		[notices]
+	);
+
+	const filteredNotices = useMemo(() => {
+		const q = query.trim().toLowerCase();
+		return notices.filter((n) => {
+			if (selectedCategories.length && !selectedCategories.includes(n.category)) return false;
+			if (onlyShortlisted && !(n.shortlisted_students && n.shortlisted_students.length > 0)) return false;
+			if (q) {
+				const hay = `${n.formatted_message} ${n.matched_job?.company ?? ""} ${n.matched_job?.job_profile ?? ""}`.toLowerCase();
+				if (!hay.includes(q)) return false;
+			}
+			return true;
+		});
+	}, [notices, query, selectedCategories, onlyShortlisted]);
 
 	if (loading) {
 		return (
@@ -90,8 +126,50 @@ export default function HomePage() {
 					</p>
 				</div>
 
+				{/* Filters */}
+				<Card className="mb-4">
+					<CardContent className="p-4 lg:p-6 space-y-3">
+						<div className="flex flex-col md:flex-row gap-3 md:items-center">
+							<div className="flex-1">
+								<Input
+									placeholder="Search updates or company/role"
+									value={query}
+									onChange={(e) => setQuery(e.target.value)}
+								/>
+							</div>
+							<div className="flex gap-2 flex-wrap">
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button variant="outline" className="whitespace-nowrap">Categories</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent className="w-56 max-h-72 overflow-auto">
+										<DropdownMenuLabel>Select categories</DropdownMenuLabel>
+										<DropdownMenuSeparator />
+										{allCategories.map((cat) => (
+											<DropdownMenuCheckboxItem
+												key={cat}
+												checked={selectedCategories.includes(cat)}
+												onCheckedChange={(checked) => {
+													setSelectedCategories((prev) => (checked ? [...prev, cat] : prev.filter((c) => c !== cat)));
+												}}
+											>
+												{cat.charAt(0).toUpperCase() + cat.slice(1)}
+											</DropdownMenuCheckboxItem>
+										))}
+									</DropdownMenuContent>
+								</DropdownMenu>
+								<div className="flex items-center gap-2">
+									<Checkbox id="onlyShortlisted" checked={onlyShortlisted} onCheckedChange={(v) => setOnlyShortlisted(!!v)} />
+									<label htmlFor="onlyShortlisted" className="text-sm text-gray-700 cursor-pointer">Only with shortlisted students</label>
+								</div>
+								<Badge variant="secondary" className="self-center">{filteredNotices.length} results</Badge>
+							</div>
+						</div>
+					</CardContent>
+				</Card>
+
 				<div className="space-y-4">
-					{notices.map((notice) => {
+					{filteredNotices.map((notice) => {
 						const IconComponent = categoryIcons[notice.category] ?? BellIcon;
 						const hasShortlistedStudents =
 							notice.shortlisted_students &&
@@ -116,9 +194,17 @@ export default function HomePage() {
 										</Badge>
 									</div>
 
-									<div className="text-gray-800 leading-relaxed">
-										{notice.formatted_message}
-									</div>
+									{notice.category === 'update' || notice.category === 'job posting' ? (
+										<div className="prose prose-sm max-w-none text-gray-800">
+											<ReactMarkdown remarkPlugins={[remarkGfm]}>
+												{notice.formatted_message}
+											</ReactMarkdown>
+										</div>
+									) : (
+										<div className="text-gray-800 leading-relaxed">
+											{notice.formatted_message}
+										</div>
+									)}
 
 									{hasShortlistedStudents && (
 										<div className="mb-4">
