@@ -26,6 +26,12 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface Notice {
 	id: string;
@@ -66,6 +72,13 @@ export default function HomePage() {
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 	const [onlyShortlisted, setOnlyShortlisted] = useState(false);
 
+	// Normalize categories for consistency (treat '[shortlist]' as 'shortlisting')
+	const normalizeCategory = (cat: string): string => {
+		const c = (cat || "").toLowerCase().trim();
+		if (/^\[?shortlist(ing)?\]?$/.test(c)) return "shortlisting";
+		return c;
+	};
+
 	useEffect(() => {
 		fetch("/data/notices.json")
 			.then((res) => res.json())
@@ -73,7 +86,10 @@ export default function HomePage() {
 				const sorted = [...data].sort(
 					(a: Notice, b: Notice) => (b.createdAt || 0) - (a.createdAt || 0)
 				);
-				setNotices(sorted);
+				// Apply category normalization
+				setNotices(
+					sorted.map((n) => ({ ...n, category: normalizeCategory(n.category) }))
+				);
 				setLoading(false);
 			});
 	}, []);
@@ -84,13 +100,136 @@ export default function HomePage() {
 		[notices]
 	);
 
+	type ParsedStudent = {
+		name: string;
+		enrollment_number: string;
+		email?: string;
+		venue?: string;
+	};
+
+	// Heuristic parser for shortlisting text when shortlisted_students isn't provided
+	const parseShortlistFromText = (text: string): ParsedStudent[] => {
+		if (!text) return [];
+		const results: ParsedStudent[] = [];
+		const seen = new Set<string>();
+		const cleaned = text
+			.replace(/\u00a0/g, " ")
+			.replace(/\s+/g, " ")
+			.trim();
+
+		// Pattern A: Name (Enrollment)
+		const patternA = /([A-Za-z][A-Za-z.'\- ]+?)\s*\((\d{7,})\)/g;
+		let matchA: RegExpExecArray | null;
+		while ((matchA = patternA.exec(cleaned))) {
+			const name = matchA[1].trim();
+			const enroll = matchA[2];
+			if (!seen.has(enroll)) {
+				results.push({ name, enrollment_number: enroll });
+				seen.add(enroll);
+			}
+		}
+
+		// Pattern B: [idx]? Enrollment Name [Email]? [Venue]
+		const patternB =
+			/(\d+\s+)?(\d{7,})\s+([^@\d][A-Za-z .'-]+?)(?:\s+([\w.+-]+@[\w.-]+\.[A-Za-z]{2,}))?(?:\s+(CL\d+|[A-Z]{2}\d+))(?=\s|$)/g;
+		let matchB: RegExpExecArray | null;
+		while ((matchB = patternB.exec(cleaned))) {
+			const enroll = matchB[2];
+			const name = matchB[3].trim();
+			const email = matchB[4];
+			const venue = matchB[5];
+			if (!seen.has(enroll)) {
+				results.push({ name, enrollment_number: enroll, email, venue });
+				seen.add(enroll);
+			}
+		}
+
+		return results;
+	};
+
+	// Extract sections from a shortlisting message for better display
+	const extractShortlistingSections = (text: string) => {
+		const src = (text || "").replace(/\r/g, "\n");
+		const lines = src
+			.split(/\n+/)
+			.map((l) => l.trim())
+			.filter(Boolean);
+		const summary: string[] = [];
+		const hiringSteps: string[] = [];
+		const companyRole: { company?: string; role?: string } = {};
+		let ctcLines: string[] = [];
+		let inHiring = false;
+		let inCTC = false;
+
+		const isStudentLine = (l: string) =>
+			/\(\d{7,}\)/.test(l) || /\b\d{7,}\b/.test(l);
+
+		// Try to capture company/role from common patterns
+		for (const l of lines.slice(0, 6)) {
+			const m1 = l.match(/Company\s*:\s*([^|]+?)(?:\s*\||$)/i);
+			if (m1) companyRole.company = m1[1].trim();
+			const m2 = l.match(/Role\s*:\s*([^|]+?)(?:\s*\||$)/i);
+			if (m2) companyRole.role = m2[1].trim();
+		}
+
+		for (const l of lines) {
+			const lower = l.toLowerCase();
+			if (/^hiring process\s*:/.test(lower)) {
+				inHiring = true;
+				inCTC = false;
+				continue;
+			}
+			if (/^(ctc|package|compensation|salary component)/i.test(l)) {
+				inCTC = true;
+				inHiring = false;
+				ctcLines.push(l);
+				continue;
+			}
+			if (/^posted by|^posted on|^\*posted by\*/i.test(lower)) {
+				inHiring = false;
+				inCTC = false;
+			}
+
+			if (inHiring) {
+				if (!isStudentLine(l))
+					hiringSteps.push(l.replace(/^[-•\d.\)]+\s*/, "").trim());
+				continue;
+			}
+			if (inCTC) {
+				ctcLines.push(l);
+				continue;
+			}
+			if (!isStudentLine(l)) summary.push(l);
+		}
+
+		// Build concise summary: limit to first 3 paragraphs
+		const summaryMarkdown = summary.slice(0, 6).join("\n\n");
+		const ctcMarkdown = ctcLines.join("\n");
+		return {
+			summaryMarkdown,
+			hiringSteps: hiringSteps.filter(Boolean),
+			ctcMarkdown,
+			...companyRole,
+		};
+	};
+
 	const filteredNotices = useMemo(() => {
 		const q = query.trim().toLowerCase();
 		return notices.filter((n) => {
-			if (selectedCategories.length && !selectedCategories.includes(n.category)) return false;
-			if (onlyShortlisted && !(n.shortlisted_students && n.shortlisted_students.length > 0)) return false;
+			if (selectedCategories.length && !selectedCategories.includes(n.category))
+				return false;
+			if (onlyShortlisted) {
+				const parsedCount =
+					n.category === "shortlisting"
+						? parseShortlistFromText(n.formatted_message).length
+						: 0;
+				const providedCount = n.shortlisted_students?.length ?? 0;
+				if (providedCount + parsedCount === 0) return false;
+			}
 			if (q) {
-				const hay = `${n.formatted_message} ${n.matched_job?.company ?? ""} ${n.matched_job?.job_profile ?? ""}`.toLowerCase();
+				const hay = `${n.formatted_message} ${n.matched_job?.company ?? ""} ${
+					n.matched_job?.job_profile ?? ""
+				}`.toLowerCase();
 				if (!hay.includes(q)) return false;
 			}
 			return true;
@@ -140,7 +279,9 @@ export default function HomePage() {
 							<div className="flex gap-2 flex-wrap">
 								<DropdownMenu>
 									<DropdownMenuTrigger asChild>
-										<Button variant="outline" className="whitespace-nowrap">Categories</Button>
+										<Button variant="outline" className="whitespace-nowrap">
+											Categories
+										</Button>
 									</DropdownMenuTrigger>
 									<DropdownMenuContent className="w-56 max-h-72 overflow-auto">
 										<DropdownMenuLabel>Select categories</DropdownMenuLabel>
@@ -150,7 +291,11 @@ export default function HomePage() {
 												key={cat}
 												checked={selectedCategories.includes(cat)}
 												onCheckedChange={(checked) => {
-													setSelectedCategories((prev) => (checked ? [...prev, cat] : prev.filter((c) => c !== cat)));
+													setSelectedCategories((prev) =>
+														checked
+															? [...prev, cat]
+															: prev.filter((c) => c !== cat)
+													);
 												}}
 											>
 												{cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -159,10 +304,21 @@ export default function HomePage() {
 									</DropdownMenuContent>
 								</DropdownMenu>
 								<div className="flex items-center gap-2">
-									<Checkbox id="onlyShortlisted" checked={onlyShortlisted} onCheckedChange={(v) => setOnlyShortlisted(!!v)} />
-									<label htmlFor="onlyShortlisted" className="text-sm text-gray-700 cursor-pointer">Only with shortlisted students</label>
+									<Checkbox
+										id="onlyShortlisted"
+										checked={onlyShortlisted}
+										onCheckedChange={(v) => setOnlyShortlisted(!!v)}
+									/>
+									<label
+										htmlFor="onlyShortlisted"
+										className="text-sm text-gray-700 cursor-pointer"
+									>
+										Only with shortlisted students
+									</label>
 								</div>
-								<Badge variant="secondary" className="self-center">{filteredNotices.length} results</Badge>
+								<Badge variant="secondary" className="self-center">
+									{filteredNotices.length} results
+								</Badge>
 							</div>
 						</div>
 					</CardContent>
@@ -171,9 +327,16 @@ export default function HomePage() {
 				<div className="space-y-4">
 					{filteredNotices.map((notice) => {
 						const IconComponent = categoryIcons[notice.category] ?? BellIcon;
-						const hasShortlistedStudents =
-							notice.shortlisted_students &&
-							notice.shortlisted_students.length > 0;
+						const parsed =
+							notice.category === "shortlisting" &&
+							(!notice.shortlisted_students ||
+								notice.shortlisted_students.length === 0)
+								? parseShortlistFromText(notice.formatted_message)
+								: [];
+						const students = (notice.shortlisted_students ?? []).concat(
+							parsed as any
+						);
+						const hasShortlistedStudents = students.length > 0;
 						return (
 							<Card
 								key={notice.id}
@@ -194,11 +357,89 @@ export default function HomePage() {
 										</Badge>
 									</div>
 
-									{notice.category === 'update' || notice.category === 'job posting' ? (
+									{notice.category === "update" ||
+									notice.category === "job posting" ? (
 										<div className="prose prose-sm max-w-none text-gray-800">
 											<ReactMarkdown remarkPlugins={[remarkGfm]}>
 												{notice.formatted_message}
 											</ReactMarkdown>
+										</div>
+									) : notice.category === "shortlisting" ? (
+										<div className="space-y-3">
+											{(() => {
+												const {
+													summaryMarkdown,
+													hiringSteps,
+													ctcMarkdown,
+													company,
+													role,
+												} = extractShortlistingSections(
+													notice.formatted_message
+												);
+												return (
+													<>
+														{(company || role) && (
+															<div className="flex flex-wrap gap-2">
+																{company && (
+																	<Badge variant="secondary">
+																		Company: {company}
+																	</Badge>
+																)}
+																{role && (
+																	<Badge variant="secondary">
+																		Role: {role}
+																	</Badge>
+																)}
+															</div>
+														)}
+														{summaryMarkdown && (
+															<div className="prose prose-sm max-w-none text-gray-800">
+																<ReactMarkdown remarkPlugins={[remarkGfm]}>
+																	{summaryMarkdown}
+																</ReactMarkdown>
+															</div>
+														)}
+														{(hiringSteps.length > 0 || ctcMarkdown) && (
+															<Accordion
+																type="single"
+																collapsible
+																className="w-full"
+															>
+																{hiringSteps.length > 0 && (
+																	<AccordionItem value="hiring">
+																		<AccordionTrigger>
+																			Hiring Process
+																		</AccordionTrigger>
+																		<AccordionContent>
+																			<ul className="list-disc pl-5 space-y-1 text-sm text-gray-800">
+																				{hiringSteps.map((s, i) => (
+																					<li key={i}>{s}</li>
+																				))}
+																			</ul>
+																		</AccordionContent>
+																	</AccordionItem>
+																)}
+																{ctcMarkdown && (
+																	<AccordionItem value="ctc">
+																		<AccordionTrigger>
+																			Compensation & Benefits
+																		</AccordionTrigger>
+																		<AccordionContent>
+																			<div className="prose prose-sm max-w-none text-gray-800">
+																				<ReactMarkdown
+																					remarkPlugins={[remarkGfm]}
+																				>
+																					{ctcMarkdown}
+																				</ReactMarkdown>
+																			</div>
+																		</AccordionContent>
+																	</AccordionItem>
+																)}
+															</Accordion>
+														)}
+													</>
+												);
+											})()}
 										</div>
 									) : (
 										<div className="text-gray-800 leading-relaxed">
@@ -212,16 +453,17 @@ export default function HomePage() {
 												<div className="flex items-center">
 													<UsersIcon className="w-4 h-4 mr-2 text-green-600" />
 													<span className="font-medium text-gray-900">
-														{notice.shortlisted_students!.length} Students
-														Shortlisted
+														{students.length} Students Shortlisted
 													</span>
 												</div>
 												<Button
 													variant="outline"
 													size="sm"
+													type="button"
+													aria-expanded={expandedNotice === notice.id}
 													onClick={() =>
-														setExpandedNotice(
-															expandedNotice === notice.id ? null : notice.id
+														setExpandedNotice((prev) =>
+															prev === notice.id ? null : notice.id
 														)
 													}
 												>
@@ -241,9 +483,58 @@ export default function HomePage() {
 
 											{expandedNotice === notice.id && (
 												<div className="bg-gray-50 rounded-lg p-4">
-													<div className="overflow-x-auto">
+													<div className="flex items-center justify-between mb-2">
+														<div className="text-sm text-gray-600">
+															Download or copy the shortlisted students.
+														</div>
+														<Button
+															variant="outline"
+															size="sm"
+															type="button"
+															onClick={() => {
+																const rows = [
+																	[
+																		"Name",
+																		"Enrollment Number",
+																		"Email",
+																		"Venue",
+																	],
+																	...students.map((s: any) => [
+																		s.name,
+																		s.enrollment_number,
+																		s.email || "",
+																		s.venue || "",
+																	]),
+																];
+																const csv = rows
+																	.map((r) =>
+																		r
+																			.map(
+																				(c) =>
+																					'"' +
+																					String(c).replace(/"/g, '""') +
+																					'"'
+																			)
+																			.join(",")
+																	)
+																	.join("\n");
+																const blob = new Blob([csv], {
+																	type: "text/csv;charset=utf-8;",
+																});
+																const url = URL.createObjectURL(blob);
+																const a = document.createElement("a");
+																a.href = url;
+																a.download = "shortlist.csv";
+																a.click();
+																URL.revokeObjectURL(url);
+															}}
+														>
+															Export CSV
+														</Button>
+													</div>
+													<div className="overflow-x-auto max-h-96 overflow-y-auto">
 														<table className="w-full text-sm">
-															<thead>
+															<thead className="sticky top-0 bg-gray-100">
 																<tr className="border-b border-gray-200">
 																	<th className="text-left py-2 font-medium text-gray-700">
 																		Name
@@ -251,24 +542,37 @@ export default function HomePage() {
 																	<th className="text-left py-2 font-medium text-gray-700">
 																		Enrollment Number
 																	</th>
+																	<th className="text-left py-2 font-medium text-gray-700">
+																		Email
+																	</th>
+																	<th className="text-left py-2 font-medium text-gray-700">
+																		Venue
+																	</th>
 																</tr>
 															</thead>
 															<tbody>
-																{notice.shortlisted_students!.map(
-																	(student, idx) => (
-																		<tr
-																			key={idx}
-																			className="border-b border-gray-100 last:border-b-0"
-																		>
-																			<td className="py-2 text-gray-900">
-																				{student.name}
-																			</td>
-																			<td className="py-2 text-gray-600 font-mono text-xs">
-																				{student.enrollment_number}
-																			</td>
-																		</tr>
-																	)
-																)}
+																{students.map((student: any, idx: number) => (
+																	<tr
+																		key={idx}
+																		className={
+																			"border-b border-gray-100 last:border-b-0 " +
+																			(idx % 2 ? "bg-white" : "bg-gray-50")
+																		}
+																	>
+																		<td className="py-2 text-gray-900">
+																			{student.name}
+																		</td>
+																		<td className="py-2 text-gray-600 font-mono text-xs">
+																			{student.enrollment_number}
+																		</td>
+																		<td className="py-2 text-gray-600 text-xs">
+																			{student.email ?? "-"}
+																		</td>
+																		<td className="py-2 text-gray-600 text-xs">
+																			{student.venue ?? "-"}
+																		</td>
+																	</tr>
+																))}
 															</tbody>
 														</table>
 													</div>
