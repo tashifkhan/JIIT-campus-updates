@@ -1,0 +1,52 @@
+[
+  {
+    "id": "p001",
+    "student_name": "Rahul Sharma",
+    "roll_number": "20CSE001",
+    "company": "TechCorp Solutions", 
+    "job_profile": "Full Stack Developer",
+    "package": 850000,
+    "placement_date": "2024-03-15",
+    "course": "B.Tech - CSE"
+  },
+  {
+    "id": "p002", 
+    "student_name": "Priya Singh",
+    "roll_number": "20CSE042",
+    "company": "Axeno",
+    "job_profile": "Software Intern",
+    "package": 600000,
+    "placement_date": "2024-03-10",
+    "course": "B.Tech - CSE"
+  },
+  {
+    "id": "p003",
+    "student_name": "Amit Kumar",
+    "roll_number": "20IT015", 
+    "company": "Analytics Pro",
+    "job_profile": "Data Analyst",
+    "package": 420000,
+    "placement_date": "2024-03-08",
+    "course": "B.Tech - IT"
+  },
+  {
+    "id": "p004",
+    "student_name": "Sneha Patel",
+    "roll_number": "20CSE087",
+    "company": "TechCorp Solutions",
+    "job_profile": "Full Stack Developer", 
+    "package": 850000,
+    "placement_date": "2024-03-15",
+    "course": "B.Tech - CSE"
+  },
+  {
+    "id": "p005",
+    "student_name": "Vikas Gupta",
+    "roll_number": "20IT032",
+    "company": "Axeno", 
+    "job_profile": "Software Intern",
+    "package": 600000,
+    "placement_date": "2024-03-10",
+    "course": "B.Tech - IT"
+  }
+]

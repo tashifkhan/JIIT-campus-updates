@@ -1,0 +1,37 @@
+[
+  {
+    "id": "soc001",
+    "name": "Computer Science Society",
+    "description": "Technical events and coding competitions",
+    "website": "https://css-college.edu",
+    "category": "Technical"
+  },
+  {
+    "id": "soc002", 
+    "name": "Cultural Society",
+    "description": "Cultural events, music, dance and drama",
+    "website": "https://cultural-society.edu",
+    "category": "Cultural"
+  },
+  {
+    "id": "soc003",
+    "name": "Sports Society", 
+    "description": "Sports events and fitness activities",
+    "website": "https://sports-club.edu",
+    "category": "Sports"
+  },
+  {
+    "id": "soc004",
+    "name": "Entrepreneurship Cell",
+    "description": "Startup events and business competitions", 
+    "website": "https://ecell-college.edu",
+    "category": "Business"
+  },
+  {
+    "id": "soc005",
+    "name": "Literary Society",
+    "description": "Writing, debates, and literary events",
+    "website": "https://lit-society.edu", 
+    "category": "Literary"
+  }
+]
