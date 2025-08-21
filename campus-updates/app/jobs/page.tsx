@@ -88,11 +88,27 @@ export default function JobsPage() {
 	}, []);
 
 	const formatDate = (timestamp: number) => {
-		return new Date(timestamp).toLocaleDateString("en-IN", {
+		const date = new Date(timestamp);
+		return date.toLocaleDateString("en-GB", {
+			day: "2-digit",
+			month: "2-digit",
 			year: "numeric",
-			month: "short",
-			day: "numeric",
 		});
+	};
+
+	const formatDateTime = (timestamp: number) => {
+		const date = new Date(timestamp);
+		const dateStr = date.toLocaleDateString("en-GB", {
+			day: "2-digit",
+			month: "2-digit",
+			year: "numeric",
+		});
+		const timeStr = date.toLocaleTimeString("en-GB", {
+			hour: "2-digit",
+			minute: "2-digit",
+			hour12: true,
+		});
+		return `${dateStr} at ${timeStr}`;
 	};
 
 	const formatPackage = (amount: number) => {
@@ -418,6 +434,11 @@ export default function JobsPage() {
 										<div className="flex items-center text-gray-600 mb-2">
 											<BuildingIcon className="w-4 h-4 mr-1" />
 											<span className="font-medium">{job.company}</span>
+										</div>
+									</div>
+									<div className="text-right">
+										<div className="text-xs text-gray-500 mb-1">
+											{formatDateTime(job.createdAt)}
 										</div>
 									</div>
 								</div>

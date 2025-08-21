@@ -51,6 +51,7 @@ interface Notice {
 	formatted_message: string;
 	createdAt?: number;
 	content?: string;
+	author?: string;
 	shortlisted_students?: Array<{
 		name: string;
 		enrollment_number: string;
@@ -83,6 +84,21 @@ export default function HomePage() {
 		const c = (cat || "").toLowerCase().trim();
 		if (/^\[?shortlist(ing)?\]?$/.test(c)) return "shortlisting";
 		return c;
+	};
+
+	const formatDateTime = (timestamp: number) => {
+		const date = new Date(timestamp);
+		const dateStr = date.toLocaleDateString("en-GB", {
+			day: "2-digit",
+			month: "2-digit",
+			year: "numeric",
+		});
+		const timeStr = date.toLocaleTimeString("en-GB", {
+			hour: "2-digit",
+			minute: "2-digit",
+			hour12: true,
+		});
+		return `${dateStr} at ${timeStr}`;
 	};
 
 	useEffect(() => {
@@ -387,12 +403,19 @@ export default function HomePage() {
 											{notice.category.charAt(0).toUpperCase() +
 												notice.category.slice(1)}
 										</Badge>
-										{notice.createdAt && (
-											<span className="text-xs text-gray-500">
-												{new Date(notice.createdAt).toLocaleDateString()}
-											</span>
-										)}
 									</div>
+									{(notice.createdAt || notice.author) && (
+										<div className="flex items-center justify-between mt-3 text-xs text-gray-500">
+											<div className="flex items-center space-x-2">
+												{notice.author && (
+													<span className="font-medium">By {notice.author}</span>
+												)}
+											</div>
+											{notice.createdAt && (
+												<span>{formatDateTime(notice.createdAt)}</span>
+											)}
+										</div>
+									)}
 								</CardHeader>
 								<CardContent className="pt-0">
 
