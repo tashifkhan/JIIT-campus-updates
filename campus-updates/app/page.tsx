@@ -86,6 +86,180 @@ export default function HomePage() {
 		return c;
 	};
 
+	// Parse and structure the formatted message for better display
+	const parseFormattedMessage = (message: string, category: string) => {
+		const lines = message.split('\n').map(line => line.trim()).filter(Boolean);
+		let title = '';
+		let body = '';
+		let eligibility = '';
+		let hiringProcess = '';
+		let deadline = '';
+		let location = '';
+		let ctc = '';
+		let company = '';
+		let role = '';
+
+		// Extract title (first line, removing markdown and emojis)
+		if (lines.length > 0) {
+			title = lines[0]
+				.replace(/^\*\*|\*\*$/g, '') // Remove markdown bold
+				.replace(/^#+\s*/, '') // Remove markdown headers
+				.replace(/📢|🎉|⚠️|💼/g, '') // Remove emojis
+				.replace(/Job Posting|Shortlisting Update|Update/gi, '') // Remove category text
+				.trim();
+		}
+
+		// Parse content by sections
+		let currentSection = '';
+		let bodyLines = [];
+		let eligibilityLines = [];
+		let hiringLines = [];
+		let inEligibility = false;
+		let inHiring = false;
+
+		for (let i = 1; i < lines.length; i++) {
+			const line = lines[i];
+			const cleanLine = line.replace(/^\*\*|\*\*$/g, '').replace(/^#+\s*/, '');
+
+			// Extract key info
+			if (line.match(/\*\*Company:\*\*\s*(.+)/i)) {
+				company = line.match(/\*\*Company:\*\*\s*(.+)/i)?.[1] || '';
+				continue;
+			}
+			if (line.match(/\*\*Role:\*\*\s*(.+)/i)) {
+				role = line.match(/\*\*Role:\*\*\s*(.+)/i)?.[1] || '';
+				continue;
+			}
+			if (line.match(/\*\*CTC:\*\*\s*(.+)/i)) {
+				ctc = line.match(/\*\*CTC:\*\*\s*(.+)/i)?.[1] || '';
+				continue;
+			}
+			if (line.match(/\*\*Location:\*\*\s*(.+)/i)) {
+				location = line.match(/\*\*Location:\*\*\s*(.+)/i)?.[1] || '';
+				continue;
+			}
+
+			// Extract deadline
+			if (line.match(/⚠️.*deadline/i) || line.match(/deadline/i)) {
+				deadline = line.replace(/⚠️|\*\*/g, '').replace(/deadline:?\s*/i, '').trim();
+				continue;
+			}
+
+			// Section detection
+			if (line.match(/eligibility|criteria/i)) {
+				inEligibility = true;
+				inHiring = false;
+				continue;
+			}
+			if (line.match(/hiring\s*(process|flow)/i)) {
+				inHiring = true;
+				inEligibility = false;
+				continue;
+			}
+			if (line.match(/posted\s*by/i) || line.match(/on:/i)) {
+				inEligibility = false;
+				inHiring = false;
+				continue;
+			}
+
+			// Categorize lines
+			if (inEligibility && !line.match(/posted\s*by/i)) {
+				eligibilityLines.push(cleanLine);
+			} else if (inHiring && !line.match(/posted\s*by/i)) {
+				hiringLines.push(cleanLine);
+			} else if (!line.match(/company:|role:|ctc:|location:|posted\s*by|on:/i) && 
+					   !line.match(/📢|🎉|job posting|shortlisting update/i)) {
+				bodyLines.push(cleanLine);
+			}
+		}
+
+		body = bodyLines.join('\n').trim();
+		eligibility = eligibilityLines.join('\n').trim();
+		hiringProcess = hiringLines.join('\n').trim();
+
+		return {
+			title,
+			body,
+			eligibility,
+			hiringProcess,
+			deadline,
+			location,
+			ctc,
+			company,
+			role
+		};
+	};
+
+	// Format eligibility criteria for display
+	const formatEligibility = (eligibilityText: string) => {
+		if (!eligibilityText) return null;
+		
+		const lines = eligibilityText.split('\n').map(line => line.trim()).filter(Boolean);
+		const criteria = [];
+		
+		for (const line of lines) {
+			// Parse course requirements
+			if (line.match(/courses?:|branches?:/i)) {
+				const coursesMatch = line.match(/courses?:\s*(.+)/i) || line.match(/branches?:\s*(.+)/i);
+				if (coursesMatch) {
+					criteria.push({
+						type: 'courses',
+						value: coursesMatch[1].split(',').map(c => c.trim())
+					});
+				}
+			}
+			// Parse CGPA/marks requirements
+			else if (line.match(/cgpa|marks|percentage/i)) {
+				const marksMatch = line.match(/(\w+).*?(\d+\.?\d*)\s*(cgpa|%|percent)/i);
+				if (marksMatch) {
+					criteria.push({
+						type: 'marks',
+						level: marksMatch[1],
+						value: marksMatch[2],
+						unit: marksMatch[3]
+					});
+				}
+			}
+			// Parse other requirements
+			else if (line.match(/no\s*backlogs?/i)) {
+				criteria.push({
+					type: 'requirement',
+					value: 'No backlogs'
+				});
+			}
+			else if (line.trim() && !line.match(/^-|^\*|^\d+\./)) {
+				criteria.push({
+					type: 'general',
+					value: line.replace(/^-\s*|\*\s*/, '').trim()
+				});
+			}
+		}
+		
+		return criteria;
+	};
+
+	// Format hiring process for display
+	const formatHiringProcess = (hiringText: string) => {
+		if (!hiringText) return [];
+		
+		const lines = hiringText.split('\n').map(line => line.trim()).filter(Boolean);
+		const steps = [];
+		
+		for (const line of lines) {
+			let step = line
+				.replace(/^\d+\.?\s*/, '') // Remove numbering
+				.replace(/^-\s*/, '') // Remove dashes
+				.replace(/^\*\s*/, '') // Remove asterisks
+				.trim();
+			
+			if (step && !step.match(/^hiring|^process|^flow/i)) {
+				steps.push(step);
+			}
+		}
+		
+		return steps;
+	};
+
 	const formatDateTime = (timestamp: number) => {
 		const date = new Date(timestamp);
 		const dateStr = date.toLocaleDateString("en-GB", {
@@ -99,6 +273,15 @@ export default function HomePage() {
 			hour12: true,
 		});
 		return `${dateStr} at ${timeStr}`;
+	};
+
+	const formatDateOnly = (timestamp: number) => {
+		const date = new Date(timestamp);
+		return date.toLocaleDateString("en-GB", {
+			day: "2-digit",
+			month: "2-digit",
+			year: "numeric",
+		});
 	};
 
 	useEffect(() => {
@@ -408,171 +591,264 @@ export default function HomePage() {
 										<div className="flex items-center justify-between mt-3 text-xs text-gray-500">
 											<div className="flex items-center space-x-2">
 												{notice.author && (
-													<span className="font-medium">By {notice.author}</span>
+													<span className="font-medium">
+														By {notice.author}
+													</span>
 												)}
 											</div>
 											{notice.createdAt && (
-												<span>{formatDateTime(notice.createdAt)}</span>
+												<span>
+													{notice.category.toLowerCase().includes("shortlisting") 
+														? formatDateOnly(notice.createdAt)
+														: formatDateTime(notice.createdAt)
+													}
+												</span>
 											)}
 										</div>
 									)}
 								</CardHeader>
 								<CardContent className="pt-0">
+									{(() => {
+										const parsedMessage = parseFormattedMessage(notice.formatted_message, notice.category);
+										const eligibilityCriteria = formatEligibility(parsedMessage.eligibility);
+										const hiringSteps = formatHiringProcess(parsedMessage.hiringProcess);
 
-									{notice.category === "update" ||
-									notice.category === "job posting" ? (
-										<div className="space-y-4">
-											<div className="prose prose-sm max-w-none text-gray-800 bg-gray-50 rounded-lg p-4">
-												<ReactMarkdown remarkPlugins={[remarkGfm]}>
-													{notice.formatted_message}
-												</ReactMarkdown>
-											</div>
-										</div>
-									) : notice.category === "shortlisting" ? (
-										<div className="space-y-4">
-											{(() => {
-												const {
-													summaryMarkdown,
-													hiringSteps,
-													ctcMarkdown,
-													company,
-													role,
-													ctcAmount,
-												} = extractShortlistingSections(
-													notice.formatted_message,
-													notice
-												);
-												return (
-													<>
-														{/* Company and Role Header */}
-														{(company || role || ctcAmount) && (
-															<div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-4 border border-blue-100">
-																<div className="flex flex-wrap gap-3 items-center justify-between">
-																	<div className="flex flex-wrap gap-2">
-																		{company && (
-																			<Badge
-																				variant="secondary"
-																				className="bg-white text-blue-700 border-blue-200"
-																			>
-																				<BuildingIcon className="w-3 h-3 mr-1" />
-																				{company}
-																			</Badge>
+										if (notice.category === "update" || notice.category === "job posting") {
+											return (
+												<div className="space-y-4">
+													{/* Title */}
+													{parsedMessage.title && (
+														<div className="mb-4">
+															<h3 className="text-lg font-semibold text-gray-900 leading-tight">
+																{parsedMessage.title}
+															</h3>
+														</div>
+													)}
+
+													{/* Company, Role, CTC Info */}
+													{(parsedMessage.company || parsedMessage.role || parsedMessage.ctc) && (
+														<div className="bg-blue-50 rounded-lg p-4 border border-blue-200 mb-4">
+															<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+																{parsedMessage.company && (
+																	<div className="flex items-center">
+																		<BuildingIcon className="w-4 h-4 mr-2 text-blue-600" />
+																		<span className="font-medium text-blue-800">{parsedMessage.company}</span>
+																	</div>
+																)}
+																{parsedMessage.role && (
+																	<div className="flex items-center">
+																		<Badge variant="secondary" className="bg-white text-blue-700">
+																			{parsedMessage.role}
+																		</Badge>
+																	</div>
+																)}
+																{parsedMessage.ctc && (
+																	<div className="flex items-center">
+																		<CircleDollarSignIcon className="w-4 h-4 mr-2 text-green-600" />
+																		<span className="font-semibold text-green-700">{parsedMessage.ctc}</span>
+																	</div>
+																)}
+															</div>
+														</div>
+													)}
+
+													{/* Deadline */}
+													{parsedMessage.deadline && (
+														<div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+															<div className="flex items-center">
+																<CalendarIcon className="w-5 h-5 mr-2 text-red-600" />
+																<span className="font-semibold text-red-800">Deadline: </span>
+																<span className="text-red-700 ml-1 font-medium">{parsedMessage.deadline}</span>
+															</div>
+														</div>
+													)}
+
+													{/* Body Content */}
+													{parsedMessage.body && (
+														<div className="bg-white rounded-lg border border-gray-200 p-4">
+															<div className="prose prose-sm max-w-none text-gray-800">
+																<ReactMarkdown remarkPlugins={[remarkGfm]}>
+																	{parsedMessage.body}
+																</ReactMarkdown>
+															</div>
+														</div>
+													)}
+
+													{/* Eligibility Criteria */}
+													{eligibilityCriteria && eligibilityCriteria.length > 0 && (
+														<div className="bg-amber-50 rounded-lg border border-amber-200 p-4">
+															<h4 className="font-semibold text-amber-900 mb-3 flex items-center">
+																<UsersIcon className="w-4 h-4 mr-2" />
+																Eligibility Criteria
+															</h4>
+															<div className="space-y-3">
+																{eligibilityCriteria.map((criteria, idx) => (
+																	<div key={idx}>
+																		{criteria.type === 'courses' && (
+																			<div>
+																				<span className="text-sm font-medium text-amber-800">Eligible Branches:</span>
+																				<div className="flex flex-wrap gap-1 mt-1">
+																					{criteria.value.map((course: string, i: number) => (
+																						<Badge key={i} variant="outline" className="text-xs bg-white border-amber-300">
+																							{course.trim()}
+																						</Badge>
+																					))}
+																				</div>
+																			</div>
 																		)}
-																		{role && (
-																			<Badge
-																				variant="secondary"
-																				className="bg-white text-green-700 border-green-200"
-																			>
-																				{role}
-																			</Badge>
+																		{criteria.type === 'marks' && (
+																			<div className="flex items-center text-sm">
+																				<span className="font-medium text-amber-800 mr-2">{criteria.level}:</span>
+																				<span className="text-amber-700">{criteria.value} {criteria.unit}</span>
+																			</div>
+																		)}
+																		{(criteria.type === 'requirement' || criteria.type === 'general') && (
+																			<div className="text-sm text-amber-700">
+																				• {criteria.value}
+																			</div>
 																		)}
 																	</div>
-																	{ctcMarkdown && ctcAmount && (
-																		<Popover>
-																			<PopoverTrigger asChild>
-																				<Button
-																					variant="default"
-																					size="sm"
-																					type="button"
-																					className="bg-green-600 hover:bg-green-700 text-white font-medium"
-																				>
-																					<CircleDollarSignIcon className="w-3 h-3 mr-1" />
-																					{ctcAmount}
-																				</Button>
-																			</PopoverTrigger>
-																			<PopoverContent className="w-80 max-w-[90vw] max-h-[60vh] overflow-auto">
-																				<div className="space-y-2">
-																					<h4 className="font-semibold text-gray-900">
-																						Package Details
-																					</h4>
-																					<div className="prose prose-sm max-w-none text-gray-700">
-																						<ReactMarkdown
-																							remarkPlugins={[remarkGfm]}
-																						>
-																							{ctcMarkdown}
-																						</ReactMarkdown>
-																					</div>
-																				</div>
-																			</PopoverContent>
-																		</Popover>
+																))}
+															</div>
+														</div>
+													)}
+
+													{/* Hiring Process */}
+													{hiringSteps.length > 0 && (
+														<div className="bg-purple-50 rounded-lg border border-purple-200 p-4">
+															<h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+																<CalendarIcon className="w-4 h-4 mr-2" />
+																Hiring Process
+															</h4>
+															<div className="space-y-2">
+																{hiringSteps.map((step, idx) => (
+																	<div key={idx} className="flex items-center text-sm">
+																		<div className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold flex items-center justify-center mr-3 flex-shrink-0">
+																			{idx + 1}
+																		</div>
+																		<span className="text-purple-800">{step}</span>
+																	</div>
+																))}
+															</div>
+														</div>
+													)}
+												</div>
+											);
+										} else if (notice.category === "shortlisting") {
+											return (
+												<div className="space-y-4">
+													{/* Title */}
+													{parsedMessage.title && (
+														<div className="mb-4">
+															<h3 className="text-lg font-semibold text-gray-900 leading-tight">
+																{parsedMessage.title}
+															</h3>
+														</div>
+													)}
+
+													{/* Company and Role Header */}
+													{(parsedMessage.company || parsedMessage.role || parsedMessage.ctc) && (
+														<div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-4 border border-blue-100">
+															<div className="flex flex-wrap gap-3 items-center justify-between">
+																<div className="flex flex-wrap gap-2">
+																	{parsedMessage.company && (
+																		<Badge
+																			variant="secondary"
+																			className="bg-white text-blue-700 border-blue-200"
+																		>
+																			<BuildingIcon className="w-3 h-3 mr-1" />
+																			{parsedMessage.company}
+																		</Badge>
+																	)}
+																	{parsedMessage.role && (
+																		<Badge
+																			variant="secondary"
+																			className="bg-white text-green-700 border-green-200"
+																		>
+																			{parsedMessage.role}
+																		</Badge>
 																	)}
 																</div>
-															</div>
-														)}
-
-														{/* Summary Content */}
-														{summaryMarkdown && (
-															<div className="bg-white rounded-lg border border-gray-200 p-4">
-																<div className="prose prose-sm max-w-none text-gray-800">
-																	<ReactMarkdown remarkPlugins={[remarkGfm]}>
-																		{summaryMarkdown}
-																	</ReactMarkdown>
-																</div>
-															</div>
-														)}
-
-														{/* Collapsible Sections */}
-														{(hiringSteps.length > 0 || ctcMarkdown) && (
-															<Accordion
-																type="single"
-																collapsible
-																className="w-full bg-white rounded-lg border border-gray-200"
-															>
-																{hiringSteps.length > 0 && (
-																	<AccordionItem value="hiring" className="border-b-0">
-																		<AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
-																			<div className="flex items-center">
-																				<CalendarIcon className="w-4 h-4 mr-2 text-blue-600" />
-																				Hiring Process
-																			</div>
-																		</AccordionTrigger>
-																		<AccordionContent className="px-4 pb-4">
-																			<div className="bg-blue-50 rounded-lg p-3">
-																				<ol className="list-decimal pl-5 space-y-2 text-sm text-gray-800">
-																					{hiringSteps.map((s, i) => (
-																						<li key={i} className="leading-relaxed">
-																							{s}
-																						</li>
-																					))}
-																				</ol>
-																			</div>
-																		</AccordionContent>
-																	</AccordionItem>
+																{parsedMessage.ctc && (
+																	<Button
+																		variant="default"
+																		size="sm"
+																		type="button"
+																		className="bg-green-600 hover:bg-green-700 text-white font-medium"
+																	>
+																		<CircleDollarSignIcon className="w-3 h-3 mr-1" />
+																		{parsedMessage.ctc}
+																	</Button>
 																)}
-																{ctcMarkdown && (
-																	<AccordionItem value="ctc" className="border-b-0">
-																		<AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
-																			<div className="flex items-center">
-																				<CircleDollarSignIcon className="w-4 h-4 mr-2 text-green-600" />
-																				Compensation & Benefits
-																			</div>
-																		</AccordionTrigger>
-																		<AccordionContent className="px-4 pb-4">
-																			<div className="bg-green-50 rounded-lg p-3">
-																				<div className="prose prose-sm max-w-none text-gray-800">
-																					<ReactMarkdown
-																						remarkPlugins={[remarkGfm]}
-																					>
-																						{ctcMarkdown}
-																					</ReactMarkdown>
-																				</div>
-																			</div>
-																		</AccordionContent>
-																	</AccordionItem>
-																)}
-															</Accordion>
-														)}
-													</>
-												);
-											})()}
-										</div>
-									) : (
-										<div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-											<div className="text-gray-800 leading-relaxed">
-												{notice.formatted_message}
-											</div>
-										</div>
-									)}
+															</div>
+														</div>
+													)}
+
+													{/* Body Content */}
+													{parsedMessage.body && (
+														<div className="bg-white rounded-lg border border-gray-200 p-4">
+															<div className="prose prose-sm max-w-none text-gray-800">
+																<ReactMarkdown remarkPlugins={[remarkGfm]}>
+																	{parsedMessage.body}
+																</ReactMarkdown>
+															</div>
+														</div>
+													)}
+
+													{/* Hiring Process for Shortlisting */}
+													{hiringSteps.length > 0 && (
+														<Accordion
+															type="single"
+															collapsible
+															className="w-full bg-white rounded-lg border border-gray-200"
+														>
+															<AccordionItem value="hiring" className="border-b-0">
+																<AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
+																	<div className="flex items-center">
+																		<CalendarIcon className="w-4 h-4 mr-2 text-blue-600" />
+																		Hiring Process
+																	</div>
+																</AccordionTrigger>
+																<AccordionContent className="px-4 pb-4">
+																	<div className="bg-blue-50 rounded-lg p-3">
+																		<ol className="list-decimal pl-5 space-y-2 text-sm text-gray-800">
+																			{hiringSteps.map((step, i) => (
+																				<li key={i} className="leading-relaxed">
+																					{step}
+																				</li>
+																			))}
+																		</ol>
+																	</div>
+																</AccordionContent>
+															</AccordionItem>
+														</Accordion>
+													)}
+												</div>
+											);
+										} else {
+											return (
+												<div className="space-y-4">
+													{/* Title */}
+													{parsedMessage.title && (
+														<div className="mb-4">
+															<h3 className="text-lg font-semibold text-gray-900 leading-tight">
+																{parsedMessage.title}
+															</h3>
+														</div>
+													)}
+													
+													{/* Body Content */}
+													<div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+														<div className="prose prose-sm max-w-none text-gray-800">
+															<ReactMarkdown remarkPlugins={[remarkGfm]}>
+																{parsedMessage.body || notice.formatted_message}
+															</ReactMarkdown>
+														</div>
+													</div>
+												</div>
+											);
+										}
+									})()}
 
 									{hasShortlistedStudents && (
 										<div className="border-t border-gray-200 pt-4">
