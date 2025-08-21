@@ -35,6 +35,7 @@ import {
 	ClockIcon,
 	ChevronDownIcon,
 	ChevronUpIcon,
+	DownloadIcon,
 } from "lucide-react";
 
 interface Job {
@@ -128,17 +129,22 @@ export default function JobsPage() {
 	};
 
 	const getCategoryColor = (code: number) => {
+		const baseStyle = {
+			borderColor: "var(--border-color)",
+			backgroundColor: "var(--primary-color)",
+		};
+
 		switch (code) {
 			case 1:
-				return "bg-red-100 text-red-800 border-red-200";
+				return { ...baseStyle, color: "#dc2626" }; // red-600
 			case 2:
-				return "bg-yellow-100 text-yellow-800 border-yellow-200";
+				return { ...baseStyle, color: "#d97706" }; // amber-600
 			case 3:
-				return "bg-green-100 text-green-800 border-green-200";
+				return { ...baseStyle, color: "#059669" }; // emerald-600
 			case 4:
-				return "bg-blue-100 text-blue-800 border-blue-200";
+				return { ...baseStyle, color: "#2563eb" }; // blue-600
 			default:
-				return "bg-gray-100 text-gray-800 border-gray-200";
+				return { ...baseStyle, color: "var(--text-color)" };
 		}
 	};
 
@@ -255,15 +261,27 @@ export default function JobsPage() {
 			<Layout>
 				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 					{[...Array(6)].map((_, i) => (
-						<Card key={i} className="animate-pulse">
+						<Card key={i} className="animate-pulse card-theme">
 							<CardHeader>
-								<div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-								<div className="h-4 bg-gray-200 rounded w-1/2"></div>
+								<div
+									className="h-6 rounded w-3/4 mb-2"
+									style={{ backgroundColor: "var(--primary-color)" }}
+								></div>
+								<div
+									className="h-4 rounded w-1/2"
+									style={{ backgroundColor: "var(--primary-color)" }}
+								></div>
 							</CardHeader>
 							<CardContent>
 								<div className="space-y-2">
-									<div className="h-3 bg-gray-200 rounded"></div>
-									<div className="h-3 bg-gray-200 rounded w-5/6"></div>
+									<div
+										className="h-3 rounded"
+										style={{ backgroundColor: "var(--primary-color)" }}
+									></div>
+									<div
+										className="h-3 rounded w-5/6"
+										style={{ backgroundColor: "var(--primary-color)" }}
+									></div>
 								</div>
 							</CardContent>
 						</Card>
@@ -277,10 +295,13 @@ export default function JobsPage() {
 		<Layout>
 			<div className="max-w-7xl mx-auto">
 				<div className="text-center mb-8">
-					<h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+					<h1
+						className="text-2xl lg:text-3xl font-bold mb-2"
+						style={{ color: "var(--text-color)" }}
+					>
 						Job Opportunities
 					</h1>
-					<p className="text-gray-600">
+					<p style={{ color: "var(--label-color)" }}>
 						Explore campus placement opportunities
 					</p>
 				</div>
@@ -319,9 +340,8 @@ export default function JobsPage() {
 												}}
 											>
 												<span
-													className={`mr-2 inline-flex items-center px-2 py-0.5 border rounded ${getCategoryColor(
-														code
-													)}`}
+													className="mr-2 inline-flex items-center px-2 py-0.5 border rounded"
+													style={getCategoryColor(code)}
 												>
 													{code}
 												</span>
@@ -416,9 +436,15 @@ export default function JobsPage() {
 
 						<div className="grid grid-cols-1 md:grid-cols-5 gap-4 md:items-end">
 							<div className="space-y-2">
-								<div className="text-sm text-gray-600 flex items-center justify-between">
+								<div
+									className="text-sm flex items-center justify-between"
+									style={{ color: "var(--label-color)" }}
+								>
 									<span>Minimum package (LPA)</span>
-									<span className="font-medium text-gray-900">
+									<span
+										className="font-medium"
+										style={{ color: "var(--text-color)" }}
+									>
 										{minPackageLpa}+
 									</span>
 								</div>
@@ -432,9 +458,15 @@ export default function JobsPage() {
 							</div>
 
 							<div className="space-y-2">
-								<div className="text-sm text-gray-600 flex items-center justify-between">
+								<div
+									className="text-sm flex items-center justify-between"
+									style={{ color: "var(--label-color)" }}
+								>
 									<span>CGPA Range</span>
-									<span className="font-medium text-gray-900">
+									<span
+										className="font-medium"
+										style={{ color: "var(--text-color)" }}
+									>
 										{cgpaRange[0].toFixed(1)} - {cgpaRange[1].toFixed(1)}
 									</span>
 								</div>
@@ -475,7 +507,12 @@ export default function JobsPage() {
 							</div>
 
 							<div className="space-y-2">
-								<div className="text-sm text-gray-600">Quick CGPA Filters</div>
+								<div
+									className="text-sm"
+									style={{ color: "var(--label-color)" }}
+								>
+									Quick CGPA Filters
+								</div>
 								<div className="flex gap-1 flex-wrap">
 									<Button
 										variant="outline"
@@ -483,9 +520,23 @@ export default function JobsPage() {
 										onClick={() => setCgpaRange([6.0, 8.0])}
 										className={`text-xs h-7 px-2 ${
 											cgpaRange[0] === 6.0 && cgpaRange[1] === 8.0
-												? "bg-blue-100 border-blue-300 text-blue-700"
-												: "hover:bg-gray-50"
+												? "border-theme"
+												: "hover-theme"
 										}`}
+										style={{
+											backgroundColor:
+												cgpaRange[0] === 6.0 && cgpaRange[1] === 8.0
+													? "var(--primary-color)"
+													: "transparent",
+											color:
+												cgpaRange[0] === 6.0 && cgpaRange[1] === 8.0
+													? "var(--accent-color)"
+													: "var(--text-color)",
+											borderColor:
+												cgpaRange[0] === 6.0 && cgpaRange[1] === 8.0
+													? "var(--accent-color)"
+													: "var(--border-color)",
+										}}
 									>
 										6.0-8.0
 									</Button>
@@ -495,9 +546,23 @@ export default function JobsPage() {
 										onClick={() => setCgpaRange([7.0, 9.0])}
 										className={`text-xs h-7 px-2 ${
 											cgpaRange[0] === 7.0 && cgpaRange[1] === 9.0
-												? "bg-blue-100 border-blue-300 text-blue-700"
-												: "hover:bg-gray-50"
+												? "border-theme"
+												: "hover-theme"
 										}`}
+										style={{
+											backgroundColor:
+												cgpaRange[0] === 7.0 && cgpaRange[1] === 9.0
+													? "var(--primary-color)"
+													: "transparent",
+											color:
+												cgpaRange[0] === 7.0 && cgpaRange[1] === 9.0
+													? "var(--accent-color)"
+													: "var(--text-color)",
+											borderColor:
+												cgpaRange[0] === 7.0 && cgpaRange[1] === 9.0
+													? "var(--accent-color)"
+													: "var(--border-color)",
+										}}
 									>
 										7.0-9.0
 									</Button>
@@ -507,9 +572,23 @@ export default function JobsPage() {
 										onClick={() => setCgpaRange([0, 10])}
 										className={`text-xs h-7 px-2 ${
 											cgpaRange[0] === 0 && cgpaRange[1] === 10
-												? "bg-blue-100 border-blue-300 text-blue-700"
-												: "hover:bg-gray-50"
+												? "border-theme"
+												: "hover-theme"
 										}`}
+										style={{
+											backgroundColor:
+												cgpaRange[0] === 0 && cgpaRange[1] === 10
+													? "var(--primary-color)"
+													: "transparent",
+											color:
+												cgpaRange[0] === 0 && cgpaRange[1] === 10
+													? "var(--accent-color)"
+													: "var(--text-color)",
+											borderColor:
+												cgpaRange[0] === 0 && cgpaRange[1] === 10
+													? "var(--accent-color)"
+													: "var(--border-color)",
+										}}
 									>
 										All
 									</Button>
@@ -524,7 +603,8 @@ export default function JobsPage() {
 								/>
 								<label
 									htmlFor="openOnly"
-									className="text-sm text-gray-700 cursor-pointer"
+									className="text-sm cursor-pointer"
+									style={{ color: "var(--text-color)" }}
 								>
 									Show only open postings (deadline in future)
 								</label>
@@ -546,17 +626,34 @@ export default function JobsPage() {
 					{filteredJobs.map((job) => (
 						<Card
 							key={job.id}
-							className="hover:shadow-xl transition-all duration-300 border-0 shadow-md bg-gradient-to-br from-white to-gray-50"
+							className="hover:shadow-xl transition-all duration-300 border card-theme"
+							style={{
+								backgroundColor: "var(--card-bg)",
+								borderColor: "var(--border-color)",
+								color: "var(--text-color)",
+							}}
 						>
 							<CardHeader className="pb-4">
 								<div className="flex items-start justify-between mb-3">
 									<div className="flex-1">
-										<CardTitle className="text-lg font-bold text-gray-900 mb-2 leading-tight">
+										<CardTitle
+											className="text-lg font-bold mb-2 leading-tight"
+											style={{ color: "var(--text-color)" }}
+										>
 											{job.job_profile}
 										</CardTitle>
-										<div className="flex items-center text-gray-600 mb-3">
-											<BuildingIcon className="w-4 h-4 mr-2 text-blue-600" />
-											<span className="font-semibold text-blue-700">
+										<div
+											className="flex items-center mb-3"
+											style={{ color: "var(--label-color)" }}
+										>
+											<BuildingIcon
+												className="w-4 h-4 mr-2"
+												style={{ color: "var(--accent-color)" }}
+											/>
+											<span
+												className="font-semibold"
+												style={{ color: "var(--accent-color)" }}
+											>
 												{job.company}
 											</span>
 										</div>
@@ -564,21 +661,32 @@ export default function JobsPage() {
 									<div className="text-right">
 										<Badge
 											variant="outline"
-											className={`${getCategoryColor(
-												job.placement_category_code
-											)} font-medium`}
+											className="font-medium border"
+											style={getCategoryColor(job.placement_category_code)}
 										>
 											{job.placement_category}
 										</Badge>
-										<div className="text-xs text-gray-500 mt-1">
+										<div
+											className="text-xs mt-1"
+											style={{ color: "var(--label-color)" }}
+										>
 											{formatDateTime(job.createdAt)}
 										</div>
 									</div>
 								</div>
 
 								{job.eligibility_courses?.length ? (
-									<div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
-										<div className="text-xs font-medium text-blue-700 mb-2">
+									<div
+										className="border rounded-lg p-3"
+										style={{
+											backgroundColor: "var(--primary-color)",
+											borderColor: "var(--border-color)",
+										}}
+									>
+										<div
+											className="text-xs font-medium mb-2"
+											style={{ color: "var(--accent-color)" }}
+										>
 											Eligible Branches
 										</div>
 										<div className="flex flex-wrap gap-1">
@@ -588,7 +696,12 @@ export default function JobsPage() {
 													<Badge
 														key={idx}
 														variant="secondary"
-														className="text-[10px] bg-white border-blue-200 text-blue-700"
+														className="text-[10px] border"
+														style={{
+															backgroundColor: "var(--card-bg)",
+															borderColor: "var(--border-color)",
+															color: "var(--accent-color)",
+														}}
 													>
 														{course}
 													</Badge>
@@ -596,7 +709,11 @@ export default function JobsPage() {
 											{job.eligibility_courses.length > 3 && (
 												<Badge
 													variant="outline"
-													className="text-[10px] border-blue-300"
+													className="text-[10px]"
+													style={{
+														borderColor: "var(--border-color)",
+														color: "var(--text-color)",
+													}}
 												>
 													+{job.eligibility_courses.length - 3} more
 												</Badge>
@@ -608,25 +725,55 @@ export default function JobsPage() {
 
 							<CardContent className="space-y-4 pt-0">
 								<div className="grid grid-cols-2 gap-3">
-									<div className="bg-green-50 border border-green-200 rounded-lg p-3">
+									<div
+										className="border rounded-lg p-3"
+										style={{
+											backgroundColor: "var(--primary-color)",
+											borderColor: "var(--border-color)",
+										}}
+									>
 										<div className="flex items-center">
-											<IndianRupeeIcon className="w-4 h-4 mr-2 text-green-600" />
-											<span className="text-sm font-medium text-green-600">
+											<IndianRupeeIcon
+												className="w-4 h-4 mr-2"
+												style={{ color: "var(--accent-color)" }}
+											/>
+											<span
+												className="text-sm font-medium"
+												style={{ color: "var(--accent-color)" }}
+											>
 												Package
 											</span>
 										</div>
-										<span className="text-lg font-bold text-green-700 block">
+										<span
+											className="text-lg font-bold block"
+											style={{ color: "var(--text-color)" }}
+										>
 											{formatPackage(job.package)}
 										</span>
 									</div>
-									<div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+									<div
+										className="border rounded-lg p-3"
+										style={{
+											backgroundColor: "var(--primary-color)",
+											borderColor: "var(--border-color)",
+										}}
+									>
 										<div className="flex items-center">
-											<MapPinIcon className="w-4 h-4 mr-2 text-blue-600" />
-											<span className="text-sm font-medium text-blue-600">
+											<MapPinIcon
+												className="w-4 h-4 mr-2"
+												style={{ color: "var(--accent-color)" }}
+											/>
+											<span
+												className="text-sm font-medium"
+												style={{ color: "var(--accent-color)" }}
+											>
 												Location
 											</span>
 										</div>
-										<span className="text-sm font-semibold text-blue-700 block mt-1">
+										<span
+											className="text-sm font-semibold block mt-1"
+											style={{ color: "var(--text-color)" }}
+										>
 											{job.location}
 										</span>
 									</div>
@@ -639,39 +786,84 @@ export default function JobsPage() {
 											(mark) => mark.level.toLowerCase() === "ug"
 										);
 										return ugMark ? (
-											<div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+											<div
+												className="border rounded-lg p-3"
+												style={{
+													backgroundColor: "var(--primary-color)",
+													borderColor: "var(--border-color)",
+												}}
+											>
 												<div className="flex items-center">
-													<UsersIcon className="w-4 h-4 mr-2 text-purple-600" />
-													<span className="text-sm font-medium text-purple-600">
+													<UsersIcon
+														className="w-4 h-4 mr-2"
+														style={{ color: "var(--accent-color)" }}
+													/>
+													<span
+														className="text-sm font-medium"
+														style={{ color: "var(--accent-color)" }}
+													>
 														Min CGPA
 													</span>
 												</div>
-												<span className="text-lg font-bold text-purple-700 block">
+												<span
+													className="text-lg font-bold block"
+													style={{ color: "var(--text-color)" }}
+												>
 													{ugMark.criteria.toFixed(1)}/10
 												</span>
 											</div>
 										) : (
-											<div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+											<div
+												className="border rounded-lg p-3"
+												style={{
+													backgroundColor: "var(--primary-color)",
+													borderColor: "var(--border-color)",
+												}}
+											>
 												<div className="flex items-center">
-													<UsersIcon className="w-4 h-4 mr-2 text-gray-400" />
-													<span className="text-sm font-medium text-gray-500">
+													<UsersIcon
+														className="w-4 h-4 mr-2"
+														style={{ color: "var(--label-color)" }}
+													/>
+													<span
+														className="text-sm font-medium"
+														style={{ color: "var(--label-color)" }}
+													>
 														CGPA
 													</span>
 												</div>
-												<span className="text-sm text-gray-500 block">
+												<span
+													className="text-sm block"
+													style={{ color: "var(--label-color)" }}
+												>
 													Not specified
 												</span>
 											</div>
 										);
 									})()}
-									<div className="bg-red-50 border border-red-200 rounded-lg p-3">
+									<div
+										className="border rounded-lg p-3"
+										style={{
+											backgroundColor: "var(--primary-color)",
+											borderColor: "var(--border-color)",
+										}}
+									>
 										<div className="flex items-center">
-											<ClockIcon className="w-4 h-4 mr-2 text-red-600" />
-											<span className="text-sm font-medium text-red-600">
+											<ClockIcon
+												className="w-4 h-4 mr-2"
+												style={{ color: "var(--accent-color)" }}
+											/>
+											<span
+												className="text-sm font-medium"
+												style={{ color: "var(--accent-color)" }}
+											>
 												Deadline
 											</span>
 										</div>
-										<span className="text-sm font-semibold text-red-700 block mt-1">
+										<span
+											className="text-sm font-semibold block mt-1"
+											style={{ color: "var(--text-color)" }}
+										>
 											{job.deadline ? formatDate(job.deadline) : "No deadline"}
 										</span>
 									</div>
@@ -682,20 +874,39 @@ export default function JobsPage() {
 										<Button
 											variant="outline"
 											size="sm"
-											className="w-full bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border-blue-200 text-blue-700 font-medium"
+											className="w-full font-medium border hover-theme"
+											style={{
+												backgroundColor: "var(--primary-color)",
+												borderColor: "var(--accent-color)",
+												color: "var(--accent-color)",
+											}}
 											onClick={() => setSelectedJobModal(job)}
 										>
 											View Details
 											<ChevronDownIcon className="w-4 h-4 ml-1" />
 										</Button>
 									</DialogTrigger>
-									<DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+									<DialogContent
+										className="max-w-4xl max-h-[80vh] overflow-y-auto card-theme"
+										style={{
+											backgroundColor: "var(--card-bg)",
+											borderColor: "var(--border-color)",
+										}}
+									>
 										<DialogHeader>
-											<DialogTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
-												<BuildingIcon className="w-5 h-5 text-blue-600" />
+											<DialogTitle
+												className="text-xl font-bold flex items-center gap-2"
+												style={{ color: "var(--text-color)" }}
+											>
+												<BuildingIcon
+													className="w-5 h-5"
+													style={{ color: "var(--accent-color)" }}
+												/>
 												{job.job_profile} at {job.company}
 											</DialogTitle>
-											<DialogDescription className="text-gray-600">
+											<DialogDescription
+												style={{ color: "var(--label-color)" }}
+											>
 												{job.placement_category} • Posted on{" "}
 												{formatDate(job.createdAt)}
 											</DialogDescription>
@@ -704,36 +915,81 @@ export default function JobsPage() {
 										<div className="space-y-6 mt-4">
 											{/* Key Info Cards */}
 											<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-												<div className="bg-green-50 border border-green-200 rounded-lg p-4">
+												<div
+													className="border rounded-lg p-4"
+													style={{
+														backgroundColor: "var(--primary-color)",
+														borderColor: "var(--border-color)",
+													}}
+												>
 													<div className="flex items-center justify-between">
-														<span className="text-sm text-green-600 font-medium">
+														<span
+															className="text-sm font-medium"
+															style={{ color: "var(--accent-color)" }}
+														>
 															Package
 														</span>
-														<IndianRupeeIcon className="w-4 h-4 text-green-600" />
+														<IndianRupeeIcon
+															className="w-4 h-4"
+															style={{ color: "var(--accent-color)" }}
+														/>
 													</div>
-													<p className="text-lg font-bold text-green-700">
+													<p
+														className="text-lg font-bold"
+														style={{ color: "var(--text-color)" }}
+													>
 														{formatPackage(job.package)}
 													</p>
 												</div>
-												<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+												<div
+													className="border rounded-lg p-4"
+													style={{
+														backgroundColor: "var(--primary-color)",
+														borderColor: "var(--border-color)",
+													}}
+												>
 													<div className="flex items-center justify-between">
-														<span className="text-sm text-blue-600 font-medium">
+														<span
+															className="text-sm font-medium"
+															style={{ color: "var(--accent-color)" }}
+														>
 															Location
 														</span>
-														<MapPinIcon className="w-4 h-4 text-blue-600" />
+														<MapPinIcon
+															className="w-4 h-4"
+															style={{ color: "var(--accent-color)" }}
+														/>
 													</div>
-													<p className="text-lg font-semibold text-blue-700">
+													<p
+														className="text-lg font-semibold"
+														style={{ color: "var(--text-color)" }}
+													>
 														{job.location}
 													</p>
 												</div>
-												<div className="bg-red-50 border border-red-200 rounded-lg p-4">
+												<div
+													className="border rounded-lg p-4"
+													style={{
+														backgroundColor: "var(--primary-color)",
+														borderColor: "var(--border-color)",
+													}}
+												>
 													<div className="flex items-center justify-between">
-														<span className="text-sm text-red-600 font-medium">
+														<span
+															className="text-sm font-medium"
+															style={{ color: "var(--accent-color)" }}
+														>
 															Deadline
 														</span>
-														<ClockIcon className="w-4 h-4 text-red-600" />
+														<ClockIcon
+															className="w-4 h-4"
+															style={{ color: "var(--accent-color)" }}
+														/>
 													</div>
-													<p className="text-lg font-semibold text-red-700">
+													<p
+														className="text-lg font-semibold"
+														style={{ color: "var(--text-color)" }}
+													>
 														{job.deadline
 															? formatDate(job.deadline)
 															: "No deadline"}
@@ -742,13 +998,26 @@ export default function JobsPage() {
 											</div>
 
 											{/* Job Description */}
-											<div className="bg-white border border-gray-200 rounded-lg p-4">
-												<h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-													<BookOpenIcon className="w-5 h-5 mr-2 text-blue-600" />
+											<div
+												className="border rounded-lg p-4"
+												style={{
+													backgroundColor: "var(--primary-color)",
+													borderColor: "var(--border-color)",
+												}}
+											>
+												<h4
+													className="font-semibold mb-3 flex items-center"
+													style={{ color: "var(--text-color)" }}
+												>
+													<BookOpenIcon
+														className="w-5 h-5 mr-2"
+														style={{ color: "var(--accent-color)" }}
+													/>
 													Job Description
 												</h4>
 												<div
-													className="text-sm text-gray-700 prose prose-sm max-w-none"
+													className="text-sm prose prose-sm max-w-none"
+													style={{ color: "var(--text-color)" }}
 													dangerouslySetInnerHTML={{
 														__html: job.job_description,
 													}}
@@ -757,8 +1026,17 @@ export default function JobsPage() {
 
 											{/* Eligibility */}
 											<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-												<div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-													<h4 className="font-semibold text-amber-900 mb-3">
+												<div
+													className="border rounded-lg p-4"
+													style={{
+														backgroundColor: "var(--primary-color)",
+														borderColor: "var(--border-color)",
+													}}
+												>
+													<h4
+														className="font-semibold mb-3"
+														style={{ color: "var(--text-color)" }}
+													>
 														Eligibility Marks
 													</h4>
 													<div className="space-y-2">
@@ -767,10 +1045,13 @@ export default function JobsPage() {
 																key={idx}
 																className="flex justify-between text-sm"
 															>
-																<span className="text-amber-700">
+																<span style={{ color: "var(--label-color)" }}>
 																	{mark.level}:
 																</span>
-																<span className="font-semibold text-amber-800">
+																<span
+																	className="font-semibold"
+																	style={{ color: "var(--text-color)" }}
+																>
 																	{mark.level.toLowerCase() === "ug"
 																		? `${mark.criteria.toFixed(1)}/10 CGPA`
 																		: `${mark.criteria}%`}
@@ -780,8 +1061,17 @@ export default function JobsPage() {
 													</div>
 												</div>
 
-												<div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-													<h4 className="font-semibold text-purple-900 mb-3">
+												<div
+													className="border rounded-lg p-4"
+													style={{
+														backgroundColor: "var(--primary-color)",
+														borderColor: "var(--border-color)",
+													}}
+												>
+													<h4
+														className="font-semibold mb-3"
+														style={{ color: "var(--text-color)" }}
+													>
 														Eligible Courses
 													</h4>
 													<div className="flex flex-wrap gap-1">
@@ -789,7 +1079,12 @@ export default function JobsPage() {
 															<Badge
 																key={idx}
 																variant="secondary"
-																className="text-xs bg-white border-purple-300"
+																className="text-xs border"
+																style={{
+																	backgroundColor: "var(--card-bg)",
+																	borderColor: "var(--border-color)",
+																	color: "var(--text-color)",
+																}}
 															>
 																{course}
 															</Badge>
@@ -800,8 +1095,17 @@ export default function JobsPage() {
 
 											{/* Skills and Hiring Process */}
 											{job.required_skills.length > 0 && (
-												<div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-													<h4 className="font-semibold text-gray-900 mb-3">
+												<div
+													className="border rounded-lg p-4"
+													style={{
+														backgroundColor: "var(--primary-color)",
+														borderColor: "var(--border-color)",
+													}}
+												>
+													<h4
+														className="font-semibold mb-3"
+														style={{ color: "var(--text-color)" }}
+													>
 														Required Skills
 													</h4>
 													<div className="flex flex-wrap gap-2">
@@ -810,6 +1114,10 @@ export default function JobsPage() {
 																key={idx}
 																variant="outline"
 																className="text-sm"
+																style={{
+																	borderColor: "var(--border-color)",
+																	color: "var(--text-color)",
+																}}
 															>
 																{skill}
 															</Badge>
@@ -818,17 +1126,35 @@ export default function JobsPage() {
 												</div>
 											)}
 
-											<div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-												<h4 className="font-semibold text-indigo-900 mb-3">
+											<div
+												className="border rounded-lg p-4"
+												style={{
+													backgroundColor: "var(--primary-color)",
+													borderColor: "var(--border-color)",
+												}}
+											>
+												<h4
+													className="font-semibold mb-3"
+													style={{ color: "var(--text-color)" }}
+												>
 													Hiring Process
 												</h4>
 												<div className="space-y-3">
 													{job.hiring_flow.map((step, idx) => (
 														<div key={idx} className="flex items-start">
-															<div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 text-sm font-semibold flex items-center justify-center mr-3 flex-shrink-0">
+															<div
+																className="w-8 h-8 rounded-full text-sm font-semibold flex items-center justify-center mr-3 flex-shrink-0"
+																style={{
+																	backgroundColor: "var(--accent-color)",
+																	color: "var(--bg-color)",
+																}}
+															>
 																{idx + 1}
 															</div>
-															<span className="text-indigo-800 leading-relaxed">
+															<span
+																className="leading-relaxed"
+																style={{ color: "var(--text-color)" }}
+															>
 																{step}
 															</span>
 														</div>
@@ -837,11 +1163,23 @@ export default function JobsPage() {
 											</div>
 
 											{job.package_info && (
-												<div className="bg-green-50 border border-green-200 rounded-lg p-4">
-													<h4 className="font-semibold text-green-900 mb-2">
+												<div
+													className="border rounded-lg p-4"
+													style={{
+														backgroundColor: "var(--primary-color)",
+														borderColor: "var(--border-color)",
+													}}
+												>
+													<h4
+														className="font-semibold mb-2"
+														style={{ color: "var(--text-color)" }}
+													>
 														Package Details
 													</h4>
-													<p className="text-sm text-green-800">
+													<p
+														className="text-sm"
+														style={{ color: "var(--text-color)" }}
+													>
 														{job.package_info}
 													</p>
 												</div>

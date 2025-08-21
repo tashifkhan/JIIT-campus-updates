@@ -23,7 +23,8 @@ import {
 	TrendingUpIcon,
 	ChevronDownIcon,
 	ChevronUpIcon,
-	CircleDollarSignIcon,
+	IndianRupeeIcon,
+	DownloadIcon,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -502,10 +503,16 @@ export default function HomePage() {
 			<Layout>
 				<div className="space-y-4">
 					{[...Array(3)].map((_, i) => (
-						<Card key={i} className="animate-pulse">
+						<Card key={i} className="animate-pulse card-theme">
 							<CardContent className="p-6">
-								<div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-								<div className="h-3 bg-gray-200 rounded w-1/2"></div>
+								<div
+									className="h-4 rounded w-3/4 mb-2"
+									style={{ backgroundColor: "var(--skeleton-color)" }}
+								></div>
+								<div
+									className="h-3 rounded w-1/2"
+									style={{ backgroundColor: "var(--skeleton-color)" }}
+								></div>
 							</CardContent>
 						</Card>
 					))}
@@ -518,16 +525,19 @@ export default function HomePage() {
 		<Layout>
 			<div className="max-w-4xl mx-auto space-y-6">
 				<div className="text-center mb-8">
-					<h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+					<h1
+						className="text-2xl lg:text-3xl font-bold mb-2"
+						style={{ color: "var(--text-color)" }}
+					>
 						Latest Updates
 					</h1>
-					<p className="text-gray-600">
+					<p style={{ color: "var(--label-color)" }}>
 						Stay informed about placement activities
 					</p>
 				</div>
 
 				{/* Filters */}
-				<Card className="mb-4">
+				<Card className="mb-4 card-theme">
 					<CardContent className="p-4 lg:p-6 space-y-3">
 						<div className="flex flex-col md:flex-row gap-3 md:items-center">
 							<div className="flex-1">
@@ -572,7 +582,8 @@ export default function HomePage() {
 									/>
 									<label
 										htmlFor="onlyShortlisted"
-										className="text-sm text-gray-700 cursor-pointer"
+										className="text-sm cursor-pointer"
+										style={{ color: "var(--text-color)" }}
 									>
 										Only with shortlisted students
 									</label>
@@ -601,22 +612,24 @@ export default function HomePage() {
 						return (
 							<Card
 								key={notice.id}
-								className={`border-l-4 hover:shadow-lg transition-all duration-200 ${
-									notice.category === "job posting"
-										? "border-l-blue-500"
-										: notice.category === "shortlisting"
-										? "border-l-green-500"
-										: "border-l-orange-500"
-								}`}
+								className="border-l-4 hover:shadow-md transition-all duration-300 card-theme"
+								style={{
+									backgroundColor: "var(--card-bg)",
+									borderColor: "var(--border-color)",
+									color: "var(--text-color)",
+									borderLeftColor: "var(--accent-color)",
+								}}
 							>
 								<CardHeader className="pb-3">
 									<div className="flex items-center justify-between">
 										<Badge
 											variant="outline"
-											className={`${
-												categoryColors[notice.category] ??
-												"bg-gray-50 text-gray-700 border-gray-200"
-											} px-3 py-1`}
+											className="px-3 py-1"
+											style={{
+												backgroundColor: "var(--primary-color)",
+												color: "var(--accent-color)",
+												borderColor: "var(--border-color)",
+											}}
 										>
 											<IconComponent className="w-3 h-3 mr-2" />
 											{notice.category.charAt(0).toUpperCase() +
@@ -624,7 +637,10 @@ export default function HomePage() {
 										</Badge>
 									</div>
 									{(notice.createdAt || notice.author) && (
-										<div className="flex items-center justify-between mt-3 text-xs text-gray-500">
+										<div
+											className="flex items-center justify-between mt-3 text-xs"
+											style={{ color: "var(--label-color)" }}
+										>
 											<div className="flex items-center space-x-2">
 												{notice.author && (
 													<span className="font-medium">
@@ -660,7 +676,10 @@ export default function HomePage() {
 													{/* Title */}
 													{parsedMessage.title && (
 														<div className="mb-4">
-															<h3 className="text-lg font-semibold text-gray-900 leading-tight">
+															<h3
+																className="text-lg font-semibold leading-tight"
+																style={{ color: "var(--text-color)" }}
+															>
 																{parsedMessage.title}
 															</h3>
 														</div>
@@ -670,12 +689,24 @@ export default function HomePage() {
 													{(parsedMessage.company ||
 														parsedMessage.role ||
 														parsedMessage.ctc) && (
-														<div className="bg-blue-50 rounded-lg p-4 border border-blue-200 mb-4">
+														<div
+															className="rounded-lg p-4 border mb-4"
+															style={{
+																backgroundColor: "var(--primary-color)",
+																borderColor: "var(--border-color)",
+															}}
+														>
 															<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
 																{parsedMessage.company && (
 																	<div className="flex items-center">
-																		<BuildingIcon className="w-4 h-4 mr-2 text-blue-600" />
-																		<span className="font-medium text-blue-800">
+																		<BuildingIcon
+																			className="w-4 h-4 mr-2"
+																			style={{ color: "var(--accent-color)" }}
+																		/>
+																		<span
+																			className="font-medium"
+																			style={{ color: "var(--accent-color)" }}
+																		>
 																			{parsedMessage.company}
 																		</span>
 																	</div>
@@ -684,7 +715,11 @@ export default function HomePage() {
 																	<div className="flex items-center">
 																		<Badge
 																			variant="secondary"
-																			className="bg-white text-blue-700"
+																			style={{
+																				backgroundColor: "var(--card-bg)",
+																				color: "var(--accent-color)",
+																				borderColor: "var(--border-color)",
+																			}}
 																		>
 																			{parsedMessage.role}
 																		</Badge>
@@ -692,8 +727,14 @@ export default function HomePage() {
 																)}
 																{parsedMessage.ctc && (
 																	<div className="flex items-center">
-																		<CircleDollarSignIcon className="w-4 h-4 mr-2 text-green-600" />
-																		<span className="font-semibold text-green-700">
+																		<IndianRupeeIcon
+																			className="w-4 h-4 mr-2"
+																			style={{ color: "var(--accent-color)" }}
+																		/>
+																		<span
+																			className="font-semibold"
+																			style={{ color: "var(--text-color)" }}
+																		>
 																			{parsedMessage.ctc}
 																		</span>
 																	</div>
@@ -704,13 +745,28 @@ export default function HomePage() {
 
 													{/* Deadline */}
 													{parsedMessage.deadline && (
-														<div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+														<div
+															className="border rounded-lg p-3 mb-4"
+															style={{
+																backgroundColor: "var(--primary-color)",
+																borderColor: "var(--border-color)",
+															}}
+														>
 															<div className="flex items-center">
-																<CalendarIcon className="w-5 h-5 mr-2 text-red-600" />
-																<span className="font-semibold text-red-800">
+																<CalendarIcon
+																	className="w-5 h-5 mr-2"
+																	style={{ color: "var(--accent-color)" }}
+																/>
+																<span
+																	className="font-semibold"
+																	style={{ color: "var(--text-color)" }}
+																>
 																	Deadline:{" "}
 																</span>
-																<span className="text-red-700 ml-1 font-medium">
+																<span
+																	className="ml-1 font-medium"
+																	style={{ color: "var(--accent-color)" }}
+																>
 																	{parsedMessage.deadline}
 																</span>
 															</div>
@@ -719,8 +775,17 @@ export default function HomePage() {
 
 													{/* Body Content */}
 													{parsedMessage.body && (
-														<div className="bg-white rounded-lg border border-gray-200 p-4">
-															<div className="prose prose-sm max-w-none text-gray-800">
+														<div
+															className="rounded-lg border p-4"
+															style={{
+																backgroundColor: "var(--card-bg)",
+																borderColor: "var(--border-color)",
+															}}
+														>
+															<div
+																className="prose prose-sm max-w-none"
+																style={{ color: "var(--text-color)" }}
+															>
 																<ReactMarkdown remarkPlugins={[remarkGfm]}>
 																	{parsedMessage.body}
 																</ReactMarkdown>
@@ -731,8 +796,17 @@ export default function HomePage() {
 													{/* Eligibility Criteria */}
 													{eligibilityCriteria &&
 														eligibilityCriteria.length > 0 && (
-															<div className="bg-amber-50 rounded-lg border border-amber-200 p-4">
-																<h4 className="font-semibold text-amber-900 mb-3 flex items-center">
+															<div
+																className="rounded-lg border p-4"
+																style={{
+																	backgroundColor: "var(--primary-color)",
+																	borderColor: "var(--border-color)",
+																}}
+															>
+																<h4
+																	className="font-semibold mb-3 flex items-center"
+																	style={{ color: "var(--text-color)" }}
+																>
 																	<UsersIcon className="w-4 h-4 mr-2" />
 																	Eligibility Criteria
 																</h4>
@@ -741,7 +815,12 @@ export default function HomePage() {
 																		<div key={idx}>
 																			{criteria.type === "courses" && (
 																				<div>
-																					<span className="text-sm font-medium text-amber-800">
+																					<span
+																						className="text-sm font-medium"
+																						style={{
+																							color: "var(--accent-color)",
+																						}}
+																					>
 																						Eligible Branches:
 																					</span>
 																					<div className="flex flex-wrap gap-1 mt-1">
@@ -751,7 +830,15 @@ export default function HomePage() {
 																									<Badge
 																										key={i}
 																										variant="outline"
-																										className="text-xs bg-white border-amber-300"
+																										className="text-xs"
+																										style={{
+																											backgroundColor:
+																												"var(--card-bg)",
+																											borderColor:
+																												"var(--border-color)",
+																											color:
+																												"var(--text-color)",
+																										}}
 																									>
 																										{course.trim()}
 																									</Badge>
@@ -760,7 +847,14 @@ export default function HomePage() {
 																						) : (
 																							<Badge
 																								variant="outline"
-																								className="text-xs bg-white border-amber-300"
+																								className="text-xs"
+																								style={{
+																									backgroundColor:
+																										"var(--card-bg)",
+																									borderColor:
+																										"var(--border-color)",
+																									color: "var(--text-color)",
+																								}}
 																							>
 																								{String(criteria.value).trim()}
 																							</Badge>
@@ -770,17 +864,31 @@ export default function HomePage() {
 																			)}
 																			{criteria.type === "marks" && (
 																				<div className="flex items-center text-sm">
-																					<span className="font-medium text-amber-800 mr-2">
+																					<span
+																						className="font-medium mr-2"
+																						style={{
+																							color: "var(--accent-color)",
+																						}}
+																					>
 																						{criteria.level}:
 																					</span>
-																					<span className="text-amber-700">
+																					<span
+																						style={{
+																							color: "var(--text-color)",
+																						}}
+																					>
 																						{criteria.value} {criteria.unit}
 																					</span>
 																				</div>
 																			)}
 																			{(criteria.type === "requirement" ||
 																				criteria.type === "general") && (
-																				<div className="text-sm text-amber-700">
+																				<div
+																					className="text-sm"
+																					style={{
+																						color: "var(--text-color)",
+																					}}
+																				>
 																					• {criteria.value}
 																				</div>
 																			)}
@@ -792,8 +900,17 @@ export default function HomePage() {
 
 													{/* Hiring Process */}
 													{hiringSteps.length > 0 && (
-														<div className="bg-purple-50 rounded-lg border border-purple-200 p-4">
-															<h4 className="font-semibold text-purple-900 mb-3 flex items-center">
+														<div
+															className="rounded-lg border p-4"
+															style={{
+																backgroundColor: "var(--primary-color)",
+																borderColor: "var(--border-color)",
+															}}
+														>
+															<h4
+																className="font-semibold mb-3 flex items-center"
+																style={{ color: "var(--text-color)" }}
+															>
 																<CalendarIcon className="w-4 h-4 mr-2" />
 																Hiring Process
 															</h4>
@@ -803,10 +920,18 @@ export default function HomePage() {
 																		key={idx}
 																		className="flex items-center text-sm"
 																	>
-																		<div className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold flex items-center justify-center mr-3 flex-shrink-0">
+																		<div
+																			className="w-6 h-6 rounded-full text-xs font-semibold flex items-center justify-center mr-3 flex-shrink-0"
+																			style={{
+																				backgroundColor: "var(--accent-color)",
+																				color: "var(--bg-color)",
+																			}}
+																		>
 																			{idx + 1}
 																		</div>
-																		<span className="text-purple-800">
+																		<span
+																			style={{ color: "var(--text-color)" }}
+																		>
 																			{step}
 																		</span>
 																	</div>
@@ -822,7 +947,10 @@ export default function HomePage() {
 													{/* Title */}
 													{parsedMessage.title && (
 														<div className="mb-4">
-															<h3 className="text-lg font-semibold text-gray-900 leading-tight">
+															<h3
+																className="text-lg font-semibold leading-tight"
+																style={{ color: "var(--text-color)" }}
+															>
 																{parsedMessage.title}
 															</h3>
 														</div>
@@ -832,13 +960,23 @@ export default function HomePage() {
 													{(parsedMessage.company ||
 														parsedMessage.role ||
 														parsedMessage.ctc) && (
-														<div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-4 border border-blue-100">
+														<div
+															className="rounded-lg p-4 border"
+															style={{
+																backgroundColor: "var(--primary-color)",
+																borderColor: "var(--border-color)",
+															}}
+														>
 															<div className="flex flex-wrap gap-3 items-center justify-between">
 																<div className="flex flex-wrap gap-2">
 																	{parsedMessage.company && (
 																		<Badge
 																			variant="secondary"
-																			className="bg-white text-blue-700 border-blue-200"
+																			style={{
+																				backgroundColor: "var(--card-bg)",
+																				color: "var(--accent-color)",
+																				borderColor: "var(--border-color)",
+																			}}
 																		>
 																			<BuildingIcon className="w-3 h-3 mr-1" />
 																			{parsedMessage.company}
@@ -847,22 +985,29 @@ export default function HomePage() {
 																	{parsedMessage.role && (
 																		<Badge
 																			variant="secondary"
-																			className="bg-white text-green-700 border-green-200"
+																			style={{
+																				backgroundColor: "var(--card-bg)",
+																				color: "var(--accent-color)",
+																				borderColor: "var(--border-color)",
+																			}}
 																		>
 																			{parsedMessage.role}
 																		</Badge>
 																	)}
 																</div>
 																{parsedMessage.ctc && (
-																	<Button
-																		variant="default"
-																		size="sm"
-																		type="button"
-																		className="bg-green-600 hover:bg-green-700 text-white font-medium"
+																	<Badge
+																		variant="outline"
+																		className="font-medium"
+																		style={{
+																			backgroundColor: "var(--primary-color)",
+																			color: "var(--accent-color)",
+																			borderColor: "var(--border-color)",
+																		}}
 																	>
-																		<CircleDollarSignIcon className="w-3 h-3 mr-1" />
+																		<IndianRupeeIcon className="w-3 h-3 mr-1" />
 																		{parsedMessage.ctc}
-																	</Button>
+																	</Badge>
 																)}
 															</div>
 														</div>
@@ -870,8 +1015,17 @@ export default function HomePage() {
 
 													{/* Body Content */}
 													{parsedMessage.body && (
-														<div className="bg-white rounded-lg border border-gray-200 p-4">
-															<div className="prose prose-sm max-w-none text-gray-800">
+														<div
+															className="rounded-lg border p-4"
+															style={{
+																backgroundColor: "var(--card-bg)",
+																borderColor: "var(--border-color)",
+															}}
+														>
+															<div
+																className="prose prose-sm max-w-none"
+																style={{ color: "var(--text-color)" }}
+															>
 																<ReactMarkdown remarkPlugins={[remarkGfm]}>
 																	{parsedMessage.body}
 																</ReactMarkdown>
@@ -884,21 +1038,39 @@ export default function HomePage() {
 														<Accordion
 															type="single"
 															collapsible
-															className="w-full bg-white rounded-lg border border-gray-200"
+															className="w-full rounded-lg border"
+															style={{
+																backgroundColor: "var(--card-bg)",
+																borderColor: "var(--border-color)",
+															}}
 														>
 															<AccordionItem
 																value="hiring"
 																className="border-b-0"
 															>
-																<AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
+																<AccordionTrigger
+																	className="px-4 py-3"
+																	style={{ color: "var(--text-color)" }}
+																>
 																	<div className="flex items-center">
-																		<CalendarIcon className="w-4 h-4 mr-2 text-blue-600" />
+																		<CalendarIcon
+																			className="w-4 h-4 mr-2"
+																			style={{ color: "var(--accent-color)" }}
+																		/>
 																		Hiring Process
 																	</div>
 																</AccordionTrigger>
 																<AccordionContent className="px-4 pb-4">
-																	<div className="bg-blue-50 rounded-lg p-3">
-																		<ol className="list-decimal pl-5 space-y-2 text-sm text-gray-800">
+																	<div
+																		className="rounded-lg p-3"
+																		style={{
+																			backgroundColor: "var(--primary-color)",
+																		}}
+																	>
+																		<ol
+																			className="list-decimal pl-5 space-y-2 text-sm"
+																			style={{ color: "var(--text-color)" }}
+																		>
 																			{hiringSteps.map((step, i) => (
 																				<li key={i} className="leading-relaxed">
 																					{step}
@@ -918,15 +1090,27 @@ export default function HomePage() {
 													{/* Title */}
 													{parsedMessage.title && (
 														<div className="mb-4">
-															<h3 className="text-lg font-semibold text-gray-900 leading-tight">
+															<h3
+																className="text-lg font-semibold leading-tight"
+																style={{ color: "var(--text-color)" }}
+															>
 																{parsedMessage.title}
 															</h3>
 														</div>
 													)}
 
 													{/* Body Content */}
-													<div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-														<div className="prose prose-sm max-w-none text-gray-800">
+													<div
+														className="rounded-lg p-4 border"
+														style={{
+															backgroundColor: "var(--primary-color)",
+															borderColor: "var(--border-color)",
+														}}
+													>
+														<div
+															className="prose prose-sm max-w-none"
+															style={{ color: "var(--text-color)" }}
+														>
 															<ReactMarkdown remarkPlugins={[remarkGfm]}>
 																{parsedMessage.body || notice.formatted_message}
 															</ReactMarkdown>
@@ -938,12 +1122,27 @@ export default function HomePage() {
 									})()}
 
 									{hasShortlistedStudents && (
-										<div className="border-t border-gray-200 pt-4">
-											<div className="bg-green-50 rounded-lg p-4 border border-green-200">
+										<div
+											className="border-t pt-4"
+											style={{ borderColor: "var(--border-color)" }}
+										>
+											<div
+												className="rounded-lg p-4 border"
+												style={{
+													backgroundColor: "var(--primary-color)",
+													borderColor: "var(--border-color)",
+												}}
+											>
 												<div className="flex items-center justify-between mb-3">
 													<div className="flex items-center">
-														<UsersIcon className="w-5 h-5 mr-2 text-green-600" />
-														<span className="font-semibold text-green-800">
+														<UsersIcon
+															className="w-5 h-5 mr-2"
+															style={{ color: "var(--accent-color)" }}
+														/>
+														<span
+															className="font-semibold"
+															style={{ color: "var(--text-color)" }}
+														>
 															{students.length} Students Shortlisted
 														</span>
 													</div>
@@ -957,7 +1156,12 @@ export default function HomePage() {
 																prev === notice.id ? null : notice.id
 															)
 														}
-														className="bg-white hover:bg-green-50 border-green-300"
+														className="hover-theme"
+														style={{
+															backgroundColor: "var(--card-bg)",
+															borderColor: "var(--border-color)",
+															color: "var(--accent-color)",
+														}}
 													>
 														{expandedNotice === notice.id ? (
 															<>
@@ -974,9 +1178,18 @@ export default function HomePage() {
 												</div>
 
 												{expandedNotice === notice.id && (
-													<div className="bg-white rounded-lg border border-green-200 p-4">
+													<div
+														className="rounded-lg border p-4"
+														style={{
+															backgroundColor: "var(--card-bg)",
+															borderColor: "#bbf7d0",
+														}}
+													>
 														<div className="flex items-center justify-between mb-4">
-															<h4 className="font-medium text-gray-900">
+															<h4
+																className="font-medium"
+																style={{ color: "var(--text-color)" }}
+															>
 																Shortlisted Students
 															</h4>
 															<Button
@@ -1020,25 +1233,52 @@ export default function HomePage() {
 																	a.click();
 																	URL.revokeObjectURL(url);
 																}}
-																className="bg-green-600 text-white hover:bg-green-700"
+																className="text-sm font-medium hover-theme"
+																style={{
+																	backgroundColor: "var(--card-bg)",
+																	borderColor: "var(--border-color)",
+																	color: "var(--accent-color)",
+																}}
 															>
-																📥 Export CSV
+																<DownloadIcon className="w-4 h-4 mr-2" />
+																Export CSV
 															</Button>
 														</div>
-														<div className="overflow-x-auto max-h-80 overflow-y-auto border border-gray-200 rounded-lg">
+														<div
+															className="overflow-x-auto max-h-80 overflow-y-auto border rounded-lg"
+															style={{ borderColor: "var(--border-color)" }}
+														>
 															<table className="w-full text-sm">
-																<thead className="sticky top-0 bg-green-100 border-b border-green-200">
+																<thead
+																	className="sticky top-0 border-b"
+																	style={{
+																		backgroundColor: "var(--primary-color)",
+																		borderColor: "var(--border-color)",
+																	}}
+																>
 																	<tr>
-																		<th className="text-left py-3 px-4 font-semibold text-green-800">
+																		<th
+																			className="text-left py-3 px-4 font-semibold"
+																			style={{ color: "var(--accent-color)" }}
+																		>
 																			Name
 																		</th>
-																		<th className="text-left py-3 px-4 font-semibold text-green-800">
+																		<th
+																			className="text-left py-3 px-4 font-semibold"
+																			style={{ color: "var(--accent-color)" }}
+																		>
 																			Enrollment
 																		</th>
-																		<th className="text-left py-3 px-4 font-semibold text-green-800">
+																		<th
+																			className="text-left py-3 px-4 font-semibold"
+																			style={{ color: "var(--accent-color)" }}
+																		>
 																			Email
 																		</th>
-																		<th className="text-left py-3 px-4 font-semibold text-green-800">
+																		<th
+																			className="text-left py-3 px-4 font-semibold"
+																			style={{ color: "var(--accent-color)" }}
+																		>
 																			Venue
 																		</th>
 																	</tr>
@@ -1047,20 +1287,39 @@ export default function HomePage() {
 																	{students.map((student: any, idx: number) => (
 																		<tr
 																			key={idx}
-																			className={`border-b border-gray-100 last:border-b-0 hover:bg-gray-50 ${
-																				idx % 2 ? "bg-white" : "bg-gray-50"
+																			className={`border-b last:border-b-0 hover-theme ${
+																				idx % 2 ? "" : ""
 																			}`}
+																			style={{
+																				borderColor: "var(--border-color)",
+																				backgroundColor:
+																					idx % 2
+																						? "var(--card-bg)"
+																						: "var(--primary-color)",
+																			}}
 																		>
-																			<td className="py-3 px-4 text-gray-900 font-medium">
+																			<td
+																				className="py-3 px-4 font-medium"
+																				style={{ color: "var(--text-color)" }}
+																			>
 																				{student.name}
 																			</td>
-																			<td className="py-3 px-4 text-gray-600 font-mono text-sm">
+																			<td
+																				className="py-3 px-4 font-mono text-sm"
+																				style={{ color: "var(--label-color)" }}
+																			>
 																				{student.enrollment_number}
 																			</td>
-																			<td className="py-3 px-4 text-gray-600 text-sm">
+																			<td
+																				className="py-3 px-4 text-sm"
+																				style={{ color: "var(--label-color)" }}
+																			>
 																				{student.email ?? "-"}
 																			</td>
-																			<td className="py-3 px-4 text-gray-600 text-sm">
+																			<td
+																				className="py-3 px-4 text-sm"
+																				style={{ color: "var(--label-color)" }}
+																			>
 																				{student.venue ?? "-"}
 																			</td>
 																		</tr>
@@ -1075,15 +1334,33 @@ export default function HomePage() {
 									)}
 
 									{notice.matched_job && (
-										<div className="border-t border-gray-200 pt-4">
-											<div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+										<div
+											className="border-t pt-4"
+											style={{ borderColor: "var(--border-color)" }}
+										>
+											<div
+												className="rounded-lg p-4 border"
+												style={{
+													backgroundColor: "var(--primary-color)",
+													borderColor: "var(--border-color)",
+												}}
+											>
 												<div className="flex items-start">
-													<BellIcon className="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
+													<BellIcon
+														className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0"
+														style={{ color: "var(--accent-color)" }}
+													/>
 													<div>
-														<h4 className="font-medium text-blue-900 mb-1">
+														<h4
+															className="font-medium mb-1"
+															style={{ color: "var(--text-color)" }}
+														>
 															Related Job Posting
 														</h4>
-														<p className="text-sm text-blue-800">
+														<p
+															className="text-sm"
+															style={{ color: "var(--text-color)" }}
+														>
 															<span className="font-medium">
 																{notice.matched_job.company}
 															</span>{" "}
