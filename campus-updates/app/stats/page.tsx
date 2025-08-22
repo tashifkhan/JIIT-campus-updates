@@ -5,6 +5,9 @@ import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
 import {
 	Dialog,
 	DialogContent,
@@ -12,6 +15,22 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+	Sheet,
+	SheetContent,
+	SheetDescription,
+	SheetHeader,
+	SheetTitle,
+	SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
 	Table,
 	TableBody,
@@ -31,11 +50,15 @@ import {
 	EyeIcon,
 	ChevronDownIcon,
 	ChevronUpIcon,
+	FilterIcon,
+	XIcon,
+	SearchIcon,
+	MapPinIcon,
 } from "lucide-react";
 
 interface Role {
 	role: string;
-	packages: string[];
+	package: number;
 	package_details: string | null;
 }
 
@@ -43,7 +66,8 @@ interface Student {
 	name: string;
 	enrollment_number: string;
 	email: string | null;
-	role: string | null;
+	role: string;
+	package: number | null;
 }
 
 interface Placement {
@@ -66,6 +90,14 @@ export default function StatsPage() {
 	const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
+	// Filter states
+	const [searchQuery, setSearchQuery] = useState("");
+	const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
+	const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+	const [packageRange, setPackageRange] = useState<[number, number]>([0, 70]);
+	const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+	const [showFilters, setShowFilters] = useState(false);
+
 	const COMPANIES_LIMIT = 6;
 
 	useEffect(() => {
@@ -77,46 +109,13 @@ export default function StatsPage() {
 			});
 	}, []);
 
-	const formatPackage = (packageStr: string | number) => {
-		if (typeof packageStr === "number") {
-			// Convert number to string format
-			if (packageStr >= 100000) {
-				return `₹${(packageStr / 100000).toFixed(1)} LPA`;
-			}
-			return `₹${packageStr.toLocaleString()}`;
+	const formatPackage = (packageValue: number | null) => {
+		if (packageValue === null || packageValue === undefined) {
+			return "TBD";
 		}
 
-		// Handle different package formats
-		if (
-			packageStr.includes("LPA") ||
-			packageStr.includes("Lacs") ||
-			packageStr.includes("Lakhs")
-		) {
-			return packageStr;
-		}
-		// If it's a number, convert to LPA format
-		const amount = parseFloat(packageStr.replace(/[^\d.]/g, ""));
-		if (amount >= 100000) {
-			return `₹${(amount / 100000).toFixed(1)} LPA`;
-		}
-		return `₹${amount.toLocaleString()}`;
-	};
-
-	const extractPackageValue = (packageStr: string): number => {
-		// Extract numeric value from package string for calculations
-		const matches = packageStr.match(/[\d.]+/g);
-		if (!matches) return 0;
-
-		// If package contains "LPA" or "Lacs", it's already in lakhs
-		if (
-			packageStr.includes("LPA") ||
-			packageStr.includes("Lacs") ||
-			packageStr.includes("Lakhs")
-		) {
-			return parseFloat(matches[0]) * 100000; // Convert to actual amount
-		}
-
-		return parseFloat(matches[0]);
+		// Package value is already in LPA
+		return `₹${packageValue.toFixed(1)} LPA`;
 	};
 
 	const formatDate = (dateString: string) => {
@@ -128,6 +127,48 @@ export default function StatsPage() {
 		});
 	};
 
+	// Helper function to get package value with fallback to role package
+	const getStudentPackage = (
+		student: Student,
+		placement: Placement
+	): number | null => {
+		// If student has a package, use it
+		if (student.package !== null && student.package !== undefined) {
+			return student.package;
+		}
+
+		// Try to find exact role match first
+		const exactMatch = placement.roles.find(
+			(role) => role.role === student.role
+		);
+		if (
+			exactMatch &&
+			exactMatch.package !== null &&
+			exactMatch.package !== undefined
+		) {
+			return exactMatch.package;
+		}
+
+		// If no exact match or exact match has null package, look for viable alternatives
+		const viableRoles = placement.roles.filter(
+			(role) => role.package !== null && role.package !== undefined
+		);
+
+		// If only one viable role, use it regardless of role name match
+		if (viableRoles.length === 1) {
+			return viableRoles[0].package;
+		}
+
+		// If multiple viable roles, prefer the highest package (company's best offer)
+		if (viableRoles.length > 1) {
+			const maxPackage = Math.max(...viableRoles.map((role) => role.package));
+			return maxPackage;
+		}
+
+		// No viable packages found
+		return null;
+	};
+
 	// Calculate statistics
 	const totalStudentsPlaced = placements.reduce(
 		(total, placement) => total + placement.students_selected.length,
@@ -136,14 +177,14 @@ export default function StatsPage() {
 
 	const totalPlacements = placements.length;
 
-	// Extract all package values for calculation
+	// Extract all package values for calculation from students
 	const allPackages: number[] = [];
 	placements.forEach((placement) => {
-		placement.roles.forEach((role) => {
-			role.packages.forEach((pkg) => {
-				const value = extractPackageValue(pkg);
-				if (value > 0) allPackages.push(value);
-			});
+		placement.students_selected.forEach((student) => {
+			const packageValue = getStudentPackage(student, placement);
+			if (packageValue !== null && packageValue > 0) {
+				allPackages.push(packageValue);
+			}
 		});
 	});
 
@@ -179,14 +220,16 @@ export default function StatsPage() {
 		acc[placement.company].count += 1;
 		acc[placement.company].studentsCount += placement.students_selected.length;
 
-		// Add all role profiles
+		// Add all role profiles and student packages
 		placement.roles.forEach((role) => {
 			acc[placement.company].profiles.add(role.role);
-			// Add package values for average calculation
-			role.packages.forEach((pkg) => {
-				const value = extractPackageValue(pkg);
-				if (value > 0) acc[placement.company].packages.push(value);
-			});
+		});
+
+		placement.students_selected.forEach((student) => {
+			const packageValue = getStudentPackage(student, placement);
+			if (packageValue !== null && packageValue > 0) {
+				acc[placement.company].packages.push(packageValue);
+			}
 		});
 
 		return acc;
@@ -200,6 +243,171 @@ export default function StatsPage() {
 				? packages.reduce((a: number, b: number) => a + b, 0) / packages.length
 				: 0;
 	});
+
+	// Filter options
+	const availableCompanies = Array.from(
+		new Set(placements.map((p) => p.company))
+	).sort();
+	const availableRoles = Array.from(
+		new Set(placements.flatMap((p) => p.roles.map((r) => r.role)))
+	).sort();
+	const availableLocations = Array.from(
+		new Set(placements.flatMap((p) => p.job_location || []))
+	)
+		.filter(Boolean)
+		.sort();
+
+	// Filter logic
+	const filteredPlacements = placements.filter((placement) => {
+		// Company filter
+		if (
+			selectedCompanies.length > 0 &&
+			!selectedCompanies.includes(placement.company)
+		) {
+			return false;
+		}
+
+		// Role filter - check if any student in this placement has a matching role
+		if (selectedRoles.length > 0) {
+			const hasMatchingRole = placement.students_selected.some((student) =>
+				selectedRoles.includes(student.role)
+			);
+			if (!hasMatchingRole) return false;
+		}
+
+		// Location filter
+		if (selectedLocations.length > 0) {
+			const hasMatchingLocation = placement.job_location?.some((loc) =>
+				selectedLocations.includes(loc)
+			);
+			if (!hasMatchingLocation) return false;
+		}
+
+		return true;
+	});
+
+	// Filter students based on search query and package range
+	const filteredStudents = filteredPlacements.flatMap((placement) =>
+		placement.students_selected
+			.filter((student) => {
+				// Search query filter
+				if (searchQuery) {
+					const query = searchQuery.toLowerCase();
+					const matchesName = student.name.toLowerCase().includes(query);
+					const matchesEnrollment = student.enrollment_number
+						.toLowerCase()
+						.includes(query);
+					const matchesCompany = placement.company
+						.toLowerCase()
+						.includes(query);
+					const matchesRole = student.role.toLowerCase().includes(query);
+
+					if (
+						!matchesName &&
+						!matchesEnrollment &&
+						!matchesCompany &&
+						!matchesRole
+					) {
+						return false;
+					}
+				}
+
+				// Package range filter
+				const packageValue = getStudentPackage(student, placement);
+				if (packageValue !== null) {
+					if (
+						packageValue < packageRange[0] ||
+						packageValue > packageRange[1]
+					) {
+						return false;
+					}
+				}
+
+				return true;
+			})
+			.map((student) => ({
+				...student,
+				company: placement.company,
+				roles: placement.roles,
+				joining_date: placement.joining_date,
+				job_location: placement.job_location,
+				placement: placement,
+			}))
+	);
+
+	// Recalculate statistics for filtered data
+	const filteredPackages: number[] = [];
+	filteredStudents.forEach((student) => {
+		const packageValue = getStudentPackage(student, student.placement);
+		if (packageValue !== null && packageValue > 0) {
+			filteredPackages.push(packageValue);
+		}
+	});
+
+	const filteredAveragePackage =
+		filteredPackages.length > 0
+			? filteredPackages.reduce((a, b) => a + b, 0) / filteredPackages.length
+			: 0;
+
+	const filteredHighestPackage =
+		filteredPackages.length > 0 ? Math.max(...filteredPackages) : 0;
+	const filteredUniqueCompanies = new Set(
+		filteredStudents.map((s) => s.company)
+	).size;
+
+	// Group filtered students by company for company-wise stats
+	const filteredCompanyStats = filteredStudents.reduce((acc, student) => {
+		const company = student.company;
+		if (!acc[company]) {
+			acc[company] = {
+				count: 0,
+				profiles: new Set(),
+				avgPackage: 0,
+				packages: [],
+				studentsCount: 0,
+			};
+		}
+		acc[company].studentsCount += 1;
+
+		// Add profiles from the student's placement
+		student.roles.forEach((role) => {
+			acc[company].profiles.add(role.role);
+		});
+
+		const packageValue = getStudentPackage(student, student.placement);
+		if (packageValue !== null && packageValue > 0) {
+			acc[company].packages.push(packageValue);
+		}
+
+		return acc;
+	}, {} as any);
+
+	// Calculate average packages for filtered company stats
+	Object.keys(filteredCompanyStats).forEach((company) => {
+		const packages = filteredCompanyStats[company].packages;
+		filteredCompanyStats[company].avgPackage =
+			packages.length > 0
+				? packages.reduce((a: number, b: number) => a + b, 0) / packages.length
+				: 0;
+	});
+
+	// Clear filters function
+	const clearFilters = () => {
+		setSearchQuery("");
+		setSelectedCompanies([]);
+		setSelectedRoles([]);
+		setPackageRange([0, 70]);
+		setSelectedLocations([]);
+	};
+
+	// Check if any filters are active
+	const hasActiveFilters =
+		searchQuery !== "" ||
+		selectedCompanies.length > 0 ||
+		selectedRoles.length > 0 ||
+		selectedLocations.length > 0 ||
+		packageRange[0] !== 0 ||
+		packageRange[1] !== 70;
 
 	// Helper function to get students for a specific company
 	const getCompanyStudents = (companyName: string) => {
@@ -232,24 +440,19 @@ export default function StatsPage() {
 			"Joining Date",
 		]);
 
-		// Add data rows
-		placements.forEach((placement) => {
-			placement.students_selected.forEach((student) => {
-				placement.roles.forEach((role) => {
-					role.packages.forEach((pkg) => {
-						csvData.push([
-							student.name,
-							student.enrollment_number,
-							student.email || "N/A",
-							placement.company,
-							student.role || role.role || "N/A",
-							pkg,
-							placement.job_location?.join(", ") || "N/A",
-							placement.joining_date || "TBD",
-						]);
-					});
-				});
-			});
+		// Add data rows from filtered students
+		filteredStudents.forEach((student) => {
+			const packageValue = getStudentPackage(student, student.placement);
+			csvData.push([
+				student.name,
+				student.enrollment_number,
+				student.email || "N/A",
+				student.company,
+				student.role || "N/A",
+				packageValue ? `₹${packageValue.toFixed(1)} LPA` : "TBD",
+				student.job_location?.join(", ") || "N/A",
+				student.joining_date || "TBD",
+			]);
 		});
 
 		// Convert to CSV string
@@ -315,7 +518,8 @@ export default function StatsPage() {
 								Placement Statistics
 							</h1>
 							<p style={{ color: "var(--label-color)" }}>
-								Campus placement data and analytics
+								Campus placement data and analytics ({filteredStudents.length}{" "}
+								of {totalStudentsPlaced} students shown)
 							</p>
 						</div>
 						<Button
@@ -327,9 +531,336 @@ export default function StatsPage() {
 							}}
 						>
 							<DownloadIcon className="w-4 h-4 mr-2" />
-							Export CSV
+							Export CSV ({filteredStudents.length} records)
 						</Button>
 					</div>
+				</div>
+
+				{/* Floating Filter Button */}
+				<div className="fixed bottom-6 right-6 z-50">
+					<Sheet open={showFilters} onOpenChange={setShowFilters}>
+						<SheetTrigger asChild>
+							<Button
+								className="rounded-full w-14 h-14 shadow-lg relative"
+								style={{
+									backgroundColor: "var(--accent-color)",
+									color: "white",
+								}}
+							>
+								<FilterIcon className="w-6 h-6" />
+								{hasActiveFilters && (
+									<Badge
+										className="absolute -top-2 -right-2 rounded-full w-6 h-6 p-0 flex items-center justify-center text-xs"
+										style={{
+											backgroundColor: "var(--error-color)",
+											color: "white",
+										}}
+									>
+										!
+									</Badge>
+								)}
+							</Button>
+						</SheetTrigger>
+						<SheetContent
+							side="right"
+							className="w-[400px] sm:w-[540px]"
+							style={{
+								backgroundColor: "var(--primary-color)",
+								borderColor: "var(--border-color)",
+							}}
+						>
+							<SheetHeader>
+								<SheetTitle style={{ color: "var(--text-color)" }}>
+									Filter Placement Data
+								</SheetTitle>
+								<SheetDescription style={{ color: "var(--label-color)" }}>
+									Filter students by company, role, location, and package range
+								</SheetDescription>
+							</SheetHeader>
+							<div className="space-y-6 py-4">
+								{/* Search */}
+								<div className="space-y-2">
+									<label
+										className="text-sm font-medium"
+										style={{ color: "var(--text-color)" }}
+									>
+										Search
+									</label>
+									<div className="flex items-center space-x-2">
+										<SearchIcon
+											className="w-4 h-4"
+											style={{ color: "var(--label-color)" }}
+										/>
+										<Input
+											placeholder="Search students, companies, or roles..."
+											value={searchQuery}
+											onChange={(e) => setSearchQuery(e.target.value)}
+											className="flex-1"
+											style={{
+												backgroundColor: "var(--card-bg)",
+												borderColor: "var(--border-color)",
+												color: "var(--text-color)",
+											}}
+										/>
+									</div>
+								</div>
+
+								{/* Company Filter */}
+								<div className="space-y-2">
+									<label
+										className="text-sm font-medium"
+										style={{ color: "var(--text-color)" }}
+									>
+										Companies
+									</label>
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button
+												variant="outline"
+												className="w-full justify-between"
+												style={{
+													backgroundColor: "var(--card-bg)",
+													borderColor: "var(--border-color)",
+													color: "var(--text-color)",
+												}}
+											>
+												{selectedCompanies.length > 0
+													? `${selectedCompanies.length} selected`
+													: "All Companies"}
+												<ChevronDownIcon className="w-4 h-4" />
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent
+											className="w-56"
+											style={{
+												backgroundColor: "var(--primary-color)",
+												borderColor: "var(--border-color)",
+											}}
+										>
+											<DropdownMenuLabel style={{ color: "var(--text-color)" }}>
+												Select Companies
+											</DropdownMenuLabel>
+											<DropdownMenuSeparator
+												style={{ backgroundColor: "var(--border-color)" }}
+											/>
+											{availableCompanies.map((company) => (
+												<DropdownMenuCheckboxItem
+													key={company}
+													checked={selectedCompanies.includes(company)}
+													onCheckedChange={(checked) =>
+														setSelectedCompanies((prev) =>
+															checked
+																? [...prev, company]
+																: prev.filter((c) => c !== company)
+														)
+													}
+													style={{ color: "var(--text-color)" }}
+												>
+													{company}
+												</DropdownMenuCheckboxItem>
+											))}
+										</DropdownMenuContent>
+									</DropdownMenu>
+								</div>
+
+								{/* Role Filter */}
+								<div className="space-y-2">
+									<label
+										className="text-sm font-medium"
+										style={{ color: "var(--text-color)" }}
+									>
+										Roles
+									</label>
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button
+												variant="outline"
+												className="w-full justify-between"
+												style={{
+													backgroundColor: "var(--card-bg)",
+													borderColor: "var(--border-color)",
+													color: "var(--text-color)",
+												}}
+											>
+												{selectedRoles.length > 0
+													? `${selectedRoles.length} selected`
+													: "All Roles"}
+												<ChevronDownIcon className="w-4 h-4" />
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent
+											className="w-56 max-h-64 overflow-y-auto"
+											style={{
+												backgroundColor: "var(--primary-color)",
+												borderColor: "var(--border-color)",
+											}}
+										>
+											<DropdownMenuLabel style={{ color: "var(--text-color)" }}>
+												Select Roles
+											</DropdownMenuLabel>
+											<DropdownMenuSeparator
+												style={{ backgroundColor: "var(--border-color)" }}
+											/>
+											{availableRoles.map((role) => (
+												<DropdownMenuCheckboxItem
+													key={role}
+													checked={selectedRoles.includes(role)}
+													onCheckedChange={(checked) =>
+														setSelectedRoles((prev) =>
+															checked
+																? [...prev, role]
+																: prev.filter((r) => r !== role)
+														)
+													}
+													style={{ color: "var(--text-color)" }}
+												>
+													{role}
+												</DropdownMenuCheckboxItem>
+											))}
+										</DropdownMenuContent>
+									</DropdownMenu>
+								</div>
+
+								{/* Location Filter */}
+								<div className="space-y-2">
+									<label
+										className="text-sm font-medium"
+										style={{ color: "var(--text-color)" }}
+									>
+										Locations
+									</label>
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button
+												variant="outline"
+												className="w-full justify-between"
+												style={{
+													backgroundColor: "var(--card-bg)",
+													borderColor: "var(--border-color)",
+													color: "var(--text-color)",
+												}}
+											>
+												{selectedLocations.length > 0
+													? `${selectedLocations.length} selected`
+													: "All Locations"}
+												<ChevronDownIcon className="w-4 h-4" />
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent
+											className="w-56 max-h-64 overflow-y-auto"
+											style={{
+												backgroundColor: "var(--primary-color)",
+												borderColor: "var(--border-color)",
+											}}
+										>
+											<DropdownMenuLabel style={{ color: "var(--text-color)" }}>
+												Select Locations
+											</DropdownMenuLabel>
+											<DropdownMenuSeparator
+												style={{ backgroundColor: "var(--border-color)" }}
+											/>
+											{availableLocations.map((location) => (
+												<DropdownMenuCheckboxItem
+													key={location}
+													checked={selectedLocations.includes(location)}
+													onCheckedChange={(checked) =>
+														setSelectedLocations((prev) =>
+															checked
+																? [...prev, location]
+																: prev.filter((l) => l !== location)
+														)
+													}
+													style={{ color: "var(--text-color)" }}
+												>
+													{location}
+												</DropdownMenuCheckboxItem>
+											))}
+										</DropdownMenuContent>
+									</DropdownMenu>
+								</div>
+
+								{/* Package Range Filter */}
+								<div className="space-y-2">
+									<label
+										className="text-sm font-medium"
+										style={{ color: "var(--text-color)" }}
+									>
+										Package Range (LPA)
+									</label>
+									<div className="space-y-2">
+										<Slider
+											value={packageRange}
+											onValueChange={(value) =>
+												setPackageRange(value as [number, number])
+											}
+											max={70}
+											min={0}
+											step={0.5}
+											className="w-full"
+										/>
+										<div
+											className="flex justify-between text-xs"
+											style={{ color: "var(--label-color)" }}
+										>
+											<span>₹{packageRange[0]} LPA</span>
+											<span>₹{packageRange[1]} LPA</span>
+										</div>
+									</div>
+								</div>
+
+								{/* Action Buttons */}
+								<div className="flex space-x-2 pt-4">
+									<Button
+										variant="outline"
+										onClick={clearFilters}
+										className="flex-1"
+										style={{
+											borderColor: "var(--border-color)",
+											color: "var(--text-color)",
+										}}
+									>
+										<XIcon className="w-4 h-4 mr-2" />
+										Clear All
+									</Button>
+									<Button
+										onClick={() => setShowFilters(false)}
+										className="flex-1"
+										style={{
+											backgroundColor: "var(--accent-color)",
+											color: "white",
+										}}
+									>
+										Apply Filters
+									</Button>
+								</div>
+
+								{/* Filter Summary */}
+								<div
+									className="border-t pt-4"
+									style={{ borderColor: "var(--border-color)" }}
+								>
+									<p
+										className="text-sm font-medium mb-2"
+										style={{ color: "var(--text-color)" }}
+									>
+										Results
+									</p>
+									<p
+										className="text-sm"
+										style={{ color: "var(--label-color)" }}
+									>
+										{filteredStudents.length} of {totalStudentsPlaced} students
+									</p>
+									<p
+										className="text-sm"
+										style={{ color: "var(--label-color)" }}
+									>
+										{filteredUniqueCompanies} of {uniqueCompanies} companies
+									</p>
+								</div>
+							</div>
+						</SheetContent>
+					</Sheet>
 				</div>
 
 				{/* Key Statistics */}
@@ -355,8 +886,16 @@ export default function StatsPage() {
 										className="text-3xl font-bold"
 										style={{ color: "var(--text-color)" }}
 									>
-										{totalStudentsPlaced}
+										{filteredStudents.length}
 									</p>
+									{filteredStudents.length !== totalStudentsPlaced && (
+										<p
+											className="text-xs"
+											style={{ color: "var(--label-color)" }}
+										>
+											of {totalStudentsPlaced} total
+										</p>
+									)}
 								</div>
 								<UsersIcon
 									className="w-8 h-8"
@@ -387,8 +926,16 @@ export default function StatsPage() {
 										className="text-3xl font-bold"
 										style={{ color: "var(--text-color)" }}
 									>
-										{formatPackage(averagePackage)}
+										{formatPackage(filteredAveragePackage)}
 									</p>
+									{filteredAveragePackage !== averagePackage && (
+										<p
+											className="text-xs"
+											style={{ color: "var(--label-color)" }}
+										>
+											overall: {formatPackage(averagePackage)}
+										</p>
+									)}
 								</div>
 								<TrendingUpIcon
 									className="w-8 h-8"
@@ -413,14 +960,22 @@ export default function StatsPage() {
 										className="text-sm font-medium mb-1"
 										style={{ color: "var(--label-color)" }}
 									>
-										Median Package
+										Highest Package
 									</p>
 									<p
 										className="text-3xl font-bold"
 										style={{ color: "var(--text-color)" }}
 									>
-										{formatPackage(medianPackage)}
+										{formatPackage(filteredHighestPackage)}
 									</p>
+									{filteredHighestPackage !== highestPackage && (
+										<p
+											className="text-xs"
+											style={{ color: "var(--label-color)" }}
+										>
+											overall: {formatPackage(highestPackage)}
+										</p>
+									)}
 								</div>
 								<IndianRupeeIcon
 									className="w-8 h-8"
@@ -451,8 +1006,16 @@ export default function StatsPage() {
 										className="text-3xl font-bold"
 										style={{ color: "var(--text-color)" }}
 									>
-										{uniqueCompanies}
+										{filteredUniqueCompanies}
 									</p>
+									{filteredUniqueCompanies !== uniqueCompanies && (
+										<p
+											className="text-xs"
+											style={{ color: "var(--label-color)" }}
+										>
+											of {uniqueCompanies} total
+										</p>
+									)}
 								</div>
 								<BuildingIcon
 									className="w-8 h-8"
@@ -470,12 +1033,23 @@ export default function StatsPage() {
 							className="flex items-center justify-between"
 							style={{ color: "var(--text-color)" }}
 						>
-							<div className="flex items-center">
+							<div className="flex items-center gap-2">
 								<BuildingIcon
 									className="w-5 h-5 mr-2"
 									style={{ color: "var(--accent-color)" }}
 								/>
 								Company-wise Placements
+								{hasActiveFilters && (
+									<Badge
+										className="rounded-full"
+										style={{
+											backgroundColor: "var(--accent-color)",
+											color: "white",
+										}}
+									>
+										{filteredUniqueCompanies}
+									</Badge>
+								)}
 							</div>
 						</CardTitle>
 					</CardHeader>
@@ -587,18 +1161,25 @@ export default function StatsPage() {
 																			<TableCell
 																				style={{ color: "var(--label-color)" }}
 																			>
-																				{student.role ||
-																					student.roles?.[0]?.role ||
-																					"N/A"}
+																				{student.role || "N/A"}
 																			</TableCell>
 																			<TableCell
 																				style={{ color: "var(--success-dark)" }}
 																			>
-																				{student.roles?.[0]?.packages?.[0]
-																					? formatPackage(
-																							student.roles[0].packages[0]
-																					  )
-																					: "N/A"}
+																				{(() => {
+																					const placement = placements.find(
+																						(p) => p.company === company
+																					);
+																					const packageValue = placement
+																						? getStudentPackage(
+																								student,
+																								placement
+																						  )
+																						: student.package;
+																					return packageValue
+																						? formatPackage(packageValue)
+																						: "TBD";
+																				})()}
 																			</TableCell>
 																			<TableCell
 																				style={{ color: "var(--label-color)" }}
@@ -725,7 +1306,7 @@ export default function StatsPage() {
 					<CardHeader>
 						<div className="flex items-center justify-between">
 							<CardTitle
-								className="flex items-center"
+								className="flex items-center gap-2"
 								style={{ color: "var(--text-color)" }}
 							>
 								<GraduationCapIcon
@@ -733,6 +1314,21 @@ export default function StatsPage() {
 									style={{ color: "var(--accent-color)" }}
 								/>
 								Placed Students
+								{hasActiveFilters ? (
+									<Badge
+										className="rounded-full"
+										style={{
+											backgroundColor: "var(--accent-color)",
+											color: "white",
+										}}
+									>
+										{filteredStudents.length}
+									</Badge>
+								) : (
+									<span style={{ color: "var(--label-color)" }}>
+										({filteredStudents.length})
+									</span>
+								)}
 							</CardTitle>
 							<Button
 								variant="outline"
@@ -743,17 +1339,19 @@ export default function StatsPage() {
 								}}
 								className="hover-theme"
 							>
-								{showStudentList ? "Hide List" : "View All Students"}
+								{showStudentList
+									? "Hide List"
+									: `View All Students (${filteredStudents.length})`}
 							</Button>
 						</div>
 					</CardHeader>
 					<CardContent>
 						{showStudentList ? (
 							<div className="space-y-4">
-								{placements.map((placement, placementIndex) =>
-									placement.students_selected.map((student, studentIndex) => (
+								{filteredStudents.length > 0 ? (
+									filteredStudents.map((student, studentIndex) => (
 										<Card
-											key={`${placementIndex}-${studentIndex}`}
+											key={`${student.enrollment_number}-${studentIndex}`}
 											className="border card-theme"
 											style={{
 												backgroundColor: "var(--primary-color)",
@@ -794,10 +1392,10 @@ export default function StatsPage() {
 															className="font-medium"
 															style={{ color: "var(--text-color)" }}
 														>
-															{placement.company}
+															{student.company}
 														</p>
 														<div className="text-sm space-y-1">
-															{placement.roles.map((role, roleIndex) => (
+															{student.roles.map((role, roleIndex) => (
 																<p
 																	key={roleIndex}
 																	style={{ color: "var(--label-color)" }}
@@ -806,28 +1404,48 @@ export default function StatsPage() {
 																</p>
 															))}
 														</div>
+														{student.job_location &&
+															student.job_location.length > 0 && (
+																<div
+																	className="flex items-center text-xs mt-1"
+																	style={{ color: "var(--label-color)" }}
+																>
+																	<MapPinIcon className="w-3 h-3 mr-1" />
+																	{student.job_location.join(", ")}
+																</div>
+															)}
 													</div>
 													<div className="text-right md:text-left">
 														<div className="space-y-1">
-															{placement.roles.map((role, roleIndex) =>
-																role.packages.map((pkg, pkgIndex) => (
+															{(() => {
+																const packageValue = getStudentPackage(
+																	student,
+																	student.placement
+																);
+																return packageValue ? (
 																	<p
-																		key={`${roleIndex}-${pkgIndex}`}
 																		className="font-semibold text-sm"
 																		style={{ color: "var(--success-dark)" }}
 																	>
-																		{formatPackage(pkg)}
+																		{formatPackage(packageValue)}
 																	</p>
-																))
-															)}
+																) : (
+																	<p
+																		className="font-semibold text-sm"
+																		style={{ color: "var(--label-color)" }}
+																	>
+																		TBD
+																	</p>
+																);
+															})()}
 														</div>
-														{placement.joining_date && (
+														{student.joining_date && (
 															<div
 																className="flex items-center text-sm mt-1"
 																style={{ color: "var(--label-color)" }}
 															>
 																<CalendarIcon className="w-3 h-3 mr-1" />
-																{formatDate(placement.joining_date)}
+																{formatDate(student.joining_date)}
 															</div>
 														)}
 													</div>
@@ -835,13 +1453,37 @@ export default function StatsPage() {
 											</CardContent>
 										</Card>
 									))
+								) : (
+									<div className="text-center py-8">
+										<p style={{ color: "var(--label-color)" }}>
+											No students match the current filters.
+										</p>
+										<Button
+											variant="outline"
+											onClick={clearFilters}
+											className="mt-4"
+											style={{
+												borderColor: "var(--border-color)",
+												color: "var(--text-color)",
+											}}
+										>
+											Clear Filters
+										</Button>
+									</div>
 								)}
 							</div>
 						) : (
 							<div className="text-center py-8">
 								<p className="mb-4" style={{ color: "var(--label-color)" }}>
-									{totalStudentsPlaced} students have been successfully placed
-									across {totalPlacements} companies
+									{filteredStudents.length} students{" "}
+									{filteredStudents.length !== totalStudentsPlaced
+										? `(of ${totalStudentsPlaced} total) `
+										: ""}
+									have been successfully placed across {filteredUniqueCompanies}{" "}
+									companies
+									{filteredUniqueCompanies !== uniqueCompanies
+										? ` (of ${uniqueCompanies} total)`
+										: ""}
 								</p>
 								<div className="flex justify-center items-center space-x-6 text-sm">
 									<div className="text-center">
@@ -855,8 +1497,16 @@ export default function StatsPage() {
 											className="font-bold"
 											style={{ color: "var(--success-dark)" }}
 										>
-											{formatPackage(highestPackage)}
+											{formatPackage(filteredHighestPackage)}
 										</p>
+										{filteredHighestPackage !== highestPackage && (
+											<p
+												className="text-xs"
+												style={{ color: "var(--label-color)" }}
+											>
+												overall: {formatPackage(highestPackage)}
+											</p>
+										)}
 									</div>
 									<div className="text-center">
 										<p
@@ -869,8 +1519,16 @@ export default function StatsPage() {
 											className="font-bold"
 											style={{ color: "var(--accent-color)" }}
 										>
-											{formatPackage(averagePackage)}
+											{formatPackage(filteredAveragePackage)}
 										</p>
+										{filteredAveragePackage !== averagePackage && (
+											<p
+												className="text-xs"
+												style={{ color: "var(--label-color)" }}
+											>
+												overall: {formatPackage(averagePackage)}
+											</p>
+										)}
 									</div>
 								</div>
 							</div>

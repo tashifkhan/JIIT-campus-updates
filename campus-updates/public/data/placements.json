@@ -4,8 +4,8 @@
 		"roles": [
 			{
 				"role": "Software Development",
-				"packages": ["INR 29.00 Lakhs"],
-				"package_details": "Base - INR 14,00,000/-, Sign-on Bonus - INR 2,00,000/-, RSU - $15,000/- Approx Value 13,00,000/- (as on 21 Aug, 2025)"
+				"package": 29.0,
+				"package_details": "Base - INR 14,00,000/-, Sign-on Bonus - INR 2,00,000/-, RSU - $15,000 (Approx Value 13,00,000/- as on 21 Aug, 2025)"
 			}
 		],
 		"job_location": ["Bangalore", "Mohali", "Pune", "Hyderabad"],
@@ -15,11 +15,12 @@
 				"name": "HARSH VARDHAN",
 				"enrollment_number": "22103281",
 				"email": "vardhanharsh7906@gmail.com",
-				"role": null
+				"role": "Software Development",
+				"package": 29.0
 			}
 		],
 		"number_of_offers": 1,
-		"additional_info": "Please submit the acceptance of the offer by 10 AM, 22 Aug, 2025.",
+		"additional_info": "Offer acceptance deadline: 10 AM, 22 Aug, 2025.",
 		"email_subject": "Fwd: Zscaler - Hiring For Full Time Role from 2026 Batch -\r\n Preplacement Offer (PPO)",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -27,9 +28,9 @@
 		"company": "Lending Labs (formerly Kuliza Technologies)",
 		"roles": [
 			{
-				"role": "Software Engineer Intern",
-				"packages": ["INR 10 Lakhs"],
-				"package_details": "Stipend: INR 50,000 per month. Full-time package based on performance during the Internship and the then prevailing market conditions, with a salary package of INR 10 Lakhs."
+				"role": "Software Engineer",
+				"package": 10.0,
+				"package_details": "Full-time package based on performance during the Internship"
 			}
 		],
 		"job_location": ["Bengaluru"],
@@ -39,17 +40,19 @@
 				"name": "Shiv Pandey",
 				"enrollment_number": "22103093",
 				"email": "shivpandey5677@gmail.com",
-				"role": null
+				"role": "Software Engineer Intern",
+				"package": null
 			},
 			{
 				"name": "VANSHIKA AGARWAL",
 				"enrollment_number": "22103276",
 				"email": "vanshikagarwal21@gmail.com",
-				"role": null
+				"role": "Software Engineer Intern",
+				"package": null
 			}
 		],
 		"number_of_offers": 2,
-		"additional_info": "Only from Batch 2026 to be converted to Full Time Role Based on Performance during the 06-month Internships from September 2025 to February 2026",
+		"additional_info": "Offers are for Batch 2026 students. Internship duration: 6 months (September 2025 to February 2026). Full-time conversion based on performance and market conditions.",
 		"email_subject": "Fwd: Lending Labs (formerly Kuliza Technologies) is Hiring Interns\r\n Only from Batch 2026 to be converted to Full Time Role Based on Performance\r\n during the 06-month Internships from September 2025 to February 2026-Final offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -58,12 +61,8 @@
 		"roles": [
 			{
 				"role": "Associate Consultant",
-				"packages": [
-					"INR 60,000/- Per Month (Internship Stipend)",
-					"INR 9,82,054/- Per Annum (Salary Package)",
-					"INR 851,000 Per Annum (Annual Gross Pay (AGP))"
-				],
-				"package_details": "Applicable Employer Contribution towards Provident Fund (Approx 45,954 PA), Delivery Target Percentage (DTP): 10% Consulting Bonus of upto INR 85,100), Relocation Assistance is provided as per the policy"
+				"package": 9.82,
+				"package_details": "INR 60,000/month Internship Stipend (INR 7.2 LPA), INR 851,000 Annual Gross Pay (AGP), Applicable Employer Contribution towards Provident Fund (Approx 45,954 PA), 10% Consulting Bonus of upto INR 85,100, Relocation Assistance as per policy"
 			}
 		],
 		"job_location": ["Noida"],
@@ -73,35 +72,40 @@
 				"name": "ANSHIT GUPTA",
 				"enrollment_number": "22102177",
 				"email": "anshitgupta085@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "AYUSH PANDEY",
 				"enrollment_number": "22104034",
 				"email": "ayush.pandeyy10.2@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "GAURI BAHUGUNA",
 				"enrollment_number": "22102045",
 				"email": "gauribahuguna03@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "BHUMIKA KHANDELWAL",
 				"enrollment_number": "9922103065",
 				"email": "bhumikakhandelwal1703@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "YUVRAJ SINGH SARAO",
 				"enrollment_number": "22102013",
 				"email": "yuvrajsingh.uv0311@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			}
 		],
 		"number_of_offers": 5,
-		"additional_info": "The offer is for an internship from Jan, 2026 to June, 2026, which will be converted to a full-time role based on performance. Offer letter will be shared directly with the student near to the joining date.",
+		"additional_info": "Internship from Jan, 2026 to June, 2026, to be converted to Full Time Role based on the performance during Internship. Offer letter will be shared directly with the student near to the joining date.",
 		"email_subject": "Fwd: Oracle India Pvt. Ltd - Hiring Interns from 2026 Batch - To be\r\n converted to Full Time Role based on the performance during Internship from\r\n Jan, 2026 to June, 2026 - Offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -110,8 +114,8 @@
 		"roles": [
 			{
 				"role": "Associate Consultant",
-				"packages": ["INR 9,82,054/- Per Annum"],
-				"package_details": "Performance Incentives (Included in Year 1 Earning Potential): 10% of Base pay - INR 85,100 (linked to individual performance)\nAdditional Perks/Benefits (Included in Year 1 Earning Potential): Applicable Employer Contribution towards PF Fund\nRelocation - Assistance for Relocating to the joining location"
+				"package": 9.82,
+				"package_details": "Base pay - INR 85,100 (Performance Incentives - 10% of Base pay), Applicable Employer Contribution towards PF Fund, Assistance for Relocating to the joining location"
 			}
 		],
 		"job_location": ["Bengaluru", "Mumbai", "Pune", "Chennai"],
@@ -121,103 +125,120 @@
 				"name": "ADITYA KUMAR SINGH",
 				"enrollment_number": "9922103156",
 				"email": "adisingh6678@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "CHAHAT KHATTAR",
 				"enrollment_number": "9922103044",
 				"email": "chahatkhattar3865@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "SANVI SRIVASTAVA",
 				"enrollment_number": "9922103017",
 				"email": "sonaaurum04@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "ALOKIK GARG",
 				"enrollment_number": "22103302",
 				"email": "alokikgarg24@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "ASTHA TIWARI",
 				"enrollment_number": "22103082",
 				"email": "astha.tiwari922@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "PANKHURI ASTHANA",
 				"enrollment_number": "22103202",
 				"email": "p.asthana192@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "YASHI JAITLY",
 				"enrollment_number": "22103326",
 				"email": "jaitlyyashi26@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "PRAKRITI YADAV",
 				"enrollment_number": "22103091",
 				"email": "prakriti14092004@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "MANYA RAI",
 				"enrollment_number": "22103221",
 				"email": "manyarai945@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "SIDDHI SINGHAL",
 				"enrollment_number": "22103169",
 				"email": "singhalsiddhi5@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "HARSH KUMAWAT",
 				"enrollment_number": "9922102118",
 				"email": "kumawatharsh2004@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "AKSHAT TOMAR",
 				"enrollment_number": "22102085",
 				"email": "akshat.tomar2003@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "HITENDRA NARAYAN GOSWAMI",
 				"enrollment_number": "22102053",
 				"email": "hitendra.goswami17@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "SAHIL KHANNA",
 				"enrollment_number": "22102115",
 				"email": "sk12102003@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "VAIBHAV BHATT",
 				"enrollment_number": "22102153",
 				"email": "vaibhavbhatt9666@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "NIHARIKA MISHRA",
 				"enrollment_number": "22104047",
 				"email": "mishraniharika108@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			},
 			{
 				"name": "SHAMBHAVI GAUR",
 				"enrollment_number": "22104056",
 				"email": "gaurshambhavi31@gmail.com",
-				"role": null
+				"role": "Associate Consultant",
+				"package": 9.82
 			}
 		],
 		"number_of_offers": 17,
@@ -230,12 +251,12 @@
 		"roles": [
 			{
 				"role": "Specialist Programmer",
-				"packages": ["INR 9.5 LPA"],
+				"package": 9.5,
 				"package_details": null
 			},
 			{
 				"role": "Digital Specialist Engineer",
-				"packages": ["INR 6.25 LPA"],
+				"package": 6.25,
 				"package_details": null
 			}
 		],
@@ -246,49 +267,57 @@
 				"name": "SAHIL SHARMA",
 				"enrollment_number": "22103267",
 				"email": "sahilgsm2003@gmail.com",
-				"role": "Specialist Programmer"
+				"role": "Specialist Programmer",
+				"package": 9.5
 			},
 			{
 				"name": "Ryan Khursheed",
 				"enrollment_number": "22102028",
 				"email": "ryan.khursheedps@gmail.com",
-				"role": "Specialist Programmer"
+				"role": "Specialist Programmer",
+				"package": 9.5
 			},
 			{
 				"name": "ARYESH SRIVASTAVA",
 				"enrollment_number": "21803026",
 				"email": "aryeshsrivastava@gmail.com",
-				"role": "Digital Specialist Engineer"
+				"role": "Digital Specialist Engineer",
+				"package": 6.25
 			},
 			{
 				"name": "Brij Sharma",
 				"enrollment_number": "221B131",
 				"email": "brijs2207@gmail.com",
-				"role": "Specialist Programmer"
+				"role": "Specialist Programmer",
+				"package": 9.5
 			},
 			{
 				"name": "Divyansh Kashyap",
 				"enrollment_number": "221B150",
 				"email": "duvyansh728@gmail.com",
-				"role": "Digital Specialist Engineer"
+				"role": "Digital Specialist Engineer",
+				"package": 6.25
 			},
 			{
 				"name": "Sanskar Pandey",
 				"enrollment_number": "221030358",
 				"email": "sanskar.works.2004@gmail.com",
-				"role": "Specialist Programmer"
+				"role": "Specialist Programmer",
+				"package": 9.5
 			},
 			{
 				"name": "Rajluxmi Singh",
 				"enrollment_number": "221031059",
 				"email": "rajluxmi.224@gmail.com",
-				"role": "Digital Specialist Engineer"
+				"role": "Digital Specialist Engineer",
+				"package": 6.25
 			},
 			{
 				"name": "Khushi Mehta",
 				"enrollment_number": "221030437",
 				"email": "khushimeh2016@gmail.com",
-				"role": "Digital Specialist Engineer"
+				"role": "Digital Specialist Engineer",
+				"package": 6.25
 			}
 		],
 		"number_of_offers": 8,
@@ -301,8 +330,8 @@
 		"roles": [
 			{
 				"role": "Software Engineer",
-				"packages": ["INR 53 Lacs"],
-				"package_details": "Salary details have been shared directly with the students in the offer letter."
+				"package": 53.0,
+				"package_details": "INR 53 Lacs"
 			}
 		],
 		"job_location": ["Bengaluru", "Hyderabad"],
@@ -312,17 +341,19 @@
 				"name": "MUSKAAN SINGHAL",
 				"enrollment_number": "22103192",
 				"email": null,
-				"role": "Software Engineer"
+				"role": "Software Engineer",
+				"package": 53.0
 			},
 			{
 				"name": "JANVI RAJKESHRIKUMAR MEHTA",
 				"enrollment_number": "9922103135",
 				"email": null,
-				"role": "Software Engineer"
+				"role": "Software Engineer",
+				"package": 53.0
 			}
 		],
 		"number_of_offers": 2,
-		"additional_info": "Offered to the 2026 batch.",
+		"additional_info": "Salary details have been shared directly with the students in the offer letter.",
 		"email_subject": "Fwd: Microsoft India: Batch 2026 - Pre Placement Full Time Offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -331,8 +362,8 @@
 		"roles": [
 			{
 				"role": "Technical/Development Consultant",
-				"packages": ["INR 23,50,280.00"],
-				"package_details": "Total Target Cash: 10,00,000\nJoining Bonus: 2,50,000\nSAP Stocks: 3,00,000\nBenefits: 8,00,280"
+				"package": 23.5028,
+				"package_details": "Total Target Cash: 10,00,000 INR, Joining Bonus: 2,50,000 INR, SAP Stocks: 3,00,000 INR, Benefits: 8,00,280 INR. Joining Bonus will be paid in 2 instalments over a period of 2 years. Restricted Stock Units (RSUs) vest quarterly over three years after an initial six-month waiting period, with pay-outs made quarterly thereafter. Benefits are approximate and subject to company policy."
 			}
 		],
 		"job_location": ["Bangalore"],
@@ -342,41 +373,47 @@
 				"name": "Ryan Khursheed",
 				"enrollment_number": "22102028",
 				"email": null,
-				"role": null
+				"role": "Technical/Development Consultant",
+				"package": 23.5028
 			},
 			{
 				"name": "Bhaskar Jha",
 				"enrollment_number": "22102078",
 				"email": null,
-				"role": null
+				"role": "Technical/Development Consultant",
+				"package": 23.5028
 			},
 			{
 				"name": "Teesha Kakkar",
 				"enrollment_number": "22103098",
 				"email": null,
-				"role": null
+				"role": "Technical/Development Consultant",
+				"package": 23.5028
 			},
 			{
 				"name": "Sushweta Bhattacharya",
 				"enrollment_number": "22103198",
 				"email": null,
-				"role": null
+				"role": "Technical/Development Consultant",
+				"package": 23.5028
 			},
 			{
 				"name": "Siddhant Sirohi",
 				"enrollment_number": "22103273",
 				"email": null,
-				"role": null
+				"role": "Technical/Development Consultant",
+				"package": 23.5028
 			},
 			{
 				"name": "SRISHTI SINGH",
 				"enrollment_number": "9922102076",
 				"email": null,
-				"role": null
+				"role": "Technical/Development Consultant",
+				"package": 23.5028
 			}
 		],
 		"number_of_offers": 6,
-		"additional_info": "Joining Bonus will be paid in 2 instalments over a period of 2 years. Restricted Stock Units (RSUs) vest quarterly over three years after an initial six-month waiting period, with pay-outs made quarterly thereafter. Benefits are approximate and subject to company policy.",
+		"additional_info": null,
 		"email_subject": "Fwd: SAP Labs - Full Time Role Hiring - Batch 2026 - Offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -385,13 +422,8 @@
 		"roles": [
 			{
 				"role": "Software Development Engineer (SDE) Intern",
-				"packages": [
-					"INR 1,00,000 per month",
-					"INR 56 Lakhs (Full-time package)",
-					"Fixed: INR 24,00,000 Per Annum",
-					"Cash bonus: INR 32,00,000 spread across 4 years"
-				],
-				"package_details": "Post completion of 1 year from the joining date: INR 500,000\nPost completion of 2 years from the joining date: INR 700,000\nPost completion of 3 years from the joining date: INR 900,000\nPost completion of 4 years from the joining date: INR 1,100,000"
+				"package": 56.0,
+				"package_details": "Fixed: INR 24,00,000 Per Annum, Cash bonus: INR 32,00,000 spread across 4 years (Post completion of 1 year: INR 500,000, Post completion of 2 years: INR 700,000, Post completion of 3 years: INR 900,000, Post completion of 4 years: INR 1,100,000)"
 			}
 		],
 		"job_location": ["Gurugram"],
@@ -401,11 +433,12 @@
 				"name": "Abhyuday Singh",
 				"enrollment_number": "22103262",
 				"email": "abhyudaysingh40@gmail.com",
-				"role": "Software Development Engineer (SDE) Intern"
+				"role": "Software Development Engineer (SDE) Intern",
+				"package": null
 			}
 		],
 		"number_of_offers": 1,
-		"additional_info": "Internship duration: 6 months (August 2025 to January 2026). Full-time offer based on performance during internship and prevailing market conditions.",
+		"additional_info": "Internship from August 2025 to January 2026, conversion to full-time based on performance.",
 		"email_subject": "Fwd: Zomato is Hiring Interns Only from Batch 2026 to be converted to\r\n Full Time Role Based on Performance during 06 months Internships from August\r\n 2025 to January 2026-SDE Intern Role-Final Offer",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -414,28 +447,23 @@
 		"roles": [
 			{
 				"role": "Customer Success Intern (CSM)",
-				"packages": [
-					"INR 8 LPA (INR 7 LPA fixed + INR 1 LPA joining bonus)",
-					"INR 15.00 Lacs (INR 12 LPA fixed + INR 3 LPA retention bonus)"
-				],
-				"package_details": "The package is based on performance during the internship and, if converted, to a full-time role and the then prevailing market conditions."
+				"package": 15.0,
+				"package_details": "INR 12 LPA fixed + INR 3 LPA retention bonus"
 			}
 		],
-		"job_location": [
-			"Richpanel Office, Bengaluru",
-			"99, 5th Cross Rd, KHB Colony, 5th Block, Koramangala, Bengaluru, Karnataka 560095"
-		],
+		"job_location": ["Bengaluru"],
 		"joining_date": null,
 		"students_selected": [
 			{
 				"name": "Venya Gangrade",
 				"enrollment_number": "22103062",
 				"email": "venyagangrade04@gmail.com",
-				"role": null
+				"role": "Customer Success Intern (CSM)",
+				"package": 15.0
 			}
 		],
 		"number_of_offers": 1,
-		"additional_info": "Internship duration: 12 Months.  The offer is for Batch 2026 students. The role is to be converted to Full Time Role Based on Performance During Internship From August 2025 to July 2026.",
+		"additional_info": "Internship duration: 12 Months. Full-time package (if converted): INR 15.00 Lacs (INR 12 LPA fixed + INR 3 LPA retention bonus) based on performance during the internship.",
 		"email_subject": "Fwd: Richpanel-Hiring Interns Only From Batch 2026-CSM Role-To be\r\n Converted to Full Time Role Based on Performance During Internship From\r\n Augsut 2025 to July 2026-Final Offer",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -444,7 +472,7 @@
 		"roles": [
 			{
 				"role": "Software Engineer Trainee",
-				"packages": ["INR 30,000 PM", "INR 32 Lacs"],
+				"package": 32.0,
 				"package_details": "Stipend during internship – INR 30,000 PM. Compensation in a full-time role: INR 32 Lacs"
 			}
 		],
@@ -455,23 +483,26 @@
 				"name": "Om Sharma",
 				"enrollment_number": "22103203",
 				"email": null,
-				"role": null
+				"role": "Software Engineer Trainee",
+				"package": 32.0
 			},
 			{
 				"name": "Anshika Agarwal",
 				"enrollment_number": "22103245",
 				"email": null,
-				"role": null
+				"role": "Software Engineer Trainee",
+				"package": 32.0
 			},
 			{
 				"name": "Adarsh Amit",
 				"enrollment_number": "22103305",
 				"email": null,
-				"role": null
+				"role": "Software Engineer Trainee",
+				"package": 32.0
 			}
 		],
 		"number_of_offers": 3,
-		"additional_info": "Permanent employment is confirmed after 12 months of internship, based on performance and the then prevailing market conditions. Internship duration: Aug 2025 to Jul 2026",
+		"additional_info": "Permanent employment is confirmed after 12 months of internship, based on performance and the then prevailing market conditions.",
 		"email_subject": "Fwd: Vinsol-Stadium - Hiring Interns Only from Batch 2026 - To be\r\n converted to Full Time Role Based on Performance during 12 months Internships\r\n from Aug 2025 to Jul 2026 - Offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -480,11 +511,8 @@
 		"roles": [
 			{
 				"role": "Intern",
-				"packages": [
-					"INR 21,000/month (Stipend)",
-					"INR 8.00 to 9.00 Lakhs (Full-time, based on performance)"
-				],
-				"package_details": "Conversion to full-time role based on performance during Internship and the then prevailing market conditions"
+				"package": 8.0,
+				"package_details": "INR 21,000 per month stipend. Conversion to full-time role based on performance during Internship and the then prevailing market conditions. Salary Package: INR 8.00 to 9.00 Lakhs"
 			}
 		],
 		"job_location": ["Noida Sector 126"],
@@ -494,11 +522,12 @@
 				"name": "Ananya Shrivastava",
 				"enrollment_number": "9922103110",
 				"email": "ananyasrivastava402@gmail.com",
-				"role": null
+				"role": "Intern",
+				"package": 8.0
 			}
 		],
 		"number_of_offers": 1,
-		"additional_info": "Work from office",
+		"additional_info": "Internship for 6 months, followed by potential full-time conversion based on performance.",
 		"email_subject": "Fwd: AppVersal : Hiring Interns only From B.Tech 2026 Batch- To be\r\n Converted to Full Time Role Based on Performance During six months Internship\r\n - Offer",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -507,12 +536,8 @@
 		"roles": [
 			{
 				"role": "IT Developer Trainee",
-				"packages": [
-					"INR 20,000 per month for 12 months",
-					"INR 6.0 LPA - INR 10.20 LPA",
-					"INR 50,000 after 18 months of service"
-				],
-				"package_details": "Stipend during Internship: INR 20,000 per month for 12 months. Salary Package upon Full Time conversion: INR 6.0 LPA - INR 10.20 LPA. Permanent employment is confirmed after 12 months of internship, based on performance and the then prevailing market conditions. Retention Bonus: INR 50,000 after 18 months of service"
+				"package": 6.0,
+				"package_details": "INR 20,000 per month for 12 months (Stipend during Internship). Full Time conversion: INR 6.0 LPA - INR 10.20 LPA. Retention Bonus: INR 50,000 after 18 months of service"
 			}
 		],
 		"job_location": ["Noida"],
@@ -522,43 +547,50 @@
 				"name": "JAHNAVI KHATTAR",
 				"enrollment_number": "22103188",
 				"email": "kjahnavi16@gmail.com",
-				"role": null
+				"role": "IT Developer Trainee",
+				"package": 6.0
 			},
 			{
 				"name": "SIMRAN SARDANA",
 				"enrollment_number": "22103342",
 				"email": "simran09hcs@gmail.com",
-				"role": null
+				"role": "IT Developer Trainee",
+				"package": 6.0
 			},
 			{
 				"name": "TANMAY JOSHI",
 				"enrollment_number": "22104064",
 				"email": "tanmay20041@gmail.com",
-				"role": null
+				"role": "IT Developer Trainee",
+				"package": 6.0
 			},
 			{
 				"name": "ISHANT SAPRA",
 				"enrollment_number": "9922103037",
 				"email": "ishantsapra33@gmail.com",
-				"role": null
+				"role": "IT Developer Trainee",
+				"package": 6.0
 			},
 			{
 				"name": "GARUN JADAUN",
 				"enrollment_number": "9922103154",
 				"email": "garunjadaun@gmail.com",
-				"role": null
+				"role": "IT Developer Trainee",
+				"package": 6.0
 			},
 			{
 				"name": "DIVYANSHI GUPTA",
 				"enrollment_number": "9922103224",
 				"email": "divyanshigupta2611@gmail.com",
-				"role": null
+				"role": "IT Developer Trainee",
+				"package": 6.0
 			},
 			{
 				"name": "GARV SAHANI",
 				"enrollment_number": "9922103234",
 				"email": "garvsahani2892004@gmail.com",
-				"role": null
+				"role": "IT Developer Trainee",
+				"package": 6.0
 			}
 		],
 		"number_of_offers": 7,
@@ -571,11 +603,8 @@
 		"roles": [
 			{
 				"role": "Software Developer",
-				"packages": [
-					"INR 22,500 per month (Stipend during Internship)",
-					"INR 15.47 Lacs (Package in a Full-Time Role)"
-				],
-				"package_details": "Fixed: 10,62,500, PB: 85,000, FY Bonus: 1,60,000, SY Bonus: 2,40,000, Total: 15,47,000"
+				"package": 15.47,
+				"package_details": "Stipend during Internship: INR 22,500 per month. Full-Time Package: INR 15.47 Lacs. Includes Fixed, PB, FY Bonus, SY Bonus."
 			}
 		],
 		"job_location": ["Gurgaon"],
@@ -585,17 +614,19 @@
 				"name": "Priyansh Yadav",
 				"enrollment_number": "22102075",
 				"email": null,
-				"role": "BTech ECE"
+				"role": "Software Developer",
+				"package": 15.47
 			},
 			{
 				"name": "Karan Arora",
 				"enrollment_number": "22103155",
 				"email": null,
-				"role": "BTech CSE"
+				"role": "Software Developer",
+				"package": 15.47
 			}
 		],
 		"number_of_offers": 2,
-		"additional_info": "Internship duration: 12 months (Aug 2025 to Jul 2026). Permanent employment is confirmed after 12 months of internship, based on performance and the then prevailing market conditions.",
+		"additional_info": "Internship from Aug 2025 to Jul 2026, leading to full-time role based on performance. Permanent employment is confirmed after 12 months of internship, based on performance and the then prevailing market conditions.",
 		"email_subject": "Fwd: JTG (Josh Technology Group) - Hiring Interns Only from Batch\r\n 2026 - To be converted to Full Time Role Based on Performance during 12\r\n months Internships from Aug 2025 to Jul 2026 - Offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -604,8 +635,8 @@
 		"roles": [
 			{
 				"role": "SDE1",
-				"packages": ["INR 18 to 20 Lakhs"],
-				"package_details": "INR13.5 Lakhs Fixed + INR 1.5L Variable + INR 3 - 5 Lakhs in ESOPs"
+				"package": 18.0,
+				"package_details": "INR 13.5 Lakhs Fixed + INR 1.5L Variable + INR 3 - 5 Lakhs in ESOPs. Internship Stipend: INR 25,000/- Per Month"
 			}
 		],
 		"job_location": ["Noida"],
@@ -615,29 +646,33 @@
 				"name": "ARYAV SINGLA",
 				"enrollment_number": "9922103226",
 				"email": "aryavsingla7@gmail.com",
-				"role": null
+				"role": "SDE1",
+				"package": 18.0
 			},
 			{
 				"name": "SHIVESH DIXIT",
 				"enrollment_number": "22103159",
 				"email": "shiveshdixit17@gmail.com",
-				"role": null
+				"role": "SDE1",
+				"package": 18.0
 			},
 			{
 				"name": "SHREY SHUKLA",
 				"enrollment_number": "9922103183",
 				"email": "shreyshukla008@gmail.com",
-				"role": null
+				"role": "SDE1",
+				"package": 18.0
 			},
 			{
 				"name": "VANSHUL AGARWAL",
 				"enrollment_number": "22103215",
 				"email": "vanshul090504@gmail.com",
-				"role": null
+				"role": "SDE1",
+				"package": 18.0
 			}
 		],
 		"number_of_offers": 4,
-		"additional_info": "Internship Stipend: INR 25,000/- Per Month. Duration of Internship : 6 month internship starting January 2026, with full-time conversion in June 2026 based on performance. (Permanent employment is confirmed after 06 months of internship, based on performance and the then prevailing market conditions.)",
+		"additional_info": "Internship from Jan 2026 to June 2026, with full-time conversion based on performance. Permanent employment is confirmed after 06 months of internship, based on performance and the then prevailing market conditions.",
 		"email_subject": "Fwd: SaaS Labs - Hiring Interns From Batch 2026 - To be Converted to\r\n Full Time Role Based on Performance During Internship From Jan 2026 to June\r\n 2026 - Offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -646,11 +681,8 @@
 		"roles": [
 			{
 				"role": "Software Engineer",
-				"packages": [
-					"INR 80,000 per month (Stipend)",
-					"INR 1,00,000 (Relocation Assistance)"
-				],
-				"package_details": "Stipend during 6-month internship: INR 80,000 per month. Relocation Assistance (one time payment on joining): INR 1,00,000. Full-time package: INR 19.75 Lakhs"
+				"package": 19.75,
+				"package_details": "Full-time package as received from the company: INR 19.75 Lakhs. Internship Stipend: INR 80,000 per month + Relocation Assistance (One time payment on joining): INR 1,00,000"
 			}
 		],
 		"job_location": ["Mumbai", "Bengaluru", "Hyderabad", "Pune"],
@@ -660,47 +692,54 @@
 				"name": "Aayushmaan Mittal",
 				"enrollment_number": "22103029",
 				"email": "aayueshmaanmittal99@gmail.com",
-				"role": "Software Engineer"
+				"role": "Software Engineer",
+				"package": 19.75
 			},
 			{
 				"name": "Ayush Malik",
 				"enrollment_number": "22103047",
 				"email": "malikayush580@gmail.com",
-				"role": "Software Engineer"
+				"role": "Software Engineer",
+				"package": 19.75
 			},
 			{
 				"name": "Swapnil Tyagi",
 				"enrollment_number": "22103200",
 				"email": "vashutyagi20@gmail.com",
-				"role": "Software Engineer"
+				"role": "Software Engineer",
+				"package": 19.75
 			},
 			{
 				"name": "Sajal Gupta",
 				"enrollment_number": "22103295",
 				"email": "sajal01ynr@gmail.com",
-				"role": "Software Engineer"
+				"role": "Software Engineer",
+				"package": 19.75
 			},
 			{
 				"name": "Sehal Saxena",
 				"enrollment_number": "22103303",
 				"email": "sehal.9989@gmail.com",
-				"role": "Software Engineer"
+				"role": "Software Engineer",
+				"package": 19.75
 			},
 			{
 				"name": "Sunpreet Singh",
 				"enrollment_number": "9922103018",
 				"email": "sunpahwa28@gmail.com",
-				"role": "Software Engineer"
+				"role": "Software Engineer",
+				"package": 19.75
 			},
 			{
 				"name": "Aashutosh Chahal",
 				"enrollment_number": "9922103141",
 				"email": "chahalaashutosh@gmail.com",
-				"role": "Software Engineer"
+				"role": "Software Engineer",
+				"package": 19.75
 			}
 		],
 		"number_of_offers": 7,
-		"additional_info": "The offer is a PPO (Pre-Placement Offer) after a 6-month internship. Internship duration: February 2026 to July 2026. Offer acceptance deadline: 5.30 PM on 06 August 2025.  Acceptance to be sent to anurag.jptnp@gmail.com",
+		"additional_info": "Students will join for a six-month internship from February 2026 to July 2026, followed by full-time employment in 2026. Offer acceptance deadline: 5:30 PM on 06 August 2025.  Acceptance to be sent to anurag.jptnp@gmail.com",
 		"email_subject": "Fwd: JPMorganChase-Pre Placement Offers From Batch 2026",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -709,10 +748,7 @@
 		"roles": [
 			{
 				"role": "12-Month Intern",
-				"packages": [
-					"INR 35,000 PM",
-					"INR 15.5 Lacs (Salary INR-10 LPA + 2.75 Lacs RSU +2.75 Lacs Joining bonus)"
-				],
+				"package": 15.5,
 				"package_details": "Stipend during internship: INR 35,000 PM. Compensation in full-time role: INR 15.5 Lacs (Salary INR-10 LPA + 2.75 Lacs RSU +2.75 Lacs Joining bonus)"
 			}
 		],
@@ -723,16 +759,46 @@
 				"name": "MANYA JAIN",
 				"enrollment_number": "22102138",
 				"email": null,
-				"role": null
+				"role": "12-Month Intern",
+				"package": 15.5
 			},
 			{
 				"name": "YASH AGARWAL",
 				"enrollment_number": "22103239",
 				"email": null,
-				"role": null
+				"role": "12-Month Intern",
+				"package": 15.5
+			},
+			{
+				"name": "ANANNY TRIPATHI",
+				"enrollment_number": "22103035",
+				"email": null,
+				"role": "12-Month Intern",
+				"package": 15.5
+			},
+			{
+				"name": "KARTIK KUMAR PANDEY",
+				"enrollment_number": "22103103",
+				"email": null,
+				"role": "12-Month Intern",
+				"package": 15.5
+			},
+			{
+				"name": "AYUSH SHARMA",
+				"enrollment_number": "22103228",
+				"email": null,
+				"role": "12-Month Intern",
+				"package": 15.5
+			},
+			{
+				"name": "AMAN KUMAR SINGH",
+				"enrollment_number": "22104032",
+				"email": null,
+				"role": "12-Month Intern",
+				"package": 15.5
 			}
 		],
-		"number_of_offers": 2,
+		"number_of_offers": 6,
 		"additional_info": "Permanent employment is confirmed after 12 months of internship, based on performance and the then prevailing market conditions.",
 		"email_subject": "Fwd: SAP Labs Hiring Interns Only from Batch 2026 - To be converted\r\n to Full Time Role Based on Performance during 12 months Internships from Aug\r\n 2025 to Jul 2026 - Additional Offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
@@ -742,11 +808,8 @@
 		"roles": [
 			{
 				"role": "Intern",
-				"packages": [
-					"INR 35 K Per Month",
-					"INR 10.00 Lakhs (based on performance during the internship and, if converted, to a full-time role and the then prevailing market conditions.)"
-				],
-				"package_details": "The package is INR 10.00 Lakhs based on performance during the internship and, if converted, to a full-time role and the then prevailing market conditions."
+				"package": 10.0,
+				"package_details": "INR 35 K Per Month stipend during internship, Full-time package based on performance during the internship and then prevailing market conditions."
 			}
 		],
 		"job_location": ["Gurugram"],
@@ -756,11 +819,12 @@
 				"name": "KARTIK AGGARWAL",
 				"enrollment_number": "22103224",
 				"email": "kartikaggarwal2004@gmail.com",
-				"role": null
+				"role": "Intern",
+				"package": 10.0
 			}
 		],
 		"number_of_offers": 1,
-		"additional_info": "Internships from August 2025 to December 2025. To be converted to Full Time Role Based on Performance during 05 months",
+		"additional_info": "Internships from August 2025 to December 2025. The offer is for Batch 2026 students only. Conversion to Full Time Role Based on Performance during 05 months.",
 		"email_subject": "Fwd: Real Time Data Services is Hiring Interns Only from Batch 2026\r\n to be converted to Full Time Role Based on Performance during 05 months\r\n Internships from August 2025 to December 2025-Final Offer",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -769,61 +833,65 @@
 		"roles": [
 			{
 				"role": "12-Month Intern",
-				"packages": [
-					"INR 35,000 PM",
-					"INR 15.5 Lacs (Salary INR-10 LPA + 2.75 Lacs RSU +2.75 Lacs Joining bonus)"
-				],
+				"package": 15.5,
 				"package_details": "Stipend during internship: INR 35,000 PM. Compensation in full-time role: INR 15.5 Lacs (Salary INR-10 LPA + 2.75 Lacs RSU +2.75 Lacs Joining bonus)"
 			}
 		],
-		"job_location": ["JIIT, Noida"],
+		"job_location": null,
 		"joining_date": "2025-09-01",
 		"students_selected": [
 			{
 				"name": "ANURAG RAJPUT",
 				"enrollment_number": "22103260",
 				"email": null,
-				"role": "B.Tech"
+				"role": "12-Month Intern",
+				"package": 15.5
 			},
 			{
 				"name": "MANYA JAIN",
 				"enrollment_number": "22102138",
 				"email": null,
-				"role": "ECE"
+				"role": "12-Month Intern",
+				"package": 15.5
 			},
 			{
 				"name": "YASH AGARWAL",
 				"enrollment_number": "22103239",
 				"email": null,
-				"role": "CSE"
+				"role": "12-Month Intern",
+				"package": 15.5
 			},
 			{
 				"name": "ANANNY TRIPATHI",
 				"enrollment_number": "22103035",
 				"email": null,
-				"role": "CSE"
+				"role": "12-Month Intern",
+				"package": 15.5
 			},
 			{
 				"name": "KARTIK KUMAR PANDEY",
 				"enrollment_number": "22103103",
 				"email": null,
-				"role": "CSE"
+				"role": "12-Month Intern",
+				"package": 15.5
 			},
 			{
 				"name": "AYUSH SHARMA",
 				"enrollment_number": "22103228",
 				"email": null,
-				"role": "CSE"
+				"role": "12-Month Intern",
+				"package": 15.5
 			},
 			{
 				"name": "AMAN KUMAR SINGH",
 				"enrollment_number": "22104032",
 				"email": null,
-				"role": "IT"
+				"role": "12-Month Intern",
+				"package": 15.5
 			}
 		],
 		"number_of_offers": 7,
-		"additional_info": "Permanent employment is confirmed after 12 months of internship, based on performance and the then prevailing market conditions.",
+		"additional_info": "Permanent employment is confirmed after 12 months of internship, based on performance and the then prevailing market conditions. Start Date of Internship: 1st Sept 2025. End Date of Internship: Aug 2026.  Start Date of Internship: Aug/Sept 2025. End Date of Internship: Aug 2026",
 		"email_subject": "Fwd: SAP Labs Hiring Interns Only from Batch 2026 - To be converted\r\n to Full Time Role Based on Performance during 12 months Internships from Aug\r\n 2025 to Jul 2026 - Additional Offer",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -832,11 +900,8 @@
 		"roles": [
 			{
 				"role": "AI Innovation Incubator (AIII) Intern",
-				"packages": [
-					"15 LPA CTC (during internship)",
-					"20.00 Lakhs per annum (Full Time)"
-				],
-				"package_details": "The pay rate for the internship period will be calculated based on 15 LPA CTC. Conversion to full-time role based on performance during internship period and the then prevailing market conditions."
+				"package": 15.0,
+				"package_details": "The pay rate for this period will be calculated based on 15 LPA CTC (Conversion to full-time role based on performance during internship period and the then prevailing market conditions)."
 			}
 		],
 		"job_location": ["Remote"],
@@ -846,35 +911,40 @@
 				"name": "BHARAT TYAGI",
 				"enrollment_number": "9922102131",
 				"email": "tyagibharat2002@gmail.com",
-				"role": null
+				"role": "AI Innovation Incubator (AIII) Intern",
+				"package": 15.0
 			},
 			{
 				"name": "KARTIK SANGWAN",
 				"enrollment_number": "22103327",
 				"email": "kartiksangwan053@gmail.com",
-				"role": null
+				"role": "AI Innovation Incubator (AIII) Intern",
+				"package": 15.0
 			},
 			{
 				"name": "MIHIKA KHEMKA",
 				"enrollment_number": "9922103076",
 				"email": "mihika.khemka@gmail.com",
-				"role": null
+				"role": "AI Innovation Incubator (AIII) Intern",
+				"package": 15.0
 			},
 			{
 				"name": "ADITYA SACHAN",
 				"enrollment_number": "221B029",
 				"email": "adityasachan24@gmail.com",
-				"role": null
+				"role": "AI Innovation Incubator (AIII) Intern",
+				"package": 15.0
 			},
 			{
 				"name": "SAMYAK JAIN",
 				"enrollment_number": "221B330",
 				"email": "samyakjain9761@gmail.com",
-				"role": null
+				"role": "AI Innovation Incubator (AIII) Intern",
+				"package": 15.0
 			}
 		],
 		"number_of_offers": 5,
-		"additional_info": "Internship duration: 6 Months. Conversion to full-time role based on performance during internship period and the then prevailing market conditions.",
+		"additional_info": "Conversion to full-time role based on performance during internship period and the then prevailing market conditions. Salary Package: INR 20.00 Lakhs per annum",
 		"email_subject": "Fwd: Concept2Action.ai : Hiring Interns From B.Tech Batch 2026 - To\r\n be Converted to Full Time Role Based on Performance During Internship From\r\n Aug 2026 to Dec 2026 - Offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -882,26 +952,24 @@
 		"company": "Bluecore India",
 		"roles": [
 			{
-				"role": "Intern",
-				"packages": [
-					"INR 25 K to 30 K Per Month",
-					"INR 16.00 Lakhs (based on performance during the internship and, if converted, to a full-time role)"
-				],
-				"package_details": "The package is INR 16.00 Lakhs based on performance during the internship and, if converted, to a full-time role and the then prevailing market conditions."
+				"role": "Full Time",
+				"package": 16.0,
+				"package_details": "Based on performance during the internship and, if converted, to a full-time role and the then prevailing market conditions."
 			}
 		],
-		"job_location": ["Delhi NCR"],
+		"job_location": ["Work From Home", "Delhi NCR"],
 		"joining_date": "2025-08-11",
 		"students_selected": [
 			{
 				"name": "TANYA SINGH",
 				"enrollment_number": "22103186",
 				"email": "tanyasinghmadnavat@gmail.com",
-				"role": null
+				"role": "Intern",
+				"package": 16.0
 			}
 		],
 		"number_of_offers": 1,
-		"additional_info": "Internship duration: 12 Months",
+		"additional_info": "Internship duration: 12 Months. Full-time offer is performance-based.",
 		"email_subject": "Fwd: Bluecore India-Hiring Interns Only From Batch 2026-To be\r\n Converted to Full Time Role Based on Performance During Internship From\r\n August 2025 to July 2026-Final Offer",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -910,13 +978,13 @@
 		"roles": [
 			{
 				"role": "Business Analyst",
-				"packages": ["INR 16.74 Lacs", "INR 11,74,166 LPA"],
-				"package_details": "Total package offered: INR 16.74 Lacs, which includes INR 5 Lacs as Long Term Bonus that will be strategically disbursed over the coming years to ensure long-term value for the candidate. Package for 1st year: INR 11,74,166 LPA. First year package also includes joining bonus of INR 1,00,000 which will be a straight-up amount given to the candidates in two different installments. They will receive the first installment of INR 50,000 with their first salary as a full-time employee and the remaining INR 50,000 after they complete 3 months as a full-time employee. Students are also entitled to a hotel accommodation (one-time benefit) of INR 20,000 (non-cash benefits) if they are an out-stationed employee."
+				"package": 16.74,
+				"package_details": "Total package offered: INR 16.74 Lacs, which includes INR 5 Lacs as Long Term Bonus that will be strategically disbursed over the coming years. Package for 1st year: INR 11,74,166 LPA. First year package also includes joining bonus of INR 1,00,000 (INR 50,000 with first salary and INR 50,000 after 3 months). Students are also entitled to a hotel accommodation (one-time benefit) of INR 20,000 (non-cash benefits)."
 			},
 			{
 				"role": "Technology Analyst",
-				"packages": ["INR 16.74 Lacs", "INR 11,74,166 LPA"],
-				"package_details": "Total package offered: INR 16.74 Lacs, which includes INR 5 Lacs as Long Term Bonus that will be strategically disbursed over the coming years to ensure long-term value for the candidate. Package for 1st year: INR 11,74,166 LPA. First year package also includes joining bonus of INR 1,00,000 which will be a straight-up amount given to the candidates in two different installments. They will receive the first installment of INR 50,000 with their first salary as a full-time employee and the remaining INR 50,000 after they complete 3 months as a full-time employee. Students are also entitled to a hotel accommodation (one-time benefit) of INR 20,000 (non-cash benefits) if they are an out-stationed employee."
+				"package": 16.74,
+				"package_details": "Total package offered: INR 16.74 Lacs, which includes INR 5 Lacs as Long Term Bonus that will be strategically disbursed over the coming years. Package for 1st year: INR 11,74,166 LPA. First year package also includes joining bonus of INR 1,00,000 (INR 50,000 with first salary and INR 50,000 after 3 months). Students are also entitled to a hotel accommodation (one-time benefit) of INR 20,000 (non-cash benefits)."
 			}
 		],
 		"job_location": ["Gurugram"],
@@ -926,53 +994,61 @@
 				"name": "SHRADHA Mittal",
 				"enrollment_number": "22103162",
 				"email": "shradhamittal1999@gmail.com",
-				"role": "Business Analyst"
+				"role": "Business Analyst",
+				"package": null
 			},
 			{
 				"name": "HARDIK GUPTA",
 				"enrollment_number": "22103242",
 				"email": "hardikgupta052@gmail.com",
-				"role": "Business Analyst"
+				"role": "Business Analyst",
+				"package": null
 			},
 			{
 				"name": "SATVIK PANDEY",
 				"enrollment_number": "22103324",
 				"email": "satvikofficial20@gmail.com",
-				"role": "Business Analyst"
+				"role": "Business Analyst",
+				"package": null
 			},
 			{
 				"name": "AARUSH GUPTA",
 				"enrollment_number": "22103030",
 				"email": "aarush9604@gmail.com",
-				"role": "Technology Analyst"
+				"role": "Technology Analyst",
+				"package": null
 			},
 			{
 				"name": "RHYTHM RAHEJA",
 				"enrollment_number": "22103314",
 				"email": "rahejarhythm29@gmail.com",
-				"role": "Technology Analyst"
+				"role": "Technology Analyst",
+				"package": null
 			},
 			{
 				"name": "SANKRITYA SHUKLA",
 				"enrollment_number": "9922103136",
 				"email": "sankrityashukla@gmail.com",
-				"role": "Technology Analyst"
+				"role": "Technology Analyst",
+				"package": null
 			},
 			{
 				"name": "Suyash Singh",
 				"enrollment_number": "9922103174",
 				"email": "suyashsingh2708@gmail.com",
-				"role": "Technology Analyst"
+				"role": "Technology Analyst",
+				"package": null
 			},
 			{
 				"name": "Siddhanth Choudhary",
 				"enrollment_number": "9922103207",
 				"email": "siddhanth1501@gmail.com",
-				"role": "Technology Analyst"
+				"role": "Technology Analyst",
+				"package": null
 			}
 		],
 		"number_of_offers": 8,
-		"additional_info": "Service Bond: Students have to pay back the amount INR 1,20,000 if they resign from ProcDNA within 12 months of their joining. The company may ask for compulsory joining as an intern from January 2026",
+		"additional_info": "Students have to pay back the amount INR 1,20,000 if they resign from ProcDNA within 12 months of their joining. The company may ask for compulsory joining as an intern from January 2026.",
 		"email_subject": "Fwd: ProcDNA Analytics Private Limited Hiring For Full Time Role From\r\n Batch 2026-Final Offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -981,18 +1057,13 @@
 		"roles": [
 			{
 				"role": "Intern",
-				"packages": [
-					"INR 1,00,000 per month",
-					"INR 56 Lakhs (Full-time package)",
-					"INR 24,00,000 Per Annum (Fixed)",
-					"INR 3,200,000 Cash bonus spread across 4 years"
-				],
-				"package_details": "Cash bonus breakdown:\nPost completion of 1 year from the joining date: INR 500,000\nPost completion of 2 years from the joining date: INR 700,000\nPost completion of 3 years from the joining date: INR 900,000\nPost completion of 4 years from the joining date: INR 1,100,000"
+				"package": 12.0,
+				"package_details": "INR 1,00,000 per month stipend"
 			},
 			{
 				"role": "Full Time",
-				"packages": ["INR 56 Lakhs"],
-				"package_details": null
+				"package": 56.0,
+				"package_details": "Fixed: INR 24,00,000 Per Annum, Cash bonus: INR 3,200,000 spread across 4 years (Post completion of 1 year: INR 500,000, Post completion of 2 years: INR 700,000, Post completion of 3 years: INR 900,000, Post completion of 4 years: INR 1,100,000)"
 			}
 		],
 		"job_location": ["Gurugram"],
@@ -1002,11 +1073,12 @@
 				"name": "Rudroneel Sengupta",
 				"enrollment_number": "22102074",
 				"email": "11a.rudroneelsengupta@gmail.com",
-				"role": null
+				"role": "Intern",
+				"package": null
 			}
 		],
 		"number_of_offers": 1,
-		"additional_info": "Internship duration: 06 months (Aug 2025 to January 2026). Full-time offer is based on performance during the internship and prevailing market conditions.  Batch 2026 students only.",
+		"additional_info": "Internship from August 2025 to January 2026, Full-time offer based on performance.",
 		"email_subject": "Fwd: Zomato is Hiring Interns Only from Batch 2026 to be converted to\r\n Full Time Role Based on Performance during 06 months Internships from Aug\r\n 2025 to January 2026-Offer",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -1015,8 +1087,13 @@
 		"roles": [
 			{
 				"role": "Generative AI Intern",
-				"packages": ["INR 1,00,000 per month", "INR 56 Lakhs"],
-				"package_details": "Full-time package as received from the company: This will transition to a full-time position based on performance during the Internship and the then prevailing market conditions, with a salary package of INR 56 Lakhs. Fixed: INR 24,00,000 Per Annum. Cash bonus: INR 3,200,000 spread across 4 years as follows: Post completion of 1 year from the joining date: INR 500,000, Post completion of 2 years from the joining date: INR 700,000, Post completion of 3 years from the joining date: INR 900,000, Post completion of 4 years from the joining date: INR 1,100,000"
+				"package": 12.0,
+				"package_details": "INR 1,00,000 per month stipend"
+			},
+			{
+				"role": "Generative AI Intern",
+				"package": 56.0,
+				"package_details": "Fixed: INR 24,00,000 Per Annum; Cash bonus: INR 3,200,000 spread across 4 years (INR 500,000 after 1 year, INR 700,000 after 2 years, INR 900,000 after 3 years, INR 1,100,000 after 4 years)"
 			}
 		],
 		"job_location": ["Gurugram"],
@@ -1026,11 +1103,12 @@
 				"name": "MANYA GANGOLI",
 				"enrollment_number": "22103248",
 				"email": "manyagangoli14@gmail.com",
-				"role": "Generative AI Intern"
+				"role": "Generative AI Intern",
+				"package": null
 			}
 		],
 		"number_of_offers": 1,
-		"additional_info": "The student completed a summer internship with the company and based on her exceptional performance during the internship she has been offered the position of Generative AI Intern.",
+		"additional_info": "The offer is a pre-placement offer (PPO) based on the student's summer internship performance. The internship starts in August 2025. The full-time package is contingent on performance during the internship and market conditions.",
 		"email_subject": "Fwd: Zomato-Pre Placement Offer From Batch 2026",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -1039,31 +1117,23 @@
 		"roles": [
 			{
 				"role": "SWE (Software Engineer)",
-				"packages": [
-					"INR 65,21,499/-",
-					"Base Pay (A): INR 26,90,000/-",
-					"Bonus Target: 10%",
-					"Bonus Target Amount (B): INR 2,69,000/-",
-					"Total Target Cash Compensation (A+B): INR 29,59,000/-",
-					"Total Equity: INR 35,62,499/- | USD: 41,600",
-					"Annual Equity (C): INR 8,90,625/- | USD: 10,400",
-					"Annual Total Target Compensation (A+B+C): INR 3,849,625/-"
-				],
-				"package_details": "Atlassian Full-time Compensation for FY26 SWE Grad | Annualised Target Total Compensation"
+				"package": 65.21,
+				"package_details": "Base Pay: INR 26,90,000/-\nBonus Target: 10% (INR 2,69,000/-)\nTotal Target Cash Compensation: INR 29,59,000/-\nTotal Equity: INR 35,62,499/- | USD: 41,600\nAnnual Equity: INR 8,90,625/- | USD: 10,400\nAnnual Total Target Compensation: INR 3,849,625/-\nFX Rate (As of 1st July 2025): 85.637"
 			}
 		],
-		"job_location": null,
+		"job_location": ["Bengaluru"],
 		"joining_date": "2026-06-01",
 		"students_selected": [
 			{
 				"name": "RISHIKA AGGARWAL",
 				"enrollment_number": "22103046",
 				"email": "aggarwalrishika468@gmail.com",
-				"role": null
+				"role": "SWE (Software Engineer)",
+				"package": 65.21
 			}
 		],
 		"number_of_offers": 1,
-		"additional_info": "If the offered grad chooses to relocate to Bengaluru at the start of their employment with Atlassian, they will receive 150,000 INR in relocation assistance, in addition to the Annual Total Target Compensation mentioned above.",
+		"additional_info": "Relocation assistance of INR 150,000 will be provided if the candidate chooses to relocate to Bengaluru at the start of their employment.",
 		"email_subject": "Fwd: Atlassian - Hiring for Full Time Role from 2026 Batch through\r\n Women in Tech 4.0 - Preplacement Offer (PPO)",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -1072,8 +1142,8 @@
 		"roles": [
 			{
 				"role": "Vivnovator Intern",
-				"packages": ["INR 15,000 per month for 12 months", "INR 18 LPA"],
-				"package_details": "Permanent employment is confirmed after 12 months of internship, based on performance and the then prevailing market conditions."
+				"package": 2.1,
+				"package_details": "INR 15,000 per month for 12 months. Permanent employment is confirmed after 12 months of internship, based on performance and the then prevailing market conditions. Package: INR 18 LPA"
 			}
 		],
 		"job_location": ["Remote (WFH)"],
@@ -1083,11 +1153,12 @@
 				"name": "DIVYA HANDA",
 				"enrollment_number": "22101017",
 				"email": "divyahanda2004@gmail.com",
-				"role": null
+				"role": "Vivnovator Intern",
+				"package": 2.1
 			}
 		],
 		"number_of_offers": 1,
-		"additional_info": "Offer acceptance required by 4 PM on 22 July 2025 through revert mail at archita.jptnp@gmail.com.",
+		"additional_info": "Offer acceptance required by 4 PM on 22 July 2025 through revert mail at archita.jptnp@gmail.com. Internship from Aug 2025 to July 2026. Full Time Role Based on Performance during 12 months Internship.",
 		"email_subject": "Fwd: Vivnovation: Hiring Interns Only from Batch 2026-To be converted\r\n to Full Time Role Based on Performance during 12 months Internship from Aug\r\n 2025 to July 2026 - OFFER",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -1096,13 +1167,8 @@
 		"roles": [
 			{
 				"role": "Trainee",
-				"packages": ["INR 17,30,000 (INR 15,00,000 fixed)"],
-				"package_details": "Permanent employment is confirmed after 6 months of Probation, based on performance and the then prevailing market conditions."
-			},
-			{
-				"role": "FT Role",
-				"packages": ["INR 17,30,000 (INR 15,00,000 fixed)"],
-				"package_details": "Permanent employment is confirmed after 6 months of Probation, based on performance and the then prevailing market conditions."
+				"package": 17.3,
+				"package_details": "INR 17,30,000 (INR 15,00,000 fixed). Permanent employment is confirmed after 6 months of Probation, based on performance and the then prevailing market conditions."
 			}
 		],
 		"job_location": ["Noida", "Hyderabad", "Pune", "Mumbai"],
@@ -1112,19 +1178,22 @@
 				"name": "DIVYANSHI CHAURASIA",
 				"enrollment_number": "221B154",
 				"email": "divyanshii0304@gmail.com",
-				"role": null
+				"role": "Trainee",
+				"package": 17.3
 			},
 			{
 				"name": "ADYA Jha",
 				"enrollment_number": "9922102115",
 				"email": "adyajha498@gmail.com",
-				"role": null
+				"role": "Trainee",
+				"package": 17.3
 			},
 			{
 				"name": "LAKSHYA BHUTANI",
 				"enrollment_number": "9922103052",
 				"email": "lakshyabhutani2004p@gmail.com",
-				"role": null
+				"role": "Trainee",
+				"package": 17.3
 			}
 		],
 		"number_of_offers": 3,
@@ -1137,13 +1206,13 @@
 		"roles": [
 			{
 				"role": "Software Developer",
-				"packages": ["INR 17,30,000 (INR 15,00,000 fixed)"],
-				"package_details": "Permanent employment is confirmed after 6 months of Probation, based on performance and the then prevailing market conditions."
+				"package": 17.3,
+				"package_details": "INR 17,30,000 (INR 15,00,000 fixed). Permanent employment is confirmed after 6 months of Probation, based on performance and the then prevailing market conditions. From Day 1, instead of a stipend, students will be given full salary"
 			},
 			{
 				"role": "Technical Analyst",
-				"packages": ["INR 17,30,000 (INR 15,00,000 fixed)"],
-				"package_details": "Permanent employment is confirmed after 6 months of Probation, based on performance and the then prevailing market conditions."
+				"package": 17.3,
+				"package_details": "INR 17,30,000 (INR 15,00,000 fixed). Permanent employment is confirmed after 6 months of Probation, based on performance and the then prevailing market conditions. From Day 1, instead of a stipend, students will be given full salary"
 			}
 		],
 		"job_location": ["Noida", "Hyderabad", "Pune", "Mumbai"],
@@ -1153,43 +1222,50 @@
 				"name": "NAYAN KATHAIT",
 				"enrollment_number": "22102201",
 				"email": "nayankathait@gmail.com",
-				"role": "Software Developer"
+				"role": "Software Developer",
+				"package": null
 			},
 			{
 				"name": "SREYA VARGHESE",
 				"enrollment_number": "22103233",
 				"email": "sreyavarghese1424@gmail.com",
-				"role": "Technical Analyst"
+				"role": "Technical Analyst",
+				"package": null
 			},
 			{
 				"name": "ARNAV GUPTA",
 				"enrollment_number": "22103257",
 				"email": "09arnavgupta@gmail.com",
-				"role": "Software Developer"
+				"role": "Software Developer",
+				"package": null
 			},
 			{
 				"name": "Ayush Kumar Tomar",
 				"enrollment_number": "22104053",
 				"email": "ayushkumartomar20@gmail.com",
-				"role": "Software Developer"
+				"role": "Software Developer",
+				"package": null
 			},
 			{
 				"name": "Ananya Singh",
 				"enrollment_number": "221030045",
 				"email": "ananyasingh5038@gmail.com",
-				"role": "Technical Analyst"
+				"role": "Technical Analyst",
+				"package": null
 			},
 			{
 				"name": "Satvik Pandey",
 				"enrollment_number": "221030408",
 				"email": "satvikpandey03@gmail.com",
-				"role": "Technical Analyst"
+				"role": "Technical Analyst",
+				"package": null
 			},
 			{
 				"name": "Saumya Mandhyan",
 				"enrollment_number": "9922103108",
 				"email": "saumyamandhyan16@gmail.com",
-				"role": "Technical Analyst"
+				"role": "Technical Analyst",
+				"package": null
 			}
 		],
 		"number_of_offers": 7,
@@ -1202,11 +1278,8 @@
 		"roles": [
 			{
 				"role": "Six Months Intern (Jan-June 2026) - To be converted to Full Time Role",
-				"packages": [
-					"INR 50,000 per month (Stipend during internship)",
-					"INR 18 Lacs (15 Lacs + 3 Lacs Sign-On bonus) (Compensation in full time role)"
-				],
-				"package_details": "Permanent employment is confirmed after six months of internship, based on performance and the then prevailing market conditions."
+				"package": 18.0,
+				"package_details": "Stipend during internship: INR 50,000 per month. Compensation in full time role: INR 18 Lacs (15 Lacs + 3 Lacs Sign-On bonus)"
 			}
 		],
 		"job_location": ["Gurgaon"],
@@ -1216,29 +1289,33 @@
 				"name": "VANSHIKA BHARGAVA",
 				"enrollment_number": "22103040",
 				"email": null,
-				"role": null
+				"role": "Six Months Intern (Jan-June 2026) - To be converted to Full Time Role",
+				"package": null
 			},
 			{
 				"name": "YASH MALIK",
 				"enrollment_number": "22103171",
 				"email": null,
-				"role": null
+				"role": "Six Months Intern (Jan-June 2026) - To be converted to Full Time Role",
+				"package": null
 			},
 			{
 				"name": "SHIVANG MISHRA",
 				"enrollment_number": "22103275",
 				"email": null,
-				"role": null
+				"role": "Six Months Intern (Jan-June 2026) - To be converted to Full Time Role",
+				"package": null
 			},
 			{
 				"name": "MUSKAN ASTHANA",
 				"enrollment_number": "22104029",
 				"email": null,
-				"role": null
+				"role": "Six Months Intern (Jan-June 2026) - To be converted to Full Time Role",
+				"package": null
 			}
 		],
 		"number_of_offers": 4,
-		"additional_info": "The email is a placement offer announcement for the 2026 batch. The internship duration is from January to June 2026. The full-time role offer is contingent on performance during the internship and market conditions.",
+		"additional_info": "Permanent employment is confirmed after six months of internship, based on performance and the then prevailing market conditions.",
 		"email_subject": "Fwd: Sprinklr - Batch 2026 – Six Months Intern (Jan-June 2026) - To be converted to Full Time Role - Offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -1247,11 +1324,8 @@
 		"roles": [
 			{
 				"role": "One-Year Intern",
-				"packages": [
-					"INR 30,000 PM for BTech Students",
-					"INR 35,000 PM for MTech Students"
-				],
-				"package_details": null
+				"package": 3.6,
+				"package_details": "INR 30,000 PM for BTech Students, INR 35,000 PM for MTech Students."
 			}
 		],
 		"job_location": ["Greater Noida"],
@@ -1261,167 +1335,194 @@
 				"name": "VANISHA CHOPRA",
 				"enrollment_number": "9922102127",
 				"email": null,
-				"role": "Hardware"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "OJAS CHAUHAN",
 				"enrollment_number": "22102070",
 				"email": null,
-				"role": "Analog"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "PRANJAL DWIVEDI",
 				"enrollment_number": "22102019",
 				"email": null,
-				"role": "Digital"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "GAURAV SAXENA",
 				"enrollment_number": "22102071",
 				"email": null,
-				"role": "Digital"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "AARYAN SINGH PUNDIR",
 				"enrollment_number": "22102077",
 				"email": null,
-				"role": "Digital"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "PRANAV MISHRA",
 				"enrollment_number": "22102095",
 				"email": null,
-				"role": "Digital"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "ANSH GOEL",
 				"enrollment_number": "22102109",
 				"email": null,
-				"role": "Digital"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "JATIN RUSTAGI",
 				"enrollment_number": "22102180",
 				"email": null,
-				"role": "Digital"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "DEVANSHI MISHRA",
 				"enrollment_number": "22102223",
 				"email": null,
-				"role": "Digital"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "VANISHA AGARWAL",
 				"enrollment_number": "9922102035",
 				"email": null,
-				"role": "Digital"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "PRAKHAR SINGH",
 				"enrollment_number": "9922102043",
 				"email": null,
-				"role": "Digital"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "PRASIDDHI BHATIA",
 				"enrollment_number": "9922102103",
 				"email": null,
-				"role": "Digital"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "KARAN SINGH",
 				"enrollment_number": "2403180006",
 				"email": null,
-				"role": "Digital"
+				"role": "One-Year Intern",
+				"package": 4.2
 			},
 			{
 				"name": "KRRISH DAYAL",
 				"enrollment_number": "22102073",
 				"email": null,
-				"role": "Embedded SW"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "ANMOL SINGH",
 				"enrollment_number": "22102120",
 				"email": null,
-				"role": "Embedded SW"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "SAKSHAM PUROHIT",
 				"enrollment_number": "22103017",
 				"email": null,
-				"role": "Software"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "ANUBHAV TYAGI",
 				"enrollment_number": "22103022",
 				"email": null,
-				"role": "Software"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "MAHI AGGARWAL",
 				"enrollment_number": "22103102",
 				"email": null,
-				"role": "Software"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "AKSHAT SINGH",
 				"enrollment_number": "22103107",
 				"email": null,
-				"role": "Software"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "TANAY JAIN",
 				"enrollment_number": "22103178",
 				"email": null,
-				"role": "Software"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "KARAN NAVEEN SOOD",
 				"enrollment_number": "22103180",
 				"email": null,
-				"role": "Software"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "LOKENDRA SINGH SHEKHAWAT",
 				"enrollment_number": "22104006",
 				"email": null,
-				"role": "Software"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "HARSH GARG",
 				"enrollment_number": "22104009",
 				"email": null,
-				"role": "Software"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "AARADHYA SHARMA",
 				"enrollment_number": "22104015",
 				"email": null,
-				"role": "Software"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "TANMAY VIG",
 				"enrollment_number": "21803003",
 				"email": null,
-				"role": "Software"
+				"role": "One-Year Intern",
+				"package": 3.6
 			},
 			{
 				"name": "ASHUTOSH TYAGI",
 				"enrollment_number": "2403030004",
 				"email": null,
-				"role": "Software"
+				"role": "One-Year Intern",
+				"package": 4.2
 			},
 			{
 				"name": "SALONI ARIF",
 				"enrollment_number": "2403030005",
 				"email": null,
-				"role": "Software"
+				"role": "One-Year Intern",
+				"package": 4.2
 			}
 		],
 		"number_of_offers": 27,
-		"additional_info": "Start Date of Internship: July 2025. End Date of Internship: June/July 2026. Date of Joining: Will be shared shortly in the next mail with LOI.",
+		"additional_info": "Start Date of Internship: July 2025, End Date of Internship: June/July 2026. Date of Joining will be shared shortly in the next mail with LOI.",
 		"email_subject": "Fwd: STMicroelectronics - Hiring Interns for One Year Internship Role\r\n from Batch 2026 - Additional Offer",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -1430,8 +1531,13 @@
 		"roles": [
 			{
 				"role": "Product Intern",
-				"packages": ["INR 35000/- Per Month", "INR 12 Lakhs"],
-				"package_details": "Conversion to full-time role based on performance during Internship and the then prevailing market conditions"
+				"package": 4.2,
+				"package_details": "INR 35000/- Per Month stipend. Conversion to full-time role based on performance during Internship and the then prevailing market conditions. Salary Package: INR 12 Lakhs"
+			},
+			{
+				"role": "Software Developer Intern",
+				"package": 4.2,
+				"package_details": "INR 35000/- Per Month stipend. Conversion to full-time role based on performance during Internship and the then prevailing market conditions. Salary Package: INR 14 Lakhs"
 			}
 		],
 		"job_location": ["Gurgaon"],
@@ -1441,41 +1547,89 @@
 				"name": "ATHARV JAIN",
 				"enrollment_number": "22102145",
 				"email": "anshatharv@gmail.com",
-				"role": null
+				"role": "Product Intern",
+				"package": null
 			},
 			{
 				"name": "ARYAMAN VASHISHTHA",
 				"enrollment_number": "9922102042",
 				"email": "aryamanvashishtha12345@gmail.com",
-				"role": null
+				"role": "Product Intern",
+				"package": null
 			},
 			{
 				"name": "DAKSH ARORA",
 				"enrollment_number": "9922103167",
 				"email": "daksh007arora@gmail.com",
-				"role": null
+				"role": "Product Intern",
+				"package": null
 			},
 			{
 				"name": "FAISAL SHAFIQUE",
 				"enrollment_number": "22102096",
 				"email": "faisall.shafique2003@gmail.com",
-				"role": null
+				"role": "Product Intern",
+				"package": null
 			},
 			{
 				"name": "KUNAL SINGH",
 				"enrollment_number": "22103033",
 				"email": "kunalsingh.workz@gmail.com",
-				"role": null
+				"role": "Product Intern",
+				"package": null
 			},
 			{
 				"name": "SANAT SHREE",
 				"enrollment_number": "9922103151",
 				"email": "sanatshree1@gmail.com",
-				"role": null
+				"role": "Product Intern",
+				"package": null
+			},
+			{
+				"name": "ABHISHEK SHUKLA",
+				"enrollment_number": "21803001",
+				"email": "abhi2003shukla@gmail.com",
+				"role": "Software Developer Intern",
+				"package": null
+			},
+			{
+				"name": "ANGEL",
+				"enrollment_number": "9922103062",
+				"email": "angelsinghal993@gmail.com",
+				"role": "Software Developer Intern",
+				"package": null
+			},
+			{
+				"name": "SHAHZAD ULLAH KHAN",
+				"enrollment_number": "22103167",
+				"email": "shahzad.2feb@gmail.com",
+				"role": "Software Developer Intern",
+				"package": null
+			},
+			{
+				"name": "ABHIRUP DANDAPAT",
+				"enrollment_number": "9922103163",
+				"email": "abhirupdandapat03@gmail.com",
+				"role": "Software Developer Intern",
+				"package": null
+			},
+			{
+				"name": "DHRUV MISHRA",
+				"enrollment_number": "9922103112",
+				"email": "dhruvmishra1020@gmail.com",
+				"role": "Software Developer Intern",
+				"package": null
+			},
+			{
+				"name": "ROHIT GUPTA",
+				"enrollment_number": "21803018",
+				"email": "rg3354877@gmail.com",
+				"role": "Software Developer Intern",
+				"package": null
 			}
 		],
-		"number_of_offers": 6,
-		"additional_info": "Non - Tech Role",
+		"number_of_offers": 12,
+		"additional_info": "Offers for Product Intern and Software Developer Intern roles.  Internship duration is one year. Conversion to full-time role based on performance.",
 		"email_subject": "Fwd: Omniful - Hiring for One Year Internship From Batch 2026 - To be\r\n converted to Full Time Role Based on Performance during 1 Year Internship\r\n from June 2025 to May 2026 - Offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -1484,11 +1638,18 @@
 		"roles": [
 			{
 				"role": "Software Engineer Intern (Full Stack)",
-				"packages": [
-					"INR 50,000/- Per Month",
-					"INR 12.60 Lakhs (INR 9 Lakhs fixed + INR 3 Lakhs LTIP + INR 60K variable)"
-				],
-				"package_details": "Conversion to full-time role based on performance during Internship and the then prevailing market conditions"
+				"package": 6.0,
+				"package_details": "INR 50,000/- Per Month (Stipend). Salary Package: INR 12.60 Lakhs (INR 9 Lakhs fixed + INR 3 Lakhs LTIP + INR 60K variable)"
+			},
+			{
+				"role": "Software Engineer Trainee (Full Stack)",
+				"package": 12.6,
+				"package_details": "INR 9 Lakhs fixed + INR 3 Lakhs LTIP + INR 60K variable"
+			},
+			{
+				"role": "Technical Project Associate",
+				"package": 12.6,
+				"package_details": "INR 9 Lakhs fixed + INR 3 Lakhs LTIP + INR 60K variable"
 			}
 		],
 		"job_location": ["Sector 67, Gurgaon, Haryana, India"],
@@ -1498,29 +1659,61 @@
 				"name": "SAMARTH NARAYAN",
 				"enrollment_number": "9922103238",
 				"email": null,
-				"role": "Software Engineer Intern (Full Stack)"
+				"role": "Software Engineer Intern (Full Stack)",
+				"package": 6.0
 			},
 			{
 				"name": "ARYAN AGRAWAL",
 				"enrollment_number": "22103182",
 				"email": null,
-				"role": "Software Engineer Intern (Full Stack)"
+				"role": "Software Engineer Intern (Full Stack)",
+				"package": 6.0
 			},
 			{
 				"name": "DIBYA SUNDAR ROY",
 				"enrollment_number": "22103229",
 				"email": null,
-				"role": "Software Engineer Intern (Full Stack)"
+				"role": "Software Engineer Intern (Full Stack)",
+				"package": 6.0
 			},
 			{
 				"name": "VEDANT SINGH CHAUHAN",
 				"enrollment_number": "22103058",
 				"email": null,
-				"role": "Software Engineer Intern (Full Stack)"
+				"role": "Software Engineer Intern (Full Stack)",
+				"package": 6.0
+			},
+			{
+				"name": "MANAN GARG",
+				"enrollment_number": "9922103081",
+				"email": null,
+				"role": "Technical Project Associate",
+				"package": 12.6
+			},
+			{
+				"name": "PRIYANSH SIKKA",
+				"enrollment_number": "9922103026",
+				"email": null,
+				"role": "Software Engineer Trainee (Full Stack)",
+				"package": 12.6
+			},
+			{
+				"name": "GAURAV TOMAR",
+				"enrollment_number": "22103038",
+				"email": null,
+				"role": "Software Engineer Trainee (Full Stack)",
+				"package": 12.6
+			},
+			{
+				"name": "AVESH KUMAR SINGH",
+				"enrollment_number": "22103136",
+				"email": null,
+				"role": "Software Engineer Trainee (Full Stack)",
+				"package": 12.6
 			}
 		],
-		"number_of_offers": 4,
-		"additional_info": "It is mandatory for candidates to be open to relocating if not staying within a distance of 20-25 km from the office location. It's an on-site work opportunity - 5 Days working",
+		"number_of_offers": 8,
+		"additional_info": "Conversion to full-time role based on performance during Internship and the then prevailing market conditions. It is mandatory for candidates to be open to relocating if not staying within a distance of 20-25 km from the office location. It's an on-site work opportunity - 5 Days working",
 		"email_subject": "Fwd: SalesCode.ai - Hiring for Six Months Tech Intern From Batch 2026\r\n -To be converted to Full Time Role Based on Performance during Internship - Offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -1529,11 +1722,8 @@
 		"roles": [
 			{
 				"role": "SDE Intern",
-				"packages": [
-					"INR 30,000/- per month",
-					"INR 10.00 to 16.00 Lakhs per annum"
-				],
-				"package_details": "Conversion to full-time role based on performance during Internship and the then prevailing market conditions"
+				"package": 3.6,
+				"package_details": "INR 30,000/- per month"
 			}
 		],
 		"job_location": ["Gurgaon"],
@@ -1543,29 +1733,33 @@
 				"name": "PRATEEK  KUMAR",
 				"enrollment_number": "22103052",
 				"email": "prateekkumaroneandonly1@gmail.com",
-				"role": "SDE Intern"
+				"role": "SDE Intern",
+				"package": 3.6
 			},
 			{
 				"name": "HARSHAL VILAS RELAN",
 				"enrollment_number": "22103235",
 				"email": "placement.harshal@gmail.com",
-				"role": "SDE Intern"
+				"role": "SDE Intern",
+				"package": 3.6
 			},
 			{
 				"name": "NANDINI",
 				"enrollment_number": "22103225",
 				"email": "nandinijindal010@gmail.com",
-				"role": "SDE Intern"
+				"role": "SDE Intern",
+				"package": 3.6
 			},
 			{
 				"name": "ANAND\n PANDA",
 				"enrollment_number": "9922103099",
 				"email": "anand612p@gmail.com",
-				"role": "SDE Intern"
+				"role": "SDE Intern",
+				"package": 3.6
 			}
 		],
 		"number_of_offers": 4,
-		"additional_info": "Offers for B.Tech CSE and IT students of 2026 batch. Internship from July 2025 to Dec 2025. Work from office.",
+		"additional_info": "Conversion to full-time role based on performance during Internship and the then prevailing market conditions. Salary Package: INR 10.00 to 16.00 Lakhs per annum.",
 		"email_subject": "Fwd: Probo : Hiring Interns only From B.Tech 2026 Batch- To be\r\n Converted to Full Time Role Based on Performance During Internship From July\r\n 2025 to Dec 2025 - Offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -1574,10 +1768,12 @@
 		"roles": [
 			{
 				"role": "Intern",
-				"packages": [
-					"INR 40,000 PM (Stipend during internship)",
-					"INR 17 Lacs (Compensation in full-time role)"
-				],
+				"package": 4.8,
+				"package_details": "INR 40,000 PM (Stipend during internship)"
+			},
+			{
+				"role": "Full Time",
+				"package": 17.0,
 				"package_details": "Permanent employment is confirmed after 12 months of internship, based on performance and the then prevailing market conditions."
 			}
 		],
@@ -1588,11 +1784,12 @@
 				"name": "ANSH GOEL",
 				"enrollment_number": "22103067",
 				"email": null,
-				"role": null
+				"role": "Intern",
+				"package": null
 			}
 		],
 		"number_of_offers": 1,
-		"additional_info": "Internship duration: June 2025 to May 2026.  Conversion to full-time role based on performance.",
+		"additional_info": "Permanent employment is confirmed after 12 months of internship, based on performance and the then prevailing market conditions.",
 		"email_subject": "Fwd: Cadence- Hiring Interns for 12 months from Batch 2026 - To be\r\n converted to Full Time Role Based on Performance during 12 months Internships\r\n from June 2025 to May 2026- Offer",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -1601,10 +1798,8 @@
 		"roles": [
 			{
 				"role": "Software Engineer Intern (Full Stack)",
-				"packages": [
-					"INR 12.60 Lakhs (INR 9 Lakhs fixed + INR 3 Lakhs LTIP + INR 60K variable)"
-				],
-				"package_details": "(Conversion to full-time role based on performance during Internship and the then prevailing market conditions)"
+				"package": 12.6,
+				"package_details": "INR 9 Lakhs fixed + INR 3 Lakhs LTIP + INR 60K variable"
 			}
 		],
 		"job_location": ["Sector 67, Gurgaon, Haryana, India"],
@@ -1614,11 +1809,12 @@
 				"name": "MAYANK SHARMA",
 				"enrollment_number": "9922103145",
 				"email": "ms323939@gmail.com",
-				"role": null
+				"role": "Software Engineer Intern (Full Stack)",
+				"package": 12.6
 			}
 		],
 		"number_of_offers": 1,
-		"additional_info": "It is mandatory for candidates to be open to relocating if not staying within a distance of 20-25 km from the office location. It's an on-site work opportunity - 5 Days working",
+		"additional_info": "Conversion to full-time role based on performance during Internship and the then prevailing market conditions.  It is mandatory for candidates to be open to relocating if not staying within a distance of 20-25 km from the office location. It's an on-site work opportunity - 5 Days working",
 		"email_subject": "Fwd: SalesCode.ai - Hiring for Six Months Tech Intern From Batch 2026\r\n - To be converted to Full Time Role Based on Performance during Internship -\r\n One More Offer",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -1626,12 +1822,9 @@
 		"company": "SAP Labs",
 		"roles": [
 			{
-				"role": "Internship",
-				"packages": [
-					"INR 35,000 PM",
-					"INR 15.50 Lacs (Salary INR-10 LPA + 2.75 Lacs RSU +2.75 Lacs Joining bonus)"
-				],
-				"package_details": "Stipend during internship: INR 35,000 PM. Compensation in full-time role: INR 15.50 Lacs (Salary INR-10 LPA + 2.75 Lacs RSU +2.75 Lacs Joining bonus)"
+				"role": "Cloud",
+				"package": 15.5,
+				"package_details": "Salary INR-10 LPA + 2.75 Lacs RSU + 2.75 Lacs Joining bonus"
 			}
 		],
 		"job_location": ["Bangalore"],
@@ -1641,23 +1834,26 @@
 				"name": "BHAVYA MALIK",
 				"enrollment_number": "21803002",
 				"email": null,
-				"role": "CSE"
+				"role": "Internship",
+				"package": null
 			},
 			{
 				"name": "VIVEK SHAURYA",
 				"enrollment_number": "21803013",
 				"email": null,
-				"role": "CSE"
+				"role": "Internship",
+				"package": null
 			},
 			{
 				"name": "ANSH JINDAL",
 				"enrollment_number": "21803016",
 				"email": null,
-				"role": "CSE"
+				"role": "Internship",
+				"package": null
 			}
 		],
 		"number_of_offers": 3,
-		"additional_info": "Permanent employment is confirmed after 10 months of internship, based on performance and the then prevailing market conditions. Internship end date: May 2026. Relocation is mandatory.",
+		"additional_info": "Permanent employment is confirmed after 10 months of internship, based on performance and the then prevailing market conditions.",
 		"email_subject": "Fwd: SAP Labs- Hiring MTech & Integrated CSE, ECE and VLSI students\r\n for 10 months Internship Role from Batch 2026 - Offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -1666,43 +1862,35 @@
 		"roles": [
 			{
 				"role": "SDE Intern (Frontend)",
-				"packages": [
-					"INR 20,000 per month for 12 months",
-					"INR 10 Lacs (Full-time)",
-					"Fixed Compensation: ₹8,00,000 per annum",
-					"ESOPs: ₹2,00,000 (Equity options), to be vested over 4 years with a 1-year cliff"
-				],
-				"package_details": "Stipend during Internship: INR 20,000 per month for 12 months. Compensation in a Full-time Role: INR 10 Lacs. Fixed Compensation: ₹8,00,000 per annum. ESOPs: ₹2,00,000 (Equity options), to be vested over 4 years with a 1-year cliff"
+				"package": 10.0,
+				"package_details": "INR 20,000 per month stipend for 12 months. Full-time role: INR 10 Lacs CTC (₹8,00,000 fixed + ₹2,00,000 ESOPs)"
 			},
 			{
 				"role": "SDE Intern (Android)",
-				"packages": [
-					"INR 20,000 per month for 12 months",
-					"INR 10 Lacs (Full-time)",
-					"Fixed Compensation: ₹8,00,000 per annum",
-					"ESOPs: ₹2,00,000 (Equity options), to be vested over 4 years with a 1-year cliff"
-				],
-				"package_details": "Stipend during Internship: INR 20,000 per month for 12 months. Compensation in a Full-time Role: INR 10 Lacs. Fixed Compensation: ₹8,00,000 per annum. ESOPs: ₹2,00,000 (Equity options), to be vested over 4 years with a 1-year cliff"
+				"package": 10.0,
+				"package_details": "INR 20,000 per month stipend for 12 months. Full-time role: INR 10 Lacs CTC (₹8,00,000 fixed + ₹2,00,000 ESOPs)"
 			}
 		],
-		"job_location": ["JIIT, Noida"],
+		"job_location": null,
 		"joining_date": "2025-06-01",
 		"students_selected": [
 			{
 				"name": "SANVI SHARMA",
 				"enrollment_number": "22103140",
 				"email": null,
-				"role": "SDE Intern (Frontend)"
+				"role": "SDE Intern (Frontend)",
+				"package": 10.0
 			},
 			{
 				"name": "RAJ TYAGI",
 				"enrollment_number": "21803020",
 				"email": null,
-				"role": "SDE Intern (Android)"
+				"role": "SDE Intern (Android)",
+				"package": 10.0
 			}
 		],
 		"number_of_offers": 2,
-		"additional_info": "Conversion to the full-time role would be on a performance basis during the one-year internship. Start Date of Internship: June/July 2025. End Date of Internship: May 2026. The date of Joining and the offer letter will be shared shortly.",
+		"additional_info": "Internship duration: June/July 2025 - May 2026. Full-time offer based on performance during internship.",
 		"email_subject": "Fwd: Crib - Hiring Interns Only from Batch 2026 - To be converted to\r\n Full Time Role Based on Performance during 12 months Internships from June\r\n 2025 to May 2026 - Offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -1711,8 +1899,8 @@
 		"roles": [
 			{
 				"role": "Summer Intern",
-				"packages": ["INR 35,000 PM"],
-				"package_details": null
+				"package": 4.2,
+				"package_details": "INR 35,000 per month stipend"
 			}
 		],
 		"job_location": null,
@@ -1722,19 +1910,22 @@
 				"name": "VANSHIKA GAHLOT",
 				"enrollment_number": "22103283",
 				"email": "vanshikagahlot561@gmail.com",
-				"role": null
+				"role": "Summer Intern",
+				"package": 4.2
 			},
 			{
 				"name": "SANYA GOEL",
 				"enrollment_number": "9922103229",
 				"email": "goelsanya09@gmail.com",
-				"role": null
+				"role": "Summer Intern",
+				"package": 4.2
 			},
 			{
 				"name": "BHAVYA CHAWLA",
 				"enrollment_number": "9922103231",
 				"email": "bhavyachawla14@gmail.com",
-				"role": null
+				"role": "Summer Intern",
+				"package": 4.2
 			}
 		],
 		"number_of_offers": 3,
@@ -1747,36 +1938,28 @@
 		"roles": [
 			{
 				"role": "Business Intel Engineer I",
-				"packages": ["INR 70000"],
-				"package_details": null
-			},
-			{
-				"role": "Business Intel Engineer",
-				"packages": ["INR 70000"],
-				"package_details": null
-			},
-			{
-				"role": "Support Engineer II",
-				"packages": ["INR 50000"],
-				"package_details": null
+				"package": 0.84,
+				"package_details": "INR 70000 per month"
 			},
 			{
 				"role": "Programmer Analyst",
-				"packages": ["INR 70000"],
-				"package_details": null
+				"package": 0.84,
+				"package_details": "INR 70000 per month"
+			},
+			{
+				"role": "Support Engineer II",
+				"package": 0.6,
+				"package_details": "INR 50000 per month"
 			},
 			{
 				"role": "System Development Engineer I",
-				"packages": ["INR 70000"],
-				"package_details": null
+				"package": 0.84,
+				"package_details": "INR 70000 per month"
 			}
 		],
 		"job_location": [
 			"Pan India",
-			"Bangalore",
-			"Hyderabad",
-			"Chennai",
-			"Gurugram"
+			"(Bangalore, Hyderabad, Chennai, Gurugram, etc.) as per the role offered & business requirements."
 		],
 		"joining_date": "2025-07-07",
 		"students_selected": [
@@ -1784,65 +1967,75 @@
 				"name": "RASENDRA KAUSHIK",
 				"enrollment_number": "9922103075",
 				"email": null,
-				"role": "Business Intel Engineer I"
+				"role": "Business Intel Engineer I",
+				"package": 0.84
 			},
 			{
 				"name": "NILESH VERMA",
 				"enrollment_number": "22102018",
 				"email": null,
-				"role": "Programmer Analyst"
+				"role": "Programmer Analyst",
+				"package": 0.84
 			},
 			{
 				"name": "KARTIKEY BORA",
 				"enrollment_number": "9922103074",
 				"email": null,
-				"role": "Programmer Analyst"
+				"role": "Programmer Analyst",
+				"package": 0.84
 			},
 			{
 				"name": "MAULIK GAUTAM",
 				"enrollment_number": "9922103182",
 				"email": null,
-				"role": "Programmer Analyst"
+				"role": "Programmer Analyst",
+				"package": 0.84
 			},
 			{
 				"name": "SIDHI GROVER",
 				"enrollment_number": "9922103095",
 				"email": null,
-				"role": "Programmer Analyst"
+				"role": "Programmer Analyst",
+				"package": 0.84
 			},
 			{
 				"name": "ARYAN JAISWAL",
 				"enrollment_number": "9922103113",
 				"email": null,
-				"role": "Support Engineer II"
+				"role": "Support Engineer II",
+				"package": 0.6
 			},
 			{
 				"name": "KHUSHI AGARWAL",
 				"enrollment_number": "9922103001",
 				"email": null,
-				"role": "Support Engineer II"
+				"role": "Support Engineer II",
+				"package": 0.6
 			},
 			{
 				"name": "SAKSHAM BHASIN",
 				"enrollment_number": "22102098",
 				"email": null,
-				"role": "System Development Engineer I"
+				"role": "System Development Engineer I",
+				"package": 0.84
 			},
 			{
 				"name": "DEVANSH KUKREJA",
 				"enrollment_number": "22104060",
 				"email": null,
-				"role": "System Development Engineer I"
+				"role": "System Development Engineer I",
+				"package": 0.84
 			},
 			{
 				"name": "SHASHANK GAUTAM",
 				"enrollment_number": "22102086",
 				"email": null,
-				"role": "Support Engineer II"
+				"role": "Support Engineer II",
+				"package": 0.6
 			}
 		],
 		"number_of_offers": 10,
-		"additional_info": "Internship duration: July - December 2025. Extension of further internship and permanent employment is confirmed after 6 months of internship, based on performance and the then prevailing market conditions.  Amazon's hiring team has sent the offer confirmation mail to all selected students and the link to complete the formalities by 2:00 pm today 1st may 2025.",
+		"additional_info": "Extension of further internship and permanent employment is confirmed after 6 months of internship, based on performance and the then prevailing market conditions.",
 		"email_subject": "Fwd: Amazon - Hiring for Six Months Tech Intern (Jul-Dec 2025) From\r\n Batch 2026 - Additional Offer",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -1851,63 +2044,63 @@
 		"roles": [
 			{
 				"role": "Associate Software Engineer Intern",
-				"packages": [
-					"INR 30,000 per month for 12 months",
-					"INR 23 Lacs (Full-time)"
-				],
-				"package_details": "Stipend during Internship: INR 30,000 per month for 12 months. Compensation in a Full-time Role: INR 23 Lacs"
+				"package": 23.0,
+				"package_details": "INR 30,000 per month for 12 months. Full-time role compensation: INR 23 Lacs"
 			},
 			{
 				"role": "Associate Business Analyst Intern",
-				"packages": [
-					"INR 30,000 per month for 12 months",
-					"INR 23 Lacs (Full-time)"
-				],
-				"package_details": "Stipend during Internship: INR 30,000 per month for 12 months. Compensation in a Full-time Role: INR 23 Lacs"
+				"package": 23.0,
+				"package_details": "INR 30,000 per month for 12 months. Full-time role compensation: INR 23 Lacs"
 			}
 		],
-		"job_location": ["JIIT, Noida"],
-		"joining_date": "2025-07/08",
+		"job_location": null,
+		"joining_date": "2025-07-01",
 		"students_selected": [
 			{
 				"name": "RAKSHIT PANDEY",
 				"enrollment_number": "9922103080",
 				"email": null,
-				"role": "Associate Software Engineer Intern"
+				"role": "Associate Software Engineer Intern",
+				"package": 32.0
 			},
 			{
 				"name": "KRISHNA DEOL",
 				"enrollment_number": "9922103012",
 				"email": null,
-				"role": "Associate Software Engineer Intern"
+				"role": "Associate Software Engineer Intern",
+				"package": 32.0
 			},
 			{
 				"name": "PRANAV MITTAL",
 				"enrollment_number": "9922103092",
 				"email": null,
-				"role": "Associate Software Engineer Intern"
+				"role": "Associate Software Engineer Intern",
+				"package": 32.0
 			},
 			{
 				"name": "SHREYASH SINGH",
 				"enrollment_number": "9922103016",
 				"email": null,
-				"role": "Associate Business Analyst Intern"
+				"role": "Associate Business Analyst Intern",
+				"package": 32.0
 			},
 			{
 				"name": "JHANVI SINGHAL",
 				"enrollment_number": "22102117",
 				"email": null,
-				"role": "Associate Business Analyst Intern"
+				"role": "Associate Business Analyst Intern",
+				"package": 32.0
 			},
 			{
 				"name": "SHRUTI TANYA",
 				"enrollment_number": "22102084",
 				"email": null,
-				"role": "Associate Business Analyst Intern"
+				"role": "Associate Business Analyst Intern",
+				"package": 32.0
 			}
 		],
 		"number_of_offers": 6,
-		"additional_info": "Permanent employment is confirmed after 12 months of internship, based on performance and the then prevailing market conditions. Internship Start Date will be communicated shortly in the next mail.",
+		"additional_info": "Internship from Jul/Aug 2025 to Jul 2026. Full-time role based on performance during internship. Stipend during Internship: INR 30,000 per month for 12 months. Compensation in a Full-time Role: INR 23 Lacs. Permanent employment is confirmed after 12 months of internship, based on performance and the then prevailing market conditions.",
 		"email_subject": "Fwd: PlaySimple Games - Hiring Interns Only from Batch 2026 - To be\r\n converted to Full Time Role Based on Performance during 12 months Internships\r\n from Jul/Aug 2025 to Jul 2026 - Offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -1916,8 +2109,8 @@
 		"roles": [
 			{
 				"role": "Project Management Intern",
-				"packages": ["INR 42,500 PM"],
-				"package_details": null
+				"package": 5.1,
+				"package_details": "INR 42,500 PM stipend"
 			}
 		],
 		"job_location": ["Noida"],
@@ -1927,11 +2120,12 @@
 				"name": "SUHANI GUPTA",
 				"enrollment_number": "9922102123",
 				"email": null,
-				"role": null
+				"role": "Project Management Intern",
+				"package": 5.1
 			}
 		],
 		"number_of_offers": 1,
-		"additional_info": "Internship duration: Six Months (Jul-Dec 2025)",
+		"additional_info": "Internship for six months.",
 		"email_subject": "Fwd: NXP- Hiring ECE & VLSI students for Hiring for Six Months\r\n Internships (Jul-Dec 2025) From Batch 2026 - Offer",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	},
@@ -1939,9 +2133,9 @@
 		"company": "JIIT Noida",
 		"roles": [
 			{
-				"role": "Faculty Scholar & Faculty Fellow thereafter",
-				"packages": ["Rs 7.20 to Rs. 9 LPA"],
-				"package_details": "Including a 1-year internship as a Faculty Scholar during the final year of your B.Tech. degree program, with a stipend of Rs. 40,000/- per month"
+				"role": "Faculty Scholar & Faculty Fellow",
+				"package": 7.2,
+				"package_details": "Rs 7.20 to Rs. 9 LPA (Including a 1-year internship as a Faculty Scholar during the final year of your B.Tech. degree program, with a stipend of Rs. 40,000/- per month)"
 			}
 		],
 		"job_location": ["JIIT Noida"],
@@ -1951,19 +2145,22 @@
 				"name": "ISHIKA ARORA",
 				"enrollment_number": "22103137",
 				"email": "ishikaarora2506@gmail.com",
-				"role": null
+				"role": "Faculty Scholar & Faculty Fellow",
+				"package": 7.2
 			},
 			{
 				"name": "NETRAMBAKAM DEVASAIKUMAR",
 				"enrollment_number": "22103337",
 				"email": "n.devasaikumar@gmail.com",
-				"role": null
+				"role": "Faculty Scholar & Faculty Fellow",
+				"package": 7.2
 			},
 			{
 				"name": "GARIMA ARORA",
 				"enrollment_number": "22102063",
 				"email": "garimaarorraa@gmail.com",
-				"role": null
+				"role": "Faculty Scholar & Faculty Fellow",
+				"package": 7.2
 			}
 		],
 		"number_of_offers": 3,
@@ -1975,278 +2172,319 @@
 		"company": "Outlook Publishing India",
 		"roles": [
 			{
-				"role": "BUSINESS ANALYTICS",
-				"packages": ["upto INR 20,000 for 06 weeks of Internship"],
-				"package_details": "Purely based on performance"
+				"role": "Business Analytics",
+				"package": 2.4,
+				"package_details": "Competitive Earning - based on performance maximum upto INR 20,000 for 06 weeks of Internship."
 			},
 			{
-				"role": "FINANCE",
-				"packages": ["upto INR 20,000 for 06 weeks of Internship"],
-				"package_details": "Purely based on performance"
+				"role": "Finance",
+				"package": 2.4,
+				"package_details": "Competitive Earning - based on performance maximum upto INR 20,000 for 06 weeks of Internship."
 			},
 			{
-				"role": "MARKETING",
-				"packages": ["upto INR 20,000 for 06 weeks of Internship"],
-				"package_details": "Purely based on performance"
+				"role": "Marketing",
+				"package": 2.4,
+				"package_details": "Competitive Earning - based on performance maximum upto INR 20,000 for 06 weeks of Internship."
 			},
 			{
-				"role": "OPERATIONS",
-				"packages": ["upto INR 20,000 for 06 weeks of Internship"],
-				"package_details": "Purely based on performance"
+				"role": "Operations",
+				"package": 2.4,
+				"package_details": "Competitive Earning - based on performance maximum upto INR 20,000 for 06 weeks of Internship."
 			}
 		],
-		"job_location": ["Physical Mode"],
+		"job_location": ["Physical Mode", "Virtual Mode (first 10 days)"],
 		"joining_date": "2025-05-28",
 		"students_selected": [
 			{
 				"name": "AVANTIKA GUPTA",
 				"enrollment_number": "2406090036",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "JATIN PRATAP SINGH",
 				"enrollment_number": "2406090058",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "KSHITIJ SINGH",
 				"enrollment_number": "2406090026",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "LAVANYA BHARDWAJ",
 				"enrollment_number": "2406090037",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "ADITI BAJPAI",
 				"enrollment_number": "2406090043",
 				"email": null,
-				"role": "FINANCE"
+				"role": "Finance",
+				"package": 0.0
 			},
 			{
 				"name": "AQSA FATIMA",
 				"enrollment_number": "2406090002",
 				"email": null,
-				"role": "MARKETING"
+				"role": "Marketing",
+				"package": 0.0
 			},
 			{
 				"name": "SHAGUN THAKUR",
 				"enrollment_number": "2406090066",
 				"email": null,
-				"role": "MARKETING"
+				"role": "Marketing",
+				"package": 0.0
 			},
 			{
 				"name": "HARSH MITTAL",
 				"enrollment_number": "23709123",
 				"email": null,
-				"role": "OPERATIONS"
+				"role": "Operations",
+				"package": 0.0
 			},
 			{
 				"name": "MAHUA MALHOTRA",
 				"enrollment_number": "23709059",
 				"email": null,
-				"role": "MARKETING"
+				"role": "Marketing",
+				"package": 2.4
 			},
 			{
 				"name": "SONALI MISHRA",
 				"enrollment_number": "23709063",
 				"email": null,
-				"role": "MARKETING"
+				"role": "Marketing",
+				"package": 2.4
 			},
 			{
 				"name": "YASH JAIN",
 				"enrollment_number": "23709148",
 				"email": null,
-				"role": "FINANCE"
+				"role": "Finance",
+				"package": 2.4
 			},
 			{
 				"name": "ANJALI SENGAR",
 				"enrollment_number": "22101039",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "ANSH GARG",
 				"enrollment_number": "9922103109",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "ASHISH GUPTA",
 				"enrollment_number": "22103318",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "CHANDAN AGARWAL",
 				"enrollment_number": "22103292",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "DAKSH JAIN",
 				"enrollment_number": "22103151",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "GURBAKSHISH SINGH",
 				"enrollment_number": "9922103009",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "ISHAN JAIN",
 				"enrollment_number": "22103338",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "ISHANK TYAGI",
 				"enrollment_number": "9922103257",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "KAPIL SHARMA",
 				"enrollment_number": "22103312",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "KARTIK GARG",
 				"enrollment_number": "22103158",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "KRISHNA AGRAWAL",
 				"enrollment_number": "22103331",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "MANAN BAGGA",
 				"enrollment_number": "9922103159",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "MANAN GARG",
 				"enrollment_number": "9922103081",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "NAVYA THAKUR",
 				"enrollment_number": "22103010",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "SANSKAR BANSAL",
 				"enrollment_number": "9922103128",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "SUBHAJIT BAUR",
 				"enrollment_number": "9922103157",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "TANYA SINGH",
 				"enrollment_number": "22103186",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "VANSHIKA AGARWAL",
 				"enrollment_number": "22103276",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "VICKKY KAPOOR",
 				"enrollment_number": "9922103084",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "YASH MITTAL",
 				"enrollment_number": "22103217",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "ABHISHEK KUMAR GUPTA",
 				"enrollment_number": "9922102025",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "ADYA JHA",
 				"enrollment_number": "9922102115",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "DHANDEEP SINGH",
 				"enrollment_number": "22102215",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "JHANVI SINGHAL",
 				"enrollment_number": "22102117",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "MANYA JAIN",
 				"enrollment_number": "22102138",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "OM AGARWAL",
 				"enrollment_number": "22102190",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "SHRIYA MISHRA",
 				"enrollment_number": "22102200",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "VASHNI AGRAHARI",
 				"enrollment_number": "22102213",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "PRAKHAR MADNANI",
 				"enrollment_number": "22104057",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			},
 			{
 				"name": "SANSKAR SRIVASTAVA",
 				"enrollment_number": "22104014",
 				"email": null,
-				"role": "BUSINESS ANALYTICS"
+				"role": "Business Analytics",
+				"package": 2.4
 			}
 		],
 		"number_of_offers": 41,
-		"additional_info": "First 10 days of Internship will be in Virtual Mode for all the Interns. Completion certificates will only be awarded if the student attends internship for full duration and achieves the desired results.",
+		"additional_info": "Summer Internship for 6 weeks. Stipend is performance based.",
 		"email_subject": "Fwd: Outlook Publishing India - B.Tech/MBA/BBA 2026 Batch - Summer\r\n Internship Offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	}
