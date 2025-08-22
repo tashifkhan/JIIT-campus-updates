@@ -37,11 +37,6 @@ import {
 	AccordionTrigger,
 } from "@/components/ui/accordion";
 import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
-import {
 	Pagination,
 	PaginationContent,
 	PaginationEllipsis,
