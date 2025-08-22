@@ -75,6 +75,8 @@ export default function JobsPage() {
 	const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
 	const [minPackageLpa, setMinPackageLpa] = useState<number>(0);
 	const [cgpaRange, setCgpaRange] = useState<[number, number]>([0, 10]);
+	const [cgpaInputMin, setCgpaInputMin] = useState<string>("0.0");
+	const [cgpaInputMax, setCgpaInputMax] = useState<string>("10.0");
 	const [openOnly, setOpenOnly] = useState<boolean>(false);
 
 	const category_mapping: Record<number, string> = {
@@ -195,6 +197,8 @@ export default function JobsPage() {
 	useEffect(() => {
 		setMinPackageLpa(0);
 		setCgpaRange([0, 10]);
+		setCgpaInputMin("0.0");
+		setCgpaInputMax("10.0");
 	}, [maxPackageLpa, maxCgpa]);
 
 	const now = Date.now();
@@ -261,6 +265,8 @@ export default function JobsPage() {
 		setSelectedCourses([]);
 		setMinPackageLpa(0);
 		setCgpaRange([0, 10]);
+		setCgpaInputMin("0.0");
+		setCgpaInputMax("10.0");
 		setOpenOnly(false);
 	};
 
@@ -483,13 +489,17 @@ export default function JobsPage() {
 										min="0"
 										max="10"
 										step="0.1"
-										value={cgpaRange[0].toFixed(1)}
+										value={cgpaInputMin}
 										onChange={(e) => {
+											setCgpaInputMin(e.target.value);
+										}}
+										onBlur={(e) => {
 											const minVal = Math.max(
 												0,
 												Math.min(10, parseFloat(e.target.value) || 0)
 											);
 											setCgpaRange([minVal, Math.max(minVal, cgpaRange[1])]);
+											setCgpaInputMin(minVal.toFixed(1));
 										}}
 										placeholder="Min"
 										className="text-sm h-9"
@@ -499,13 +509,17 @@ export default function JobsPage() {
 										min="0"
 										max="10"
 										step="0.1"
-										value={cgpaRange[1].toFixed(1)}
+										value={cgpaInputMax}
 										onChange={(e) => {
+											setCgpaInputMax(e.target.value);
+										}}
+										onBlur={(e) => {
 											const maxVal = Math.max(
 												0,
 												Math.min(10, parseFloat(e.target.value) || 10)
 											);
 											setCgpaRange([Math.min(cgpaRange[0], maxVal), maxVal]);
+											setCgpaInputMax(maxVal.toFixed(1));
 										}}
 										placeholder="Max"
 										className="text-sm h-9"
@@ -524,7 +538,11 @@ export default function JobsPage() {
 									<Button
 										variant="outline"
 										size="sm"
-										onClick={() => setCgpaRange([6.0, 8.0])}
+										onClick={() => {
+											setCgpaRange([6.0, 8.0]);
+											setCgpaInputMin("6.0");
+											setCgpaInputMax("8.0");
+										}}
 										className={`text-xs h-7 px-2 ${
 											cgpaRange[0] === 6.0 && cgpaRange[1] === 8.0
 												? "border-theme"
@@ -550,7 +568,11 @@ export default function JobsPage() {
 									<Button
 										variant="outline"
 										size="sm"
-										onClick={() => setCgpaRange([7.0, 9.0])}
+										onClick={() => {
+											setCgpaRange([7.0, 9.0]);
+											setCgpaInputMin("7.0");
+											setCgpaInputMax("9.0");
+										}}
 										className={`text-xs h-7 px-2 ${
 											cgpaRange[0] === 7.0 && cgpaRange[1] === 9.0
 												? "border-theme"
@@ -576,7 +598,11 @@ export default function JobsPage() {
 									<Button
 										variant="outline"
 										size="sm"
-										onClick={() => setCgpaRange([0, 10])}
+										onClick={() => {
+											setCgpaRange([0, 10]);
+											setCgpaInputMin("0.0");
+											setCgpaInputMax("10.0");
+										}}
 										className={`text-xs h-7 px-2 ${
 											cgpaRange[0] === 0 && cgpaRange[1] === 10
 												? "border-theme"
