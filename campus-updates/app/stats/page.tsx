@@ -531,7 +531,7 @@ export default function StatsPage() {
 							}}
 						>
 							<DownloadIcon className="w-4 h-4 mr-2" />
-							Export CSV ({filteredStudents.length} records)
+							Export CSV
 						</Button>
 					</div>
 				</div>
