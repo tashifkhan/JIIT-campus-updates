@@ -12,6 +12,8 @@ import {
 	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
 	DropdownMenuLabel,
+	DropdownMenuRadioGroup,
+	DropdownMenuRadioItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -39,6 +41,15 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+	Pagination,
+	PaginationContent,
+	PaginationEllipsis,
+	PaginationItem,
+	PaginationLink,
+	PaginationNext,
+	PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface Notice {
 	id: string;
@@ -79,6 +90,9 @@ export default function HomePage() {
 	const [query, setQuery] = useState("");
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 	const [onlyShortlisted, setOnlyShortlisted] = useState(false);
+	// Pagination
+	const [currentPage, setCurrentPage] = useState(1);
+	const [itemsPerPage, setItemsPerPage] = useState(20);
 
 	// Normalize categories for consistency (treat '[shortlist]' as 'shortlisting')
 	const normalizeCategory = (cat: string): string => {
@@ -498,6 +512,17 @@ export default function HomePage() {
 		});
 	}, [notices, query, selectedCategories, onlyShortlisted]);
 
+	// Pagination calculations
+	const totalPages = Math.ceil(filteredNotices.length / itemsPerPage);
+	const startIndex = (currentPage - 1) * itemsPerPage;
+	const endIndex = startIndex + itemsPerPage;
+	const currentNotices = filteredNotices.slice(startIndex, endIndex);
+
+	// Reset to first page when filters change
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [query, selectedCategories, onlyShortlisted, itemsPerPage]);
+
 	if (loading) {
 		return (
 			<Layout>
@@ -574,6 +599,32 @@ export default function HomePage() {
 										))}
 									</DropdownMenuContent>
 								</DropdownMenu>
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button variant="outline" className="whitespace-nowrap">
+											{itemsPerPage} per page
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent className="w-40">
+										<DropdownMenuLabel>Items per page</DropdownMenuLabel>
+										<DropdownMenuSeparator />
+										<DropdownMenuRadioGroup
+											value={itemsPerPage.toString()}
+											onValueChange={(value) => setItemsPerPage(Number(value))}
+										>
+											<DropdownMenuRadioItem value="5">5</DropdownMenuRadioItem>
+											<DropdownMenuRadioItem value="10">
+												10
+											</DropdownMenuRadioItem>
+											<DropdownMenuRadioItem value="20">
+												20
+											</DropdownMenuRadioItem>
+											<DropdownMenuRadioItem value="50">
+												50
+											</DropdownMenuRadioItem>
+										</DropdownMenuRadioGroup>
+									</DropdownMenuContent>
+								</DropdownMenu>
 								<div className="flex items-center gap-2">
 									<Checkbox
 										id="onlyShortlisted"
@@ -585,7 +636,7 @@ export default function HomePage() {
 										className="text-sm cursor-pointer"
 										style={{ color: "var(--text-color)" }}
 									>
-										Only with shortlisted students
+										Shortlisted students
 									</label>
 								</div>
 								<Badge variant="secondary" className="self-center">
@@ -597,7 +648,7 @@ export default function HomePage() {
 				</Card>
 
 				<div className="space-y-6">
-					{filteredNotices.map((notice) => {
+					{currentNotices.map((notice) => {
 						const IconComponent = categoryIcons[notice.category] ?? BellIcon;
 						const parsed =
 							notice.category === "shortlisting" &&
@@ -1377,7 +1428,117 @@ export default function HomePage() {
 							</Card>
 						);
 					})}
+
+					{/* No results message */}
+					{currentNotices.length === 0 && !loading && (
+						<Card className="text-center py-12 card-theme">
+							<CardContent>
+								<p style={{ color: "var(--label-color)" }}>
+									No updates found matching your criteria.
+								</p>
+							</CardContent>
+						</Card>
+					)}
 				</div>
+
+				{/* Pagination */}
+				{totalPages > 1 && (
+					<div className="mt-8">
+						<Pagination>
+							<PaginationContent>
+								<PaginationItem>
+									<PaginationPrevious
+										onClick={() =>
+											setCurrentPage((prev) => Math.max(prev - 1, 1))
+										}
+										className={
+											currentPage === 1
+												? "pointer-events-none opacity-50"
+												: "cursor-pointer"
+										}
+									/>
+								</PaginationItem>
+
+								{/* First page */}
+								{currentPage > 3 && (
+									<>
+										<PaginationItem>
+											<PaginationLink
+												onClick={() => setCurrentPage(1)}
+												isActive={currentPage === 1}
+												className="cursor-pointer"
+											>
+												1
+											</PaginationLink>
+										</PaginationItem>
+										{currentPage > 4 && (
+											<PaginationItem>
+												<PaginationEllipsis />
+											</PaginationItem>
+										)}
+									</>
+								)}
+
+								{/* Page numbers around current page */}
+								{Array.from({ length: totalPages }, (_, i) => i + 1)
+									.filter((page) => {
+										const distance = Math.abs(page - currentPage);
+										return distance <= 2 || page === 1 || page === totalPages;
+									})
+									.filter((page) => {
+										if (currentPage <= 3) return page <= 5;
+										if (currentPage >= totalPages - 2)
+											return page >= totalPages - 4;
+										return Math.abs(page - currentPage) <= 2;
+									})
+									.map((page) => (
+										<PaginationItem key={page}>
+											<PaginationLink
+												onClick={() => setCurrentPage(page)}
+												isActive={currentPage === page}
+												className="cursor-pointer"
+											>
+												{page}
+											</PaginationLink>
+										</PaginationItem>
+									))}
+
+								{/* Last page */}
+								{currentPage < totalPages - 2 && (
+									<>
+										{currentPage < totalPages - 3 && (
+											<PaginationItem>
+												<PaginationEllipsis />
+											</PaginationItem>
+										)}
+										<PaginationItem>
+											<PaginationLink
+												onClick={() => setCurrentPage(totalPages)}
+												isActive={currentPage === totalPages}
+												className="cursor-pointer"
+											>
+												{totalPages}
+											</PaginationLink>
+										</PaginationItem>
+									</>
+								)}
+
+								<PaginationItem>
+									<PaginationNext
+										onClick={() =>
+											setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+										}
+										className={
+											currentPage === totalPages
+												? "pointer-events-none opacity-50"
+												: "cursor-pointer"
+										}
+									/>
+								</PaginationItem>
+							</PaginationContent>
+						</Pagination>
+					</div>
+				)}
 			</div>
 		</Layout>
 	);
