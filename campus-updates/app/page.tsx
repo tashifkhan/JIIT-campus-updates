@@ -607,16 +607,11 @@ export default function HomePage() {
 											value={itemsPerPage.toString()}
 											onValueChange={(value) => setItemsPerPage(Number(value))}
 										>
-											<DropdownMenuRadioItem value="5">5</DropdownMenuRadioItem>
-											<DropdownMenuRadioItem value="10">
-												10
-											</DropdownMenuRadioItem>
-											<DropdownMenuRadioItem value="20">
-												20
-											</DropdownMenuRadioItem>
-											<DropdownMenuRadioItem value="50">
-												50
-											</DropdownMenuRadioItem>
+											{[20, 50, 75, 100].map((val) => (
+												<DropdownMenuRadioItem key={val} value={val.toString()}>
+													{val}
+												</DropdownMenuRadioItem>
+											))}
 										</DropdownMenuRadioGroup>
 									</DropdownMenuContent>
 								</DropdownMenu>
