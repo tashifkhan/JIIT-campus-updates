@@ -18,7 +18,7 @@ const navigation = [
 	{ name: "Updates", href: "/", icon: HomeIcon },
 	{ name: "Jobs", href: "/jobs", icon: BriefcaseIcon },
 	{ name: "Stats", href: "/stats", icon: TrendingUpIcon },
-	{ name: "Campus", href: "/campus", icon: CalendarIcon },
+	// { name: "Campus", href: "/campus", icon: CalendarIcon },
 ];
 
 export default function Layout({ children }: { children: React.ReactNode }) {
