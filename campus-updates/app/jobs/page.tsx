@@ -77,6 +77,12 @@ export default function JobsPage() {
 	const [cgpaRange, setCgpaRange] = useState<[number, number]>([0, 10]);
 	const [openOnly, setOpenOnly] = useState<boolean>(false);
 
+	const category_mapping: Record<number, string> = {
+		1: "High",
+		2: "Middle",
+		3: "> 4.6L",
+		4: "Internship",
+	};
 	useEffect(() => {
 		fetch("/data/jobs.json")
 			.then((res) => res.json())
@@ -342,12 +348,11 @@ export default function JobsPage() {
 												}}
 											>
 												<span
-													className="mr-2 inline-flex items-center px-2 py-0.5 border rounded"
+													className="inline-flex items-center px-2 py-0.5 border rounded"
 													style={getCategoryColor(code)}
 												>
-													{code}
+													{category_mapping[code] || code}
 												</span>
-												Category {code}
 											</DropdownMenuCheckboxItem>
 										))}
 									</DropdownMenuContent>
@@ -666,7 +671,8 @@ export default function JobsPage() {
 											className="font-medium border"
 											style={getCategoryColor(job.placement_category_code)}
 										>
-											{job.placement_category}
+											{category_mapping[job.placement_category_code] ||
+												job.placement_category}
 										</Badge>
 										<div
 											className="text-xs mt-1"
