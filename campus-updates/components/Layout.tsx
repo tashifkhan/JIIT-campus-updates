@@ -28,7 +28,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
 	return (
 		<div
-			className="h-screen overflow-hidden"
+			className="min-h-screen lg:h-screen lg:overflow-hidden"
 			style={{ backgroundColor: "var(--bg-color)" }}
 		>
 			{/* Mobile Header */}
@@ -197,8 +197,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 				</div>
 
 				{/* Main Content */}
-				<div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-					<main className="p-4 lg:p-8 h-full overflow-auto">{children}</main>
+				<div className="flex-1 min-w-0 flex flex-col lg:overflow-hidden">
+					<main className="p-4 lg:p-8 lg:h-full lg:overflow-auto">{children}</main>
 				</div>
 			</div>
 
