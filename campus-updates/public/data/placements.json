@@ -1056,11 +1056,6 @@
 		"company": "Zomato",
 		"roles": [
 			{
-				"role": "Intern",
-				"package": 12.0,
-				"package_details": "INR 1,00,000 per month stipend"
-			},
-			{
 				"role": "Full Time",
 				"package": 56.0,
 				"package_details": "Fixed: INR 24,00,000 Per Annum, Cash bonus: INR 3,200,000 spread across 4 years (Post completion of 1 year: INR 500,000, Post completion of 2 years: INR 700,000, Post completion of 3 years: INR 900,000, Post completion of 4 years: INR 1,100,000)"
@@ -1085,11 +1080,6 @@
 	{
 		"company": "Zomato",
 		"roles": [
-			{
-				"role": "Generative AI Intern",
-				"package": 12.0,
-				"package_details": "INR 1,00,000 per month stipend"
-			},
 			{
 				"role": "Generative AI Intern",
 				"package": 56.0,
