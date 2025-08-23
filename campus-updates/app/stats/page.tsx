@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import {
 	Dialog,
@@ -351,6 +350,15 @@ export default function StatsPage() {
 
 	const filteredHighestPackage =
 		filteredPackages.length > 0 ? Math.max(...filteredPackages) : 0;
+	const filteredSortedPackages = [...filteredPackages].sort((a, b) => a - b);
+	const filteredMedianPackage =
+		filteredSortedPackages.length > 0
+			? filteredSortedPackages.length % 2 === 0
+				? (filteredSortedPackages[filteredSortedPackages.length / 2 - 1] +
+						filteredSortedPackages[filteredSortedPackages.length / 2]) /
+				  2
+				: filteredSortedPackages[Math.floor(filteredSortedPackages.length / 2)]
+			: 0;
 	const filteredUniqueCompanies = new Set(
 		filteredStudents.map((s) => s.company)
 	).size;
@@ -509,20 +517,18 @@ export default function StatsPage() {
 		<Layout>
 			<div className="max-w-7xl mx-auto space-y-8">
 				<div className="text-center mb-8">
-					<div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-						<div className="text-center sm:text-left">
-							<h1
-								className="text-2xl lg:text-3xl font-bold mb-2"
-								style={{ color: "var(--text-color)" }}
-							>
-								Placement Statistics
-							</h1>
-							<p style={{ color: "var(--label-color)" }}>
-								Campus placement data and analytics ({filteredStudents.length}{" "}
-								of {totalStudentsPlaced} students shown)
-							</p>
-						</div>
-						<Button
+					<div className="text-center sm:text-left">
+						<h1
+							className="text-2xl text-center lg:text-3xl font-bold mb-2"
+							style={{ color: "var(--text-color)" }}
+						>
+							Placement Statistics
+						</h1>
+						<p className="text-center" style={{ color: "var(--label-color)" }}>
+							Campus placement data and analytics
+						</p>
+					</div>
+					{/* <Button
 							onClick={exportToCSV}
 							className="mt-4 sm:mt-0"
 							style={{
@@ -532,12 +538,11 @@ export default function StatsPage() {
 						>
 							<DownloadIcon className="w-4 h-4 mr-2" />
 							Export CSV
-						</Button>
-					</div>
+						</Button> */}
 				</div>
 
 				{/* Floating Filter Button */}
-				<div className="fixed bottom-6 right-6 z-50">
+				<div className="fixed bottom-20 md:bottom-6 right-6 z-50">
 					<Sheet open={showFilters} onOpenChange={setShowFilters}>
 						<SheetTrigger asChild>
 							<Button
@@ -863,8 +868,23 @@ export default function StatsPage() {
 					</Sheet>
 				</div>
 
+				{/* Floating Export CSV Button (left of filter) */}
+				<div className="fixed bottom-20 md:bottom-6 right-20 z-50 mr-1">
+					<Button
+						onClick={exportToCSV}
+						className="rounded-full w-14 h-14 shadow-lg"
+						style={{
+							backgroundColor: "var(--accent-color)",
+							color: "white",
+						}}
+						aria-label="Export CSV"
+					>
+						<DownloadIcon className="w-5 h-5" />
+					</Button>
+				</div>
+
 				{/* Key Statistics */}
-				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
 					<Card
 						className="border card-theme hover:shadow-md transition-all duration-300"
 						style={{
@@ -934,6 +954,46 @@ export default function StatsPage() {
 											style={{ color: "var(--label-color)" }}
 										>
 											overall: {formatPackage(averagePackage)}
+										</p>
+									)}
+								</div>
+								<TrendingUpIcon
+									className="w-8 h-8"
+									style={{ color: "var(--accent-color)" }}
+								/>
+							</div>
+						</CardContent>
+					</Card>
+
+					<Card
+						className="border card-theme hover:shadow-md transition-all duration-300"
+						style={{
+							backgroundColor: "var(--card-bg)",
+							borderColor: "var(--border-color)",
+							color: "var(--text-color)",
+						}}
+					>
+						<CardContent className="p-6">
+							<div className="flex items-center justify-between">
+								<div>
+									<p
+										className="text-sm font-medium mb-1"
+										style={{ color: "var(--label-color)" }}
+									>
+										Median Package
+									</p>
+									<p
+										className="text-3xl font-bold"
+										style={{ color: "var(--text-color)" }}
+									>
+										{formatPackage(filteredMedianPackage)}
+									</p>
+									{filteredMedianPackage !== medianPackage && (
+										<p
+											className="text-xs"
+											style={{ color: "var(--label-color)" }}
+										>
+											overall: {formatPackage(medianPackage)}
 										</p>
 									)}
 								</div>
@@ -1325,9 +1385,7 @@ export default function StatsPage() {
 										{filteredStudents.length}
 									</Badge>
 								) : (
-									<span style={{ color: "var(--label-color)" }}>
-										({filteredStudents.length})
-									</span>
+									<></>
 								)}
 							</CardTitle>
 							<Button
@@ -1339,9 +1397,7 @@ export default function StatsPage() {
 								}}
 								className="hover-theme"
 							>
-								{showStudentList
-									? "Hide List"
-									: `View All Students (${filteredStudents.length})`}
+								{showStudentList ? "Hide List" : `View All Students`}
 							</Button>
 						</div>
 					</CardHeader>
