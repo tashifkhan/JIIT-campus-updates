@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import ThemeSwitcher from "./ThemeSwitcher";
@@ -27,7 +28,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
 	return (
 		<div
-			className="min-h-screen"
+			className="h-screen overflow-hidden"
 			style={{ backgroundColor: "var(--bg-color)" }}
 		>
 			{/* Mobile Header */}
@@ -39,14 +40,24 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 				}}
 			>
 				<div className="flex items-center justify-between px-4 py-3">
-					<h1
-						className="text-lg font-semibold"
-						style={{ color: "var(--text-color)" }}
-					>
-						JIIT Placement Updates
-					</h1>
+					<div className="flex items-center gap-3">
+						<div className="w-12 h-12 relative rounded-full overflow-hidden flex-shrink-0">
+							<Image
+								src="/logo.png"
+								alt="JIIT Logo"
+								fill
+								style={{ objectFit: "cover" }}
+							/>
+						</div>
+						<h1
+							className="text-lg font-semibold"
+							style={{ color: "var(--text-color)" }}
+						>
+							Placement Updates
+						</h1>
+					</div>
 					<div className="flex items-center gap-2">
-						<ThemeSwitcher />
+						<ThemeSwitcher compact />
 						<button
 							onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
 							className="p-2 rounded-md hover-theme"
@@ -107,40 +118,50 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 				)}
 			</div>
 
-			<div className="lg:flex lg:min-h-screen">
+		<div className="lg:flex lg:h-full">
 				{/* Desktop Sidebar */}
 				<div className="hidden lg:flex lg:flex-shrink-0">
 					<div
-						className="flex flex-col w-64 border-r border-theme"
+						className="flex flex-col w-64 border-r border-theme h-full overflow-hidden"
 						style={{
 							backgroundColor: "var(--card-bg)",
 							borderColor: "var(--border-color)",
 						}}
 					>
 						<div
-							className="px-6 py-6 border-b border-theme"
+							className="px-6 py-6 border-b border-theme o"
 							style={{ borderColor: "var(--border-color)" }}
 						>
+							<div className="w-20 h-20 relative rounded-full overflow-hidden flex-shrink-0">
+								<Image
+									src="/logo.png"
+									alt="JIIT Logo"
+									fill
+									style={{ objectFit: "cover" }}
+								/>
+							</div>
 							<div className="flex items-center justify-between">
-								<div>
-									<h1
-										className="text-xl font-bold"
-										style={{ color: "var(--text-color)" }}
-									>
-										Campus Updates
-									</h1>
-									<p
-										className="text-sm mt-1"
-										style={{ color: "var(--label-color)" }}
-									>
-										Placement Portal
-									</p>
+								<div className="flex items-center gap-3">
+									<div>
+										<h1
+											className="text-xl font-bold"
+											style={{ color: "var(--text-color)" }}
+										>
+											Placement Updates
+										</h1>
+										<p
+											className="text-sm mt-1"
+											style={{ color: "var(--label-color)" }}
+										>
+											Placement Portal
+										</p>
+									</div>
 								</div>
-								<ThemeSwitcher />
+								{/* Desktop switcher moved to bottom of sidebar */}
 							</div>
 						</div>
 
-						<nav className="flex-1 px-4 py-6 space-y-2">
+						<nav className="flex-1 px-4 py-6 space-y-2 overflow-auto">
 							{navigation.map((item) => {
 								const Icon = item.icon;
 								const isActive = pathname === item.href;
@@ -172,12 +193,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 								);
 							})}
 						</nav>
+						{/* Bottom area for desktop: theme switcher */}
+						<div className="px-4 py-4 border-t border-theme mt-auto" style={{ borderColor: "var(--border-color)" }}>
+							<ThemeSwitcher />
+						</div>
 					</div>
 				</div>
 
 				{/* Main Content */}
-				<div className="flex-1 min-w-0">
-					<main className="p-4 lg:p-8">{children}</main>
+				<div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+					<main className="p-4 lg:p-8 h-full overflow-auto">{children}</main>
 				</div>
 			</div>
 
