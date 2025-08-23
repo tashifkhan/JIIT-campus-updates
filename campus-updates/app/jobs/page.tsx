@@ -984,6 +984,10 @@ export default function JobsPage() {
 														size="sm"
 														className="md:hidden flex-shrink-0 ml-2"
 														style={{ color: "var(--text-color)" }}
+														onClick={(e) => {
+															e.stopPropagation();
+															setSelectedJobModal(null);
+														}}
 													>
 														<XIcon className="w-5 h-5" />
 													</Button>
