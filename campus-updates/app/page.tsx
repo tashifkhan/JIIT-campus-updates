@@ -226,7 +226,10 @@ export default function HomePage() {
 		}
 
 		// Join body lines preserving blank lines; trim only the ends
-		body = bodyLines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+		body = bodyLines
+			.join("\n")
+			.replace(/\n{3,}/g, "\n\n")
+			.trim();
 		eligibility = eligibilityLines.join("\n").trim();
 		hiringProcess = hiringLines.join("\n").trim();
 
