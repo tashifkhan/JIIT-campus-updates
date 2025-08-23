@@ -1055,74 +1055,8 @@ export default function HomePage() {
 													)}
 
 													{/* Body Content */}
-													{parsedMessage.body && (
-														<div
-															className="rounded-lg border p-4"
-															style={{
-																backgroundColor: "var(--card-bg)",
-																borderColor: "var(--border-color)",
-															}}
-														>
-															<div
-																className="prose prose-sm max-w-none"
-																style={{ color: "var(--text-color)" }}
-															>
-																<ReactMarkdown remarkPlugins={[remarkGfm]}>
-																	{parsedMessage.body}
-																</ReactMarkdown>
-															</div>
-														</div>
-													)}
-
-													{/* Hiring Process for Shortlisting */}
-													{hiringSteps.length > 0 && (
-														<Accordion
-															type="single"
-															collapsible
-															className="w-full rounded-lg border"
-															style={{
-																backgroundColor: "var(--card-bg)",
-																borderColor: "var(--border-color)",
-															}}
-														>
-															<AccordionItem
-																value="hiring"
-																className="border-b-0"
-															>
-																<AccordionTrigger
-																	className="px-4 py-3"
-																	style={{ color: "var(--text-color)" }}
-																>
-																	<div className="flex items-center">
-																		<CalendarIcon
-																			className="w-4 h-4 mr-2"
-																			style={{ color: "var(--accent-color)" }}
-																		/>
-																		Hiring Process
-																	</div>
-																</AccordionTrigger>
-																<AccordionContent className="px-4 pb-4">
-																	<div
-																		className="rounded-lg p-3"
-																		style={{
-																			backgroundColor: "var(--primary-color)",
-																		}}
-																	>
-																		<ol
-																			className="list-decimal pl-5 space-y-2 text-sm"
-																			style={{ color: "var(--text-color)" }}
-																		>
-																			{hiringSteps.map((step, i) => (
-																				<li key={i} className="leading-relaxed">
-																					{step}
-																				</li>
-																			))}
-																		</ol>
-																	</div>
-																</AccordionContent>
-															</AccordionItem>
-														</Accordion>
-													)}
+													{/* For shortlisting notices we intentionally omit formatted_message body and detailed hiring steps.
+													   Keep only title and company/role header to match design requirement. */}
 												</div>
 											);
 										} else {
