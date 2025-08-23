@@ -658,11 +658,20 @@ export default function JobsPage() {
 					{filteredJobs.map((job) => (
 						<Card
 							key={job.id}
-							className="hover:shadow-xl transition-all duration-300 border card-theme"
+							className="hover:shadow-xl transition-all duration-300 border card-theme cursor-pointer"
 							style={{
 								backgroundColor: "var(--card-bg)",
 								borderColor: "var(--border-color)",
 								color: "var(--text-color)",
+							}}
+							role="button"
+							tabIndex={0}
+							onClick={() => setSelectedJobModal(job)}
+							onKeyDown={(e) => {
+								if (e.key === "Enter" || e.key === " ") {
+									e.preventDefault();
+									setSelectedJobModal(job);
+								}
 							}}
 						>
 							<CardHeader className="pb-4">
@@ -902,18 +911,38 @@ export default function JobsPage() {
 									</div>
 								</div>
 
-								<Dialog>
+								<Dialog
+									open={selectedJobModal?.id === job.id}
+									onOpenChange={(open) => {
+										if (!open) setSelectedJobModal(null);
+									}}
+								>
+									{/* explicit small action to open dialog without relying on card click */}
+									<Button
+										variant="link"
+										size="sm"
+										onClick={(e) => {
+											e.stopPropagation();
+											setSelectedJobModal(job);
+										}}
+										className="text-sm"
+									>
+										Show more details
+									</Button>
 									<DialogTrigger asChild>
 										<Button
 											variant="outline"
 											size="sm"
-											className="w-full font-medium border hover-theme"
+											className="w-full font-medium border hover-theme mt-2"
 											style={{
 												backgroundColor: "var(--primary-color)",
 												borderColor: "var(--accent-color)",
 												color: "var(--accent-color)",
 											}}
-											onClick={() => setSelectedJobModal(job)}
+											onClick={(e) => {
+												e.stopPropagation();
+												setSelectedJobModal(job);
+											}}
 										>
 											View Details
 											<ChevronDownIcon className="w-4 h-4 ml-1" />
