@@ -2646,5 +2646,37 @@
 			"Technical interview"
 		],
 		"placement_type": null
+	},
+	{
+		"id": "efb2605d-030c-48d7-912d-70a2a44cb369",
+		"job_profile": "Backend-Software Engineer (Intern)",
+		"company": "Buyhatke",
+		"placement_category_code": 2,
+		"placement_category": "Middle",
+		"content": "",
+		"createdAt": 1755775080000,
+		"deadline": 1755833455000,
+		"eligibility_marks": [
+			{
+				"level": "UG",
+				"criteria": 6.0
+			}
+		],
+		"eligibility_courses": ["B.Tech - CSE", "B.Tech - IT"],
+		"allowed_genders": ["Female", "Male", "Other"],
+		"job_description": "<p>&nbsp;Buyhatke is&nbsp;Hiring Interns Only from Batch 2026 to be converted to Full Time Role Based on Performance during the 06-month Internships from&nbsp;August 2025 to&nbsp;January 2026.</p><p>This opportunity begins with an internship starting from&nbsp;August 2025 till&nbsp;January 2026,&nbsp;<em><strong>offering a stipend of INR 50,000 per month.</strong></em></p><p>Date of joining as an intern:&nbsp;Immediately</p><p><br>This will transition to a full-time position based on performance during the Internship and the then prevailing market conditions&nbsp;<strong><em>with a salary package of INR&nbsp;12 Lakhs</em>.</strong></p><p><strong>The date of joining as a full-time employee will be June 2026.</strong></p><div><blockquote style=\"padding-left: 1ex; border-left: #cccccc 1px solid; margin: 0px 0px 0px 0.8ex;\"><p><strong>1) Company Profile with Website:&nbsp;</strong></p><p>We at Buyhatke aim to give the ultimate user experience on any transactions online; be it online shopping, flight or train ticket booking, purchases, or even crypto transactions. As we grow, we continue to expand our portfolio of products and services with new offerings like&nbsp;<strong>Bitbns</strong>, Salesla, UseMyCards, TatkalForSure, and more.<br>&nbsp;<strong><br>Bitbns</strong>&nbsp;is Indias most liquid crypto exchange. With over 4.8 million users bitbns has seen rapid growth over time. Bitbns has built the global first products around web3. Launchonascent.com&nbsp;<a href=\"http://bitdroplet.com/dapp\" target=\"_blank\"><u>bitdroplet.com/dapp</u></a>&nbsp;to name a few. We are working on building some ambitious web3 products and would love for folks keen to join us.<strong><br><br>Website for reference:</strong><u><br></u><a href=\"https://bitbns.com/\" target=\"_blank\"><u>https://bitbns.com/</u></a>&nbsp;(BitBNS)<u><br></u><a href=\"https://onramp.money/\" target=\"_blank\"><u>https://onramp.money/</u></a>&nbsp;(Onramp)</p><p><a name=\"m_-3140600199928354782_m_-3210332570139571801_m_-3800542463278297373_m_-8175650758463674000_m_8725058984182086400_m_1777398528833846671_m_-8286146772172074969_m_3295544599939296556_m_2373109012371518109_m_-3363203122478430213_m_-7021143547573322726_m_-119838456595321627_m_5571311271914792558_m_-3729897077337436847_m_-1312733394330857770_m_-3794955723007664287_m_3106957937259980028_m_-5797153676596556818_m_6223406104062527131_m_5124626415273125323_m_-1687919217934471500_m_4115156901684844365_m_-7377465868053196400_m_-2003763364283929903_m_-8467989203358113888_m_-1520342018728300182_m_9022156748245915883_m_7971789782705712424_m_327515130335769881_m_-6622657629956693811__Hlk125380071\"></a><br>2) Job profile (with complete job description): Attached<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<br>&nbsp;<br>3) Stipend Amount per Month:&nbsp;INR 50,000 per month&nbsp;(Backend)&nbsp; &nbsp;</p><p>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<br>4) &nbsp;After Internship &nbsp;CTC (Fixed +Variable) for&nbsp;(Backend):</p><p><br>INR 12,00,000 to INR 20,00,000 based on the performance during the internship period.&nbsp;<br>&nbsp;<br>5) Duration of internship:&nbsp;6 months&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<br>&nbsp;<br>6) Min Qualifications: Any Computer Science background, Need Leetcode and Codeforces&nbsp;profiles.</p><p>7) Locations: Bangalore (Work From Office)</p><p><strong>Eligible students who have already registered on NPTEL for MOOC courses and submitted the fees need to volunteer.</strong></p><p>The company will try to close this drive by&nbsp;27 August.</p></blockquote></div><p>&nbsp;</p>",
+		"location": "Bengaluru",
+		"package": 1200000.0,
+		"package_info": "",
+		"required_skills": [],
+		"hiring_flow": [
+			"Pre-placement Talk",
+			"Resume shortlisting",
+			"Technical interview 1",
+			"Technical interview 2",
+			"Technical interview 3",
+			"HR interview"
+		],
+		"placement_type": null
 	}
 ]

@@ -9,7 +9,7 @@ import {
 	BriefcaseIcon,
 	HomeIcon,
 	TrendingUpIcon,
-	CalendarIcon,
+	// CalendarIcon,
 	MenuIcon,
 	XIcon,
 } from "lucide-react";
@@ -43,7 +43,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 						className="text-lg font-semibold"
 						style={{ color: "var(--text-color)" }}
 					>
-						Campus Updates
+						JIIT Placement Updates
 					</h1>
 					<div className="flex items-center gap-2">
 						<ThemeSwitcher />
