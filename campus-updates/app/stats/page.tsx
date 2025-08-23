@@ -1105,191 +1105,87 @@ export default function StatsPage() {
 					<CardContent>
 						<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 							{companiesToShow.map(([company, stats]: [string, any]) => (
-								<Card
+								<Dialog
 									key={company}
-									className="border card-theme cursor-pointer hover:shadow-lg transition-all duration-300"
-									style={{
-										backgroundColor: "var(--primary-color)",
-										borderColor: "var(--border-color)",
+									open={isModalOpen && selectedCompany === company}
+									onOpenChange={(open) => {
+										setIsModalOpen(open);
+										if (!open) setSelectedCompany(null);
 									}}
 								>
-									<CardContent className="p-4">
-										<div className="flex justify-between items-start mb-2">
-											<h3
-												className="font-semibold flex-1"
-												style={{ color: "var(--text-color)" }}
-											>
-												{company}
-											</h3>
-											<Dialog
-												open={isModalOpen && selectedCompany === company}
-												onOpenChange={(open) => {
-													setIsModalOpen(open);
-													if (!open) setSelectedCompany(null);
-												}}
-											>
-												<DialogTrigger asChild>
-													<Button
-														variant="ghost"
-														size="sm"
-														onClick={() => {
-															setSelectedCompany(company);
-															setIsModalOpen(true);
+									<Card
+										className="border card-theme cursor-pointer hover:shadow-lg transition-all duration-300"
+										style={{
+											backgroundColor: "var(--primary-color)",
+											borderColor: "var(--border-color)",
+										}}
+										onClick={() => {
+											setSelectedCompany(company);
+											setIsModalOpen(true);
+										}}
+									>
+										<CardContent className="p-4">
+											<div className="flex justify-between items-start mb-2">
+												<h3
+													className="font-semibold flex-1"
+													style={{ color: "var(--text-color)" }}
+												>
+													{company}
+												</h3>
+											</div>
+											<div className="space-y-2 text-sm">
+												<div className="flex justify-between">
+													<span style={{ color: "var(--label-color)" }}>
+														Students Placed:
+													</span>
+													<Badge
+														variant="secondary"
+														style={{
+															backgroundColor: "var(--card-bg)",
+															color: "var(--accent-color)",
+															borderColor: "var(--border-color)",
 														}}
-														style={{ color: "var(--accent-color)" }}
 													>
-														<EyeIcon className="w-4 h-4" />
-													</Button>
-												</DialogTrigger>
-												<DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-													<DialogHeader>
-														<DialogTitle style={{ color: "var(--text-color)" }}>
-															{company} - Student Details
-														</DialogTitle>
-													</DialogHeader>
-													<div className="mt-4">
-														<Table>
-															<TableHeader>
-																<TableRow>
-																	<TableHead
-																		style={{ color: "var(--text-color)" }}
-																	>
-																		Name
-																	</TableHead>
-																	<TableHead
-																		style={{ color: "var(--text-color)" }}
-																	>
-																		Enrollment
-																	</TableHead>
-																	<TableHead
-																		style={{ color: "var(--text-color)" }}
-																	>
-																		Email
-																	</TableHead>
-																	<TableHead
-																		style={{ color: "var(--text-color)" }}
-																	>
-																		Role
-																	</TableHead>
-																	<TableHead
-																		style={{ color: "var(--text-color)" }}
-																	>
-																		Package
-																	</TableHead>
-																	<TableHead
-																		style={{ color: "var(--text-color)" }}
-																	>
-																		Location
-																	</TableHead>
-																	<TableHead
-																		style={{ color: "var(--text-color)" }}
-																	>
-																		Joining Date
-																	</TableHead>
-																</TableRow>
-															</TableHeader>
-															<TableBody>
-																{getCompanyStudents(company).map(
-																	(student, idx) => (
-																		<TableRow key={idx}>
-																			<TableCell
-																				style={{ color: "var(--text-color)" }}
-																			>
-																				{student.name}
-																			</TableCell>
-																			<TableCell
-																				style={{ color: "var(--label-color)" }}
-																			>
-																				{student.enrollment_number}
-																			</TableCell>
-																			<TableCell
-																				style={{ color: "var(--label-color)" }}
-																			>
-																				{student.email || "N/A"}
-																			</TableCell>
-																			<TableCell
-																				style={{ color: "var(--label-color)" }}
-																			>
-																				{student.role || "N/A"}
-																			</TableCell>
-																			<TableCell
-																				style={{ color: "var(--success-dark)" }}
-																			>
-																				{(() => {
-																					const placement = placements.find(
-																						(p) => p.company === company
-																					);
-																					const packageValue = placement
-																						? getStudentPackage(
-																								student,
-																								placement
-																						  )
-																						: student.package;
-																					return packageValue
-																						? formatPackage(packageValue)
-																						: "TBD";
-																				})()}
-																			</TableCell>
-																			<TableCell
-																				style={{ color: "var(--label-color)" }}
-																			>
-																				{student.job_location?.join(", ") ||
-																					"N/A"}
-																			</TableCell>
-																			<TableCell
-																				style={{ color: "var(--label-color)" }}
-																			>
-																				{formatDate(student.joining_date || "")}
-																			</TableCell>
-																		</TableRow>
-																	)
-																)}
-															</TableBody>
-														</Table>
-													</div>
-												</DialogContent>
-											</Dialog>
-										</div>
-										<div className="space-y-2 text-sm">
-											<div className="flex justify-between">
-												<span style={{ color: "var(--label-color)" }}>
-													Students Placed:
-												</span>
-												<Badge
-													variant="secondary"
-													style={{
-														backgroundColor: "var(--card-bg)",
-														color: "var(--accent-color)",
-														borderColor: "var(--border-color)",
-													}}
-												>
-													{stats.studentsCount}
-												</Badge>
-											</div>
-											<div className="flex justify-between">
-												<span style={{ color: "var(--label-color)" }}>
-													Avg Package:
-												</span>
-												<span
-													className="font-semibold"
-													style={{ color: "var(--success-dark)" }}
-												>
-													{formatPackage(stats.avgPackage)}
-												</span>
-											</div>
-											<div>
-												<span
-													className="block mb-1"
-													style={{ color: "var(--label-color)" }}
-												>
-													Profiles:
-												</span>
-												<div className="flex flex-wrap gap-1">
-													{Array.from(stats.profiles)
-														.slice(0, 3)
-														.map((profile: any, idx: number) => (
+														{stats.studentsCount}
+													</Badge>
+												</div>
+												<div className="flex justify-between">
+													<span style={{ color: "var(--label-color)" }}>
+														Avg Package:
+													</span>
+													<span
+														className="font-semibold"
+														style={{ color: "var(--success-dark)" }}
+													>
+														{formatPackage(stats.avgPackage)}
+													</span>
+												</div>
+												<div>
+													<span
+														className="block mb-1"
+														style={{ color: "var(--label-color)" }}
+													>
+														Profiles:
+													</span>
+													<div className="flex flex-wrap gap-1">
+														{Array.from(stats.profiles)
+															.slice(0, 3)
+															.map((profile: any, idx: number) => (
+																<Badge
+																	key={idx}
+																	variant="outline"
+																	className="text-xs"
+																	style={{
+																		backgroundColor: "var(--card-bg)",
+																		borderColor: "var(--border-color)",
+																		color: "var(--text-color)",
+																	}}
+																>
+																	{profile}
+																</Badge>
+															))}
+														{Array.from(stats.profiles).length > 3 && (
 															<Badge
-																key={idx}
 																variant="outline"
 																className="text-xs"
 																style={{
@@ -1298,27 +1194,100 @@ export default function StatsPage() {
 																	color: "var(--text-color)",
 																}}
 															>
-																{profile}
+																+{Array.from(stats.profiles).length - 3} more
 															</Badge>
-														))}
-													{Array.from(stats.profiles).length > 3 && (
-														<Badge
-															variant="outline"
-															className="text-xs"
-															style={{
-																backgroundColor: "var(--card-bg)",
-																borderColor: "var(--border-color)",
-																color: "var(--text-color)",
-															}}
-														>
-															+{Array.from(stats.profiles).length - 3} more
-														</Badge>
-													)}
+														)}
+													</div>
 												</div>
 											</div>
+										</CardContent>
+									</Card>
+									<DialogContent className="w-full sm:max-w-3xl md:max-w-4xl max-h-[90vh] sm:rounded-lg overflow-y-auto">
+										<DialogHeader>
+											<DialogTitle style={{ color: "var(--text-color)" }}>
+												{company} - Student Details
+											</DialogTitle>
+										</DialogHeader>
+										<div className="mt-4">
+											<Table>
+												<TableHeader>
+													<TableRow>
+														<TableHead style={{ color: "var(--text-color)" }}>
+															Name
+														</TableHead>
+														<TableHead style={{ color: "var(--text-color)" }}>
+															Enrollment
+														</TableHead>
+														<TableHead style={{ color: "var(--text-color)" }}>
+															Email
+														</TableHead>
+														<TableHead style={{ color: "var(--text-color)" }}>
+															Role
+														</TableHead>
+														<TableHead style={{ color: "var(--text-color)" }}>
+															Package
+														</TableHead>
+														<TableHead style={{ color: "var(--text-color)" }}>
+															Location
+														</TableHead>
+														<TableHead style={{ color: "var(--text-color)" }}>
+															Joining Date
+														</TableHead>
+													</TableRow>
+												</TableHeader>
+												<TableBody>
+													{getCompanyStudents(company).map((student, idx) => (
+														<TableRow key={idx}>
+															<TableCell style={{ color: "var(--text-color)" }}>
+																{student.name}
+															</TableCell>
+															<TableCell
+																style={{ color: "var(--label-color)" }}
+															>
+																{student.enrollment_number}
+															</TableCell>
+															<TableCell
+																style={{ color: "var(--label-color)" }}
+															>
+																{student.email || "N/A"}
+															</TableCell>
+															<TableCell
+																style={{ color: "var(--label-color)" }}
+															>
+																{student.role || "N/A"}
+															</TableCell>
+															<TableCell
+																style={{ color: "var(--success-dark)" }}
+															>
+																{(() => {
+																	const placement = placements.find(
+																		(p) => p.company === company
+																	);
+																	const packageValue = placement
+																		? getStudentPackage(student, placement)
+																		: student.package;
+																	return packageValue
+																		? formatPackage(packageValue)
+																		: "TBD";
+																})()}
+															</TableCell>
+															<TableCell
+																style={{ color: "var(--label-color)" }}
+															>
+																{student.job_location?.join(", ") || "N/A"}
+															</TableCell>
+															<TableCell
+																style={{ color: "var(--label-color)" }}
+															>
+																{formatDate(student.joining_date || "")}
+															</TableCell>
+														</TableRow>
+													))}
+												</TableBody>
+											</Table>
 										</div>
-									</CardContent>
-								</Card>
+									</DialogContent>
+								</Dialog>
 							))}
 						</div>
 
