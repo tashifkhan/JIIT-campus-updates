@@ -17,11 +17,11 @@ export const metadata: Metadata = {
 		url: "https://jiit-placement-updates.tashif.codes",
 		siteName: "JIIT Placement Updates",
 		images: [
-				{
-					url: "https://jiit-placement-updates.tashif.codes/logo.png",
-					height: 800,
-					width: 1200,
-				},
+			{
+				url: "https://jiit-placement-updates.tashif.codes/logo.png",
+				height: 800,
+				width: 1200,
+			},
 		],
 		type: "website",
 	},
@@ -46,7 +46,11 @@ export const metadata: Metadata = {
 	},
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+	children,
+}: {
+	children: React.ReactNode;
+}) {
 	return (
 		<html lang="en">
 			<head />
@@ -60,14 +64,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 						__html: JSON.stringify({
 							"@context": "https://schema.org",
 							"@type": "WebSite",
-							"name": "JIIT Placement Updates",
-							"url": "https://jiit-placement-updates.tashif.codes",
-							"potentialAction": {
+							name: "JIIT Placement Updates",
+							url: "https://jiit-placement-updates.tashif.codes",
+							potentialAction: {
 								"@type": "SearchAction",
-								"target": "https://jiit-placement-updates.tashif.codes/search?q={search_term_string}",
-								"query-input": "required name=search_term_string"
-							}
-						})
+								target:
+									"https://jiit-placement-updates.tashif.codes/search?q={search_term_string}",
+								"query-input": "required name=search_term_string",
+							},
+						}),
 					}}
 				/>
 			</body>
