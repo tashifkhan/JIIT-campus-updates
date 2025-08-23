@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Sitemap for the live site
+Sitemap: https://jiit-placement-updates.tashif.codes/sitemap.xml
