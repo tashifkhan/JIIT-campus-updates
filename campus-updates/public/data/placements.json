@@ -1712,7 +1712,7 @@
 		"roles": [
 			{
 				"role": "SDE Intern",
-				"package": 3.6,
+				"package": 10.0,
 				"package_details": "INR 30,000/- per month"
 			}
 		],
@@ -1724,28 +1724,28 @@
 				"enrollment_number": "22103052",
 				"email": "prateekkumaroneandonly1@gmail.com",
 				"role": "SDE Intern",
-				"package": 3.6
+				"package": 10.0
 			},
 			{
 				"name": "HARSHAL VILAS RELAN",
 				"enrollment_number": "22103235",
 				"email": "placement.harshal@gmail.com",
 				"role": "SDE Intern",
-				"package": 3.6
+				"package": 10.0
 			},
 			{
 				"name": "NANDINI",
 				"enrollment_number": "22103225",
 				"email": "nandinijindal010@gmail.com",
 				"role": "SDE Intern",
-				"package": 3.6
+				"package": 10.0
 			},
 			{
 				"name": "ANAND\n PANDA",
 				"enrollment_number": "9922103099",
 				"email": "anand612p@gmail.com",
 				"role": "SDE Intern",
-				"package": 3.6
+				"package": 10.0
 			}
 		],
 		"number_of_offers": 4,
