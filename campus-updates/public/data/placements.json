@@ -1923,22 +1923,22 @@
 		"roles": [
 			{
 				"role": "Business Intel Engineer I",
-				"package": 0.84,
+				"package": 8.4,
 				"package_details": "INR 70000 per month"
 			},
 			{
 				"role": "Programmer Analyst",
-				"package": 0.84,
+				"package": 8.4,
 				"package_details": "INR 70000 per month"
 			},
 			{
 				"role": "Support Engineer II",
-				"package": 0.6,
+				"package": 6.0,
 				"package_details": "INR 50000 per month"
 			},
 			{
 				"role": "System Development Engineer I",
-				"package": 0.84,
+				"package": 8.4,
 				"package_details": "INR 70000 per month"
 			}
 		],
@@ -1953,70 +1953,70 @@
 				"enrollment_number": "9922103075",
 				"email": null,
 				"role": "Business Intel Engineer I",
-				"package": 0.84
+				"package": 8.4
 			},
 			{
 				"name": "NILESH VERMA",
 				"enrollment_number": "22102018",
 				"email": null,
 				"role": "Programmer Analyst",
-				"package": 0.84
+				"package": 8.4
 			},
 			{
 				"name": "KARTIKEY BORA",
 				"enrollment_number": "9922103074",
 				"email": null,
 				"role": "Programmer Analyst",
-				"package": 0.84
+				"package": 8.4
 			},
 			{
 				"name": "MAULIK GAUTAM",
 				"enrollment_number": "9922103182",
 				"email": null,
 				"role": "Programmer Analyst",
-				"package": 0.84
+				"package": 8.4
 			},
 			{
 				"name": "SIDHI GROVER",
 				"enrollment_number": "9922103095",
 				"email": null,
 				"role": "Programmer Analyst",
-				"package": 0.84
+				"package": 8.4
 			},
 			{
 				"name": "ARYAN JAISWAL",
 				"enrollment_number": "9922103113",
 				"email": null,
 				"role": "Support Engineer II",
-				"package": 0.6
+				"package": 6.0
 			},
 			{
 				"name": "KHUSHI AGARWAL",
 				"enrollment_number": "9922103001",
 				"email": null,
 				"role": "Support Engineer II",
-				"package": 0.6
+				"package": 6.0
 			},
 			{
 				"name": "SAKSHAM BHASIN",
 				"enrollment_number": "22102098",
 				"email": null,
 				"role": "System Development Engineer I",
-				"package": 0.84
+				"package": 8.4
 			},
 			{
 				"name": "DEVANSH KUKREJA",
 				"enrollment_number": "22104060",
 				"email": null,
 				"role": "System Development Engineer I",
-				"package": 0.84
+				"package": 8.4
 			},
 			{
 				"name": "SHASHANK GAUTAM",
 				"enrollment_number": "22102086",
 				"email": null,
 				"role": "Support Engineer II",
-				"package": 0.6
+				"package": 6.0
 			}
 		],
 		"number_of_offers": 10,
