@@ -528,17 +528,6 @@ export default function StatsPage() {
 							Campus placement data and analytics
 						</p>
 					</div>
-					{/* <Button
-							onClick={exportToCSV}
-							className="mt-4 sm:mt-0"
-							style={{
-								backgroundColor: "var(--accent-color)",
-								color: "white",
-							}}
-						>
-							<DownloadIcon className="w-4 h-4 mr-2" />
-							Export CSV
-						</Button> */}
 				</div>
 
 				{/* Floating Filter Button */}
