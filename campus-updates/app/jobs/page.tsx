@@ -917,37 +917,23 @@ export default function JobsPage() {
 										if (!open) setSelectedJobModal(null);
 									}}
 								>
-									{/* explicit small action to open dialog without relying on card click */}
 									<Button
-										variant="link"
+										variant="outline"
 										size="sm"
+										className="w-full font-medium border hover-theme mt-2"
+										style={{
+											backgroundColor: "var(--primary-color)",
+											borderColor: "var(--accent-color)",
+											color: "var(--accent-color)",
+										}}
 										onClick={(e) => {
 											e.stopPropagation();
 											setSelectedJobModal(job);
 										}}
-										className="text-sm"
 									>
-										Show more details
+										View Details
+										<ChevronDownIcon className="w-4 h-4 ml-1" />
 									</Button>
-									<DialogTrigger asChild>
-										<Button
-											variant="outline"
-											size="sm"
-											className="w-full font-medium border hover-theme mt-2"
-											style={{
-												backgroundColor: "var(--primary-color)",
-												borderColor: "var(--accent-color)",
-												color: "var(--accent-color)",
-											}}
-											onClick={(e) => {
-												e.stopPropagation();
-												setSelectedJobModal(job);
-											}}
-										>
-											View Details
-											<ChevronDownIcon className="w-4 h-4 ml-1" />
-										</Button>
-									</DialogTrigger>
 									<DialogContent
 										className="max-w-none md:max-w-4xl max-h-[80vh] md:max-h-[80vh] h-screen md:h-auto w-screen md:w-auto overflow-y-auto card-theme p-4 md:p-6"
 										style={{
