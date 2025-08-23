@@ -118,7 +118,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 				)}
 			</div>
 
-		<div className="lg:flex lg:h-full">
+			<div className="lg:flex lg:h-full">
 				{/* Desktop Sidebar */}
 				<div className="hidden lg:flex lg:flex-shrink-0">
 					<div
@@ -129,10 +129,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 						}}
 					>
 						<div
-							className="px-6 py-6 border-b border-theme o"
+							className="px-6 py-6 border-b border-theme text-center"
 							style={{ borderColor: "var(--border-color)" }}
 						>
-							<div className="w-20 h-20 relative rounded-full overflow-hidden flex-shrink-0">
+							<div className="w-20 h-20 mx-auto relative rounded-full overflow-hidden">
 								<Image
 									src="/logo.png"
 									alt="JIIT Logo"
@@ -140,25 +140,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 									style={{ objectFit: "cover" }}
 								/>
 							</div>
-							<div className="flex items-center justify-between">
-								<div className="flex items-center gap-3">
-									<div>
-										<h1
-											className="text-xl font-bold"
-											style={{ color: "var(--text-color)" }}
-										>
-											Placement Updates
-										</h1>
-										<p
-											className="text-sm mt-1"
-											style={{ color: "var(--label-color)" }}
-										>
-											Placement Portal
-										</p>
-									</div>
-								</div>
-								{/* Desktop switcher moved to bottom of sidebar */}
-							</div>
+							<h1
+								className="text-xl font-bold mt-3"
+								style={{ color: "var(--text-color)" }}
+							>
+								Placement Updates
+							</h1>
+							<p
+								className="text-sm mt-1"
+								style={{ color: "var(--label-color)" }}
+							>
+								Placement Portal
+							</p>
 						</div>
 
 						<nav className="flex-1 px-4 py-6 space-y-2 overflow-auto">
@@ -194,7 +187,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 							})}
 						</nav>
 						{/* Bottom area for desktop: theme switcher */}
-						<div className="px-4 py-4 border-t border-theme mt-auto" style={{ borderColor: "var(--border-color)" }}>
+						<div
+							className="px-4 py-4 border-t border-theme mt-auto"
+							style={{ borderColor: "var(--border-color)" }}
+						>
 							<ThemeSwitcher />
 						</div>
 					</div>
