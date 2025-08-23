@@ -1521,12 +1521,12 @@
 		"roles": [
 			{
 				"role": "Product Intern",
-				"package": 4.2,
+				"package": 12.6,
 				"package_details": "INR 35000/- Per Month stipend. Conversion to full-time role based on performance during Internship and the then prevailing market conditions. Salary Package: INR 12 Lakhs"
 			},
 			{
 				"role": "Software Developer Intern",
-				"package": 4.2,
+				"package": 14.0,
 				"package_details": "INR 35000/- Per Month stipend. Conversion to full-time role based on performance during Internship and the then prevailing market conditions. Salary Package: INR 14 Lakhs"
 			}
 		],
@@ -1538,84 +1538,84 @@
 				"enrollment_number": "22102145",
 				"email": "anshatharv@gmail.com",
 				"role": "Product Intern",
-				"package": null
+				"package": 12.6
 			},
 			{
 				"name": "ARYAMAN VASHISHTHA",
 				"enrollment_number": "9922102042",
 				"email": "aryamanvashishtha12345@gmail.com",
 				"role": "Product Intern",
-				"package": null
+				"package": 12.6
 			},
 			{
 				"name": "DAKSH ARORA",
 				"enrollment_number": "9922103167",
 				"email": "daksh007arora@gmail.com",
 				"role": "Product Intern",
-				"package": null
+				"package": 12.6
 			},
 			{
 				"name": "FAISAL SHAFIQUE",
 				"enrollment_number": "22102096",
 				"email": "faisall.shafique2003@gmail.com",
 				"role": "Product Intern",
-				"package": null
+				"package": 12.6
 			},
 			{
 				"name": "KUNAL SINGH",
 				"enrollment_number": "22103033",
 				"email": "kunalsingh.workz@gmail.com",
 				"role": "Product Intern",
-				"package": null
+				"package": 12.6
 			},
 			{
 				"name": "SANAT SHREE",
 				"enrollment_number": "9922103151",
 				"email": "sanatshree1@gmail.com",
 				"role": "Product Intern",
-				"package": null
+				"package": 12.6
 			},
 			{
 				"name": "ABHISHEK SHUKLA",
 				"enrollment_number": "21803001",
 				"email": "abhi2003shukla@gmail.com",
 				"role": "Software Developer Intern",
-				"package": null
+				"package": 14.0
 			},
 			{
 				"name": "ANGEL",
 				"enrollment_number": "9922103062",
 				"email": "angelsinghal993@gmail.com",
 				"role": "Software Developer Intern",
-				"package": null
+				"package": 14.0
 			},
 			{
 				"name": "SHAHZAD ULLAH KHAN",
 				"enrollment_number": "22103167",
 				"email": "shahzad.2feb@gmail.com",
 				"role": "Software Developer Intern",
-				"package": null
+				"package": 14.0
 			},
 			{
 				"name": "ABHIRUP DANDAPAT",
 				"enrollment_number": "9922103163",
 				"email": "abhirupdandapat03@gmail.com",
 				"role": "Software Developer Intern",
-				"package": null
+				"package": 14.0
 			},
 			{
 				"name": "DHRUV MISHRA",
 				"enrollment_number": "9922103112",
 				"email": "dhruvmishra1020@gmail.com",
 				"role": "Software Developer Intern",
-				"package": null
+				"package": 14.0
 			},
 			{
 				"name": "ROHIT GUPTA",
 				"enrollment_number": "21803018",
 				"email": "rg3354877@gmail.com",
 				"role": "Software Developer Intern",
-				"package": null
+				"package": 14.0
 			}
 		],
 		"number_of_offers": 12,
@@ -1627,13 +1627,8 @@
 		"company": "Salescode.ai",
 		"roles": [
 			{
-				"role": "Software Engineer Intern (Full Stack)",
-				"package": 6.0,
-				"package_details": "INR 50,000/- Per Month (Stipend). Salary Package: INR 12.60 Lakhs (INR 9 Lakhs fixed + INR 3 Lakhs LTIP + INR 60K variable)"
-			},
-			{
-				"role": "Software Engineer Trainee (Full Stack)",
-				"package": 12.6,
+				"role": "Software Engineer (Full Stack)",
+				"package": 14.0,
 				"package_details": "INR 9 Lakhs fixed + INR 3 Lakhs LTIP + INR 60K variable"
 			},
 			{
@@ -1649,29 +1644,29 @@
 				"name": "SAMARTH NARAYAN",
 				"enrollment_number": "9922103238",
 				"email": null,
-				"role": "Software Engineer Intern (Full Stack)",
-				"package": 6.0
+				"role": "Software Engineer (Full Stack)",
+				"package": 14.0
 			},
 			{
 				"name": "ARYAN AGRAWAL",
 				"enrollment_number": "22103182",
 				"email": null,
-				"role": "Software Engineer Intern (Full Stack)",
-				"package": 6.0
+				"role": "Software Engineer (Full Stack)",
+				"package": 14.0
 			},
 			{
 				"name": "DIBYA SUNDAR ROY",
 				"enrollment_number": "22103229",
 				"email": null,
-				"role": "Software Engineer Intern (Full Stack)",
-				"package": 6.0
+				"role": "Software Engineer (Full Stack)",
+				"package": 14.0
 			},
 			{
 				"name": "VEDANT SINGH CHAUHAN",
 				"enrollment_number": "22103058",
 				"email": null,
-				"role": "Software Engineer Intern (Full Stack)",
-				"package": 6.0
+				"role": "Software Engineer (Full Stack)",
+				"package": 14.0
 			},
 			{
 				"name": "MANAN GARG",
@@ -2156,326 +2151,6 @@
 		"number_of_offers": 3,
 		"additional_info": "Selected candidates may pursue a Sponsored M. Tech. from JIIT in the respective discipline after completing the internship as a Faculty Scholar or serving as a Faculty Fellow for one year.",
 		"email_subject": "Fwd: JIIT Noida--Faculty Fellow & Later Sponsored M.Tech. at\r\n JIIT-2026 Batch-Final Offers",
-		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
-	},
-	{
-		"company": "Outlook Publishing India",
-		"roles": [
-			{
-				"role": "Business Analytics",
-				"package": 2.4,
-				"package_details": "Competitive Earning - based on performance maximum upto INR 20,000 for 06 weeks of Internship."
-			},
-			{
-				"role": "Finance",
-				"package": 2.4,
-				"package_details": "Competitive Earning - based on performance maximum upto INR 20,000 for 06 weeks of Internship."
-			},
-			{
-				"role": "Marketing",
-				"package": 2.4,
-				"package_details": "Competitive Earning - based on performance maximum upto INR 20,000 for 06 weeks of Internship."
-			},
-			{
-				"role": "Operations",
-				"package": 2.4,
-				"package_details": "Competitive Earning - based on performance maximum upto INR 20,000 for 06 weeks of Internship."
-			}
-		],
-		"job_location": ["Physical Mode", "Virtual Mode (first 10 days)"],
-		"joining_date": "2025-05-28",
-		"students_selected": [
-			{
-				"name": "AVANTIKA GUPTA",
-				"enrollment_number": "2406090036",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "JATIN PRATAP SINGH",
-				"enrollment_number": "2406090058",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "KSHITIJ SINGH",
-				"enrollment_number": "2406090026",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "LAVANYA BHARDWAJ",
-				"enrollment_number": "2406090037",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "ADITI BAJPAI",
-				"enrollment_number": "2406090043",
-				"email": null,
-				"role": "Finance",
-				"package": 0.0
-			},
-			{
-				"name": "AQSA FATIMA",
-				"enrollment_number": "2406090002",
-				"email": null,
-				"role": "Marketing",
-				"package": 0.0
-			},
-			{
-				"name": "SHAGUN THAKUR",
-				"enrollment_number": "2406090066",
-				"email": null,
-				"role": "Marketing",
-				"package": 0.0
-			},
-			{
-				"name": "HARSH MITTAL",
-				"enrollment_number": "23709123",
-				"email": null,
-				"role": "Operations",
-				"package": 0.0
-			},
-			{
-				"name": "MAHUA MALHOTRA",
-				"enrollment_number": "23709059",
-				"email": null,
-				"role": "Marketing",
-				"package": 2.4
-			},
-			{
-				"name": "SONALI MISHRA",
-				"enrollment_number": "23709063",
-				"email": null,
-				"role": "Marketing",
-				"package": 2.4
-			},
-			{
-				"name": "YASH JAIN",
-				"enrollment_number": "23709148",
-				"email": null,
-				"role": "Finance",
-				"package": 2.4
-			},
-			{
-				"name": "ANJALI SENGAR",
-				"enrollment_number": "22101039",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "ANSH GARG",
-				"enrollment_number": "9922103109",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "ASHISH GUPTA",
-				"enrollment_number": "22103318",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "CHANDAN AGARWAL",
-				"enrollment_number": "22103292",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "DAKSH JAIN",
-				"enrollment_number": "22103151",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "GURBAKSHISH SINGH",
-				"enrollment_number": "9922103009",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "ISHAN JAIN",
-				"enrollment_number": "22103338",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "ISHANK TYAGI",
-				"enrollment_number": "9922103257",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "KAPIL SHARMA",
-				"enrollment_number": "22103312",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "KARTIK GARG",
-				"enrollment_number": "22103158",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "KRISHNA AGRAWAL",
-				"enrollment_number": "22103331",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "MANAN BAGGA",
-				"enrollment_number": "9922103159",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "MANAN GARG",
-				"enrollment_number": "9922103081",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "NAVYA THAKUR",
-				"enrollment_number": "22103010",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "SANSKAR BANSAL",
-				"enrollment_number": "9922103128",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "SUBHAJIT BAUR",
-				"enrollment_number": "9922103157",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "TANYA SINGH",
-				"enrollment_number": "22103186",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "VANSHIKA AGARWAL",
-				"enrollment_number": "22103276",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "VICKKY KAPOOR",
-				"enrollment_number": "9922103084",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "YASH MITTAL",
-				"enrollment_number": "22103217",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "ABHISHEK KUMAR GUPTA",
-				"enrollment_number": "9922102025",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "ADYA JHA",
-				"enrollment_number": "9922102115",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "DHANDEEP SINGH",
-				"enrollment_number": "22102215",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "JHANVI SINGHAL",
-				"enrollment_number": "22102117",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "MANYA JAIN",
-				"enrollment_number": "22102138",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "OM AGARWAL",
-				"enrollment_number": "22102190",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "SHRIYA MISHRA",
-				"enrollment_number": "22102200",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "VASHNI AGRAHARI",
-				"enrollment_number": "22102213",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "PRAKHAR MADNANI",
-				"enrollment_number": "22104057",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			},
-			{
-				"name": "SANSKAR SRIVASTAVA",
-				"enrollment_number": "22104014",
-				"email": null,
-				"role": "Business Analytics",
-				"package": 2.4
-			}
-		],
-		"number_of_offers": 41,
-		"additional_info": "Summer Internship for 6 weeks. Stipend is performance based.",
-		"email_subject": "Fwd: Outlook Publishing India - B.Tech/MBA/BBA 2026 Batch - Summer\r\n Internship Offers",
 		"email_sender": "Tashif Ahmad Khan <tashifkhan010@gmail.com>"
 	}
 ]
