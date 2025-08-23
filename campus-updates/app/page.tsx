@@ -98,25 +98,38 @@ export default function HomePage() {
 
 	// Parse and structure the formatted message for better display
 	const parseFormattedMessage = (message: string, category: string) => {
+		// Normalize line endings
+		let processedMessage = (message || "").replace(/\r/g, "");
+
+		// Remove announcement labels (e.g. "**🔔 Announcement**" or emoji variants)
+		// Also remove the generic 'Announcement' standalone lines
+		processedMessage = processedMessage
+			.split("\n")
+			.filter((ln) => {
+				const t = ln.replace(/\*+/g, "").trim();
+				// remove lines that are just 'Announcement' or start with common announcement emojis
+				// match common emojis like: 🔔 📢 ⚠️ 🎉 📰
+				if (/^(?:[\s\*🔔📢⚠️🎉📰]*\bAnnouncement\b[\s\*🔔📢⚠️🎉📰]*)$/i.test(t))
+					return false;
+				return true;
+			})
+			.join("\n");
+
 		// Remove congratulations text and student lists from shortlisting notices
-		let processedMessage = message;
 		if (category.toLowerCase().includes("shortlisting")) {
-			processedMessage = message
+			processedMessage = processedMessage
 				.replace(/Congratulations to the following students:\s*/gi, "")
 				// Remove entire student list section - names with enrollment numbers
 				.replace(/^[A-Za-z\s]+\s*\(\d+\)\s*$/gm, "")
 				// Remove lines that are just names and numbers (more flexible pattern)
 				.replace(/^[A-Z][A-Za-z\s]*\s*\(\d{6,}\)\s*$/gm, "")
 				// Remove any remaining standalone enrollment numbers
-				.replace(/^\(\d{6,}\)\s*$/gm, "")
-				// Remove empty lines that might be left behind
-				.replace(/^\s*$/gm, "");
+				.replace(/^\(\d{6,}\)\s*$/gm, "");
 		}
 
-		const lines = processedMessage
-			.split("\n")
-			.map((line) => line.trim())
-			.filter(Boolean);
+		// Keep raw lines (including empty lines) to preserve paragraph breaks
+		const rawLines = processedMessage.split("\n");
+		const lines = rawLines.map((line) => line.trim());
 		let title = "";
 		let body = "";
 		let eligibility = "";
@@ -127,13 +140,14 @@ export default function HomePage() {
 		let company = "";
 		let role = "";
 
-		// Extract title (first line, removing markdown and emojis)
-		if (lines.length > 0) {
-			title = lines[0]
+		// Extract title (first non-empty trimmed line, removing markdown and emojis)
+		const firstNonEmptyIdx = lines.findIndex((l) => l.length > 0);
+		if (firstNonEmptyIdx >= 0) {
+			title = lines[firstNonEmptyIdx]
 				.replace(/^\*\*|\*\*$/g, "") // Remove markdown bold
 				.replace(/^#+\s*/, "") // Remove markdown headers
-				.replace(/📢|🎉|⚠️|💼/g, "") // Remove emojis
-				.replace(/Job Posting|Shortlisting Update|Update/gi, "") // Remove category text
+				.replace(/📢|🎉|⚠️|💼|🔔/g, "") // Remove common emojis
+				.replace(/Job Posting|Shortlisting Update|Update|Announcement/gi, "") // Remove category text
 				.trim();
 		}
 
@@ -145,7 +159,9 @@ export default function HomePage() {
 		let inEligibility = false;
 		let inHiring = false;
 
-		for (let i = 1; i < lines.length; i++) {
+		// Start processing lines after the title line (if found)
+		for (let i = Math.max(0, firstNonEmptyIdx + 1); i < lines.length; i++) {
+			const rawLine = rawLines[i] || "";
 			const line = lines[i];
 			const cleanLine = line.replace(/^\*\*|\*\*$/g, "").replace(/^#+\s*/, "");
 
@@ -196,22 +212,21 @@ export default function HomePage() {
 			// Categorize lines
 			if (inEligibility && !line.match(/posted\s*by/i)) {
 				// Extra cleaning for eligibility text to remove markdown formatting
-				const cleanEligibilityLine = cleanLine
-					.replace(/^\*\*|\*\*$/g, "") // Remove bold markdown
-					.replace(/\*\*/g, "") // Remove any remaining asterisks
-					.trim();
+				const cleanEligibilityLine = cleanLine.replace(/\*\*/g, "").trim();
 				eligibilityLines.push(cleanEligibilityLine);
 			} else if (inHiring && !line.match(/posted\s*by/i)) {
 				hiringLines.push(cleanLine);
 			} else if (
 				!line.match(/company:|role:|ctc:|location:|posted\s*by|on:/i) &&
-				!line.match(/📢|🎉|job posting|shortlisting update/i)
+				!line.match(/📢|🎉|job posting|shortlisting update|announcement/i)
 			) {
-				bodyLines.push(cleanLine);
+				// Preserve the original spacing for the body line to keep paragraph breaks
+				bodyLines.push(rawLine);
 			}
 		}
 
-		body = bodyLines.join("\n").trim();
+		// Join body lines preserving blank lines; trim only the ends
+		body = bodyLines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
 		eligibility = eligibilityLines.join("\n").trim();
 		hiringProcess = hiringLines.join("\n").trim();
 
