@@ -535,7 +535,7 @@ export default function StatsPage() {
 					<Sheet open={showFilters} onOpenChange={setShowFilters}>
 						<SheetTrigger asChild>
 							<Button
-								className="rounded-full w-14 h-14 shadow-lg relative"
+								className="rounded-2xl w-14 h-14 shadow-lg relative"
 								style={{
 									backgroundColor: "var(--accent-color)",
 									color: "white",
@@ -861,7 +861,7 @@ export default function StatsPage() {
 				<div className="fixed bottom-20 md:bottom-6 right-20 z-50 mr-1">
 					<Button
 						onClick={exportToCSV}
-						className="rounded-full w-14 h-14 shadow-lg"
+						className="rounded-2xl w-14 h-14 shadow-lg"
 						style={{
 							backgroundColor: "var(--accent-color)",
 							color: "white",
