@@ -11,6 +11,7 @@ import {
 	HomeIcon,
 	TrendingUpIcon,
 	// CalendarIcon,
+	BellIcon,
 	MenuIcon,
 	XIcon,
 } from "lucide-react";
@@ -57,6 +58,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 						</h1>
 					</div>
 					<div className="flex items-center gap-2">
+						<Link
+							href="https://t.me/SupersetNotificationBot"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="px-3 py-1 rounded-2xl text-sm font-medium hover-theme"
+							style={{
+								backgroundColor: "var(--accent-color)",
+								color: "var(--card-bg)",
+							}}
+						>
+							<BellIcon className="w-5 h-5" />
+						</Link>
 						<ThemeSwitcher compact />
 						<button
 							onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -152,6 +165,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 							>
 								Placement Portal
 							</p>
+							<Link
+								href="https://t.me/SupersetNotificationBot"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="inline-block mt-3 px-3 py-1 rounded-md text-sm font-medium hover-theme"
+								style={{
+									backgroundColor: "var(--accent-color)",
+									color: "var(--card-bg)",
+								}}
+							>
+								Get notifications
+							</Link>
 						</div>
 
 						<nav className="flex-1 px-4 py-6 space-y-2 overflow-auto">
