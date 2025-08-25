@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,9 +45,20 @@ const categoryIcons: Record<string, any> = {
 type Props = { initialNotices: NoticeType[] };
 
 export default function NoticesClient({ initialNotices = [] }: Props) {
-	const [notices, setNotices] = useState<NoticeType[]>(initialNotices || []);
 	const [expandedNotice, setExpandedNotice] = useState<string | null>(null);
-	const [loading, setLoading] = useState(false);
+
+	const { data: fetchedNotices, isLoading } = useQuery<NoticeType[]>({
+		queryKey: ["notices"],
+		queryFn: async () => {
+			const res = await fetch("/api/notices");
+			const json = await res.json();
+			return (json?.ok ? json.data : []) as NoticeType[];
+		},
+		initialData: initialNotices,
+	});
+
+	const notices = fetchedNotices ?? [];
+	const loading = isLoading;
 	// Filters
 	const [query, setQuery] = useState("");
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
