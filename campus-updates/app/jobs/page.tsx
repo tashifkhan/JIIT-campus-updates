@@ -85,9 +85,11 @@ export default function JobsPage() {
 		4: "Internship",
 	};
 	useEffect(() => {
-		fetch("/data/jobs.json")
+		// Fetch jobs from the server API which returns { ok, data }
+		fetch("/api/jobs")
 			.then((res) => res.json())
-			.then((data) => {
+			.then((resp) => {
+				const data = resp?.ok ? resp.data : [];
 				// Sort by createdAt descending
 				const sorted = [...data].sort(
 					(a: Job, b: Job) => (b.createdAt || 0) - (a.createdAt || 0)
@@ -102,6 +104,10 @@ export default function JobsPage() {
 					}
 				}
 				setJobs(deduped);
+				setLoading(false);
+			})
+			.catch(() => {
+				setJobs([]);
 				setLoading(false);
 			});
 	}, []);

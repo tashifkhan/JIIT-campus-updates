@@ -100,10 +100,16 @@ export default function StatsPage() {
 	const COMPANIES_LIMIT = 6;
 
 	useEffect(() => {
-		fetch("/data/placements.json")
+		// Fetch placement offers from the server API which returns { ok, data }
+		fetch("/api/placement-offers")
 			.then((res) => res.json())
-			.then((data) => {
+			.then((resp) => {
+				const data = resp?.ok ? resp.data : [];
 				setPlacements(data);
+				setLoading(false);
+			})
+			.catch(() => {
+				setPlacements([]);
 				setLoading(false);
 			});
 	}, []);
@@ -292,14 +298,16 @@ export default function StatsPage() {
 				// Search query filter
 				if (searchQuery) {
 					const query = searchQuery.toLowerCase();
-					const matchesName = student.name.toLowerCase().includes(query);
-					const matchesEnrollment = student.enrollment_number
-						.toLowerCase()
-						.includes(query);
-					const matchesCompany = placement.company
-						.toLowerCase()
-						.includes(query);
-					const matchesRole = student.role.toLowerCase().includes(query);
+					const matchesName =
+						!!student.name && student.name.toLowerCase().includes(query);
+					const matchesEnrollment =
+						!!student.enrollment_number &&
+						student.enrollment_number.toLowerCase().includes(query);
+					const matchesCompany =
+						!!placement.company &&
+						placement.company.toLowerCase().includes(query);
+					const matchesRole =
+						!!student.role && student.role.toLowerCase().includes(query);
 
 					if (
 						!matchesName &&
@@ -419,6 +427,11 @@ export default function StatsPage() {
 
 	// Helper function to get students for a specific company
 	const getCompanyStudents = (companyName: string) => {
+		// If filters are active, return students from the filtered set so company dialog
+		// reflects current filters; otherwise return all students from placements.
+		if (hasActiveFilters) {
+			return filteredStudents.filter((s) => s.company === companyName);
+		}
 		return placements
 			.filter((placement) => placement.company === companyName)
 			.flatMap((placement) =>
@@ -483,10 +496,14 @@ export default function StatsPage() {
 		document.body.removeChild(link);
 	};
 
-	// Get companies to display (limited or all)
+	// Get companies to display (limited or all). If filters are active, use the
+	// filteredCompanyStats so the company list matches the current filters.
+	const sourceCompanyStats = hasActiveFilters
+		? filteredCompanyStats
+		: companyStats;
 	const companiesToShow = showAllCompanies
-		? Object.entries(companyStats)
-		: Object.entries(companyStats).slice(0, COMPANIES_LIMIT);
+		? Object.entries(sourceCompanyStats)
+		: Object.entries(sourceCompanyStats).slice(0, COMPANIES_LIMIT);
 
 	if (loading) {
 		return (
