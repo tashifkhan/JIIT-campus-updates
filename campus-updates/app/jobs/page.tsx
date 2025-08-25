@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -84,33 +85,35 @@ export default function JobsPage() {
 		3: "> 4.6L",
 		4: "Internship",
 	};
+	// Use react-query to fetch jobs
+	const { data: jobsResp, isLoading: jobsLoading } = useQuery<Job[]>({
+		queryKey: ["jobs"],
+		queryFn: async () => {
+			const res = await fetch("/api/jobs");
+			const json = await res.json();
+			return (json?.ok ? json.data : []) as Job[];
+		},
+	});
+
 	useEffect(() => {
-		// Fetch jobs from the server API which returns { ok, data }
-		fetch("/api/jobs")
-			.then((res) => res.json())
-			.then((resp) => {
-				const data = resp?.ok ? resp.data : [];
-				// Sort by createdAt descending
-				const sorted = [...data].sort(
-					(a: Job, b: Job) => (b.createdAt || 0) - (a.createdAt || 0)
-				);
-				// De-duplicate by id (keep the latest by createdAt)
-				const seen = new Set<string>();
-				const deduped: Job[] = [];
-				for (const j of sorted) {
-					if (!seen.has(j.id)) {
-						seen.add(j.id);
-						deduped.push(j);
-					}
+		if (jobsResp) {
+			const sorted = [...jobsResp].sort(
+				(a: Job, b: Job) => (b.createdAt || 0) - (a.createdAt || 0)
+			);
+			const seen = new Set<string>();
+			const deduped: Job[] = [];
+			for (const j of sorted) {
+				if (!seen.has(j.id)) {
+					seen.add(j.id);
+					deduped.push(j);
 				}
-				setJobs(deduped);
-				setLoading(false);
-			})
-			.catch(() => {
-				setJobs([]);
-				setLoading(false);
-			});
-	}, []);
+			}
+			setJobs(deduped);
+			setLoading(false);
+		}
+	}, [jobsResp]);
+
+	useEffect(() => setLoading(jobsLoading), [jobsLoading]);
 
 	const formatDate = (timestamp: number) => {
 		const date = new Date(timestamp);

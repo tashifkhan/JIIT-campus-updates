@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -99,20 +100,26 @@ export default function StatsPage() {
 
 	const COMPANIES_LIMIT = 6;
 
+	// Use react-query to fetch placements
+	const { data: placementsResp, isLoading: placementsLoading } = useQuery<
+		Placement[]
+	>({
+		queryKey: ["placement-offers"],
+		queryFn: async () => {
+			const res = await fetch("/api/placement-offers");
+			const json = await res.json();
+			return (json?.ok ? json.data : []) as Placement[];
+		},
+	});
+
 	useEffect(() => {
-		// Fetch placement offers from the server API which returns { ok, data }
-		fetch("/api/placement-offers")
-			.then((res) => res.json())
-			.then((resp) => {
-				const data = resp?.ok ? resp.data : [];
-				setPlacements(data);
-				setLoading(false);
-			})
-			.catch(() => {
-				setPlacements([]);
-				setLoading(false);
-			});
-	}, []);
+		if (placementsResp) {
+			setPlacements(placementsResp);
+			setLoading(false);
+		}
+	}, [placementsResp]);
+
+	useEffect(() => setLoading(placementsLoading), [placementsLoading]);
 
 	const formatPackage = (packageValue: number | null) => {
 		if (packageValue === null || packageValue === undefined) {

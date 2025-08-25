@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Analytics } from "@vercel/analytics/next";
+import ReactQueryProvider from "@/components/ReactQueryProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -55,7 +56,7 @@ export default function RootLayout({
 		<html lang="en">
 			<head />
 			<body className={inter.className}>
-				<ThemeProvider>{children}</ThemeProvider>
+				<ReactQueryProvider>{children}</ReactQueryProvider>
 				<Analytics />
 				{/* JSON-LD structured data for site */}
 				<script
