@@ -1,9 +1,10 @@
 import Layout from "@/components/Layout";
 import NoticesClient from "@/components/NoticesClient";
-import noticesData from "@/public/data/notices.json";
+import { getNotices } from "@/lib/server/data";
 
-export default function HomePage() {
-	// Server-rendered: load JSON at build/server time and pass to client component
+export default async function HomePage() {
+	// Server-rendered: load from MongoDB on the server only and pass to client component
+	const noticesData = await getNotices();
 	const sorted = (noticesData as any[])
 		.slice()
 		.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
@@ -17,6 +18,7 @@ export default function HomePage() {
 
 	return (
 		<Layout>
+			{/* initialNotices is server-populated; client does not fetch directly */}
 			<NoticesClient initialNotices={sorted} />
 		</Layout>
 	);
