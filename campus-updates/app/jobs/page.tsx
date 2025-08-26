@@ -212,7 +212,10 @@ export default function JobsPage() {
 	const now = Date.now();
 	const filteredJobs = useMemo(() => {
 		return jobs.filter((job) => {
-			if (openOnly && job.deadline && job.deadline < now) return false;
+			// When 'openOnly' is enabled, exclude jobs that have no deadline
+			// and also exclude those whose deadline is in the past.
+			if (openOnly && (job.deadline == null || job.deadline < now))
+				return false;
 			const q = query.trim().toLowerCase();
 			if (q) {
 				const hay =
