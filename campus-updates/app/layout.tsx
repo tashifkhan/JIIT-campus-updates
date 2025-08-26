@@ -1,7 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ThemeProvider } from "@/components/ThemeProvider";
+import { PostHogProvider } from "@/components/providor";
 import { Analytics } from "@vercel/analytics/next";
 import ReactQueryProvider from "@/components/ReactQueryProvider";
 
@@ -56,26 +56,28 @@ export default function RootLayout({
 		<html lang="en">
 			<head />
 			<body className={inter.className}>
-				<ReactQueryProvider>{children}</ReactQueryProvider>
-				<Analytics />
-				{/* JSON-LD structured data for site */}
-				<script
-					type="application/ld+json"
-					dangerouslySetInnerHTML={{
-						__html: JSON.stringify({
-							"@context": "https://schema.org",
-							"@type": "WebSite",
-							name: "JIIT Placement Updates",
-							url: "https://jiit-placement-updates.tashif.codes",
-							potentialAction: {
-								"@type": "SearchAction",
-								target:
-									"https://jiit-placement-updates.tashif.codes/search?q={search_term_string}",
-								"query-input": "required name=search_term_string",
-							},
-						}),
-					}}
-				/>
+				<PostHogProvider>
+					<ReactQueryProvider>{children}</ReactQueryProvider>
+					<Analytics />
+					{/* JSON-LD structured data for site */}
+					<script
+						type="application/ld+json"
+						dangerouslySetInnerHTML={{
+							__html: JSON.stringify({
+								"@context": "https://schema.org",
+								"@type": "WebSite",
+								name: "JIIT Placement Updates",
+								url: "https://jiit-placement-updates.tashif.codes",
+								potentialAction: {
+									"@type": "SearchAction",
+									target:
+										"https://jiit-placement-updates.tashif.codes/search?q={search_term_string}",
+									"query-input": "required name=search_term_string",
+								},
+							}),
+						}}
+					/>
+				</PostHogProvider>
 			</body>
 		</html>
 	);
