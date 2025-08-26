@@ -2,6 +2,9 @@ import Layout from "@/components/Layout";
 import NoticesClient from "@/components/NoticesClient";
 import { getNotices } from "@/lib/server/data";
 
+// Force request-time rendering so the page always reads fresh data from MongoDB
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
 	// Server-rendered: load from MongoDB on the server only and pass to client component
 	const noticesData = await getNotices();
