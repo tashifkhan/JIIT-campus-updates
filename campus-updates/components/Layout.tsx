@@ -284,7 +284,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 											borderColor: "var(--border-color)",
 										}}
 									>
-										<div className="flex items-center justify-between mb-2">
+										{/* <div className="flex items-center justify-between mb-2">
 											<button
 												onClick={() => setToolsOpen(false)}
 												className="p-1 rounded hover-theme"
@@ -292,7 +292,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 											>
 												<XIcon className="w-4 h-4" />
 											</button>
-										</div>
+										</div> */}
 										<div className="space-y-1">
 											{tools.map((t) => {
 												const ToolIcon = t.icon;
