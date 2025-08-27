@@ -293,7 +293,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 											{tools.map((t) => {
 												const ToolIcon = t.icon;
 												return (
-													<a
+													<Link
 														key={t.href}
 														href={t.href}
 														target="_blank"
@@ -303,7 +303,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 													>
 														{ToolIcon && <ToolIcon className="w-4 h-4 mr-3" />}
 														<span className="truncate">{t.name}</span>
-													</a>
+													</Link>
 												);
 											})}
 										</div>
@@ -375,50 +375,61 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 			{/* Bottom padding for mobile nav */}
 			<div className="lg:hidden h-16"></div>
 
-			{/* Mobile Tools Overlay */}
+			{/* Mobile Tools Overlay - Redesigned */}
 			{toolsOpen && (
-				<div className="fixed inset-0 z-50 flex items-end lg:hidden">
+				<div className="fixed inset-0 z-50 flex items-center justify-center lg:hidden">
+					{/* Overlay background */}
 					<div
-						className="absolute inset-0 bg-black/40"
+						className="absolute inset-0 bg-black/50 backdrop-blur-sm"
 						onClick={() => setToolsOpen(false)}
+						aria-label="Close tools modal"
+						tabIndex={0}
 					/>
+					{/* Modal card */}
 					<div
-						className="w-full bg-card rounded-t-lg p-4"
+						className="relative w-[90vw] max-w-md mx-auto bg-card rounded-2xl shadow-xl p-5 border border-theme"
 						style={{
 							backgroundColor: "var(--card-bg)",
-							borderTop: "1px solid var(--border-color)",
+							borderColor: "var(--border-color)",
 						}}
+						role="dialog"
+						aria-modal="true"
 					>
-						<div className="flex items-center justify-between mb-2">
-							<strong style={{ color: "var(--text-color)" }}>Tools</strong>
-							<button
-								className="p-1 rounded hover-theme"
-								onClick={() => setToolsOpen(false)}
-							>
-								<XIcon
-									className="w-4 h-4"
-									style={{ color: "var(--label-color)" }}
-								/>
-							</button>
-						</div>
-						<div className="space-y-2">
+						<button
+							className="absolute top-3 right-3 p-2 rounded-full hover-theme"
+							onClick={() => setToolsOpen(false)}
+							aria-label="Close"
+							style={{ backgroundColor: "var(--primary-color-lite)" }}
+						>
+							<XIcon
+								className="w-5 h-5"
+								style={{ color: "var(--label-color)" }}
+							/>
+						</button>
+						<h2
+							className="text-lg font-bold mb-4 text-center"
+							style={{ color: "var(--text-color)" }}
+						>
+							Tools
+						</h2>
+						<div className="flex flex-col gap-3">
 							{tools.map((t) => {
 								const ToolIcon = t.icon;
 								return (
-									<a
+									<Link
 										key={t.href}
 										href={t.href}
 										target="_blank"
 										rel="noopener noreferrer"
-										className="flex items-center px-4 py-3 rounded-lg text-sm font-medium hover-theme"
+										className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium hover-theme transition-all border border-transparent focus:outline-none focus:ring-2 focus:ring-accent"
 										style={{
 											color: "var(--text-color)",
 											backgroundColor: "var(--primary-color-lite)",
 										}}
 									>
-										{ToolIcon && <ToolIcon className="w-5 h-5 mr-3" />}
+										{ToolIcon && <ToolIcon className="w-6 h-6 flex-shrink-0" />}
 										<span className="truncate">{t.name}</span>
-									</a>
+									</Link>
 								);
 							})}
 						</div>
