@@ -10,10 +10,15 @@ import {
 	BriefcaseIcon,
 	HomeIcon,
 	TrendingUpIcon,
-	// CalendarIcon,
+	CalendarIcon,
 	BellIcon,
 	MenuIcon,
 	XIcon,
+	WrenchIcon,
+	MessageSquareIcon,
+	CoffeeIcon,
+	WifiIcon,
+	BookOpenIcon,
 } from "lucide-react";
 
 const navigation = [
@@ -23,9 +28,38 @@ const navigation = [
 	// { name: "Campus", href: "/campus", icon: CalendarIcon },
 ];
 
+const tools = [
+	// {
+	//  name: "Placement Updates PWA",
+	//  href: "https://jiit-placement-updates.tashif.codes",
+	// },
+	{
+		name: "Placement Bot",
+		href: "https://t.me/SupersetNotificationBot",
+		icon: MessageSquareIcon,
+	},
+	{
+		name: "Timetable",
+		href: "https://jiit-timetable.tashif.codes",
+		icon: CalendarIcon,
+	},
+	{
+		name: "Mess Menu",
+		href: "https://jiit-timetable.tashif.codes/mess-menu",
+		icon: CoffeeIcon,
+	},
+	{
+		name: "Wifi Auto Login",
+		href: "https://sophos-autologin.tashif.codes",
+		icon: WifiIcon,
+	},
+	{ name: "JPortal", href: "https://jportal.tashif.codes", icon: BookOpenIcon },
+];
+
 export default function Layout({ children }: { children: React.ReactNode }) {
 	const pathname = usePathname();
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+	const [toolsOpen, setToolsOpen] = useState(false);
 
 	return (
 		<div
@@ -210,6 +244,72 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 									</Link>
 								);
 							})}
+
+							{/* Tools button (desktop) */}
+							<div className="">
+								<button
+									onClick={() => setToolsOpen(!toolsOpen)}
+									className={cn(
+										"w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors border hover-theme",
+										toolsOpen ? "border-theme" : "border-transparent"
+									)}
+									style={{
+										color: toolsOpen
+											? "var(--accent-color)"
+											: "var(--text-color)",
+										backgroundColor: toolsOpen
+											? "var(--primary-color)"
+											: "transparent",
+										borderColor: toolsOpen
+											? "var(--accent-color)"
+											: "transparent",
+									}}
+								>
+									<WrenchIcon className="w-5 h-5 mr-3" />
+									Tools
+								</button>
+							</div>
+
+							{/* Tools popup panel inside sidebar (desktop only) */}
+							{toolsOpen && (
+								<div className="mt-3">
+									<div
+										className="rounded-lg border p-3"
+										style={{
+											backgroundColor: "var(--card-bg)",
+											borderColor: "var(--border-color)",
+										}}
+									>
+										<div className="flex items-center justify-between mb-2">
+											<button
+												onClick={() => setToolsOpen(false)}
+												className="p-1 rounded hover-theme"
+												style={{ color: "var(--label-color)" }}
+											>
+												<XIcon className="w-4 h-4" />
+											</button>
+										</div>
+										<div className="space-y-1">
+											{tools.map((t) => {
+												const ToolIcon = t.icon;
+												return (
+													<a
+														key={t.href}
+														href={t.href}
+														target="_blank"
+														rel="noopener noreferrer"
+														className="flex items-center px-3 py-2 rounded hover-theme text-sm"
+														style={{ color: "var(--text-color)" }}
+													>
+														{ToolIcon && <ToolIcon className="w-4 h-4 mr-3" />}
+														<span className="truncate">{t.name}</span>
+													</a>
+												);
+											})}
+										</div>
+									</div>
+								</div>
+							)}
 						</nav>
 						{/* Bottom area for desktop: theme switcher */}
 						<div
@@ -259,11 +359,72 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 							</Link>
 						);
 					})}
+
+					{/* Tools button for mobile */}
+					<button
+						onClick={() => setToolsOpen(true)}
+						className="flex flex-col items-center py-2 px-3 rounded-lg transition-colors min-w-0 active:scale-95"
+						style={{ color: "var(--label-color)" }}
+					>
+						<WrenchIcon className="w-5 h-5 mb-1" />
+						<span className="text-xs font-medium truncate">Tools</span>
+					</button>
 				</nav>
 			</div>
 
 			{/* Bottom padding for mobile nav */}
 			<div className="lg:hidden h-16"></div>
+
+			{/* Mobile Tools Overlay */}
+			{toolsOpen && (
+				<div className="fixed inset-0 z-50 flex items-end lg:hidden">
+					<div
+						className="absolute inset-0 bg-black/40"
+						onClick={() => setToolsOpen(false)}
+					/>
+					<div
+						className="w-full bg-card rounded-t-lg p-4"
+						style={{
+							backgroundColor: "var(--card-bg)",
+							borderTop: "1px solid var(--border-color)",
+						}}
+					>
+						<div className="flex items-center justify-between mb-2">
+							<strong style={{ color: "var(--text-color)" }}>Tools</strong>
+							<button
+								className="p-1 rounded hover-theme"
+								onClick={() => setToolsOpen(false)}
+							>
+								<XIcon
+									className="w-4 h-4"
+									style={{ color: "var(--label-color)" }}
+								/>
+							</button>
+						</div>
+						<div className="space-y-2">
+							{tools.map((t) => {
+								const ToolIcon = t.icon;
+								return (
+									<a
+										key={t.href}
+										href={t.href}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="flex items-center px-4 py-3 rounded-lg text-sm font-medium hover-theme"
+										style={{
+											color: "var(--text-color)",
+											backgroundColor: "var(--primary-color-lite)",
+										}}
+									>
+										{ToolIcon && <ToolIcon className="w-5 h-5 mr-3" />}
+										<span className="truncate">{t.name}</span>
+									</a>
+								);
+							})}
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
