@@ -53,7 +53,11 @@ const tools = [
 		href: "https://sophos-autologin.tashif.codes",
 		icon: WifiIcon,
 	},
-	{ name: "JPortal", href: "https://jportal.tashif.codes", icon: BookOpenIcon },
+	{
+		name: "JPortal",
+		href: "https://yashmalik.tech/jportal/",
+		icon: BookOpenIcon,
+	},
 ];
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -387,7 +391,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 					/>
 					{/* Modal card */}
 					<div
-						className="relative w-[94vw] max-w-md ml-auto mr-0 bg-card rounded-2xl shadow-xl p-5 border border-theme mb-20"
+						className="relative max-w-md ml-auto mr-0 bg-card rounded-2xl shadow-xl p-5 border border-theme mb-20"
 						style={{
 							backgroundColor: "var(--card-bg)",
 							borderColor: "var(--border-color)",

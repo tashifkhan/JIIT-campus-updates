@@ -678,11 +678,14 @@ export default function JobsPage() {
 							}}
 							role="button"
 							tabIndex={0}
-							onClick={() => setSelectedJobModal(job)}
+							onClick={() => {
+								// Only open if no other modal is currently open
+								if (!selectedJobModal) setSelectedJobModal(job);
+							}}
 							onKeyDown={(e) => {
 								if (e.key === "Enter" || e.key === " ") {
 									e.preventDefault();
-									setSelectedJobModal(job);
+									if (!selectedJobModal) setSelectedJobModal(job);
 								}
 							}}
 						>
