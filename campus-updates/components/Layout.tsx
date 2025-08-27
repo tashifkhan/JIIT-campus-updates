@@ -377,7 +377,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
 			{/* Mobile Tools Overlay - Redesigned */}
 			{toolsOpen && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center lg:hidden">
+				<div className="fixed inset-0 z-50 flex items-end justify-end lg:hidden">
 					{/* Overlay background */}
 					<div
 						className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -387,7 +387,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 					/>
 					{/* Modal card */}
 					<div
-						className="relative w-[90vw] max-w-md mx-auto bg-card rounded-2xl shadow-xl p-5 border border-theme"
+						className="relative w-[94vw] max-w-md ml-auto mr-0 bg-card rounded-2xl shadow-xl p-5 border border-theme mb-20"
 						style={{
 							backgroundColor: "var(--card-bg)",
 							borderColor: "var(--border-color)",
@@ -406,12 +406,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 								style={{ color: "var(--label-color)" }}
 							/>
 						</button>
-						<h2
-							className="text-lg font-bold mb-4 text-center"
-							style={{ color: "var(--text-color)" }}
-						>
-							Tools
-						</h2>
 						<div className="flex flex-col gap-3">
 							{tools.map((t) => {
 								const ToolIcon = t.icon;
