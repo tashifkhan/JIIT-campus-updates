@@ -1,126 +1,148 @@
-# JIIT Campus Updates
+## JIIT Campus Updates
 
-[![Astro](https://img.shields.io/badge/Frontend-Astro-FF5D01?logo=astro&logoColor=white)](https://astro.build/)  [![Bun](https://img.shields.io/badge/Runtime-Bun-000000?logo=bun&logoColor=white)](https://bun.sh/)  [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)  [![MongoDB](https://img.shields.io/badge/Database-MongoDB-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)  [![LangChain](https://img.shields.io/badge/AI-LangChain-1C3C3C)](https://www.langchain.com/)  [![LangGraph](https://img.shields.io/badge/AI-LangGraph-1C3C3C)](https://www.langchain.com/langgraph)
+![Next.js](https://img.shields.io/badge/Frontend-Next.js-000000?logo=nextdotjs&logoColor=white) ![Node](https://img.shields.io/badge/Runtime-Node.js-339933?logo=node.js&logoColor=white) ![Python](https://img.shields.io/badge/Backend-Python-3776AB?logo=python&logoColor=white) ![MongoDB](https://img.shields.io/badge/Database-MongoDB-47A248?logo=mongodb&logoColor=white) ![LangChain](https://img.shields.io/badge/AI-LangChain-1C3C3C)
 
+JIIT Campus Updates is a web application that aggregates placement notices, job listings, and campus updates and delivers curated notifications via a Telegram bot. The project consists of:
 
-**JIIT Campus Updates** is a centralized web platform designed to keep students informed about the latest placement opportunities and campus activities at Jaypee Institute of Information Technology (JIIT).  
-The platform automatically refreshes its data every day at **9:00 AM IST**, ensuring that students always have access to the most recent updates.
+- A Next.js frontend (in `campus-updates/`) that serves the web UI and a few server API routes.
+- A Python-based backend bot (in `backend/placement_updates/`) which scrapes sources, formats notices using LangChain/LangGraph + Google Generative API, persists data to MongoDB, and broadcasts updates to Telegram.
 
+This README documents how to run the frontend and the Python bot, what environment variables are required, and how the scheduling works.
+
+## Quick status
+
+- Frontend: Next.js app located in `campus-updates/` (use `pnpm`/`npm`/`yarn` as you prefer; a `pnpm-lock.yaml` is present).
+- Backend: Python scripts in `backend/placement_updates/` (not a FastAPI web service). The bot runs scheduled scraping and Telegram broadcast jobs.
 
 ## Features
 
-- **Placement Updates**  
-  Stay informed about ongoing and upcoming placement drives, company visits, and recruitment announcements.
+- Aggregates placement and campus notices from configured sources
+- Formats notices using an LLM workflow (LangChain + LangGraph + Google Generative AI)
+- Persists structured notices and job listings to MongoDB
+- Broadcasts updates to a Telegram channel via a Telegram Bot
+- Supports running as a foreground process or detached daemon (background)
 
-- **Campus Activity Updates**  
-  View details of events, workshops, competitions, and activities organized by various hubs and societies.
+## Requirements
 
-- **Automated Daily Refresh**  
-  Data is updated automatically at 9:00 AM IST using backend automation.
+- Node.js (for frontend) and a package manager (pnpm, npm, or yarn)
+- Python 3.10+ (for the backend bot)
+- MongoDB instance (cloud or local)
+- Google Generative API key (if you want the LLM-based formatting to work)
 
-- **Search and Filter**  
-  Quickly find relevant updates using search and category filters.
+## Environment variables
 
+The project expects a few environment variables. Place them in `.env` files or export them in your environment.
 
-## Tech Stack
+- Common / Database
 
-**Frontend**  
-- [Astro](https://astro.build/) – Static site generation and modern frontend framework  
-- [Bun](https://bun.sh/) – Fast JavaScript runtime and package manager
+  - MONGODB_URI - MongoDB connection string (required by both frontend server APIs and backend bot)
+  - MONGODB_DB - optional, database name (defaults to `SupersetPlacement`)
 
-**Backend**  
-- [Python](https://www.python.org/)  
-- [FastAPI](https://fastapi.tiangolo.com/) – High-performance API framework  
-- [MongoDB](https://www.mongodb.com/) – NoSQL database for storing updates  
-- [LangChain](https://www.langchain.com/) – AI-powered data processing and automation  
-- [LangGraph](https://www.langchain.com/langgraph) – Workflow orchestration for AI pipelines
+- Backend (Python bot) — set in `backend/placement_updates/.env` or your shell
 
-**Automation**  
-- Cron jobs for scheduled daily refresh
+  - TELEGRAM_BOT_TOKEN - Telegram bot token (example env in repo: `TELEGRAM_BOT_TOKEN`)
+  - TELEGRAM_CHAT_ID - target Telegram chat id for broadcast (example env in repo: `TELEGRAM_CHAT_ID`)
+  - GOOGLE_API_KEY - Google Generative API key used by the notice formatter (optional if you don't need LLM formatting)
 
+- Frontend (optional / analytics)
+  - NEXT_PUBLIC_POSTHOG_KEY - PostHog key used in frontend (optional)
+  - NEXT_PUBLIC_POSTHOG_HOST - PostHog host (optional)
 
-## Installation
+Note: The repository currently contains an example `backend/placement_updates/.env` and `campus-updates/.env` with values; remove or rotate any secrets before publishing.
 
-### Prerequisites
-- [Bun](https://bun.sh/) (v1.0 or later)
-- Python (3.10 or later)
-- MongoDB instance (local or cloud)
-- Git
+## Running locally
 
-### Steps
+1. Frontend (development)
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-username/jiit-campus-updates.git
-   cd jiit-campus-updates
-   ```
+```bash
+cd campus-updates
+# Install deps (pnpm recommended because a pnpm-lock.yaml exists, but npm/yarn will also work)
+pnpm install
+pnpm dev
+# or: npm install && npm run dev
+```
 
-2. **Setup Backend**
-   ```bash
-   cd backend
-   python -m venv venv
-   source venv/bin/activate   # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
+Open http://localhost:3000 to view the frontend.
 
-3. **Setup Frontend**
-   ```bash
-   cd ../frontend
-   bun install
-   ```
+2. Backend bot (development / run-once)
 
-4. **Environment Variables**  
-   Create a `.env` file in both `backend` and `frontend` directories with the required configuration:
-   ```
-   MONGODB_URI=your_mongodb_connection_string
-   LANGCHAIN_API_KEY=your_langchain_api_key
-   ```
+```bash
+cd backend/placement_updates
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+# Run the bot once (scrape + send to Telegram)
+python main.py
+```
 
-5. **Run Backend**
-   ```bash
-   cd backend
-   uvicorn main:app --reload
-   ```
+3. Bot server with scheduler
 
-6. **Run Frontend**
-   ```bash
-   cd frontend
-   bun run dev
-   ```
+The code includes `bot_server.py` which starts the Telegram bot server and a scheduler that runs scraping + broadcasting at multiple times per day.
 
-## Project Structure
+```bash
+cd backend/placement_updates
+source .venv/bin/activate
+python bot_server.py     # accepts -d / --daemon to spawn a background process
+python bot_server.py --daemon
+```
+
+Daemon mode: when run with `--daemon` the process is detached and logs are written to `backend/placement_updates/logs/superset_bot.log`.
+
+4. Run Telegram-only sending (no scraping)
+
+```bash
+cd backend/placement_updates
+python main.py --telegram-only
+```
+
+## Scheduler times
+
+The backend scheduler (in `bot_server.py`) registers jobs to run multiple times per day (IST):
+
+- 09:00 IST
+- 12:00 IST
+- 15:00 IST
+- 18:00 IST
+- 20:00 IST
+- 00:00 IST
+
+These times are defined in `bot_server.py` and can be adjusted in the source if you need a different cadence.
+
+## Logs
+
+- When running in daemon mode, logs are written to `backend/placement_updates/logs/superset_bot.log`.
+- When running in foreground, output is printed to the console.
+
+## Notes and TODOs
+
+- The backend uses LangChain / LangGraph and the Google Generative API to format notices. If you don't set `GOOGLE_API_KEY`, the formatting will fall back to simpler logic (check `notice_formater.py`).
+- The repo contains sensitive credentials in `campus-updates/.env` and `backend/placement_updates/.env`. Rotate or remove them before making the repo public.
+
+## Project layout (high level)
 
 ```
-jiit-campus-updates/
-│
-├── backend/               # FastAPI backend
-│   ├── main.py             # API entry point
-│   ├── services/           # Business logic
-│   ├── models/             # MongoDB models
-│   ├── utils/              # Helper functions
+.
+├── backend/placement_updates/     # Python bot: scraping, formatting, DB, Telegram
+│   ├── main.py                    # Orchestrator (run once / telegram-only)
+│   ├── bot_server.py              # Bot server + scheduler (daemon support)
+│   ├── telegram_handeller.py      # Telegram bot implementation
+│   ├── notice_formater.py         # LLM formatter (LangChain/LangGraph + Google GenAI)
+│   ├── database.py                # MongoDB helpers
+│   ├── update.py                  # Scraper + upsert logic
 │   └── requirements.txt
-│
-├── frontend/               # Astro frontend
-│   ├── src/                # Pages and components
-│   ├── public/             # Static assets
-│   └── bun.lockb
+
+├── campus-updates/                # Next.js frontend app
+│   ├── app/
+│   ├── components/
+│   └── package.json
 │
 └── README.md
 ```
 
-
-## Update Schedule
-
-The backend uses a scheduled job to fetch and update placement and campus activity data every day at **9:00 AM IST**.  
-This ensures that the platform always displays the latest information.
-
-
 ## Contributing
 
-Contributions are welcome. Please fork the repository and submit a pull request with your changes.  
-For major changes, open an issue first to discuss what you would like to change.
-
+Contributions welcome. If you add functionality, include tests where possible and avoid committing secrets. For large changes, open an issue first to discuss.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under MIT. See the `LICENSE` file for details.
