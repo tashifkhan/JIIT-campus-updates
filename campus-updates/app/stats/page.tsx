@@ -1233,82 +1233,172 @@ export default function StatsPage() {
 											</DialogTitle>
 										</DialogHeader>
 										<div className="mt-4">
-											<Table>
-												<TableHeader>
-													<TableRow>
-														<TableHead style={{ color: "var(--text-color)" }}>
-															Name
-														</TableHead>
-														<TableHead style={{ color: "var(--text-color)" }}>
-															Enrollment
-														</TableHead>
-														<TableHead style={{ color: "var(--text-color)" }}>
-															Email
-														</TableHead>
-														<TableHead style={{ color: "var(--text-color)" }}>
-															Role
-														</TableHead>
-														<TableHead style={{ color: "var(--text-color)" }}>
-															Package
-														</TableHead>
-														<TableHead style={{ color: "var(--text-color)" }}>
-															Location
-														</TableHead>
-														<TableHead style={{ color: "var(--text-color)" }}>
-															Joining Date
-														</TableHead>
-													</TableRow>
-												</TableHeader>
-												<TableBody>
-													{getCompanyStudents(company).map((student, idx) => (
-														<TableRow key={idx}>
-															<TableCell style={{ color: "var(--text-color)" }}>
-																{student.name}
-															</TableCell>
-															<TableCell
-																style={{ color: "var(--label-color)" }}
-															>
-																{student.enrollment_number}
-															</TableCell>
-															<TableCell
-																style={{ color: "var(--label-color)" }}
-															>
-																{student.email || "N/A"}
-															</TableCell>
-															<TableCell
-																style={{ color: "var(--label-color)" }}
-															>
-																{student.role || "N/A"}
-															</TableCell>
-															<TableCell
-																style={{ color: "var(--success-dark)" }}
-															>
-																{(() => {
-																	const placement = placements.find(
-																		(p) => p.company === company
-																	);
-																	const packageValue = placement
-																		? getStudentPackage(student, placement)
-																		: student.package;
-																	return packageValue
-																		? formatPackage(packageValue)
-																		: "TBD";
-																})()}
-															</TableCell>
-															<TableCell
-																style={{ color: "var(--label-color)" }}
-															>
-																{student.job_location?.join(", ") || "N/A"}
-															</TableCell>
-															<TableCell
-																style={{ color: "var(--label-color)" }}
-															>
-																{formatDate(student.joining_date || "")}
-															</TableCell>
+											{/* Desktop / tablet: keep table layout for sm and above */}
+											<div className="hidden sm:block">
+												<Table>
+													<TableHeader>
+														<TableRow>
+															<TableHead style={{ color: "var(--text-color)" }}>
+																Name
+															</TableHead>
+															<TableHead style={{ color: "var(--text-color)" }}>
+																Enrollment
+															</TableHead>
+															<TableHead style={{ color: "var(--text-color)" }}>
+																Email
+															</TableHead>
+															<TableHead style={{ color: "var(--text-color)" }}>
+																Role
+															</TableHead>
+															<TableHead style={{ color: "var(--text-color)" }}>
+																Package
+															</TableHead>
+															<TableHead style={{ color: "var(--text-color)" }}>
+																Location
+															</TableHead>
+															<TableHead style={{ color: "var(--text-color)" }}>
+																Joining Date
+															</TableHead>
 														</TableRow>
-													))}
-												</TableBody>
-											</Table>
+													</TableHeader>
+													<TableBody>
+														{getCompanyStudents(company).map((student, idx) => (
+															<TableRow key={idx}>
+																<TableCell
+																	style={{ color: "var(--text-color)" }}
+																>
+																	{student.name}
+																</TableCell>
+																<TableCell
+																	style={{ color: "var(--label-color)" }}
+																>
+																	{student.enrollment_number}
+																</TableCell>
+																<TableCell
+																	style={{ color: "var(--label-color)" }}
+																>
+																	{student.email || "N/A"}
+																</TableCell>
+																<TableCell
+																	style={{ color: "var(--label-color)" }}
+																>
+																	{student.role || "N/A"}
+																</TableCell>
+																<TableCell
+																	style={{ color: "var(--success-dark)" }}
+																>
+																	{(() => {
+																		const placement = placements.find(
+																			(p) => p.company === company
+																		);
+																		const packageValue = placement
+																			? getStudentPackage(student, placement)
+																			: student.package;
+																		return packageValue
+																			? formatPackage(packageValue)
+																			: "TBD";
+																	})()}
+																</TableCell>
+																<TableCell
+																	style={{ color: "var(--label-color)" }}
+																>
+																	{student.job_location?.join(", ") || "N/A"}
+																</TableCell>
+																<TableCell
+																	style={{ color: "var(--label-color)" }}
+																>
+																	{formatDate(student.joining_date || "")}
+																</TableCell>
+															</TableRow>
+														))}
+													</TableBody>
+												</Table>
+											</div>
+
+											{/* Mobile: stacked, readable rows */}
+											<div className="space-y-3 sm:hidden">
+												{getCompanyStudents(company).map((student, idx) => {
+													const placement = placements.find(
+														(p) => p.company === company
+													);
+													const packageValue = placement
+														? getStudentPackage(student, placement)
+														: student.package;
+													return (
+														<div
+															key={idx}
+															className="border rounded-lg p-3 card-theme"
+															style={{
+																backgroundColor: "var(--primary-color)",
+																borderColor: "var(--border-color)",
+															}}
+														>
+															<div className="flex items-start justify-between">
+																<div className="flex-1">
+																	<p
+																		className="font-semibold"
+																		style={{ color: "var(--text-color)" }}
+																	>
+																		{student.name}
+																	</p>
+																	<p
+																		className="text-xs"
+																		style={{ color: "var(--label-color)" }}
+																	>
+																		{student.enrollment_number}
+																	</p>
+																	<p
+																		className="text-xs mt-1"
+																		style={{ color: "var(--label-color)" }}
+																	>
+																		{student.email || "N/A"}
+																	</p>
+																	<div
+																		className="text-xs mt-2"
+																		style={{ color: "var(--label-color)" }}
+																	>
+																		<strong
+																			style={{ color: "var(--label-color)" }}
+																		>
+																			Role:{" "}
+																		</strong>
+																		{student.role || "N/A"}
+																	</div>
+																	<div
+																		className="text-xs mt-1"
+																		style={{ color: "var(--label-color)" }}
+																	>
+																		<strong
+																			style={{ color: "var(--label-color)" }}
+																		>
+																			Location:{" "}
+																		</strong>
+																		{student.job_location?.join(", ") || "N/A"}
+																	</div>
+																</div>
+																<div className="ml-4 text-right">
+																	<p
+																		className="font-semibold text-sm"
+																		style={{ color: "var(--success-dark)" }}
+																	>
+																		{packageValue
+																			? formatPackage(packageValue)
+																			: "TBD"}
+																	</p>
+																	<p
+																		className="text-xs mt-1"
+																		style={{ color: "var(--label-color)" }}
+																	>
+																		{student.joining_date
+																			? formatDate(student.joining_date)
+																			: "TBD"}
+																	</p>
+																</div>
+															</div>
+														</div>
+													);
+												})}
+											</div>
 										</div>
 									</DialogContent>
 								</Dialog>
