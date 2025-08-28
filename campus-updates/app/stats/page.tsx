@@ -555,7 +555,7 @@ export default function StatsPage() {
 				</div>
 
 				{/* Floating Filter Button */}
-				<div className="fixed bottom-20 md:bottom-6 right-6 z-50">
+				<div className="fixed bottom-24 md:bottom-6 right-6 z-50">
 					<Sheet open={showFilters} onOpenChange={setShowFilters}>
 						<SheetTrigger asChild>
 							<Button
@@ -882,7 +882,7 @@ export default function StatsPage() {
 				</div>
 
 				{/* Floating Export CSV Button (left of filter) */}
-				<div className="fixed bottom-20 md:bottom-6 right-20 z-50 mr-1">
+				<div className="fixed bottom-24 md:bottom-6 right-20 z-50 mr-1">
 					<Button
 						onClick={exportToCSV}
 						className="rounded-2xl w-14 h-14 shadow-lg"
