@@ -450,8 +450,8 @@ export default function JobDetailPage() {
 											borderColor: "var(--border-color)",
 										}}
 									>
-										<div className="flex items-center justify-between">
-											<div className="flex items-center flex-1 min-w-0">
+										<div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+											<div className="flex items-center flex-1 min-w-0 w-full">
 												<FileTextIcon
 													className="w-5 h-5 mr-3 flex-shrink-0"
 													style={{ color: "var(--accent-color)" }}
@@ -472,7 +472,7 @@ export default function JobDetailPage() {
 													</p>
 												</div>
 											</div>
-											<div className="flex gap-3 ml-4">
+											<div className="flex self-end gap-3 sm:self-auto">
 												<Button
 													variant="outline"
 													className="flex items-center gap-2 hover-theme"
