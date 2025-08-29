@@ -57,7 +57,7 @@ const tools = [
 	},
 	{
 		name: "JPortal",
-		href: "https://jportal.tashif.codes",
+		href: "https://yashmalik.tech/jportal/",
 		icon: BookOpenIcon,
 	},
 ];
