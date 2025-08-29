@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +41,7 @@ import {
 	XIcon,
 	FileTextIcon,
 	ExternalLinkIcon,
+	ArrowRightIcon,
 } from "lucide-react";
 
 interface Job {
@@ -71,6 +73,7 @@ interface Job {
 }
 
 export default function JobsPage() {
+	const router = useRouter();
 	const [jobs, setJobs] = useState<Job[]>([]);
 	const [selectedJobModal, setSelectedJobModal] = useState<Job | null>(null);
 	const [loading, setLoading] = useState(true);
@@ -933,16 +936,11 @@ export default function JobsPage() {
 									</div>
 								</div>
 
-								<Dialog
-									open={selectedJobModal?.id === job.id}
-									onOpenChange={(open) => {
-										if (!open) setSelectedJobModal(null);
-									}}
-								>
+								<div className="flex gap-2 mt-2">
 									<Button
 										variant="outline"
 										size="sm"
-										className="w-full font-medium border hover-theme mt-2"
+										className="flex-1 font-medium border hover-theme"
 										style={{
 											backgroundColor: "var(--primary-color)",
 											borderColor: "var(--accent-color)",
@@ -953,9 +951,33 @@ export default function JobsPage() {
 											setSelectedJobModal(job);
 										}}
 									>
-										View Details
+										Quick View
 										<ChevronDownIcon className="w-4 h-4 ml-1" />
 									</Button>
+									<Button
+										variant="default"
+										size="sm"
+										className="flex-1 font-medium"
+										style={{
+											backgroundColor: "var(--accent-color)",
+											color: "var(--bg-color)",
+										}}
+										onClick={(e) => {
+											e.stopPropagation();
+											router.push(`/jobs/${job.id}`);
+										}}
+									>
+										Full Details
+										<ArrowRightIcon className="w-4 h-4 ml-1" />
+									</Button>
+								</div>
+
+								<Dialog
+									open={selectedJobModal?.id === job.id}
+									onOpenChange={(open) => {
+										if (!open) setSelectedJobModal(null);
+									}}
+								>
 									<DialogContent
 										className="max-w-none md:max-w-4xl max-h-[80vh] md:max-h-[80vh] h-screen md:h-auto w-screen md:w-auto overflow-y-auto card-theme p-4 md:p-6"
 										style={{
@@ -986,20 +1008,39 @@ export default function JobsPage() {
 														{formatDate(job.createdAt)}
 													</DialogDescription>
 												</div>
-												<DialogClose asChild>
+												<div className="flex items-center gap-2 ml-2">
 													<Button
-														variant="ghost"
+														variant="outline"
 														size="sm"
-														className="md:hidden flex-shrink-0 ml-2"
-														style={{ color: "var(--text-color)" }}
+														className="hidden md:flex items-center gap-1 hover-theme"
+														style={{
+															borderColor: "var(--accent-color)",
+															color: "var(--accent-color)",
+															backgroundColor: "transparent",
+														}}
 														onClick={(e) => {
 															e.stopPropagation();
-															setSelectedJobModal(null);
+															router.push(`/jobs/${job.id}`);
 														}}
 													>
-														<XIcon className="w-5 h-5" />
+														<ArrowRightIcon className="w-4 h-4" />
+														Full Page
 													</Button>
-												</DialogClose>
+													<DialogClose asChild>
+														<Button
+															variant="ghost"
+															size="sm"
+															className="flex-shrink-0"
+															style={{ color: "var(--text-color)" }}
+															onClick={(e) => {
+																e.stopPropagation();
+																setSelectedJobModal(null);
+															}}
+														>
+															<XIcon className="w-5 h-5" />
+														</Button>
+													</DialogClose>
+												</div>
 											</div>
 										</DialogHeader>
 
@@ -1389,6 +1430,29 @@ export default function JobsPage() {
 													</div>
 												</div>
 											)}
+
+											{/* Mobile Full Page Button */}
+											<div
+												className="md:hidden pt-4 border-t"
+												style={{ borderColor: "var(--border-color)" }}
+											>
+												<Button
+													variant="default"
+													className="w-full font-medium"
+													style={{
+														backgroundColor: "var(--accent-color)",
+														color: "var(--bg-color)",
+													}}
+													onClick={(e) => {
+														e.stopPropagation();
+														setSelectedJobModal(null);
+														router.push(`/jobs/${job.id}`);
+													}}
+												>
+													<ArrowRightIcon className="w-4 h-4 mr-2" />
+													Open Full Page
+												</Button>
+											</div>
 										</div>
 									</DialogContent>
 								</Dialog>
