@@ -482,12 +482,13 @@ export default function NoticesClient({}: Props) {
 																			className="font-medium mr-2"
 																			style={{ color: "var(--accent-color)" }}
 																		>
-																			{criteria.level}:
+																			{criteria.level.replace("_", " ")}:
 																		</span>
 																		<span
 																			style={{ color: "var(--text-color)" }}
 																		>
-																			{criteria.value} {criteria.unit}
+																			{criteria.value}{" "}
+																			{criteria.unit.replace("CGPA", "")}
 																		</span>
 																	</div>
 																)}
