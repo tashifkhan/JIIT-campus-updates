@@ -13,7 +13,6 @@ import {
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
-	DialogTrigger,
 } from "@/components/ui/dialog";
 import {
 	Sheet,
@@ -437,7 +436,9 @@ export default function StatsPage() {
 		// If filters are active, return students from the filtered set so company dialog
 		// reflects current filters; otherwise return all students from placements.
 		if (hasActiveFilters) {
-			return filteredStudents.filter((s) => s.company === companyName);
+			return filteredStudents
+				.filter((s) => s.company === companyName)
+				.sort((x, y) => (x.name || "").localeCompare(y.name || ""));
 		}
 		return placements
 			.filter((placement) => placement.company === companyName)
@@ -508,9 +509,13 @@ export default function StatsPage() {
 	const sourceCompanyStats = hasActiveFilters
 		? filteredCompanyStats
 		: companyStats;
+	// Sort company entries alphabetically by company name before slicing/showing
+	const companyEntries = Object.entries(sourceCompanyStats).sort(([a], [b]) =>
+		a.localeCompare(b)
+	);
 	const companiesToShow = showAllCompanies
-		? Object.entries(sourceCompanyStats)
-		: Object.entries(sourceCompanyStats).slice(0, COMPANIES_LIMIT);
+		? companyEntries
+		: companyEntries.slice(0, COMPANIES_LIMIT);
 
 	if (loading) {
 		return (
@@ -1477,110 +1482,112 @@ export default function StatsPage() {
 						{showStudentList ? (
 							<div className="space-y-4">
 								{filteredStudents.length > 0 ? (
-									filteredStudents.map((student, studentIndex) => (
-										<Card
-											key={`${student.enrollment_number}-${studentIndex}`}
-											className="border card-theme"
-											style={{
-												backgroundColor: "var(--primary-color)",
-												borderColor: "var(--border-color)",
-											}}
-										>
-											<CardContent className="p-4">
-												<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-													<div>
-														<h3
-															className="font-semibold"
-															style={{ color: "var(--text-color)" }}
-														>
-															{student.name}
-														</h3>
-														<p
-															className="text-sm"
-															style={{ color: "var(--label-color)" }}
-														>
-															{student.enrollment_number}
-														</p>
-														{student.role && (
-															<Badge
-																variant="secondary"
-																className="mt-1 text-xs"
-																style={{
-																	backgroundColor: "var(--card-bg)",
-																	color: "var(--accent-color)",
-																	borderColor: "var(--border-color)",
-																}}
+									[...filteredStudents]
+										.sort((a, b) => (a.name || "").localeCompare(b.name || ""))
+										.map((student, studentIndex) => (
+											<Card
+												key={`${student.enrollment_number}-${studentIndex}`}
+												className="border card-theme"
+												style={{
+													backgroundColor: "var(--primary-color)",
+													borderColor: "var(--border-color)",
+												}}
+											>
+												<CardContent className="p-4">
+													<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+														<div>
+															<h3
+																className="font-semibold"
+																style={{ color: "var(--text-color)" }}
 															>
-																{student.role}
-															</Badge>
-														)}
-													</div>
-													<div>
-														<p
-															className="font-medium"
-															style={{ color: "var(--text-color)" }}
-														>
-															{student.company}
-														</p>
-														<div className="text-sm space-y-1">
-															{student.roles.map((role, roleIndex) => (
-																<p
-																	key={roleIndex}
-																	style={{ color: "var(--label-color)" }}
-																>
-																	{role.role}
-																</p>
-															))}
-														</div>
-														{student.job_location &&
-															student.job_location.length > 0 && (
-																<div
-																	className="flex items-center text-xs mt-1"
-																	style={{ color: "var(--label-color)" }}
-																>
-																	<MapPinIcon className="w-3 h-3 mr-1" />
-																	{student.job_location.join(", ")}
-																</div>
-															)}
-													</div>
-													<div className="text-right md:text-left">
-														<div className="space-y-1">
-															{(() => {
-																const packageValue = getStudentPackage(
-																	student,
-																	student.placement
-																);
-																return packageValue ? (
-																	<p
-																		className="font-semibold text-sm"
-																		style={{ color: "var(--success-dark)" }}
-																	>
-																		{formatPackage(packageValue)}
-																	</p>
-																) : (
-																	<p
-																		className="font-semibold text-sm"
-																		style={{ color: "var(--label-color)" }}
-																	>
-																		TBD
-																	</p>
-																);
-															})()}
-														</div>
-														{student.joining_date && (
-															<div
-																className="flex items-center text-sm mt-1"
+																{student.name}
+															</h3>
+															<p
+																className="text-sm"
 																style={{ color: "var(--label-color)" }}
 															>
-																<CalendarIcon className="w-3 h-3 mr-1" />
-																{formatDate(student.joining_date)}
+																{student.enrollment_number}
+															</p>
+															{student.role && (
+																<Badge
+																	variant="secondary"
+																	className="mt-1 text-xs"
+																	style={{
+																		backgroundColor: "var(--card-bg)",
+																		color: "var(--accent-color)",
+																		borderColor: "var(--border-color)",
+																	}}
+																>
+																	{student.role}
+																</Badge>
+															)}
+														</div>
+														<div>
+															<p
+																className="font-medium"
+																style={{ color: "var(--text-color)" }}
+															>
+																{student.company}
+															</p>
+															<div className="text-sm space-y-1">
+																{student.roles.map((role, roleIndex) => (
+																	<p
+																		key={roleIndex}
+																		style={{ color: "var(--label-color)" }}
+																	>
+																		{role.role}
+																	</p>
+																))}
 															</div>
-														)}
+															{student.job_location &&
+																student.job_location.length > 0 && (
+																	<div
+																		className="flex items-center text-xs mt-1"
+																		style={{ color: "var(--label-color)" }}
+																	>
+																		<MapPinIcon className="w-3 h-3 mr-1" />
+																		{student.job_location.join(", ")}
+																	</div>
+																)}
+														</div>
+														<div className="text-right md:text-left">
+															<div className="space-y-1">
+																{(() => {
+																	const packageValue = getStudentPackage(
+																		student,
+																		student.placement
+																	);
+																	return packageValue ? (
+																		<p
+																			className="font-semibold text-sm"
+																			style={{ color: "var(--success-dark)" }}
+																		>
+																			{formatPackage(packageValue)}
+																		</p>
+																	) : (
+																		<p
+																			className="font-semibold text-sm"
+																			style={{ color: "var(--label-color)" }}
+																		>
+																			TBD
+																		</p>
+																	);
+																})()}
+															</div>
+															{student.joining_date && (
+																<div
+																	className="flex items-center text-sm mt-1"
+																	style={{ color: "var(--label-color)" }}
+																>
+																	<CalendarIcon className="w-3 h-3 mr-1" />
+																	{formatDate(student.joining_date)}
+																</div>
+															)}
+														</div>
 													</div>
-												</div>
-											</CardContent>
-										</Card>
-									))
+												</CardContent>
+											</Card>
+										))
 								) : (
 									<div className="text-center py-8">
 										<p style={{ color: "var(--label-color)" }}>
