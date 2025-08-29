@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import {
 	TrendingUpIcon,
 	IndianRupeeIcon,
 	BellIcon,
+	ArrowRightIcon,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -45,6 +47,7 @@ const categoryIcons: Record<string, any> = {
 type Props = {};
 
 export default function NoticesClient({}: Props) {
+	const router = useRouter();
 	const [expandedNotice, setExpandedNotice] = useState<string | null>(null);
 
 	const { data: rawNotices, isLoading } = useQuery<any[]>({
@@ -683,29 +686,52 @@ export default function NoticesClient({}: Props) {
 												borderColor: "var(--border-color)",
 											}}
 										>
-											<div className="flex items-start">
-												<BellIcon
-													className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0"
-													style={{ color: "var(--accent-color)" }}
-												/>
-												<div>
-													<h4
-														className="font-medium mb-1"
-														style={{ color: "var(--text-color)" }}
-													>
-														Related Job Posting
-													</h4>
-													<p
-														className="text-sm"
-														style={{ color: "var(--text-color)" }}
-													>
-														<span className="font-medium">
-															{notice.matched_job.company}
-														</span>{" "}
-														- {notice.matched_job.job_profile}
-													</p>
+											<div className="flex items-start justify-between mb-3">
+												<div className="flex items-start">
+													<BellIcon
+														className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0"
+														style={{ color: "var(--accent-color)" }}
+													/>
+													<div>
+														<h4
+															className="font-medium mb-1"
+															style={{ color: "var(--text-color)" }}
+														>
+															Related Job Posting
+														</h4>
+														<p
+															className="text-sm"
+															style={{ color: "var(--text-color)" }}
+														>
+															<span className="font-medium">
+																{notice.matched_job.company}
+															</span>{" "}
+															- {notice.matched_job.job_profile}
+														</p>
+													</div>
 												</div>
 											</div>
+											{notice.matched_job.id && (
+												<Button
+													variant="outline"
+													size="sm"
+													className="w-full sm:w-auto hover-theme"
+													style={{
+														borderColor: "var(--accent-color)",
+														color: "var(--accent-color)",
+														backgroundColor: "transparent",
+													}}
+													onClick={(e) => {
+														e.stopPropagation();
+														if (notice.matched_job?.id) {
+															router.push(`/jobs/${notice.matched_job.id}`);
+														}
+													}}
+												>
+													<ArrowRightIcon className="w-4 h-4 mr-2" />
+													View Job Details
+												</Button>
+											)}
 										</div>
 									</div>
 								)}
@@ -742,66 +768,61 @@ export default function NoticesClient({}: Props) {
 								/>
 							</PaginationItem>
 
-							{currentPage > 3 && (
-								<>
-									<PaginationItem>
-										<PaginationLink
-											onClick={() => setCurrentPage(1)}
-											isActive={currentPage === 1}
-											className="cursor-pointer"
-										>
-											1
-										</PaginationLink>
-									</PaginationItem>
-									{currentPage > 4 && (
-										<PaginationItem>
-											<PaginationEllipsis />
-										</PaginationItem>
-									)}
-								</>
-							)}
+							{(() => {
+								const pages = [];
+								const showPages = [];
 
-							{Array.from({ length: totalPages }, (_, i) => i + 1)
-								.filter((page) => {
-									const distance = Math.abs(page - currentPage);
-									return distance <= 2 || page === 1 || page === totalPages;
-								})
-								.filter((page) => {
-									if (currentPage <= 3) return page <= 5;
-									if (currentPage >= totalPages - 2)
-										return page >= totalPages - 4;
-									return Math.abs(page - currentPage) <= 2;
-								})
-								.map((page) => (
-									<PaginationItem key={page}>
-										<PaginationLink
-											onClick={() => setCurrentPage(page)}
-											isActive={currentPage === page}
-											className="cursor-pointer"
-										>
-											{page}
-										</PaginationLink>
-									</PaginationItem>
-								))}
+								// Always show first page
+								if (totalPages > 0) showPages.push(1);
 
-							{currentPage < totalPages - 2 && (
-								<>
-									{currentPage < totalPages - 3 && (
-										<PaginationItem>
-											<PaginationEllipsis />
+								// Show pages around current page
+								const start = Math.max(2, currentPage - 1);
+								const end = Math.min(totalPages - 1, currentPage + 1);
+
+								for (let i = start; i <= end; i++) {
+									if (!showPages.includes(i)) {
+										showPages.push(i);
+									}
+								}
+
+								// Always show last page (if different from first)
+								if (totalPages > 1 && !showPages.includes(totalPages)) {
+									showPages.push(totalPages);
+								}
+
+								// Sort pages
+								showPages.sort((a, b) => a - b);
+
+								// Add ellipsis where needed and create pagination items
+								for (let i = 0; i < showPages.length; i++) {
+									const page = showPages[i];
+									const prevPage = showPages[i - 1];
+
+									// Add ellipsis if there's a gap
+									if (prevPage && page - prevPage > 1) {
+										pages.push(
+											<PaginationItem key={`ellipsis-${prevPage}`}>
+												<PaginationEllipsis />
+											</PaginationItem>
+										);
+									}
+
+									// Add the page
+									pages.push(
+										<PaginationItem key={page}>
+											<PaginationLink
+												onClick={() => setCurrentPage(page)}
+												isActive={currentPage === page}
+												className="cursor-pointer"
+											>
+												{page}
+											</PaginationLink>
 										</PaginationItem>
-									)}
-									<PaginationItem>
-										<PaginationLink
-											onClick={() => setCurrentPage(totalPages)}
-											isActive={currentPage === totalPages}
-											className="cursor-pointer"
-										>
-											{totalPages}
-										</PaginationLink>
-									</PaginationItem>
-								</>
-							)}
+									);
+								}
+
+								return pages;
+							})()}
 
 							<PaginationItem>
 								<PaginationNext
