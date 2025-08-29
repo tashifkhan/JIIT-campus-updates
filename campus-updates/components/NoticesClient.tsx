@@ -680,19 +680,34 @@ export default function NoticesClient({}: Props) {
 										style={{ borderColor: "var(--border-color)" }}
 									>
 										<div
-											className="rounded-lg p-4 border"
+											className="rounded-lg p-4 border cursor-pointer hover:shadow-md transition-all duration-200 group"
 											style={{
 												backgroundColor: "var(--primary-color)",
 												borderColor: "var(--border-color)",
 											}}
+											onClick={() => {
+												if (notice.matched_job?.id) {
+													router.push(`/jobs/${notice.matched_job.id}`);
+												}
+											}}
+											role="button"
+											tabIndex={0}
+											onKeyDown={(e) => {
+												if (e.key === "Enter" || e.key === " ") {
+													e.preventDefault();
+													if (notice.matched_job?.id) {
+														router.push(`/jobs/${notice.matched_job.id}`);
+													}
+												}
+											}}
 										>
-											<div className="flex items-start justify-between mb-3">
-												<div className="flex items-start">
+											<div className="flex items-start justify-between">
+												<div className="flex items-start flex-1">
 													<BellIcon
 														className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0"
 														style={{ color: "var(--accent-color)" }}
 													/>
-													<div>
+													<div className="flex-1">
 														<h4
 															className="font-medium mb-1"
 															style={{ color: "var(--text-color)" }}
@@ -708,30 +723,19 @@ export default function NoticesClient({}: Props) {
 															</span>{" "}
 															- {notice.matched_job.job_profile}
 														</p>
+														<p
+															className="text-xs mt-1 group-hover:text-accent-color transition-colors"
+															style={{ color: "var(--label-color)" }}
+														>
+															Click to view full job details
+														</p>
 													</div>
 												</div>
+												<ArrowRightIcon
+													className="w-4 h-4 flex-shrink-0 ml-2 group-hover:translate-x-1 transition-transform"
+													style={{ color: "var(--accent-color)" }}
+												/>
 											</div>
-											{notice.matched_job.id && (
-												<Button
-													variant="outline"
-													size="sm"
-													className="w-full sm:w-auto hover-theme"
-													style={{
-														borderColor: "var(--accent-color)",
-														color: "var(--accent-color)",
-														backgroundColor: "transparent",
-													}}
-													onClick={(e) => {
-														e.stopPropagation();
-														if (notice.matched_job?.id) {
-															router.push(`/jobs/${notice.matched_job.id}`);
-														}
-													}}
-												>
-													<ArrowRightIcon className="w-4 h-4 mr-2" />
-													View Job Details
-												</Button>
-											)}
 										</div>
 									</div>
 								)}
@@ -753,7 +757,7 @@ export default function NoticesClient({}: Props) {
 
 			{totalPages > 1 && (
 				<div className="mt-8">
-					<Pagination>
+					<Pagination className="max-w-[80vw]">
 						<PaginationContent>
 							<PaginationItem>
 								<PaginationPrevious
