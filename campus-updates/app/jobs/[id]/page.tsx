@@ -250,7 +250,7 @@ export default function JobDetailPage() {
 
 				{/* Header */}
 				<div className="mb-8">
-					<div className="flex items-start justify-between mb-4">
+					<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
 						<div className="flex-1">
 							<h1
 								className="text-2xl lg:text-3xl font-bold mb-2 leading-tight"
@@ -274,17 +274,17 @@ export default function JobDetailPage() {
 								</span>
 							</div>
 						</div>
-						<div className="text-right">
+						<div className="text-left sm:text-right self-start sm:self-auto flex items-center gap-2 sm:block">
 							<Badge
 								variant="outline"
-								className="font-medium border text-sm"
+								className="inline-flex items-center font-medium border text-sm"
 								style={getCategoryColor(job.placement_category_code)}
 							>
 								{category_mapping[job.placement_category_code] ||
 									job.placement_category}
 							</Badge>
 							<div
-								className="text-sm mt-2 flex items-center"
+								className="text-sm mt-2 flex items-center sm:justify-end"
 								style={{ color: "var(--label-color)" }}
 							>
 								<CalendarIcon className="w-4 h-4 mr-1" />
