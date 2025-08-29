@@ -56,7 +56,10 @@ export default function RootLayout({
 		<html lang="en">
 			<head />
 			<body className={inter.className}>
-				<PostHogProvider>
+				<PostHogProvider
+					apiKey={process.env.NEXT_PUBLIC_POSTHOG_KEY}
+					options={{ api_host: "/ph" }}
+				>
 					<ReactQueryProvider>{children}</ReactQueryProvider>
 					<Analytics />
 					{/* JSON-LD structured data for site */}
