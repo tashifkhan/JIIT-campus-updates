@@ -757,7 +757,7 @@ export default function NoticesClient({}: Props) {
 
 			{totalPages > 1 && (
 				<div className="mt-8">
-					<Pagination className="max-w-[80vw]">
+					<Pagination>
 						<PaginationContent>
 							<PaginationItem>
 								<PaginationPrevious
