@@ -93,7 +93,7 @@ export default function StatsPage() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
 	const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-	const [packageRange, setPackageRange] = useState<[number, number]>([0, 70]);
+	const [packageRange, setPackageRange] = useState<[number, number]>([0, 100]);
 	const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
 	const [showFilters, setShowFilters] = useState(false);
 
@@ -445,7 +445,7 @@ export default function StatsPage() {
 		setSearchQuery("");
 		setSelectedCompanies([]);
 		setSelectedRoles([]);
-		setPackageRange([0, 70]);
+		setPackageRange([0, 100]);
 		setSelectedLocations([]);
 	};
 
@@ -456,7 +456,7 @@ export default function StatsPage() {
 		selectedRoles.length > 0 ||
 		selectedLocations.length > 0 ||
 		packageRange[0] !== 0 ||
-		packageRange[1] !== 70;
+		packageRange[1] !== 100;
 
 	// Helper function to get students for a specific company
 	const getCompanyStudents = (companyName: string) => {
@@ -843,7 +843,7 @@ export default function StatsPage() {
 											onValueChange={(value) =>
 												setPackageRange(value as [number, number])
 											}
-											max={70}
+											max={100}
 											min={0}
 											step={0.5}
 											className="w-full"
