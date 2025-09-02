@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -96,6 +96,12 @@ export default function StatsPage() {
 	const [packageRange, setPackageRange] = useState<[number, number]>([0, 100]);
 	const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
 	const [showFilters, setShowFilters] = useState(false);
+
+	// Sorting state for students
+	const [sortKey, setSortKey] = useState<
+		"name" | "package" | "company" | "joining_date" | "enrollment" | "role"
+	>("name");
+	const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
 	const COMPANIES_LIMIT = 6;
 
@@ -359,7 +365,7 @@ export default function StatsPage() {
 				...student,
 				company: placement.company,
 				roles: placement.roles,
-				joining_date: placement.joining_date,
+				joining_date: placement.joining_date || undefined,
 				job_location: placement.job_location,
 				placement: placement,
 			}))
@@ -391,8 +397,74 @@ export default function StatsPage() {
 				: filteredSortedPackages[Math.floor(filteredSortedPackages.length / 2)]
 			: 0;
 	const filteredUniqueCompanies = new Set(
-		filteredStudents.map((s) => s.company)
+		filteredStudents.map((s: any) => s.company)
 	).size;
+
+	// Sort helper for lists of students
+	const sortStudentsList = (
+		students: Array<
+			Student & {
+				company?: string;
+				placement?: Placement;
+				joining_date?: string;
+				roles?: Role[];
+				job_location?: string[] | null;
+			}
+		>
+	) => {
+		const list = [...students];
+		list.sort((a, b) => {
+			const dir = sortDir === "asc" ? 1 : -1;
+
+			if (sortKey === "name") {
+				return ((a.name || "") as string).localeCompare(b.name || "") * dir;
+			}
+
+			if (sortKey === "company") {
+				return (
+					((a.company || "") as string).localeCompare(b.company || "") * dir
+				);
+			}
+
+			if (sortKey === "enrollment") {
+				return (
+					((a.enrollment_number || "") as string).localeCompare(
+						b.enrollment_number || ""
+					) * dir
+				);
+			}
+
+			if (sortKey === "role") {
+				return ((a.role || "") as string).localeCompare(b.role || "") * dir;
+			}
+
+			if (sortKey === "joining_date") {
+				const da = a.joining_date ? new Date(a.joining_date).getTime() : 0;
+				const db = b.joining_date ? new Date(b.joining_date).getTime() : 0;
+				return (da - db) * dir;
+			}
+
+			// package
+			const pa = a.placement
+				? getStudentPackage(a, a.placement)
+				: getStudentPackage(
+						a,
+						placements.find(
+							(p: Placement) => p.company === a.company
+						) as Placement
+				  ) ?? 0;
+			const pb = b.placement
+				? getStudentPackage(b, b.placement)
+				: getStudentPackage(
+						b,
+						placements.find(
+							(p: Placement) => p.company === b.company
+						) as Placement
+				  ) ?? 0;
+			return ((pa ?? 0) - (pb ?? 0)) * dir;
+		});
+		return list;
+	};
 
 	// Group filtered students by company for company-wise stats
 	const filteredCompanyStats = filteredStudents.reduce(
@@ -463,21 +535,26 @@ export default function StatsPage() {
 		// If filters are active, return students from the filtered set so company dialog
 		// reflects current filters; otherwise return all students from placements.
 		if (hasActiveFilters) {
-			return filteredStudents
-				.filter((s) => s.company === companyName)
-				.sort((x, y) => (x.name || "").localeCompare(y.name || ""));
-		}
-		return placements
-			.filter((placement) => placement.company === companyName)
-			.flatMap((placement) =>
-				placement.students_selected.map((student) => ({
-					...student,
-					company: placement.company,
-					roles: placement.roles,
-					joining_date: placement.joining_date,
-					job_location: placement.job_location,
-				}))
+			return sortStudentsList(
+				filteredStudents
+					.filter((s: any) => s.company === companyName)
+					.map((s: any) => s)
 			);
+		}
+		return sortStudentsList(
+			placements
+				.filter((placement: Placement) => placement.company === companyName)
+				.flatMap((placement: Placement) =>
+					placement.students_selected.map((student: Student) => ({
+						...student,
+						company: placement.company,
+						roles: placement.roles,
+						joining_date: placement.joining_date || undefined,
+						job_location: placement.job_location,
+						placement: placement,
+					}))
+				)
+		);
 	};
 
 	// CSV Export function
@@ -1474,7 +1551,7 @@ export default function StatsPage() {
 				{/* Placed Students Section */}
 				<Card className="card-theme">
 					<CardHeader>
-						<div className="flex items-center justify-between">
+						<div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
 							<CardTitle
 								className="flex items-center gap-2"
 								style={{ color: "var(--text-color)" }}
@@ -1498,129 +1575,223 @@ export default function StatsPage() {
 									<></>
 								)}
 							</CardTitle>
-							<Button
-								variant="outline"
-								onClick={() => setShowStudentList(!showStudentList)}
-								style={{
-									borderColor: "var(--border-color)",
-									color: "var(--text-color)",
-								}}
-								className="hover-theme"
-							>
-								{showStudentList ? "Hide List" : `View All Students`}
-							</Button>
+
+							{/* Sorting Controls - Always visible */}
+							<div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
+								<div className="flex items-center space-x-2">
+									<span
+										className="text-sm font-medium"
+										style={{ color: "var(--text-color)" }}
+									>
+										Sort by:
+									</span>
+									<select
+										value={sortKey}
+										onChange={(e) => setSortKey(e.target.value as any)}
+										className="px-3 py-2 border rounded-md text-sm min-w-[120px]"
+										style={{
+											backgroundColor: "var(--card-bg)",
+											borderColor: "var(--border-color)",
+											color: "var(--text-color)",
+										}}
+									>
+										<option value="name">Name</option>
+										<option value="package">Package</option>
+										<option value="company">Company</option>
+										<option value="enrollment">Enrollment</option>
+										<option value="role">Role</option>
+										<option value="joining_date">Joining Date</option>
+									</select>
+									<Button
+										variant="outline"
+										onClick={() =>
+											setSortDir((d) => (d === "asc" ? "desc" : "asc"))
+										}
+										className="h-10 px-3"
+										style={{
+											backgroundColor:
+												sortDir === "asc"
+													? "var(--accent-color)"
+													: "var(--card-bg)",
+											borderColor: "var(--accent-color)",
+											color:
+												sortDir === "asc" ? "white" : "var(--accent-color)",
+										}}
+										title={`Currently: ${
+											sortDir === "asc" ? "Ascending" : "Descending"
+										}. Click to toggle.`}
+									>
+										{sortDir === "asc" ? "▲" : "▼"}
+									</Button>
+								</div>
+								<Button
+									variant="outline"
+									onClick={() => setShowStudentList(!showStudentList)}
+									style={{
+										borderColor: "var(--border-color)",
+										color: "var(--text-color)",
+									}}
+									className="hover-theme"
+								>
+									{showStudentList ? "Hide List" : `View All Students`}
+								</Button>
+							</div>
 						</div>
 					</CardHeader>
 					<CardContent>
 						{showStudentList ? (
 							<div className="space-y-4">
-								{filteredStudents.length > 0 ? (
-									[...filteredStudents]
-										.sort((a, b) => (a.name || "").localeCompare(b.name || ""))
-										.map((student, studentIndex) => (
-											<Card
-												key={`${student.enrollment_number}-${studentIndex}`}
-												className="border card-theme"
+								{/* Sorting indicator */}
+								{showStudentList && filteredStudents.length > 0 && (
+									<div
+										className="flex items-center justify-between mb-4 pb-3 border-b"
+										style={{ borderColor: "var(--border-color)" }}
+									>
+										<div className="flex items-center space-x-2">
+											<span
+												className="text-sm font-medium"
+												style={{ color: "var(--text-color)" }}
+											>
+												Currently sorted by:
+											</span>
+											<Badge
+												variant="outline"
+												className="px-3 py-1"
 												style={{
-													backgroundColor: "var(--primary-color)",
-													borderColor: "var(--border-color)",
+													backgroundColor: "var(--accent-color)",
+													borderColor: "var(--accent-color)",
+													color: "white",
 												}}
 											>
-												<CardContent className="p-4">
-													<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-														<div>
-															<h3
-																className="font-semibold"
-																style={{ color: "var(--text-color)" }}
+												{sortKey.charAt(0).toUpperCase() +
+													sortKey.slice(1).replace("_", " ")}{" "}
+												{sortDir === "asc" ? "↑" : "↓"}
+											</Badge>
+										</div>
+										<span
+											className="text-sm font-medium"
+											style={{ color: "var(--text-color)" }}
+										>
+											{filteredStudents.length} students
+										</span>
+									</div>
+								)}
+
+								{filteredStudents.length > 0 ? (
+									sortStudentsList(
+										filteredStudents.map((student) => ({
+											...student,
+											company: student.company,
+											placement: student.placement,
+											joining_date: student.joining_date,
+											job_location: student.job_location,
+										}))
+									).map((student, studentIndex) => (
+										<Card
+											key={`${student.enrollment_number}-${studentIndex}`}
+											className="border card-theme"
+											style={{
+												backgroundColor: "var(--primary-color)",
+												borderColor: "var(--border-color)",
+											}}
+										>
+											<CardContent className="p-4">
+												<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+													<div>
+														<h3
+															className="font-semibold"
+															style={{ color: "var(--text-color)" }}
+														>
+															{student.name}
+														</h3>
+														<p
+															className="text-sm"
+															style={{ color: "var(--label-color)" }}
+														>
+															{student.enrollment_number}
+														</p>
+														{student.role && (
+															<Badge
+																variant="secondary"
+																className="mt-1 text-xs"
+																style={{
+																	backgroundColor: "var(--card-bg)",
+																	color: "var(--accent-color)",
+																	borderColor: "var(--border-color)",
+																}}
 															>
-																{student.name}
-															</h3>
-															<p
-																className="text-sm"
-																style={{ color: "var(--label-color)" }}
-															>
-																{student.enrollment_number}
-															</p>
-															{student.role && (
-																<Badge
-																	variant="secondary"
-																	className="mt-1 text-xs"
-																	style={{
-																		backgroundColor: "var(--card-bg)",
-																		color: "var(--accent-color)",
-																		borderColor: "var(--border-color)",
-																	}}
-																>
-																	{student.role}
-																</Badge>
-															)}
-														</div>
-														<div>
-															<p
-																className="font-medium"
-																style={{ color: "var(--text-color)" }}
-															>
-																{student.company}
-															</p>
-															<div className="text-sm space-y-1">
-																{student.roles.map((role, roleIndex) => (
-																	<p
-																		key={roleIndex}
-																		style={{ color: "var(--label-color)" }}
-																	>
-																		{role.role}
-																	</p>
-																))}
-															</div>
-															{student.job_location &&
-																student.job_location.length > 0 && (
-																	<div
-																		className="flex items-center text-xs mt-1"
-																		style={{ color: "var(--label-color)" }}
-																	>
-																		<MapPinIcon className="w-3 h-3 mr-1" />
-																		{student.job_location.join(", ")}
-																	</div>
-																)}
-														</div>
-														<div className="text-right md:text-left">
-															<div className="space-y-1">
-																{(() => {
-																	const packageValue = getStudentPackage(
-																		student,
-																		student.placement
-																	);
-																	return packageValue ? (
-																		<p
-																			className="font-semibold text-sm"
-																			style={{ color: "var(--success-dark)" }}
-																		>
-																			{formatPackage(packageValue)}
-																		</p>
-																	) : (
-																		<p
-																			className="font-semibold text-sm"
-																			style={{ color: "var(--label-color)" }}
-																		>
-																			TBD
-																		</p>
-																	);
-																})()}
-															</div>
-															{student.joining_date && (
-																<div
-																	className="flex items-center text-sm mt-1"
+																{student.role}
+															</Badge>
+														)}
+													</div>
+													<div>
+														<p
+															className="font-medium"
+															style={{ color: "var(--text-color)" }}
+														>
+															{student.company}
+														</p>
+														<div className="text-sm space-y-1">
+															{student.roles?.map((role, roleIndex) => (
+																<p
+																	key={roleIndex}
 																	style={{ color: "var(--label-color)" }}
 																>
-																	<CalendarIcon className="w-3 h-3 mr-1" />
-																	{formatDate(student.joining_date)}
+																	{role.role}
+																</p>
+															))}
+														</div>
+														{student.job_location &&
+															student.job_location.length > 0 && (
+																<div
+																	className="flex items-center text-xs mt-1"
+																	style={{ color: "var(--label-color)" }}
+																>
+																	<MapPinIcon className="w-3 h-3 mr-1" />
+																	{student.job_location.join(", ")}
 																</div>
 															)}
-														</div>
 													</div>
-												</CardContent>
-											</Card>
-										))
+													<div className="text-right md:text-left">
+														<div className="space-y-1">
+															{(() => {
+																const packageValue = student.placement
+																	? getStudentPackage(
+																			student,
+																			student.placement
+																	  )
+																	: null;
+																return packageValue ? (
+																	<p
+																		className="font-semibold text-sm"
+																		style={{ color: "var(--success-dark)" }}
+																	>
+																		{formatPackage(packageValue)}
+																	</p>
+																) : (
+																	<p
+																		className="font-semibold text-sm"
+																		style={{ color: "var(--label-color)" }}
+																	>
+																		TBD
+																	</p>
+																);
+															})()}
+														</div>
+														{student.joining_date && (
+															<div
+																className="flex items-center text-sm mt-1"
+																style={{ color: "var(--label-color)" }}
+															>
+																<CalendarIcon className="w-3 h-3 mr-1" />
+																{formatDate(student.joining_date)}
+															</div>
+														)}
+													</div>
+												</div>
+											</CardContent>
+										</Card>
+									))
 								) : (
 									<div className="text-center py-8">
 										<p style={{ color: "var(--label-color)" }}>
