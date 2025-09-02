@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
+import { cn } from "@/lib/utils";
 import {
 	Dialog,
 	DialogContent,
@@ -39,20 +40,21 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import {
-	UsersIcon,
-	TrendingUpIcon,
-	IndianRupeeIcon,
-	BuildingIcon,
-	GraduationCapIcon,
-	CalendarIcon,
-	DownloadIcon,
-	EyeIcon,
-	ChevronDownIcon,
-	ChevronUpIcon,
-	FilterIcon,
-	XIcon,
-	SearchIcon,
-	MapPinIcon,
+	Users,
+	TrendingUp,
+	IndianRupee,
+	Building,
+	GraduationCap,
+	Calendar,
+	Download,
+	Eye,
+	EyeOff,
+	ChevronDown,
+	ChevronUp,
+	Filter,
+	X,
+	Search,
+	MapPin,
 } from "lucide-react";
 
 interface Role {
@@ -668,108 +670,95 @@ export default function StatsPage() {
 					<Sheet open={showFilters} onOpenChange={setShowFilters}>
 						<SheetTrigger asChild>
 							<Button
-								className="rounded-2xl w-14 h-14 shadow-lg relative"
-								style={{
-									backgroundColor: "var(--accent-color)",
-									color: "white",
-								}}
+								size="lg"
+								className="rounded-full w-14 h-14 shadow-xl hover:shadow-2xl transition-all duration-300 relative group"
 							>
-								<FilterIcon className="w-6 h-6" />
+								<Filter className="w-6 h-6 transition-transform group-hover:scale-110" />
 								{hasActiveFilters && (
-									<Badge
-										className="absolute -top-2 -right-2 rounded-full w-6 h-6 p-0 flex items-center justify-center text-xs"
-										style={{
-											backgroundColor: "var(--error-color)",
-											color: "white",
-										}}
-									>
-										!
+									<Badge className="absolute -top-1 -right-1 rounded-full w-5 h-5 p-0 flex items-center justify-center text-xs bg-destructive text-destructive-foreground animate-pulse">
+										{
+											[
+												searchQuery && 1,
+												selectedCompanies.length > 0 && 1,
+												selectedRoles.length > 0 && 1,
+												selectedLocations.length > 0 && 1,
+												(packageRange[0] !== 0 || packageRange[1] !== 100) && 1,
+											].filter(Boolean).length
+										}
 									</Badge>
 								)}
 							</Button>
 						</SheetTrigger>
 						<SheetContent
 							side="right"
-							className="w-[400px] sm:w-[540px]"
-							style={{
-								backgroundColor: "var(--primary-color)",
-								borderColor: "var(--border-color)",
-							}}
+							className="w-[400px] sm:w-[540px] overflow-y-auto"
 						>
-							<SheetHeader>
-								<SheetTitle style={{ color: "var(--text-color)" }}>
+							<SheetHeader className="pb-6">
+								<SheetTitle className="text-xl font-bold flex items-center gap-2">
+									<Filter className="w-5 h-5" />
 									Filter Placement Data
 								</SheetTitle>
-								<SheetDescription style={{ color: "var(--label-color)" }}>
-									Filter students by company, role, location, and package range
+								<SheetDescription className="text-sm text-muted-foreground">
+									Refine your view by filtering students based on company, role,
+									location, and package range
 								</SheetDescription>
 							</SheetHeader>
-							<div className="space-y-6 py-4">
-								{/* Search */}
-								<div className="space-y-2">
-									<label
-										className="text-sm font-medium"
-										style={{ color: "var(--text-color)" }}
-									>
-										Search
-									</label>
-									<div className="flex items-center space-x-2">
-										<SearchIcon
-											className="w-4 h-4"
-											style={{ color: "var(--label-color)" }}
-										/>
-										<Input
-											placeholder="Search students, companies, or roles..."
-											value={searchQuery}
-											onChange={(e) => setSearchQuery(e.target.value)}
-											className="flex-1"
-											style={{
-												backgroundColor: "var(--card-bg)",
-												borderColor: "var(--border-color)",
-												color: "var(--text-color)",
-											}}
-										/>
+
+							<div className="space-y-8 py-2">
+								{/* Search Section */}
+								<div className="space-y-3">
+									<div className="flex items-center gap-2">
+										<Search className="w-4 h-4 text-muted-foreground" />
+										<label className="text-sm font-semibold text-foreground">
+											Search
+										</label>
 									</div>
+									<Input
+										placeholder="Search students, companies, or roles..."
+										value={searchQuery}
+										onChange={(e) => setSearchQuery(e.target.value)}
+										className="h-11"
+									/>
+									{searchQuery && (
+										<p className="text-xs text-muted-foreground">
+											Searching across names, enrollment numbers, companies, and
+											roles
+										</p>
+									)}
 								</div>
 
-								{/* Company Filter */}
-								<div className="space-y-2">
-									<label
-										className="text-sm font-medium"
-										style={{ color: "var(--text-color)" }}
-									>
-										Companies
-									</label>
+								{/* Company Filter Section */}
+								<div className="space-y-3">
+									<div className="flex items-center justify-between">
+										<div className="flex items-center gap-2">
+											<Building className="w-4 h-4 text-muted-foreground" />
+											<label className="text-sm font-semibold text-foreground">
+												Companies
+											</label>
+										</div>
+										{selectedCompanies.length > 0 && (
+											<Badge variant="secondary" className="text-xs">
+												{selectedCompanies.length} selected
+											</Badge>
+										)}
+									</div>
 									<DropdownMenu>
 										<DropdownMenuTrigger asChild>
 											<Button
 												variant="outline"
-												className="w-full justify-between"
-												style={{
-													backgroundColor: "var(--card-bg)",
-													borderColor: "var(--border-color)",
-													color: "var(--text-color)",
-												}}
+												className="w-full justify-between h-11"
 											>
 												{selectedCompanies.length > 0
-													? `${selectedCompanies.length} selected`
-													: "All Companies"}
-												<ChevronDownIcon className="w-4 h-4" />
+													? `${selectedCompanies.length} companies selected`
+													: "Select companies"}
+												<ChevronDown className="w-4 h-4" />
 											</Button>
 										</DropdownMenuTrigger>
-										<DropdownMenuContent
-											className="w-56"
-											style={{
-												backgroundColor: "var(--primary-color)",
-												borderColor: "var(--border-color)",
-											}}
-										>
-											<DropdownMenuLabel style={{ color: "var(--text-color)" }}>
+										<DropdownMenuContent className="w-80 max-h-60 overflow-y-auto">
+											<DropdownMenuLabel className="font-semibold">
 												Select Companies
 											</DropdownMenuLabel>
-											<DropdownMenuSeparator
-												style={{ backgroundColor: "var(--border-color)" }}
-											/>
+											<DropdownMenuSeparator />
 											{availableCompanies.map((company) => (
 												<DropdownMenuCheckboxItem
 													key={company}
@@ -781,53 +770,65 @@ export default function StatsPage() {
 																: prev.filter((c) => c !== company)
 														)
 													}
-													style={{ color: "var(--text-color)" }}
+													className="py-2"
 												>
 													{company}
 												</DropdownMenuCheckboxItem>
 											))}
 										</DropdownMenuContent>
 									</DropdownMenu>
+									{selectedCompanies.length > 0 && (
+										<div className="flex flex-wrap gap-1">
+											{selectedCompanies.slice(0, 3).map((company) => (
+												<Badge
+													key={company}
+													variant="outline"
+													className="text-xs"
+												>
+													{company}
+												</Badge>
+											))}
+											{selectedCompanies.length > 3 && (
+												<Badge variant="outline" className="text-xs">
+													+{selectedCompanies.length - 3} more
+												</Badge>
+											)}
+										</div>
+									)}
 								</div>
 
-								{/* Role Filter */}
-								<div className="space-y-2">
-									<label
-										className="text-sm font-medium"
-										style={{ color: "var(--text-color)" }}
-									>
-										Roles
-									</label>
+								{/* Role Filter Section */}
+								<div className="space-y-3">
+									<div className="flex items-center justify-between">
+										<div className="flex items-center gap-2">
+											<GraduationCap className="w-4 h-4 text-muted-foreground" />
+											<label className="text-sm font-semibold text-foreground">
+												Roles
+											</label>
+										</div>
+										{selectedRoles.length > 0 && (
+											<Badge variant="secondary" className="text-xs">
+												{selectedRoles.length} selected
+											</Badge>
+										)}
+									</div>
 									<DropdownMenu>
 										<DropdownMenuTrigger asChild>
 											<Button
 												variant="outline"
-												className="w-full justify-between"
-												style={{
-													backgroundColor: "var(--card-bg)",
-													borderColor: "var(--border-color)",
-													color: "var(--text-color)",
-												}}
+												className="w-full justify-between h-11"
 											>
 												{selectedRoles.length > 0
-													? `${selectedRoles.length} selected`
-													: "All Roles"}
-												<ChevronDownIcon className="w-4 h-4" />
+													? `${selectedRoles.length} roles selected`
+													: "Select roles"}
+												<ChevronDown className="w-4 h-4" />
 											</Button>
 										</DropdownMenuTrigger>
-										<DropdownMenuContent
-											className="w-56 max-h-64 overflow-y-auto"
-											style={{
-												backgroundColor: "var(--primary-color)",
-												borderColor: "var(--border-color)",
-											}}
-										>
-											<DropdownMenuLabel style={{ color: "var(--text-color)" }}>
+										<DropdownMenuContent className="w-80 max-h-60 overflow-y-auto">
+											<DropdownMenuLabel className="font-semibold">
 												Select Roles
 											</DropdownMenuLabel>
-											<DropdownMenuSeparator
-												style={{ backgroundColor: "var(--border-color)" }}
-											/>
+											<DropdownMenuSeparator />
 											{availableRoles.map((role) => (
 												<DropdownMenuCheckboxItem
 													key={role}
@@ -839,53 +840,61 @@ export default function StatsPage() {
 																: prev.filter((r) => r !== role)
 														)
 													}
-													style={{ color: "var(--text-color)" }}
+													className="py-2"
 												>
 													{role}
 												</DropdownMenuCheckboxItem>
 											))}
 										</DropdownMenuContent>
 									</DropdownMenu>
+									{selectedRoles.length > 0 && (
+										<div className="flex flex-wrap gap-1">
+											{selectedRoles.slice(0, 3).map((role) => (
+												<Badge key={role} variant="outline" className="text-xs">
+													{role}
+												</Badge>
+											))}
+											{selectedRoles.length > 3 && (
+												<Badge variant="outline" className="text-xs">
+													+{selectedRoles.length - 3} more
+												</Badge>
+											)}
+										</div>
+									)}
 								</div>
 
-								{/* Location Filter */}
-								<div className="space-y-2">
-									<label
-										className="text-sm font-medium"
-										style={{ color: "var(--text-color)" }}
-									>
-										Locations
-									</label>
+								{/* Location Filter Section */}
+								<div className="space-y-3">
+									<div className="flex items-center justify-between">
+										<div className="flex items-center gap-2">
+											<MapPin className="w-4 h-4 text-muted-foreground" />
+											<label className="text-sm font-semibold text-foreground">
+												Locations
+											</label>
+										</div>
+										{selectedLocations.length > 0 && (
+											<Badge variant="secondary" className="text-xs">
+												{selectedLocations.length} selected
+											</Badge>
+										)}
+									</div>
 									<DropdownMenu>
 										<DropdownMenuTrigger asChild>
 											<Button
 												variant="outline"
-												className="w-full justify-between"
-												style={{
-													backgroundColor: "var(--card-bg)",
-													borderColor: "var(--border-color)",
-													color: "var(--text-color)",
-												}}
+												className="w-full justify-between h-11"
 											>
 												{selectedLocations.length > 0
-													? `${selectedLocations.length} selected`
-													: "All Locations"}
-												<ChevronDownIcon className="w-4 h-4" />
+													? `${selectedLocations.length} locations selected`
+													: "Select locations"}
+												<ChevronDown className="w-4 h-4" />
 											</Button>
 										</DropdownMenuTrigger>
-										<DropdownMenuContent
-											className="w-56 max-h-64 overflow-y-auto"
-											style={{
-												backgroundColor: "var(--primary-color)",
-												borderColor: "var(--border-color)",
-											}}
-										>
-											<DropdownMenuLabel style={{ color: "var(--text-color)" }}>
+										<DropdownMenuContent className="w-80 max-h-60 overflow-y-auto">
+											<DropdownMenuLabel className="font-semibold">
 												Select Locations
 											</DropdownMenuLabel>
-											<DropdownMenuSeparator
-												style={{ backgroundColor: "var(--border-color)" }}
-											/>
+											<DropdownMenuSeparator />
 											{availableLocations.map((location) => (
 												<DropdownMenuCheckboxItem
 													key={location}
@@ -897,111 +906,154 @@ export default function StatsPage() {
 																: prev.filter((l) => l !== location)
 														)
 													}
-													style={{ color: "var(--text-color)" }}
+													className="py-2"
 												>
 													{location}
 												</DropdownMenuCheckboxItem>
 											))}
 										</DropdownMenuContent>
 									</DropdownMenu>
+									{selectedLocations.length > 0 && (
+										<div className="flex flex-wrap gap-1">
+											{selectedLocations.slice(0, 3).map((location) => (
+												<Badge
+													key={location}
+													variant="outline"
+													className="text-xs"
+												>
+													{location}
+												</Badge>
+											))}
+											{selectedLocations.length > 3 && (
+												<Badge variant="outline" className="text-xs">
+													+{selectedLocations.length - 3} more
+												</Badge>
+											)}
+										</div>
+									)}
 								</div>
 
-								{/* Package Range Filter */}
-								<div className="space-y-2">
-									<label
-										className="text-sm font-medium"
-										style={{ color: "var(--text-color)" }}
-									>
-										Package Range (LPA)
-									</label>
-									<div className="space-y-2">
-										<Slider
-											value={packageRange}
-											onValueChange={(value) =>
-												setPackageRange(value as [number, number])
-											}
-											max={100}
-											min={0}
-											step={0.5}
-											className="w-full"
-										/>
-										<div
-											className="flex justify-between text-xs"
-											style={{ color: "var(--label-color)" }}
-										>
-											<span>₹{packageRange[0]} LPA</span>
-											<span>₹{packageRange[1]} LPA</span>
+								{/* Package Range Filter Section */}
+								<div className="space-y-4">
+									<div className="flex items-center gap-2">
+										<IndianRupee className="w-4 h-4 text-muted-foreground" />
+										<label className="text-sm font-semibold text-foreground">
+											Package Range
+										</label>
+									</div>
+									<div className="space-y-4">
+										<div className="px-2">
+											<Slider
+												value={packageRange}
+												onValueChange={(value) =>
+													setPackageRange(value as [number, number])
+												}
+												max={100}
+												min={0}
+												step={0.5}
+												className="w-full"
+											/>
 										</div>
+										<div className="flex items-center justify-between text-sm">
+											<div className="flex items-center gap-1">
+												<span className="text-muted-foreground">Min:</span>
+												<Badge variant="outline" className="font-mono">
+													₹{packageRange[0]} LPA
+												</Badge>
+											</div>
+											<div className="flex items-center gap-1">
+												<span className="text-muted-foreground">Max:</span>
+												<Badge variant="outline" className="font-mono">
+													₹{packageRange[1]} LPA
+												</Badge>
+											</div>
+										</div>
+										{(packageRange[0] !== 0 || packageRange[1] !== 100) && (
+											<p className="text-xs text-muted-foreground text-center">
+												Showing packages between ₹{packageRange[0]} - ₹
+												{packageRange[1]} LPA
+											</p>
+										)}
 									</div>
 								</div>
 
-								{/* Action Buttons */}
-								<div className="flex space-x-2 pt-4">
-									<Button
-										variant="outline"
-										onClick={clearFilters}
-										className="flex-1"
-										style={{
-											borderColor: "var(--border-color)",
-											color: "var(--text-color)",
-										}}
-									>
-										<XIcon className="w-4 h-4 mr-2" />
-										Clear All
-									</Button>
-									<Button
-										onClick={() => setShowFilters(false)}
-										className="flex-1"
-										style={{
-											backgroundColor: "var(--accent-color)",
-											color: "white",
-										}}
-									>
-										Apply Filters
-									</Button>
-								</div>
+								{/* Action Buttons Section */}
+								<div className="space-y-3 pt-6 border-t">
+									<div className="flex gap-3">
+										<Button
+											variant="outline"
+											onClick={clearFilters}
+											className="flex-1 h-11"
+											disabled={!hasActiveFilters}
+										>
+											<X className="w-4 h-4 mr-2" />
+											Clear All
+										</Button>
+										<Button
+											onClick={() => setShowFilters(false)}
+											className="flex-1 h-11"
+										>
+											Apply Filters
+										</Button>
+									</div>
 
-								{/* Filter Summary */}
-								<div
-									className="border-t pt-4"
-									style={{ borderColor: "var(--border-color)" }}
-								>
-									<p
-										className="text-sm font-medium mb-2"
-										style={{ color: "var(--text-color)" }}
-									>
-										Results
-									</p>
-									<p
-										className="text-sm"
-										style={{ color: "var(--label-color)" }}
-									>
-										{filteredStudents.length} of {totalStudentsPlaced} students
-									</p>
-									<p
-										className="text-sm"
-										style={{ color: "var(--label-color)" }}
-									>
-										{filteredUniqueCompanies} of {uniqueCompanies} companies
-									</p>
+									{/* Filter Summary Card */}
+									<div className="bg-muted/30 rounded-lg p-4 space-y-2">
+										<h4 className="text-sm font-semibold text-foreground">
+											Filter Results
+										</h4>
+										<div className="grid grid-cols-2 gap-4 text-sm">
+											<div>
+												<p className="text-muted-foreground">Students</p>
+												<p className="font-semibold">
+													{filteredStudents.length} of {totalStudentsPlaced}
+												</p>
+											</div>
+											<div>
+												<p className="text-muted-foreground">Companies</p>
+												<p className="font-semibold">
+													{filteredUniqueCompanies} of {uniqueCompanies}
+												</p>
+											</div>
+										</div>
+										{hasActiveFilters && (
+											<div className="pt-2 border-t border-border/50">
+												<p className="text-xs text-muted-foreground">
+													{[
+														searchQuery && "text search",
+														selectedCompanies.length > 0 &&
+															`${selectedCompanies.length} companies`,
+														selectedRoles.length > 0 &&
+															`${selectedRoles.length} roles`,
+														selectedLocations.length > 0 &&
+															`${selectedLocations.length} locations`,
+														(packageRange[0] !== 0 ||
+															packageRange[1] !== 100) &&
+															"package range",
+													]
+														.filter(Boolean)
+														.join(", ")}{" "}
+													applied
+												</p>
+											</div>
+										)}
+									</div>
 								</div>
 							</div>
 						</SheetContent>
 					</Sheet>
 				</div>
 
-				{/* Floating Export CSV Button (left of filter) */}
-				<div className="fixed bottom-24 md:bottom-6 right-20 z-50 mr-1">
+				{/* Floating Export CSV Button */}
+				<div className="fixed bottom-24 md:bottom-6 right-20 z-50 mr-2">
 					<Button
 						onClick={exportToCSV}
-						className="rounded-2xl w-14 h-14 shadow-lg"
-						style={{
-							backgroundColor: "var(--accent-color)",
-							color: "white",
-						}}
-						aria-label="Export CSV"
+						size="lg"
+						variant="secondary"
+						className="rounded-full w-14 h-14 shadow-xl hover:shadow-2xl transition-all duration-300 group"
+						aria-label="Export to CSV"
 					>
-						<DownloadIcon className="w-5 h-5" />
+						<Download className="w-5 h-5 transition-transform group-hover:scale-110" />
 					</Button>
 				</div>
 
@@ -1039,7 +1091,7 @@ export default function StatsPage() {
 										</p>
 									)}
 								</div>
-								<UsersIcon
+								<Users
 									className="w-8 h-8"
 									style={{ color: "var(--accent-color)" }}
 								/>
@@ -1079,7 +1131,7 @@ export default function StatsPage() {
 										</p>
 									)}
 								</div>
-								<TrendingUpIcon
+								<TrendingUp
 									className="w-8 h-8"
 									style={{ color: "var(--accent-color)" }}
 								/>
@@ -1119,7 +1171,7 @@ export default function StatsPage() {
 										</p>
 									)}
 								</div>
-								<TrendingUpIcon
+								<TrendingUp
 									className="w-8 h-8"
 									style={{ color: "var(--accent-color)" }}
 								/>
@@ -1159,7 +1211,7 @@ export default function StatsPage() {
 										</p>
 									)}
 								</div>
-								<IndianRupeeIcon
+								<IndianRupee
 									className="w-8 h-8"
 									style={{ color: "var(--accent-color)" }}
 								/>
@@ -1199,7 +1251,7 @@ export default function StatsPage() {
 										</p>
 									)}
 								</div>
-								<BuildingIcon
+								<Building
 									className="w-8 h-8"
 									style={{ color: "var(--accent-color)" }}
 								/>
@@ -1216,7 +1268,7 @@ export default function StatsPage() {
 							style={{ color: "var(--text-color)" }}
 						>
 							<div className="flex items-center gap-2">
-								<BuildingIcon
+								<Building
 									className="w-5 h-5 mr-2"
 									style={{ color: "var(--accent-color)" }}
 								/>
@@ -1533,12 +1585,12 @@ export default function StatsPage() {
 								>
 									{showAllCompanies ? (
 										<>
-											<ChevronUpIcon className="w-4 h-4 mr-2" />
+											<ChevronUp className="w-4 h-4 mr-2" />
 											Show Less Companies
 										</>
 									) : (
 										<>
-											<ChevronDownIcon className="w-4 h-4 mr-2" />
+											<ChevronDown className="w-4 h-4 mr-2" />
 											Show All {Object.entries(companyStats).length} Companies
 										</>
 									)}
@@ -1549,91 +1601,127 @@ export default function StatsPage() {
 				</Card>
 
 				{/* Placed Students Section */}
-				<Card className="card-theme">
-					<CardHeader>
-						<div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-							<CardTitle
-								className="flex items-center gap-2"
-								style={{ color: "var(--text-color)" }}
-							>
-								<GraduationCapIcon
-									className="w-5 h-5 mr-2"
-									style={{ color: "var(--accent-color)" }}
-								/>
-								Placed Students
-								{hasActiveFilters ? (
-									<Badge
-										className="rounded-full"
-										style={{
-											backgroundColor: "var(--accent-color)",
-											color: "white",
-										}}
-									>
-										{filteredStudents.length}
+				<Card className="border-0 shadow-lg">
+					<CardHeader className="pb-6">
+						<div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+							<CardTitle className="flex items-center gap-3 text-xl">
+								<div className="p-2 rounded-lg bg-primary/10">
+									<GraduationCap className="w-6 h-6 text-primary" />
+								</div>
+								<div>
+									<h2 className="text-xl font-bold">Placed Students</h2>
+									<p className="text-sm text-muted-foreground font-normal">
+										Detailed breakdown of student placements
+									</p>
+								</div>
+								{hasActiveFilters && (
+									<Badge variant="secondary" className="ml-auto lg:ml-0">
+										{filteredStudents.length} filtered
 									</Badge>
-								) : (
-									<></>
 								)}
 							</CardTitle>
 
-							{/* Sorting Controls - Always visible */}
-							<div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
-								<div className="flex items-center space-x-2">
-									<span
-										className="text-sm font-medium"
-										style={{ color: "var(--text-color)" }}
-									>
+							{/* Enhanced Sorting Controls */}
+							<div className="flex flex-col space-y-3 lg:flex-row lg:items-center lg:space-y-0 lg:space-x-4">
+								<div className="flex items-center space-x-3">
+									<span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
 										Sort by:
 									</span>
-									<select
-										value={sortKey}
-										onChange={(e) => setSortKey(e.target.value as any)}
-										className="px-3 py-2 border rounded-md text-sm min-w-[120px]"
-										style={{
-											backgroundColor: "var(--card-bg)",
-											borderColor: "var(--border-color)",
-											color: "var(--text-color)",
-										}}
-									>
-										<option value="name">Name</option>
-										<option value="package">Package</option>
-										<option value="company">Company</option>
-										<option value="enrollment">Enrollment</option>
-										<option value="role">Role</option>
-										<option value="joining_date">Joining Date</option>
-									</select>
-									<Button
-										variant="outline"
-										onClick={() =>
-											setSortDir((d) => (d === "asc" ? "desc" : "asc"))
-										}
-										className="h-10 px-3"
-										style={{
-											backgroundColor:
+									<div className="flex items-center space-x-2">
+										<DropdownMenu>
+											<DropdownMenuTrigger asChild>
+												<Button
+													variant="outline"
+													className="h-10 px-3 justify-between min-w-[140px]"
+												>
+													{sortKey === "name" && "Name"}
+													{sortKey === "package" && "Package"}
+													{sortKey === "company" && "Company"}
+													{sortKey === "enrollment" && "Enrollment"}
+													{sortKey === "role" && "Role"}
+													{sortKey === "joining_date" && "Joining Date"}
+													<ChevronDown className="w-4 h-4" />
+												</Button>
+											</DropdownMenuTrigger>
+											<DropdownMenuContent className="w-[140px]">
+												<DropdownMenuLabel className="font-semibold">
+													Sort by
+												</DropdownMenuLabel>
+												<DropdownMenuSeparator />
+												<DropdownMenuCheckboxItem
+													checked={sortKey === "name"}
+													onCheckedChange={() => setSortKey("name")}
+												>
+													Name
+												</DropdownMenuCheckboxItem>
+												<DropdownMenuCheckboxItem
+													checked={sortKey === "package"}
+													onCheckedChange={() => setSortKey("package")}
+												>
+													Package
+												</DropdownMenuCheckboxItem>
+												<DropdownMenuCheckboxItem
+													checked={sortKey === "company"}
+													onCheckedChange={() => setSortKey("company")}
+												>
+													Company
+												</DropdownMenuCheckboxItem>
+												<DropdownMenuCheckboxItem
+													checked={sortKey === "enrollment"}
+													onCheckedChange={() => setSortKey("enrollment")}
+												>
+													Enrollment
+												</DropdownMenuCheckboxItem>
+												<DropdownMenuCheckboxItem
+													checked={sortKey === "role"}
+													onCheckedChange={() => setSortKey("role")}
+												>
+													Role
+												</DropdownMenuCheckboxItem>
+												<DropdownMenuCheckboxItem
+													checked={sortKey === "joining_date"}
+													onCheckedChange={() => setSortKey("joining_date")}
+												>
+													Joining Date
+												</DropdownMenuCheckboxItem>
+											</DropdownMenuContent>
+										</DropdownMenu>
+										<Button
+											variant="outline"
+											size="icon"
+											onClick={() =>
+												setSortDir((d) => (d === "asc" ? "desc" : "asc"))
+											}
+											className={cn(
+												"h-10 w-10 transition-all",
 												sortDir === "asc"
-													? "var(--accent-color)"
-													: "var(--card-bg)",
-											borderColor: "var(--accent-color)",
-											color:
-												sortDir === "asc" ? "white" : "var(--accent-color)",
-										}}
-										title={`Currently: ${
-											sortDir === "asc" ? "Ascending" : "Descending"
-										}. Click to toggle.`}
-									>
-										{sortDir === "asc" ? "▲" : "▼"}
-									</Button>
+													? "bg-primary text-primary-foreground hover:bg-primary/90"
+													: "hover:bg-muted"
+											)}
+											title={`Currently: ${
+												sortDir === "asc" ? "Ascending" : "Descending"
+											}. Click to toggle.`}
+										>
+											{sortDir === "asc" ? "↑" : "↓"}
+										</Button>
+									</div>
 								</div>
 								<Button
 									variant="outline"
 									onClick={() => setShowStudentList(!showStudentList)}
-									style={{
-										borderColor: "var(--border-color)",
-										color: "var(--text-color)",
-									}}
-									className="hover-theme"
+									className="h-10 px-4"
 								>
-									{showStudentList ? "Hide List" : `View All Students`}
+									{showStudentList ? (
+										<>
+											<EyeOff className="w-4 h-4 mr-2" />
+											Hide List
+										</>
+									) : (
+										<>
+											<Eye className="w-4 h-4 mr-2" />
+											View All Students
+										</>
+									)}
 								</Button>
 							</div>
 						</div>
@@ -1747,7 +1835,7 @@ export default function StatsPage() {
 																	className="flex items-center text-xs mt-1"
 																	style={{ color: "var(--label-color)" }}
 																>
-																	<MapPinIcon className="w-3 h-3 mr-1" />
+																	<MapPin className="w-3 h-3 mr-1" />
 																	{student.job_location.join(", ")}
 																</div>
 															)}
@@ -1783,7 +1871,7 @@ export default function StatsPage() {
 																className="flex items-center text-sm mt-1"
 																style={{ color: "var(--label-color)" }}
 															>
-																<CalendarIcon className="w-3 h-3 mr-1" />
+																<Calendar className="w-3 h-3 mr-1" />
 																{formatDate(student.joining_date)}
 															</div>
 														)}
