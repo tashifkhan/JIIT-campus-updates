@@ -129,6 +129,19 @@ export default function StatsPage() {
 		return `₹${packageValue.toFixed(1)} LPA`;
 	};
 
+	// Compute a fallback package for a company when no students are recorded.
+	const getCompanyFallbackPackage = (companyName: string): number => {
+		const companyPlacements = placements.filter(
+			(p: Placement) => p.company === companyName
+		);
+		const rolePackages: number[] = companyPlacements.flatMap((p: Placement) =>
+			(p.roles || [])
+				.map((r: Role) => r.package)
+				.filter((pk): pk is number => pk != null)
+		);
+		return rolePackages.length > 0 ? Math.max(...rolePackages) : 0;
+	};
+
 	const formatDate = (dateString: string) => {
 		if (!dateString) return "TBD";
 		return new Date(dateString).toLocaleDateString("en-IN", {
@@ -182,7 +195,8 @@ export default function StatsPage() {
 
 	// Calculate statistics
 	const totalStudentsPlaced = placements.reduce(
-		(total, placement) => total + placement.students_selected.length,
+		(total: number, placement: Placement) =>
+			total + placement.students_selected.length,
 		0
 	);
 
@@ -190,8 +204,8 @@ export default function StatsPage() {
 
 	// Extract all package values for calculation from students
 	const allPackages: number[] = [];
-	placements.forEach((placement) => {
-		placement.students_selected.forEach((student) => {
+	placements.forEach((placement: Placement) => {
+		placement.students_selected.forEach((student: Student) => {
 			const packageValue = getStudentPackage(student, placement);
 			if (packageValue !== null && packageValue > 0) {
 				allPackages.push(packageValue);
@@ -215,10 +229,11 @@ export default function StatsPage() {
 			: 0;
 
 	const highestPackage = allPackages.length > 0 ? Math.max(...allPackages) : 0;
-	const uniqueCompanies = new Set(placements.map((p) => p.company)).size;
+	const uniqueCompanies = new Set(placements.map((p: Placement) => p.company))
+		.size;
 
 	// Group placements by company
-	const companyStats = placements.reduce((acc, placement) => {
+	const companyStats = placements.reduce((acc: any, placement: Placement) => {
 		if (!acc[placement.company]) {
 			acc[placement.company] = {
 				count: 0,
@@ -232,11 +247,11 @@ export default function StatsPage() {
 		acc[placement.company].studentsCount += placement.students_selected.length;
 
 		// Add all role profiles and student packages
-		placement.roles.forEach((role) => {
+		placement.roles.forEach((role: Role) => {
 			acc[placement.company].profiles.add(role.role);
 		});
 
-		placement.students_selected.forEach((student) => {
+		placement.students_selected.forEach((student: Student) => {
 			const packageValue = getStudentPackage(student, placement);
 			if (packageValue !== null && packageValue > 0) {
 				acc[placement.company].packages.push(packageValue);
@@ -257,19 +272,21 @@ export default function StatsPage() {
 
 	// Filter options
 	const availableCompanies = Array.from(
-		new Set(placements.map((p) => p.company))
+		new Set(placements.map((p: Placement) => p.company))
 	).sort();
 	const availableRoles = Array.from(
-		new Set(placements.flatMap((p) => p.roles.map((r) => r.role)))
+		new Set(
+			placements.flatMap((p: Placement) => p.roles.map((r: Role) => r.role))
+		)
 	).sort();
 	const availableLocations = Array.from(
-		new Set(placements.flatMap((p) => p.job_location || []))
+		new Set(placements.flatMap((p: Placement) => p.job_location || []))
 	)
 		.filter(Boolean)
 		.sort();
 
 	// Filter logic
-	const filteredPlacements = placements.filter((placement) => {
+	const filteredPlacements = placements.filter((placement: Placement) => {
 		// Company filter
 		if (
 			selectedCompanies.length > 0 &&
@@ -280,15 +297,15 @@ export default function StatsPage() {
 
 		// Role filter - check if any student in this placement has a matching role
 		if (selectedRoles.length > 0) {
-			const hasMatchingRole = placement.students_selected.some((student) =>
-				selectedRoles.includes(student.role)
+			const hasMatchingRole = placement.students_selected.some(
+				(student: Student) => selectedRoles.includes(student.role)
 			);
 			if (!hasMatchingRole) return false;
 		}
 
 		// Location filter
 		if (selectedLocations.length > 0) {
-			const hasMatchingLocation = placement.job_location?.some((loc) =>
+			const hasMatchingLocation = placement.job_location?.some((loc: string) =>
 				selectedLocations.includes(loc)
 			);
 			if (!hasMatchingLocation) return false;
@@ -298,9 +315,9 @@ export default function StatsPage() {
 	});
 
 	// Filter students based on search query and package range
-	const filteredStudents = filteredPlacements.flatMap((placement) =>
+	const filteredStudents = filteredPlacements.flatMap((placement: Placement) =>
 		placement.students_selected
-			.filter((student) => {
+			.filter((student: Student) => {
 				// Search query filter
 				if (searchQuery) {
 					const query = searchQuery.toLowerCase();
@@ -338,7 +355,7 @@ export default function StatsPage() {
 
 				return true;
 			})
-			.map((student) => ({
+			.map((student: Student) => ({
 				...student,
 				company: placement.company,
 				roles: placement.roles,
@@ -350,7 +367,7 @@ export default function StatsPage() {
 
 	// Recalculate statistics for filtered data
 	const filteredPackages: number[] = [];
-	filteredStudents.forEach((student) => {
+	filteredStudents.forEach((student: Student & { placement: Placement }) => {
 		const packageValue = getStudentPackage(student, student.placement);
 		if (packageValue !== null && packageValue > 0) {
 			filteredPackages.push(packageValue);
@@ -378,31 +395,41 @@ export default function StatsPage() {
 	).size;
 
 	// Group filtered students by company for company-wise stats
-	const filteredCompanyStats = filteredStudents.reduce((acc, student) => {
-		const company = student.company;
-		if (!acc[company]) {
-			acc[company] = {
-				count: 0,
-				profiles: new Set(),
-				avgPackage: 0,
-				packages: [],
-				studentsCount: 0,
-			};
-		}
-		acc[company].studentsCount += 1;
+	const filteredCompanyStats = filteredStudents.reduce(
+		(
+			acc: any,
+			student: Student & {
+				company: string;
+				roles: Role[];
+				placement: Placement;
+			}
+		) => {
+			const company = student.company;
+			if (!acc[company]) {
+				acc[company] = {
+					count: 0,
+					profiles: new Set(),
+					avgPackage: 0,
+					packages: [],
+					studentsCount: 0,
+				};
+			}
+			acc[company].studentsCount += 1;
 
-		// Add profiles from the student's placement
-		student.roles.forEach((role) => {
-			acc[company].profiles.add(role.role);
-		});
+			// Add profiles from the student's placement
+			student.roles.forEach((role) => {
+				acc[company].profiles.add(role.role);
+			});
 
-		const packageValue = getStudentPackage(student, student.placement);
-		if (packageValue !== null && packageValue > 0) {
-			acc[company].packages.push(packageValue);
-		}
+			const packageValue = getStudentPackage(student, student.placement);
+			if (packageValue !== null && packageValue > 0) {
+				acc[company].packages.push(packageValue);
+			}
 
-		return acc;
-	}, {} as any);
+			return acc;
+		},
+		{} as any
+	);
 
 	// Calculate average packages for filtered company stats
 	Object.keys(filteredCompanyStats).forEach((company) => {
@@ -1186,7 +1213,13 @@ export default function StatsPage() {
 														className="font-semibold"
 														style={{ color: "var(--success-dark)" }}
 													>
-														{formatPackage(stats.avgPackage)}
+														{stats.studentsCount > 0
+															? formatPackage(stats.avgPackage)
+															: getCompanyFallbackPackage(company) > 0
+															? `${formatPackage(
+																	getCompanyFallbackPackage(company)
+															  )} (assumed)`
+															: formatPackage(0)}
 													</span>
 												</div>
 												<div>
