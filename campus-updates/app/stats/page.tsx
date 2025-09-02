@@ -671,9 +671,9 @@ export default function StatsPage() {
 						<SheetTrigger asChild>
 							<Button
 								size="lg"
-								className="rounded-full w-14 h-14 shadow-xl hover:shadow-2xl transition-all duration-300 relative group"
+								className="rounded-full w-14 h-14 shadow-xl hover:shadow-2xl transition-all duration-300 relative group text-white bg-primary hover:bg-primary/90"
 							>
-								<Filter className="w-6 h-6 transition-transform group-hover:scale-110" />
+								<Filter className="w-6 h-6 transition-transform group-hover:scale-110 text-current" />
 								{hasActiveFilters && (
 									<Badge className="absolute -top-1 -right-1 rounded-full w-5 h-5 p-0 flex items-center justify-center text-xs bg-destructive text-destructive-foreground animate-pulse">
 										{
@@ -1050,10 +1050,10 @@ export default function StatsPage() {
 						onClick={exportToCSV}
 						size="lg"
 						variant="secondary"
-						className="rounded-full w-14 h-14 shadow-xl hover:shadow-2xl transition-all duration-300 group"
+						className="rounded-full w-14 h-14 shadow-xl hover:shadow-2xl transition-all duration-300 group bg-secondary text-secondary-foreground hover:bg-secondary/80"
 						aria-label="Export to CSV"
 					>
-						<Download className="w-5 h-5 transition-transform group-hover:scale-110" />
+						<Download className="w-5 h-5 transition-transform group-hover:scale-110 text-current" />
 					</Button>
 				</div>
 
