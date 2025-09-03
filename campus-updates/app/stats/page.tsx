@@ -58,8 +58,9 @@ import {
 } from "lucide-react";
 
 import "./enrollmemt_range.json"; // enrollment mapping
-// Mtech enrollment pattern i didn't want to figure out sooo 24* -> MTech
-// JUIT contains alphabets -> JUIT
+// Mtech & JUIT enrollment pattern i didn't want to figure out sooo
+// 24* -> MTech
+// contains alphabets -> JUIT
 
 interface Role {
 	role: string;
