@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useTransition } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -48,6 +48,8 @@ type Props = {};
 
 export default function NoticesClient({}: Props) {
 	const router = useRouter();
+	const [isPending, startTransition] = useTransition();
+	const [pendingJobId, setPendingJobId] = useState<string | null>(null);
 	const [expandedNotice, setExpandedNotice] = useState<string | null>(null);
 
 	const { data: rawNotices, isLoading } = useQuery<any[]>({
@@ -695,8 +697,12 @@ export default function NoticesClient({}: Props) {
 												borderColor: "var(--border-color)",
 											}}
 											onClick={() => {
-												if (notice.matched_job?.id) {
-													router.push(`/jobs/${notice.matched_job.id}`);
+												const jobId = notice.matched_job?.id;
+												if (jobId) {
+													setPendingJobId(jobId);
+													startTransition(() => {
+														router.push(`/jobs/${jobId}`);
+													});
 												}
 											}}
 											role="button"
@@ -704,11 +710,18 @@ export default function NoticesClient({}: Props) {
 											onKeyDown={(e) => {
 												if (e.key === "Enter" || e.key === " ") {
 													e.preventDefault();
-													if (notice.matched_job?.id) {
-														router.push(`/jobs/${notice.matched_job.id}`);
+													const jobId = notice.matched_job?.id;
+													if (jobId) {
+														setPendingJobId(jobId);
+														startTransition(() => {
+															router.push(`/jobs/${jobId}`);
+														});
 													}
 												}
 											}}
+											aria-busy={
+												isPending && pendingJobId === notice.matched_job?.id
+											}
 										>
 											<div className="flex items-start justify-between">
 												<div className="flex items-start flex-1">
@@ -732,12 +745,28 @@ export default function NoticesClient({}: Props) {
 															</span>{" "}
 															- {notice.matched_job.job_profile}
 														</p>
-														<p
-															className="text-xs mt-1 group-hover:text-accent-color transition-colors"
-															style={{ color: "var(--label-color)" }}
-														>
-															Click to view full job details
-														</p>
+														{isPending &&
+														pendingJobId === notice.matched_job?.id ? (
+															<div className="flex items-center text-xs mt-1">
+																<div
+																	className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin mr-2"
+																	style={{
+																		borderColor: "var(--border-color)",
+																		borderTopColor: "transparent",
+																	}}
+																/>
+																<span style={{ color: "var(--label-color)" }}>
+																	Loading…
+																</span>
+															</div>
+														) : (
+															<p
+																className="text-xs mt-1 group-hover:text-accent-color transition-colors"
+																style={{ color: "var(--label-color)" }}
+															>
+																Click to view full job details
+															</p>
+														)}
 													</div>
 												</div>
 												<ArrowRightIcon
