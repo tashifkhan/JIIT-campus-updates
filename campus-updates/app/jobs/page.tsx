@@ -689,13 +689,13 @@ export default function JobsPage() {
 							role="button"
 							tabIndex={0}
 							onClick={() => {
-								// Only open if no other modal is currently open
-								if (!selectedJobModal) setSelectedJobModal(job);
+								// Navigate to dedicated job page on card click
+								router.push(`/jobs/${job.id}`);
 							}}
 							onKeyDown={(e) => {
 								if (e.key === "Enter" || e.key === " ") {
 									e.preventDefault();
-									if (!selectedJobModal) setSelectedJobModal(job);
+									router.push(`/jobs/${job.id}`);
 								}
 							}}
 						>
