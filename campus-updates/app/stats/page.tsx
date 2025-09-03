@@ -1620,16 +1620,23 @@ export default function StatsPage() {
 																		return getStudentPackage(s, plc);
 																	})
 																	.filter((n): n is number => !!n && n > 0);
-																const avg = pkgs.length
-																	? pkgs.reduce((a, c) => a + c, 0) /
-																	  pkgs.length
-																	: 0;
-																return { count: list.length, avg };
+															const avg = pkgs.length
+																? pkgs.reduce((a, c) => a + c, 0) / pkgs.length
+																: 0;
+															const sorted = [...pkgs].sort((a, b) => a - b);
+															const median = sorted.length
+																? sorted.length % 2 === 0
+																	? (sorted[sorted.length / 2 - 1] +
+																	   sorted[sorted.length / 2]) /
+																	  2
+																	: sorted[Math.floor(sorted.length / 2)]
+																: 0;
+															return { count: list.length, avg, median };
 															};
 
 															const cards: Array<{
 																title: string;
-																info: { count: number; avg: number };
+																info: { count: number; avg: number; median: number };
 															}> = [];
 															if (branch === "CSE" || branch === "ECE") {
 																const ranges =
@@ -1729,12 +1736,17 @@ export default function StatsPage() {
 																			>
 																				{info.count}
 																			</Badge>
-																			<span
-																				className="font-semibold"
-																				style={{ color: "var(--success-dark)" }}
-																			>
-																				{formatPackage(info.avg)}
-																			</span>
+																			<div className="text-right">
+																				<div
+																					className="font-semibold"
+																					style={{ color: "var(--success-dark)" }}
+																				>
+																					{formatPackage(info.avg)}
+																				</div>
+																				<div className="text-xs" style={{ color: "var(--label-color)" }}>
+																					Median: <span className="font-semibold" style={{ color: "var(--success-dark)" }}>{formatPackage(info.median)}</span>
+																				</div>
+																			</div>
 																		</div>
 																	</CardContent>
 																</Card>
