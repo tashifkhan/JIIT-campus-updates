@@ -1510,6 +1510,17 @@ export default function StatsPage() {
 														</div>
 														<div className="flex justify-between">
 															<span style={{ color: "var(--label-color)" }}>
+																Median Package:
+															</span>
+															<span
+																className="font-semibold"
+																style={{ color: "var(--success-dark)" }}
+															>
+																{formatPackage((stats as any).median)}
+															</span>
+														</div>
+														<div className="flex justify-between">
+															<span style={{ color: "var(--label-color)" }}>
 																Highest Package:
 															</span>
 															<span
@@ -1531,7 +1542,7 @@ export default function StatsPage() {
 												</DialogHeader>
 												<div className="mt-2 space-y-4">
 													{/* Branch summary */}
-													<div className="grid grid-cols-2 gap-3">
+													<div className="grid grid-cols-2 md:grid-cols-3 gap-3">
 														<div
 															className="border rounded-lg p-3 card-theme"
 															style={{
@@ -1570,6 +1581,26 @@ export default function StatsPage() {
 																style={{ color: "var(--success-dark)" }}
 															>
 																{formatPackage((stats as any).avgPackage)}
+															</p>
+														</div>
+														<div
+															className="border rounded-lg p-3 card-theme"
+															style={{
+																backgroundColor: "var(--primary-color)",
+																borderColor: "var(--border-color)",
+															}}
+														>
+															<p
+																className="text-xs"
+																style={{ color: "var(--label-color)" }}
+															>
+																Median Package
+															</p>
+															<p
+																className="text-lg font-bold"
+																style={{ color: "var(--success-dark)" }}
+															>
+																{formatPackage((stats as any).median)}
 															</p>
 														</div>
 													</div>
