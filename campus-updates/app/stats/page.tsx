@@ -587,7 +587,13 @@ export default function StatsPage() {
 		) => {
 			const b = getBranch(s.enrollment_number);
 			if (!acc[b])
-				acc[b] = { count: 0, packages: [], avgPackage: 0, highest: 0, median: 0 };
+				acc[b] = {
+					count: 0,
+					packages: [],
+					avgPackage: 0,
+					highest: 0,
+					median: 0,
+				};
 			acc[b].count += 1;
 			const pkg = getStudentPackage(s, s.placement);
 			if (pkg != null && pkg > 0) acc[b].packages.push(pkg);
@@ -1620,23 +1626,28 @@ export default function StatsPage() {
 																		return getStudentPackage(s, plc);
 																	})
 																	.filter((n): n is number => !!n && n > 0);
-															const avg = pkgs.length
-																? pkgs.reduce((a, c) => a + c, 0) / pkgs.length
-																: 0;
-															const sorted = [...pkgs].sort((a, b) => a - b);
-															const median = sorted.length
-																? sorted.length % 2 === 0
-																	? (sorted[sorted.length / 2 - 1] +
-																	   sorted[sorted.length / 2]) /
-																	  2
-																	: sorted[Math.floor(sorted.length / 2)]
-																: 0;
-															return { count: list.length, avg, median };
+																const avg = pkgs.length
+																	? pkgs.reduce((a, c) => a + c, 0) /
+																	  pkgs.length
+																	: 0;
+																const sorted = [...pkgs].sort((a, b) => a - b);
+																const median = sorted.length
+																	? sorted.length % 2 === 0
+																		? (sorted[sorted.length / 2 - 1] +
+																				sorted[sorted.length / 2]) /
+																		  2
+																		: sorted[Math.floor(sorted.length / 2)]
+																	: 0;
+																return { count: list.length, avg, median };
 															};
 
 															const cards: Array<{
 																title: string;
-																info: { count: number; avg: number; median: number };
+																info: {
+																	count: number;
+																	avg: number;
+																	median: number;
+																};
 															}> = [];
 															if (branch === "CSE" || branch === "ECE") {
 																const ranges =
@@ -1739,12 +1750,27 @@ export default function StatsPage() {
 																			<div className="text-right">
 																				<div
 																					className="font-semibold"
-																					style={{ color: "var(--success-dark)" }}
+																					style={{
+																						color: "var(--success-dark)",
+																					}}
 																				>
 																					{formatPackage(info.avg)}
 																				</div>
-																				<div className="text-xs" style={{ color: "var(--label-color)" }}>
-																					Median: <span className="font-semibold" style={{ color: "var(--success-dark)" }}>{formatPackage(info.median)}</span>
+																				<div
+																					className="text-xs"
+																					style={{
+																						color: "var(--label-color)",
+																					}}
+																				>
+																					Median:{" "}
+																					<span
+																						className="font-semibold"
+																						style={{
+																							color: "var(--success-dark)",
+																						}}
+																					>
+																						{formatPackage(info.median)}
+																					</span>
 																				</div>
 																			</div>
 																		</div>
