@@ -61,6 +61,7 @@ import enrollmentRanges from "./enrollmemt_range.json"; // enrollment mapping
 // Mtech & JUIT enrollment pattern i didn't want to figure out sooo
 // 24* -> MTech
 // contains alphabets -> JUIT
+// len 9 -> JUIT
 
 interface Role {
 	role: string;
@@ -172,6 +173,8 @@ export default function StatsPage() {
 		const s = String(enroll).trim();
 		// JUIT contains alphabets in enrollment
 		if (/[A-Za-z]/.test(s)) return "JUIT";
+		// If enrollment length is 9, classify as JUIT
+		if (s.length === 9) return "JUIT";
 		// Heuristic: 24* => MTech (based on comment)
 		if (s.startsWith("24")) return "MTech";
 		const n = Number(s);
