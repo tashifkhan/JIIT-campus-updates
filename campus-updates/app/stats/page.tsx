@@ -670,21 +670,22 @@ export default function StatsPage() {
 					<Sheet open={showFilters} onOpenChange={setShowFilters}>
 						<SheetTrigger asChild>
 							<Button
-								size="lg"
-								className="rounded-full w-14 h-14 shadow-xl hover:shadow-2xl transition-all duration-300 relative group text-white bg-primary hover:bg-primary/90"
+								className="rounded-2xl w-14 h-14 shadow-lg relative"
+								style={{
+									backgroundColor: "var(--accent-color)",
+									color: "white",
+								}}
 							>
-								<Filter className="w-6 h-6 transition-transform group-hover:scale-110 text-current" />
+								<Filter className="w-6 h-6" />
 								{hasActiveFilters && (
-									<Badge className="absolute -top-1 -right-1 rounded-full w-5 h-5 p-0 flex items-center justify-center text-xs bg-destructive text-destructive-foreground animate-pulse">
-										{
-											[
-												searchQuery && 1,
-												selectedCompanies.length > 0 && 1,
-												selectedRoles.length > 0 && 1,
-												selectedLocations.length > 0 && 1,
-												(packageRange[0] !== 0 || packageRange[1] !== 100) && 1,
-											].filter(Boolean).length
-										}
+									<Badge
+										className="absolute -top-2 -right-2 rounded-full w-6 h-6 p-0 flex items-center justify-center text-xs"
+										style={{
+											backgroundColor: "var(--error-color)",
+											color: "white",
+										}}
+									>
+										!
 									</Badge>
 								)}
 							</Button>
@@ -1045,15 +1046,18 @@ export default function StatsPage() {
 				</div>
 
 				{/* Floating Export CSV Button */}
-				<div className="fixed bottom-24 md:bottom-6 right-20 z-50 mr-2">
+				{/* Floating Export CSV Button (left of filter) */}
+				<div className="fixed bottom-24 md:bottom-6 right-20 z-50 mr-1">
 					<Button
 						onClick={exportToCSV}
-						size="lg"
-						variant="secondary"
-						className="rounded-full w-14 h-14 shadow-xl hover:shadow-2xl transition-all duration-300 group bg-secondary text-secondary-foreground hover:bg-secondary/80"
-						aria-label="Export to CSV"
+						className="rounded-2xl w-14 h-14 shadow-lg"
+						style={{
+							backgroundColor: "var(--accent-color)",
+							color: "white",
+						}}
+						aria-label="Export CSV"
 					>
-						<Download className="w-5 h-5 transition-transform group-hover:scale-110 text-current" />
+						<Download className="w-5 h-5" />
 					</Button>
 				</div>
 
