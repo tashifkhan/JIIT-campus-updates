@@ -95,6 +95,8 @@ export default function StatsPage() {
 	const [showAllCompanies, setShowAllCompanies] = useState(false);
 	const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
+	const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
 
 	// Filter states
 	const [searchQuery, setSearchQuery] = useState("");
@@ -640,6 +642,28 @@ export default function StatsPage() {
 						placement: placement,
 					}))
 				)
+		);
+	};
+
+	// Helper function to get students for a specific branch
+	const getBranchStudents = (branchName: string) => {
+		const base = hasActiveFilters
+			? filteredStudents
+			: placements.flatMap((placement: Placement) =>
+					placement.students_selected.map((student: Student) => ({
+						...student,
+						company: placement.company,
+						roles: placement.roles,
+						joining_date: placement.joining_date || undefined,
+						job_location: placement.job_location,
+						placement: placement,
+					}))
+			  );
+
+		return sortStudentsList(
+			base
+				.filter((s: any) => getBranch(s.enrollment_number) === branchName)
+				.map((s: any) => s)
 		);
 	};
 
@@ -1424,59 +1448,488 @@ export default function StatsPage() {
 								{Object.entries(branchStats)
 									.sort((a, b) => b[1].count - a[1].count)
 									.map(([branch, stats]) => (
-										<Card
+										<Dialog
 											key={branch}
-											className="border card-theme"
-											style={{
-												backgroundColor: "var(--primary-color)",
-												borderColor: "var(--border-color)",
+											open={isBranchModalOpen && selectedBranch === branch}
+											onOpenChange={(open) => {
+												setIsBranchModalOpen(open);
+												if (!open) setSelectedBranch(null);
 											}}
 										>
-											<CardContent className="p-4">
-												<div className="flex justify-between items-start mb-2">
-													<h3
-														className="font-semibold flex-1"
-														style={{ color: "var(--text-color)" }}
-													>
-														{branch}
-													</h3>
-													<Badge
-														variant="secondary"
-														style={{
-															backgroundColor: "var(--card-bg)",
-															color: "var(--accent-color)",
-															borderColor: "var(--border-color)",
-														}}
-													>
-														{(stats as any).count}
-													</Badge>
-												</div>
-												<div className="space-y-2 text-sm">
-													<div className="flex justify-between">
-														<span style={{ color: "var(--label-color)" }}>
-															Avg Package:
-														</span>
-														<span
-															className="font-semibold"
-															style={{ color: "var(--success-dark)" }}
+											<Card
+												className="border card-theme cursor-pointer hover:shadow-lg transition-all duration-300"
+												style={{
+													backgroundColor: "var(--primary-color)",
+													borderColor: "var(--border-color)",
+												}}
+												onClick={() => {
+													setSelectedBranch(branch);
+													setIsBranchModalOpen(true);
+												}}
+											>
+												<CardContent className="p-4">
+													<div className="flex justify-between items-start mb-2">
+														<h3
+															className="font-semibold flex-1"
+															style={{ color: "var(--text-color)" }}
 														>
-															{formatPackage((stats as any).avgPackage)}
-														</span>
-													</div>
-													<div className="flex justify-between">
-														<span style={{ color: "var(--label-color)" }}>
-															Highest Package:
-														</span>
-														<span
-															className="font-semibold"
-															style={{ color: "var(--success-dark)" }}
+															{branch}
+														</h3>
+														<Badge
+															variant="secondary"
+															style={{
+																backgroundColor: "var(--card-bg)",
+																color: "var(--accent-color)",
+																borderColor: "var(--border-color)",
+															}}
 														>
-															{formatPackage((stats as any).highest)}
-														</span>
+															{(stats as any).count}
+														</Badge>
 													</div>
+													<div className="space-y-2 text-sm">
+														<div className="flex justify-between">
+															<span style={{ color: "var(--label-color)" }}>
+																Avg Package:
+															</span>
+															<span
+																className="font-semibold"
+																style={{ color: "var(--success-dark)" }}
+															>
+																{formatPackage((stats as any).avgPackage)}
+															</span>
+														</div>
+														<div className="flex justify-between">
+															<span style={{ color: "var(--label-color)" }}>
+																Highest Package:
+															</span>
+															<span
+																className="font-semibold"
+																style={{ color: "var(--success-dark)" }}
+															>
+																{formatPackage((stats as any).highest)}
+															</span>
+														</div>
+													</div>
+												</CardContent>
+											</Card>
+
+											<DialogContent className="w-full sm:max-w-3xl md:max-w-4xl max-h-[90vh] sm:rounded-lg overflow-y-auto">
+												<DialogHeader>
+													<DialogTitle style={{ color: "var(--text-color)" }}>
+														{branch} - Students & Subgroups
+													</DialogTitle>
+												</DialogHeader>
+												<div className="mt-2 space-y-4">
+													{/* Branch summary */}
+													<div className="grid grid-cols-2 gap-3">
+														<div
+															className="border rounded-lg p-3 card-theme"
+															style={{
+																backgroundColor: "var(--primary-color)",
+																borderColor: "var(--border-color)",
+															}}
+														>
+															<p
+																className="text-xs"
+																style={{ color: "var(--label-color)" }}
+															>
+																Students Placed
+															</p>
+															<p
+																className="text-lg font-bold"
+																style={{ color: "var(--text-color)" }}
+															>
+																{(stats as any).count}
+															</p>
+														</div>
+														<div
+															className="border rounded-lg p-3 card-theme"
+															style={{
+																backgroundColor: "var(--primary-color)",
+																borderColor: "var(--border-color)",
+															}}
+														>
+															<p
+																className="text-xs"
+																style={{ color: "var(--label-color)" }}
+															>
+																Average Package
+															</p>
+															<p
+																className="text-lg font-bold"
+																style={{ color: "var(--success-dark)" }}
+															>
+																{formatPackage((stats as any).avgPackage)}
+															</p>
+														</div>
+													</div>
+													{/* Subgroup stats row */}
+													<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+														{(() => {
+															const students = getBranchStudents(branch);
+															const calc = (filterFn: (s: any) => boolean) => {
+																const list = students.filter(filterFn);
+																const pkgs = list
+																	.map((s) => {
+																		const plc = s.placement
+																			? (s.placement as Placement)
+																			: (placements.find(
+																					(p) => p.company === s.company
+																			  ) as Placement);
+																		return getStudentPackage(s, plc);
+																	})
+																	.filter((n): n is number => !!n && n > 0);
+																const avg = pkgs.length
+																	? pkgs.reduce((a, c) => a + c, 0) /
+																	  pkgs.length
+																	: 0;
+																return { count: list.length, avg };
+															};
+
+															const cards: Array<{
+																title: string;
+																info: { count: number; avg: number };
+															}> = [];
+															if (branch === "CSE" || branch === "ECE") {
+																const ranges =
+																	(enrollmentRanges as any)[branch] || {};
+																const r62 = ranges["62"] as
+																	| { start: number; end: number }
+																	| undefined;
+																const r128 = ranges["128"] as
+																	| { start: number; end: number }
+																	| undefined;
+																if (r62) {
+																	cards.push({
+																		title: `${branch} - 62`,
+																		info: calc((s) => {
+																			const n = Number(s.enrollment_number);
+																			return (
+																				Number.isFinite(n) &&
+																				n >= r62.start &&
+																				n < r62.end
+																			);
+																		}),
+																	});
+																}
+																if (r128) {
+																	cards.push({
+																		title: `${branch} - 128`,
+																		info: calc((s) => {
+																			const n = Number(s.enrollment_number);
+																			return (
+																				Number.isFinite(n) &&
+																				n >= r128.start &&
+																				n < r128.end
+																			);
+																		}),
+																	});
+																}
+															} else if (branch === "Intg. MTech") {
+																cards.push({
+																	title: "Intg. MTech - CSE",
+																	info: calc((s) => {
+																		const n = Number(s.enrollment_number);
+																		const { CSE } =
+																			(enrollmentRanges as any)[
+																				"Intg. MTech"
+																			] || {};
+																		return CSE && n >= CSE.start && n < CSE.end;
+																	}),
+																});
+																cards.push({
+																	title: "Intg. MTech - ECE",
+																	info: calc((s) => {
+																		const n = Number(s.enrollment_number);
+																		const { ECE } =
+																			(enrollmentRanges as any)[
+																				"Intg. MTech"
+																			] || {};
+																		return ECE && n >= ECE.start && n < ECE.end;
+																	}),
+																});
+																cards.push({
+																	title: "Intg. MTech - BT",
+																	info: calc((s) => {
+																		const n = Number(s.enrollment_number);
+																		const { BT } =
+																			(enrollmentRanges as any)[
+																				"Intg. MTech"
+																			] || {};
+																		return BT && n >= BT.start && n < BT.end;
+																	}),
+																});
+															}
+
+															return cards.map(({ title, info }, i) => (
+																<Card
+																	key={i}
+																	className="border card-theme"
+																	style={{
+																		backgroundColor: "var(--primary-color)",
+																		borderColor: "var(--border-color)",
+																	}}
+																>
+																	<CardContent className="p-4">
+																		<p
+																			className="text-sm"
+																			style={{ color: "var(--label-color)" }}
+																		>
+																			{title}
+																		</p>
+																		<div className="flex items-center justify-between mt-1">
+																			<Badge
+																				variant="secondary"
+																				style={{
+																					backgroundColor: "var(--card-bg)",
+																					color: "var(--accent-color)",
+																					borderColor: "var(--border-color)",
+																				}}
+																			>
+																				{info.count}
+																			</Badge>
+																			<span
+																				className="font-semibold"
+																				style={{ color: "var(--success-dark)" }}
+																			>
+																				{formatPackage(info.avg)}
+																			</span>
+																		</div>
+																	</CardContent>
+																</Card>
+															));
+														})()}
+													</div>
+
+													{/* Student list */}
+													<div className="mt-2">
+														<div className="hidden sm:block">
+															<Table>
+																<TableHeader>
+																	<TableRow>
+																		<TableHead
+																			style={{ color: "var(--text-color)" }}
+																		>
+																			Name
+																		</TableHead>
+																		<TableHead
+																			style={{ color: "var(--text-color)" }}
+																		>
+																			Enrollment
+																		</TableHead>
+																		<TableHead
+																			style={{ color: "var(--text-color)" }}
+																		>
+																			Email
+																		</TableHead>
+																		<TableHead
+																			style={{ color: "var(--text-color)" }}
+																		>
+																			Company
+																		</TableHead>
+																		<TableHead
+																			style={{ color: "var(--text-color)" }}
+																		>
+																			Role
+																		</TableHead>
+																		<TableHead
+																			style={{ color: "var(--text-color)" }}
+																		>
+																			Package
+																		</TableHead>
+																		<TableHead
+																			style={{ color: "var(--text-color)" }}
+																		>
+																			Joining Date
+																		</TableHead>
+																	</TableRow>
+																</TableHeader>
+																<TableBody>
+																	{getBranchStudents(branch).map(
+																		(student, idx) => (
+																			<TableRow key={idx}>
+																				<TableCell
+																					style={{ color: "var(--text-color)" }}
+																				>
+																					{student.name}
+																				</TableCell>
+																				<TableCell
+																					style={{
+																						color: "var(--label-color)",
+																					}}
+																				>
+																					{student.enrollment_number}
+																				</TableCell>
+																				<TableCell
+																					style={{
+																						color: "var(--label-color)",
+																					}}
+																				>
+																					{student.email ||
+																						`${student.enrollment_number}@${
+																							/[A-Za-z]/.test(
+																								student.enrollment_number || ""
+																							)
+																								? "mail.juit.ac.in"
+																								: "mail.jiit.ac.in"
+																						}`}
+																				</TableCell>
+																				<TableCell
+																					style={{
+																						color: "var(--label-color)",
+																					}}
+																				>
+																					{student.company}
+																				</TableCell>
+																				<TableCell
+																					style={{
+																						color: "var(--label-color)",
+																					}}
+																				>
+																					{student.role || "N/A"}
+																				</TableCell>
+																				<TableCell
+																					style={{
+																						color: "var(--success-dark)",
+																					}}
+																				>
+																					{(() => {
+																						const plc = student.placement
+																							? (student.placement as Placement)
+																							: (placements.find(
+																									(p) =>
+																										p.company ===
+																										student.company
+																							  ) as Placement);
+																						const pkg = getStudentPackage(
+																							student,
+																							plc
+																						);
+																						return pkg
+																							? formatPackage(pkg)
+																							: "TBD";
+																					})()}
+																				</TableCell>
+																				<TableCell
+																					style={{
+																						color: "var(--label-color)",
+																					}}
+																				>
+																					{formatDate(
+																						student.joining_date || ""
+																					)}
+																				</TableCell>
+																			</TableRow>
+																		)
+																	)}
+																</TableBody>
+															</Table>
+														</div>
+
+														{/* Mobile list */}
+														<div className="space-y-3 sm:hidden">
+															{getBranchStudents(branch).map((student, idx) => (
+																<div
+																	key={idx}
+																	className="border rounded-lg p-3 card-theme"
+																	style={{
+																		backgroundColor: "var(--primary-color)",
+																		borderColor: "var(--border-color)",
+																	}}
+																>
+																	<div className="flex items-start justify-between">
+																		<div className="flex-1">
+																			<p
+																				className="font-semibold"
+																				style={{ color: "var(--text-color)" }}
+																			>
+																				{student.name}
+																			</p>
+																			<p
+																				className="text-xs"
+																				style={{ color: "var(--label-color)" }}
+																			>
+																				{student.enrollment_number}
+																			</p>
+																			<p
+																				className="text-xs mt-1"
+																				style={{ color: "var(--label-color)" }}
+																			>
+																				{student.email ||
+																					`${student.enrollment_number}@${
+																						/[A-Za-z]/.test(
+																							student.enrollment_number || ""
+																						)
+																							? "mail.juit.ac.in"
+																							: "mail.jiit.ac.in"
+																					}`}
+																			</p>
+																			<div
+																				className="text-xs mt-2"
+																				style={{ color: "var(--label-color)" }}
+																			>
+																				<strong
+																					style={{
+																						color: "var(--label-color)",
+																					}}
+																				>
+																					Company:{" "}
+																				</strong>
+																				{student.company}
+																			</div>
+																			<div
+																				className="text-xs mt-1"
+																				style={{ color: "var(--label-color)" }}
+																			>
+																				<strong
+																					style={{
+																						color: "var(--label-color)",
+																					}}
+																				>
+																					Role:{" "}
+																				</strong>
+																				{student.role || "N/A"}
+																			</div>
+																		</div>
+																		<div className="ml-4 text-right">
+																			<p
+																				className="font-semibold text-sm"
+																				style={{ color: "var(--success-dark)" }}
+																			>
+																				{(() => {
+																					const plc = student.placement
+																						? (student.placement as Placement)
+																						: (placements.find(
+																								(p) =>
+																									p.company === student.company
+																						  ) as Placement);
+																					const pkg = getStudentPackage(
+																						student,
+																						plc
+																					);
+																					return pkg
+																						? formatPackage(pkg)
+																						: "TBD";
+																				})()}
+																			</p>
+																			<p
+																				className="text-xs mt-1"
+																				style={{ color: "var(--label-color)" }}
+																			>
+																				{student.joining_date
+																					? formatDate(student.joining_date)
+																					: "TBD"}
+																			</p>
+																		</div>
+																	</div>
+																</div>
+															))}
+														</div>
+													</div>
+													{/* close mt-2 space-y-4 wrapper */}
 												</div>
-											</CardContent>
-										</Card>
+											</DialogContent>
+										</Dialog>
 									))}
 							</div>
 						)}
