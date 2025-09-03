@@ -38,6 +38,7 @@ import {
 	ChevronDownIcon,
 	ChevronUpIcon,
 	DownloadIcon,
+	Share2Icon,
 	XIcon,
 	FileTextIcon,
 	ExternalLinkIcon,
@@ -1026,7 +1027,55 @@ export default function JobsPage() {
 														<ArrowRightIcon className="w-4 h-4" />
 														Full Page
 													</Button>
-													<DialogClose asChild>
+													<Button
+														variant="outline"
+														size="sm"
+														className="hidden md:flex items-center gap-1 hover-theme"
+														style={{
+															borderColor: "var(--accent-color)",
+															color: "var(--accent-color)",
+															backgroundColor: "transparent",
+														}}
+														onClick={async (e) => {
+															e.stopPropagation();
+															const url = `${window.location.origin}/jobs/${job.id}`;
+															const shareData = {
+																title: `${job.job_profile} at ${job.company}`,
+																text: `${job.job_profile} at ${
+																	job.company
+																} — ${formatPackage(job.package)}`,
+																url,
+															};
+
+															try {
+																if ((navigator as any).share) {
+																	await (navigator as any).share(shareData);
+																} else if (
+																	navigator.clipboard &&
+																	navigator.clipboard.writeText
+																) {
+																	await navigator.clipboard.writeText(url);
+																	// lightweight feedback
+																	window.alert("Job link copied to clipboard");
+																} else {
+																	// final fallback: open the link in a new tab
+																	window.open(url, "_blank");
+																}
+															} catch (err) {
+																// ignore user-cancel or other errors, fallback to copying
+																try {
+																	await navigator.clipboard.writeText(url);
+																	window.alert("Job link copied to clipboard");
+																} catch {
+																	window.open(url, "_blank");
+																}
+															}
+														}}
+													>
+														<Share2Icon className="w-4 h-4" />
+														Share
+													</Button>
+													{/* <DialogClose asChild>
 														<Button
 															variant="ghost"
 															size="sm"
@@ -1039,7 +1088,7 @@ export default function JobsPage() {
 														>
 															<XIcon className="w-5 h-5" />
 														</Button>
-													</DialogClose>
+													</DialogClose> */}
 												</div>
 											</div>
 										</DialogHeader>
