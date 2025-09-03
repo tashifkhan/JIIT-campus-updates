@@ -2341,7 +2341,7 @@ export default function StatsPage() {
 							))}
 						</div>
 
-						{Object.entries(companyStats).length > COMPANIES_LIMIT && (
+						{companyEntries.length > COMPANIES_LIMIT && (
 							<div className="text-center mt-6">
 								<Button
 									variant="outline"
@@ -2360,7 +2360,7 @@ export default function StatsPage() {
 									) : (
 										<>
 											<ChevronDown className="w-4 h-4 mr-2" />
-											Show All {Object.entries(companyStats).length} Companies
+											Show All {companyEntries.length} Companies
 										</>
 									)}
 								</Button>
