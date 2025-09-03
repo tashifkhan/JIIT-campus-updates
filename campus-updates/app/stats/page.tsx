@@ -581,7 +581,12 @@ export default function StatsPage() {
 			csvData.push([
 				student.name,
 				student.enrollment_number,
-				student.email || `${student.enrollment_number}@mail.jiit.ac.in`,
+				student.email ||
+					`${student.enrollment_number}@${
+						/[A-Za-z]/.test(student.enrollment_number || "")
+							? "mail.juit.ac.in"
+							: "mail.jiit.ac.in"
+					}`,
 				student.company,
 				student.role || "N/A",
 				packageValue ? `₹${packageValue.toFixed(1)} LPA` : "TBD",
@@ -1492,7 +1497,13 @@ export default function StatsPage() {
 																	style={{ color: "var(--label-color)" }}
 																>
 																	{student.email ||
-																		`${student.enrollment_number}@mail.jiit.ac.in`}
+																		`${student.enrollment_number}@${
+																			/[A-Za-z]/.test(
+																				student.enrollment_number || ""
+																			)
+																				? "mail.juit.ac.in"
+																				: "mail.jiit.ac.in"
+																		}`}
 																</TableCell>
 																<TableCell
 																	style={{ color: "var(--label-color)" }}
@@ -1567,7 +1578,13 @@ export default function StatsPage() {
 																		style={{ color: "var(--label-color)" }}
 																	>
 																		{student.email ||
-																			`${student.enrollment_number}@mail.jiit.ac.in`}
+																			`${student.enrollment_number}@${
+																				/[A-Za-z]/.test(
+																					student.enrollment_number || ""
+																				)
+																					? "mail.juit.ac.in"
+																					: "mail.jiit.ac.in"
+																			}`}
 																	</p>
 																	<div
 																		className="text-xs mt-2"
