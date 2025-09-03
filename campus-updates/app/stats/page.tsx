@@ -580,13 +580,14 @@ export default function StatsPage() {
 					packages: number[];
 					avgPackage: number;
 					highest: number;
+					median: number;
 				}
 			>,
 			s: any
 		) => {
 			const b = getBranch(s.enrollment_number);
 			if (!acc[b])
-				acc[b] = { count: 0, packages: [], avgPackage: 0, highest: 0 };
+				acc[b] = { count: 0, packages: [], avgPackage: 0, highest: 0, median: 0 };
 			acc[b].count += 1;
 			const pkg = getStudentPackage(s, s.placement);
 			if (pkg != null && pkg > 0) acc[b].packages.push(pkg);
@@ -601,6 +602,12 @@ export default function StatsPage() {
 			? pkgs.reduce((a, c) => a + c, 0) / pkgs.length
 			: 0;
 		branchStats[b].highest = pkgs.length ? Math.max(...pkgs) : 0;
+		const sorted = [...pkgs].sort((a, c) => a - c);
+		branchStats[b].median = sorted.length
+			? sorted.length % 2 === 0
+				? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+				: sorted[Math.floor(sorted.length / 2)]
+			: 0;
 	});
 
 	// Clear filters function
