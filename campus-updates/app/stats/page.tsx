@@ -1605,14 +1605,9 @@ export default function StatsPage() {
 					<CardHeader className="pb-6">
 						<div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
 							<CardTitle className="flex items-center gap-3 text-xl">
-								<div className="p-2 rounded-lg bg-primary/10">
-									<GraduationCap className="w-6 h-6 text-primary" />
-								</div>
+								<GraduationCap className="w-6 h-6 text-primary" />
 								<div>
 									<h2 className="text-xl font-bold">Placed Students</h2>
-									<p className="text-sm text-muted-foreground font-normal">
-										Detailed breakdown of student placements
-									</p>
 								</div>
 								{hasActiveFilters && (
 									<Badge variant="secondary" className="ml-auto lg:ml-0">
