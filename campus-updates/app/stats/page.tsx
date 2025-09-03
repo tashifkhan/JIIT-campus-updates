@@ -1601,7 +1601,7 @@ export default function StatsPage() {
 				</Card>
 
 				{/* Placed Students Section */}
-				<Card className="border-0 shadow-lg">
+				<Card className="card-theme">
 					<CardHeader className="pb-6">
 						<div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
 							<CardTitle className="flex items-center gap-3 text-xl">
