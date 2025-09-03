@@ -13,6 +13,7 @@ import {
 	DownloadIcon,
 	FileTextIcon,
 	ExternalLinkIcon,
+	Share,
 	ArrowLeftIcon,
 	BookOpenIcon,
 	CalendarIcon,
@@ -109,6 +110,83 @@ export default function JobDetailClient({ job }: { job: Job }) {
 
 	const jobLocal = job;
 
+	// Share handler: uses Web Share API when available, otherwise copies link
+	const handleShare = async () => {
+		try {
+			const title = `${jobLocal.company} ${jobLocal.job_profile} - JIIT Placement Updates`;
+			const url = typeof window !== "undefined" ? window.location.href : "";
+			// Try Web Share API
+			if (navigator && (navigator as any).share) {
+				await (navigator as any).share({
+					title,
+					text: stripHtml(jobLocal.job_description).slice(0, 200),
+					url,
+				});
+				return;
+			}
+
+			// Fallback: copy to clipboard
+			if (navigator && navigator.clipboard && url) {
+				await navigator.clipboard.writeText(url);
+				showToast("Link copied to clipboard");
+				return;
+			}
+			// Final fallback: create temporary input
+			const input = document.createElement("input");
+			input.value = url;
+			document.body.appendChild(input);
+			input.select();
+			document.execCommand("copy");
+			document.body.removeChild(input);
+			showToast("Link copied to clipboard");
+		} catch (e) {
+			showToast("Unable to share");
+		}
+	};
+
+	const stripHtml = (html: string) => {
+		if (!html) return "";
+		const div = document.createElement("div");
+		div.innerHTML = html;
+		return div.textContent || div.innerText || "";
+	};
+
+	const showToast = (message: string) => {
+		const toast = document.createElement("div");
+		toast.setAttribute("role", "status");
+		toast.textContent = message;
+		Object.assign(toast.style, {
+			position: "fixed",
+			right: "20px",
+			bottom: "96px",
+			zIndex: "9999",
+			background: "var(--accent-color)",
+			color: "white",
+			padding: "8px 12px",
+			borderRadius: "9999px",
+			boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
+			fontSize: "13px",
+			fontWeight: "600",
+			opacity: "0",
+			transform: "translateY(6px)",
+			transition: "opacity 180ms ease, transform 180ms ease",
+			pointerEvents: "none",
+		});
+
+		document.body.appendChild(toast);
+		requestAnimationFrame(() => {
+			toast.style.opacity = "1";
+			toast.style.transform = "translateY(0)";
+		});
+		setTimeout(() => {
+			toast.style.opacity = "0";
+			toast.style.transform = "translateY(6px)";
+			setTimeout(() => {
+				if (toast.parentNode) toast.parentNode.removeChild(toast);
+			}, 200);
+		}, 2500);
+	};
+
 	return (
 		<Layout>
 			<div className="max-w-4xl mx-auto p-4">
@@ -123,6 +201,19 @@ export default function JobDetailClient({ job }: { job: Job }) {
 				>
 					<ArrowLeftIcon className="w-4 h-4 mr-2" />
 					Back
+				</Button>
+
+				<Button
+					variant="outline"
+					className="mb-6 ml-3 hover-theme"
+					style={{
+						borderColor: "var(--border-color)",
+						color: "var(--text-color)",
+					}}
+					onClick={handleShare}
+				>
+					<Share className="w-4 h-4 mr-2" />
+					Share
 				</Button>
 
 				<div className="mb-8">
