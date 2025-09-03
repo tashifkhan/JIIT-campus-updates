@@ -1540,13 +1540,13 @@ export default function StatsPage() {
 												</CardContent>
 											</Card>
 
-											<DialogContent className="w-full sm:max-w-3xl md:max-w-4xl max-h-[90vh] sm:rounded-lg overflow-y-auto">
+											<DialogContent className="w-full sm:w-[95vw] md:w-[98vw] lg:w-screen sm:max-w-[95vw] md:max-w-[98vw] lg:max-w-screen max-h-[90vh] sm:rounded-lg overflow-hidden">
 												<DialogHeader>
 													<DialogTitle style={{ color: "var(--text-color)" }}>
 														{branch} - Students & Subgroups
 													</DialogTitle>
 												</DialogHeader>
-												<div className="mt-2 space-y-4">
+												<div className="mt-2 space-y-4 max-h-[80vh] overflow-hidden flex flex-col">
 													{/* Branch summary */}
 													<div className="grid grid-cols-2 md:grid-cols-3 gap-3">
 														<div
@@ -1781,7 +1781,7 @@ export default function StatsPage() {
 													</div>
 
 													{/* Student list */}
-													<div className="mt-2">
+													<div className="mt-2 flex-1 overflow-auto">
 														<div className="hidden sm:block">
 															<Table>
 																<TableHeader>
@@ -2148,15 +2148,15 @@ export default function StatsPage() {
 											</div>
 										</CardContent>
 									</Card>
-									<DialogContent className="w-full sm:max-w-3xl md:max-w-4xl max-h-[90vh] sm:rounded-lg overflow-y-auto">
+									<DialogContent className="w-full sm:w-[95vw] md:w-[98vw] lg:w-screen sm:max-w-[95vw] md:max-w-[98vw] lg:max-w-screen max-h-[90vh] sm:rounded-lg overflow-hidden">
 										<DialogHeader>
 											<DialogTitle style={{ color: "var(--text-color)" }}>
 												{company} - Student Details
 											</DialogTitle>
 										</DialogHeader>
-										<div className="mt-4">
+										<div className="mt-4 max-h-[80vh] overflow-hidden flex flex-col">
 											{/* Desktop / tablet: keep table layout for sm and above */}
-											<div className="hidden sm:block">
+											<div className="hidden sm:block flex-1 overflow-auto">
 												<Table>
 													<TableHeader>
 														<TableRow>
@@ -2245,7 +2245,7 @@ export default function StatsPage() {
 											</div>
 
 											{/* Mobile: stacked, readable rows */}
-											<div className="space-y-3 sm:hidden">
+											<div className="space-y-3 sm:hidden flex-1 overflow-auto">
 												{getCompanyStudents(company).map((student, idx) => {
 													const placement = placements.find(
 														(p) => p.company === company
