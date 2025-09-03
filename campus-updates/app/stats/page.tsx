@@ -57,7 +57,7 @@ import {
 	MapPin,
 } from "lucide-react";
 
-import "./enrollmemt_range.json"; // enrollment mapping
+import enrollmentRanges from "./enrollmemt_range.json"; // enrollment mapping
 // Mtech & JUIT enrollment pattern i didn't want to figure out sooo
 // 24* -> MTech
 // contains alphabets -> JUIT
@@ -162,6 +162,52 @@ export default function StatsPage() {
 			month: "short",
 			day: "numeric",
 		});
+	};
+
+	// Determine student's branch from enrollment number using mapping + heuristics
+	const getBranch = (enroll?: string | null): string => {
+		if (!enroll) return "Unknown";
+		const s = String(enroll).trim();
+		// JUIT contains alphabets in enrollment
+		if (/[A-Za-z]/.test(s)) return "JUIT";
+		// Heuristic: 24* => MTech (based on comment)
+		if (s.startsWith("24")) return "MTech";
+		const n = Number(s);
+		if (!Number.isFinite(n)) return "Unknown";
+		try {
+			for (const [branch, ranges] of Object.entries(
+				enrollmentRanges as unknown as Record<string, any>
+			)) {
+				if (branch === "Intg. MTech") {
+					for (const nested of Object.values(ranges || {})) {
+						const { start, end } = nested as { start: number; end: number };
+						if (
+							typeof start === "number" &&
+							typeof end === "number" &&
+							n >= start &&
+							n < end
+						) {
+							return "Intg. MTech";
+						}
+					}
+					continue;
+				}
+				for (const entry of Object.values(ranges || {})) {
+					const { start, end } = entry as { start: number; end: number };
+					if (
+						typeof start === "number" &&
+						typeof end === "number" &&
+						n >= start &&
+						n < end
+					) {
+						return branch;
+					}
+				}
+			}
+		} catch {
+			// ignore
+		}
+		return "Unknown";
 	};
 
 	// Helper function to get package value with fallback to role package
@@ -517,6 +563,39 @@ export default function StatsPage() {
 			packages.length > 0
 				? packages.reduce((a: number, b: number) => a + b, 0) / packages.length
 				: 0;
+	});
+
+	// Branch-wise stats from filtered students
+	const branchStats = filteredStudents.reduce(
+		(
+			acc: Record<
+				string,
+				{
+					count: number;
+					packages: number[];
+					avgPackage: number;
+					highest: number;
+				}
+			>,
+			s: any
+		) => {
+			const b = getBranch(s.enrollment_number);
+			if (!acc[b])
+				acc[b] = { count: 0, packages: [], avgPackage: 0, highest: 0 };
+			acc[b].count += 1;
+			const pkg = getStudentPackage(s, s.placement);
+			if (pkg != null && pkg > 0) acc[b].packages.push(pkg);
+			return acc;
+		},
+		{}
+	);
+
+	Object.keys(branchStats).forEach((b) => {
+		const pkgs = branchStats[b].packages;
+		branchStats[b].avgPackage = pkgs.length
+			? pkgs.reduce((a, c) => a + c, 0) / pkgs.length
+			: 0;
+		branchStats[b].highest = pkgs.length ? Math.max(...pkgs) : 0;
 	});
 
 	// Clear filters function
@@ -1316,6 +1395,93 @@ export default function StatsPage() {
 						</CardContent>
 					</Card>
 				</div>
+				{/* Branch-wise Statistics */}
+				<Card className="card-theme">
+					<CardHeader>
+						<CardTitle
+							className="flex items-center justify-between"
+							style={{ color: "var(--text-color)" }}
+						>
+							<div className="flex items-center gap-2">
+								<GraduationCap
+									className="w-5 h-5 mr-2"
+									style={{ color: "var(--accent-color)" }}
+								/>
+								Branch-wise Placements
+							</div>
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						{Object.keys(branchStats).length === 0 ? (
+							<div
+								className="text-center py-6"
+								style={{ color: "var(--label-color)" }}
+							>
+								No branch data for current filters.
+							</div>
+						) : (
+							<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+								{Object.entries(branchStats)
+									.sort((a, b) => b[1].count - a[1].count)
+									.map(([branch, stats]) => (
+										<Card
+											key={branch}
+											className="border card-theme"
+											style={{
+												backgroundColor: "var(--primary-color)",
+												borderColor: "var(--border-color)",
+											}}
+										>
+											<CardContent className="p-4">
+												<div className="flex justify-between items-start mb-2">
+													<h3
+														className="font-semibold flex-1"
+														style={{ color: "var(--text-color)" }}
+													>
+														{branch}
+													</h3>
+													<Badge
+														variant="secondary"
+														style={{
+															backgroundColor: "var(--card-bg)",
+															color: "var(--accent-color)",
+															borderColor: "var(--border-color)",
+														}}
+													>
+														{(stats as any).count}
+													</Badge>
+												</div>
+												<div className="space-y-2 text-sm">
+													<div className="flex justify-between">
+														<span style={{ color: "var(--label-color)" }}>
+															Avg Package:
+														</span>
+														<span
+															className="font-semibold"
+															style={{ color: "var(--success-dark)" }}
+														>
+															{formatPackage((stats as any).avgPackage)}
+														</span>
+													</div>
+													<div className="flex justify-between">
+														<span style={{ color: "var(--label-color)" }}>
+															Highest Package:
+														</span>
+														<span
+															className="font-semibold"
+															style={{ color: "var(--success-dark)" }}
+														>
+															{formatPackage((stats as any).highest)}
+														</span>
+													</div>
+												</div>
+											</CardContent>
+										</Card>
+									))}
+							</div>
+						)}
+					</CardContent>
+				</Card>
 
 				{/* Company-wise Statistics */}
 				<Card className="card-theme">
