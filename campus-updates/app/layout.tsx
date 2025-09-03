@@ -8,7 +8,10 @@ import ReactQueryProvider from "@/components/ReactQueryProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-	title: "JIIT Placement Updates",
+	title: {
+		default: "JIIT Placement Updates",
+		template: "%s - JIIT Placement Updates",
+	},
 	description: "Campus placement and updates portal",
 	applicationName: "JIIT Placement Updates",
 	metadataBase: new URL("https://jiit-placement-updates.tashif.codes"),
