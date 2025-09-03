@@ -1046,10 +1046,53 @@ export default function StatsPage() {
 				</div>
 
 				{/* Floating Export CSV Button */}
-				{/* Floating Export CSV Button (left of filter) */}
 				<div className="fixed bottom-24 md:bottom-6 right-20 z-50 mr-1">
 					<Button
-						onClick={exportToCSV}
+						onClick={() => {
+							exportToCSV();
+
+							// Create a temporary toast/notification element appended to body
+							const toast = document.createElement("div");
+							toast.setAttribute("role", "status");
+							toast.setAttribute("aria-live", "polite");
+							toast.textContent = "CSV downloaded";
+
+							// Style the toast (keeps styling inline so no extra CSS is required)
+							Object.assign(toast.style, {
+								position: "fixed",
+								right: "20px",
+								bottom: "96px",
+								zIndex: "9999",
+								background: "var(--accent-color)",
+								color: "white",
+								padding: "8px 12px",
+								borderRadius: "9999px",
+								boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
+								fontSize: "13px",
+								fontWeight: "600",
+								opacity: "0",
+								transform: "translateY(6px)",
+								transition: "opacity 180ms ease, transform 180ms ease",
+								pointerEvents: "none",
+							});
+
+							document.body.appendChild(toast);
+
+							// Trigger appear animation
+							requestAnimationFrame(() => {
+								toast.style.opacity = "1";
+								toast.style.transform = "translateY(0)";
+							});
+
+							// Remove after 2.5s with fade out
+							setTimeout(() => {
+								toast.style.opacity = "0";
+								toast.style.transform = "translateY(6px)";
+								setTimeout(() => {
+									if (toast.parentNode) toast.parentNode.removeChild(toast);
+								}, 200);
+							}, 2500);
+						}}
 						className="rounded-2xl w-14 h-14 shadow-lg"
 						style={{
 							backgroundColor: "var(--accent-color)",
