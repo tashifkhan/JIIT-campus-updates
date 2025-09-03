@@ -689,13 +689,13 @@ export default function JobsPage() {
 							role="button"
 							tabIndex={0}
 							onClick={() => {
-								// Navigate to dedicated job page on card click
-								router.push(`/jobs/${job.id}`);
+								// Open quick view modal on card click instead of navigating
+								setSelectedJobModal(job);
 							}}
 							onKeyDown={(e) => {
 								if (e.key === "Enter" || e.key === " ") {
 									e.preventDefault();
-									router.push(`/jobs/${job.id}`);
+									setSelectedJobModal(job);
 								}
 							}}
 						>
