@@ -251,7 +251,16 @@ export default function NoticesClient({}: Props) {
 					const eligibilityCriteria = formatEligibility(
 						parsedMessage.eligibility
 					);
-					const hiringSteps = formatHiringProcess(parsedMessage.hiringProcess);
+					const hiringSteps = (
+						formatHiringProcess(parsedMessage.hiringProcess) || []
+					).filter((s: string) => {
+						const t = String(s || "").trim();
+						// Remove lines that are the Detailed JD link (or start with the link emoji)
+						if (!t) return false;
+						if (/detailed\s*jd/i.test(t)) return false;
+						if (/^\s*🔗/.test(t)) return false;
+						return true;
+					});
 
 					return (
 						<Card
