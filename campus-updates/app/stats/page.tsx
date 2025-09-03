@@ -175,7 +175,7 @@ export default function StatsPage() {
 		if (/[A-Za-z]/.test(s)) return "JUIT";
 		// If enrollment length is 9, classify as JUIT
 		if (s.length === 9) return "JUIT";
-		// Heuristic: 24* => MTech (based on comment)
+		// Heuristic: 24* => MTech
 		if (s.startsWith("24")) return "MTech";
 		const n = Number(s);
 		if (!Number.isFinite(n)) return "Unknown";
