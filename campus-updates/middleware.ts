@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 
 const allowedOriginPattern = process.env.ALLOWED_ORIGIN_PATTERN
   ? new RegExp(process.env.ALLOWED_ORIGIN_PATTERN)
-  : /^https?:\/\/(.+\.)?tashif\.codes(:\d+)?$|^https?:\/\/localhost(:\d+)?$/; // Added (:\d+)? for port support and localhost
+  : /^https?:\/\/(.+\.)?tashif\.codes(:\d+)?$|^https?:\/\/(.+\.)?vercel\.app(:\d+)?$|^https?:\/\/localhost(:\d+)?$/;
 
 export function middleware(request: NextRequest) {
   const origin = request.headers.get('Origin');
