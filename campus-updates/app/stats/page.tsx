@@ -1460,7 +1460,7 @@ export default function StatsPage() {
 								No branch data for current filters.
 							</div>
 						) : (
-							<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+							<div className="space-y-4">
 								{Object.entries(branchStats)
 									.sort((a, b) => b[1].count - a[1].count)
 									.map(([branch, stats]) => (
@@ -1472,8 +1472,9 @@ export default function StatsPage() {
 												if (!open) setSelectedBranch(null);
 											}}
 										>
+											{/* Mobile-first responsive design */}
 											<Card
-												className="border card-theme cursor-pointer hover:shadow-lg transition-all duration-300"
+												className="border card-theme cursor-pointer hover:shadow-lg transition-all duration-300 active:scale-[0.98]"
 												style={{
 													backgroundColor: "var(--primary-color)",
 													borderColor: "var(--border-color)",
@@ -1483,288 +1484,503 @@ export default function StatsPage() {
 													setIsBranchModalOpen(true);
 												}}
 											>
-												<CardContent className="p-4">
-													<div className="flex justify-between items-start mb-2">
-														<h3
-															className="font-semibold flex-1"
-															style={{ color: "var(--text-color)" }}
-														>
-															{branch}
-														</h3>
-														<Badge
-															variant="secondary"
-															style={{
-																backgroundColor: "var(--card-bg)",
-																color: "var(--accent-color)",
-																borderColor: "var(--border-color)",
-															}}
-														>
-															{(stats as any).count}
-														</Badge>
+												<CardContent className="p-4 sm:p-6">
+													{/* Mobile Layout (default) */}
+													<div className="sm:hidden">
+														<div className="flex items-center justify-between mb-4">
+															<div className="flex items-center gap-3">
+																<div
+																	className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
+																	style={{
+																		backgroundColor: "var(--accent-color)",
+																	}}
+																>
+																	{branch.charAt(0)}
+																</div>
+																<div>
+																	<h3
+																		className="font-bold text-lg leading-tight"
+																		style={{ color: "var(--text-color)" }}
+																	>
+																		{branch}
+																	</h3>
+																	<p
+																		className="text-sm"
+																		style={{ color: "var(--label-color)" }}
+																	>
+																		{(stats as any).count} students placed
+																	</p>
+																</div>
+															</div>
+															<div className="text-right">
+																<div
+																	className="text-xl font-bold mb-1"
+																	style={{ color: "var(--success-dark)" }}
+																>
+																	{formatPackage((stats as any).avgPackage)}
+																</div>
+																<p
+																	className="text-xs"
+																	style={{ color: "var(--label-color)" }}
+																>
+																	Avg Package
+																</p>
+															</div>
+														</div>
+														
+														<div className="grid grid-cols-2 gap-4">
+															<div
+																className="text-center p-3 rounded-lg"
+																style={{
+																	backgroundColor: "var(--card-bg)",
+																}}
+															>
+																<div
+																	className="text-lg font-bold"
+																	style={{ color: "var(--success-dark)" }}
+																>
+																	{formatPackage((stats as any).median)}
+																</div>
+																<p
+																	className="text-xs mt-1"
+																	style={{ color: "var(--label-color)" }}
+																>
+																	Median
+																</p>
+															</div>
+															<div
+																className="text-center p-3 rounded-lg"
+																style={{
+																	backgroundColor: "var(--card-bg)",
+																}}
+															>
+																<div
+																	className="text-lg font-bold"
+																	style={{ color: "var(--success-dark)" }}
+																>
+																	{formatPackage((stats as any).highest)}
+																</div>
+																<p
+																	className="text-xs mt-1"
+																	style={{ color: "var(--label-color)" }}
+																>
+																	Highest
+																</p>
+															</div>
+														</div>
+														
+														<div className="mt-4 pt-4 border-t border-opacity-20">
+															<div className="flex items-center justify-center gap-2">
+																<span
+																	className="text-sm"
+																	style={{ color: "var(--label-color)" }}
+																>
+																	Tap to view details
+																</span>
+																<ChevronDown
+																	className="w-4 h-4"
+																	style={{ color: "var(--accent-color)" }}
+																/>
+															</div>
+														</div>
 													</div>
-													<div className="space-y-2 text-sm">
-														<div className="flex justify-between">
-															<span style={{ color: "var(--label-color)" }}>
-																Avg Package:
-															</span>
-															<span
-																className="font-semibold"
-																style={{ color: "var(--success-dark)" }}
+
+													{/* Desktop/Tablet Layout (sm and above) */}
+													<div className="hidden sm:block">
+														<div className="flex items-center justify-between mb-4">
+															<div className="flex items-center gap-4">
+																<div
+																	className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl"
+																	style={{
+																		backgroundColor: "var(--accent-color)",
+																	}}
+																>
+																	{branch.charAt(0)}
+																</div>
+																<div>
+																	<h3
+																		className="font-bold text-xl"
+																		style={{ color: "var(--text-color)" }}
+																	>
+																		{branch}
+																	</h3>
+																	<p
+																		className="text-sm"
+																		style={{ color: "var(--label-color)" }}
+																	>
+																		{(stats as any).count} students successfully placed
+																	</p>
+																</div>
+															</div>
+															<Badge
+																variant="secondary"
+																className="px-3 py-1 text-sm font-semibold"
+																style={{
+																	backgroundColor: "var(--accent-color)",
+																	color: "white",
+																}}
 															>
-																{formatPackage((stats as any).avgPackage)}
-															</span>
+																{(stats as any).count}
+															</Badge>
 														</div>
-														<div className="flex justify-between">
-															<span style={{ color: "var(--label-color)" }}>
-																Median Package:
-															</span>
-															<span
-																className="font-semibold"
-																style={{ color: "var(--success-dark)" }}
-															>
-																{formatPackage((stats as any).median)}
-															</span>
+														
+														<div className="grid grid-cols-3 gap-4">
+															<div className="text-center">
+																<div
+																	className="text-2xl font-bold mb-1"
+																	style={{ color: "var(--success-dark)" }}
+																>
+																	{formatPackage((stats as any).avgPackage)}
+																</div>
+																<p
+																	className="text-sm"
+																	style={{ color: "var(--label-color)" }}
+																>
+																	Average Package
+																</p>
+															</div>
+															<div className="text-center">
+																<div
+																	className="text-2xl font-bold mb-1"
+																	style={{ color: "var(--success-dark)" }}
+																>
+																	{formatPackage((stats as any).median)}
+																</div>
+																<p
+																	className="text-sm"
+																	style={{ color: "var(--label-color)" }}
+																>
+																	Median Package
+																</p>
+															</div>
+															<div className="text-center">
+																<div
+																	className="text-2xl font-bold mb-1"
+																	style={{ color: "var(--success-dark)" }}
+																>
+																	{formatPackage((stats as any).highest)}
+																</div>
+																<p
+																	className="text-sm"
+																	style={{ color: "var(--label-color)" }}
+																>
+																	Highest Package
+																</p>
+															</div>
 														</div>
-														<div className="flex justify-between">
-															<span style={{ color: "var(--label-color)" }}>
-																Highest Package:
-															</span>
-															<span
-																className="font-semibold"
-																style={{ color: "var(--success-dark)" }}
-															>
-																{formatPackage((stats as any).highest)}
-															</span>
+														
+														<div className="mt-6 pt-4 border-t border-opacity-20">
+															<div className="flex items-center justify-center gap-2">
+																<span
+																	className="text-sm"
+																	style={{ color: "var(--label-color)" }}
+																>
+																	Click to view detailed breakdown
+																</span>
+																<ChevronDown
+																	className="w-4 h-4"
+																	style={{ color: "var(--accent-color)" }}
+																/>
+															</div>
 														</div>
 													</div>
 												</CardContent>
 											</Card>
 
 											<DialogContent className="w-full sm:w-[95vw] md:w-[98vw] lg:w-screen sm:max-w-[95vw] md:max-w-[98vw] lg:max-w-screen max-h-[90vh] sm:rounded-lg overflow-hidden">
-												<DialogHeader>
-													<DialogTitle style={{ color: "var(--text-color)" }}>
-														{branch} - Students & Subgroups
-													</DialogTitle>
-												</DialogHeader>
-												<div className="mt-2 space-y-4 max-h-[80vh] overflow-hidden flex flex-col">
-													{/* Branch summary */}
-													<div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+												<DialogHeader className="pb-4">
+													<DialogTitle 
+														className="text-xl sm:text-2xl font-bold flex items-center gap-3"
+														style={{ color: "var(--text-color)" }}
+													>
 														<div
-															className="border rounded-lg p-3 card-theme"
+															className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold"
+															style={{
+																backgroundColor: "var(--accent-color)",
+															}}
+														>
+															{branch.charAt(0)}
+														</div>
+														{branch} - Detailed Analytics
+													</DialogTitle>
+													<p
+														className="text-sm sm:text-base mt-2"
+														style={{ color: "var(--label-color)" }}
+													>
+														Comprehensive breakdown of placement statistics and student data
+													</p>
+												</DialogHeader>
+												<div className="mt-2 space-y-6 max-h-[80vh] overflow-hidden flex flex-col">
+													{/* Enhanced Branch Summary */}
+													<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+														<div
+															className="border rounded-xl p-4 text-center card-theme"
 															style={{
 																backgroundColor: "var(--primary-color)",
 																borderColor: "var(--border-color)",
 															}}
 														>
+															<div
+																className="text-2xl sm:text-3xl font-bold mb-2"
+																style={{ color: "var(--text-color)" }}
+															>
+																{(stats as any).count}
+															</div>
 															<p
-																className="text-xs"
+																className="text-sm font-medium"
 																style={{ color: "var(--label-color)" }}
 															>
 																Students Placed
 															</p>
-															<p
-																className="text-lg font-bold"
-																style={{ color: "var(--text-color)" }}
-															>
-																{(stats as any).count}
-															</p>
 														</div>
 														<div
-															className="border rounded-lg p-3 card-theme"
+															className="border rounded-xl p-4 text-center card-theme"
 															style={{
 																backgroundColor: "var(--primary-color)",
 																borderColor: "var(--border-color)",
 															}}
 														>
+															<div
+																className="text-2xl sm:text-3xl font-bold mb-2"
+																style={{ color: "var(--success-dark)" }}
+															>
+																{formatPackage((stats as any).avgPackage)}
+															</div>
 															<p
-																className="text-xs"
+																className="text-sm font-medium"
 																style={{ color: "var(--label-color)" }}
 															>
 																Average Package
 															</p>
-															<p
-																className="text-lg font-bold"
-																style={{ color: "var(--success-dark)" }}
-															>
-																{formatPackage((stats as any).avgPackage)}
-															</p>
 														</div>
 														<div
-															className="border rounded-lg p-3 card-theme"
+															className="border rounded-xl p-4 text-center card-theme"
 															style={{
 																backgroundColor: "var(--primary-color)",
 																borderColor: "var(--border-color)",
 															}}
 														>
+															<div
+																className="text-2xl sm:text-3xl font-bold mb-2"
+																style={{ color: "var(--success-dark)" }}
+															>
+																{formatPackage((stats as any).median)}
+															</div>
 															<p
-																className="text-xs"
+																className="text-sm font-medium"
 																style={{ color: "var(--label-color)" }}
 															>
 																Median Package
 															</p>
-															<p
-																className="text-lg font-bold"
+														</div>
+														<div
+															className="border rounded-xl p-4 text-center card-theme"
+															style={{
+																backgroundColor: "var(--primary-color)",
+																borderColor: "var(--border-color)",
+															}}
+														>
+															<div
+																className="text-2xl sm:text-3xl font-bold mb-2"
 																style={{ color: "var(--success-dark)" }}
 															>
-																{formatPackage((stats as any).median)}
+																{formatPackage((stats as any).highest)}
+															</div>
+															<p
+																className="text-sm font-medium"
+																style={{ color: "var(--label-color)" }}
+															>
+																Highest Package
 															</p>
 														</div>
 													</div>
-													{/* Subgroup stats row */}
-													<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-														{(() => {
-															const students = getBranchStudents(branch);
-															const calc = (filterFn: (s: any) => boolean) => {
-																const list = students.filter(filterFn);
-																const pkgs = list
-																	.map((s) => {
-																		const plc = s.placement
-																			? (s.placement as Placement)
-																			: (placements.find(
-																					(p) => p.company === s.company
-																			  ) as Placement);
-																		return getStudentPackage(s, plc);
-																	})
-																	.filter((n): n is number => !!n && n > 0);
-																const avg = pkgs.length
-																	? pkgs.reduce((a, c) => a + c, 0) /
-																	  pkgs.length
-																	: 0;
-																const sorted = [...pkgs].sort((a, b) => a - b);
-																const median = sorted.length
-																	? sorted.length % 2 === 0
-																		? (sorted[sorted.length / 2 - 1] +
-																				sorted[sorted.length / 2]) /
-																		  2
-																		: sorted[Math.floor(sorted.length / 2)]
-																	: 0;
-																return { count: list.length, avg, median };
-															};
-
-															const cards: Array<{
-																title: string;
-																info: {
-																	count: number;
-																	avg: number;
-																	median: number;
+													
+													{/* Subgroup stats with improved mobile layout */}
+													<div>
+														<h3 
+															className="text-lg font-bold mb-4 flex items-center gap-2"
+															style={{ color: "var(--text-color)" }}
+														>
+															<TrendingUp className="w-5 h-5" style={{ color: "var(--accent-color)" }} />
+															Branch Specializations
+														</h3>
+														<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+															{(() => {
+																const students = getBranchStudents(branch);
+																const calc = (filterFn: (s: any) => boolean) => {
+																	const list = students.filter(filterFn);
+																	const pkgs = list
+																		.map((s) => {
+																			const plc = s.placement
+																				? (s.placement as Placement)
+																				: (placements.find(
+																						(p) => p.company === s.company
+																				  ) as Placement);
+																			return getStudentPackage(s, plc);
+																		})
+																		.filter((n): n is number => !!n && n > 0);
+																	const avg = pkgs.length
+																		? pkgs.reduce((a, c) => a + c, 0) /
+																		  pkgs.length
+																		: 0;
+																	const sorted = [...pkgs].sort((a, b) => a - b);
+																	const median = sorted.length
+																		? sorted.length % 2 === 0
+																			? (sorted[sorted.length / 2 - 1] +
+																					sorted[sorted.length / 2]) /
+																			  2
+																			: sorted[Math.floor(sorted.length / 2)]
+																		: 0;
+																	return { count: list.length, avg, median };
 																};
-															}> = [];
-															if (branch === "CSE" || branch === "ECE") {
-																const ranges =
-																	(enrollmentRanges as any)[branch] || {};
-																const r62 = ranges["62"] as
-																	| { start: number; end: number }
-																	| undefined;
-																const r128 = ranges["128"] as
-																	| { start: number; end: number }
-																	| undefined;
-																if (r62) {
-																	cards.push({
-																		title: `${branch} - 62`,
-																		info: calc((s) => {
-																			const n = Number(s.enrollment_number);
-																			return (
-																				Number.isFinite(n) &&
-																				n >= r62.start &&
-																				n < r62.end
-																			);
-																		}),
-																	});
-																}
-																if (r128) {
-																	cards.push({
-																		title: `${branch} - 128`,
-																		info: calc((s) => {
-																			const n = Number(s.enrollment_number);
-																			return (
-																				Number.isFinite(n) &&
-																				n >= r128.start &&
-																				n < r128.end
-																			);
-																		}),
-																	});
-																}
-															} else if (branch === "Intg. MTech") {
-																cards.push({
-																	title: "Intg. MTech - CSE",
-																	info: calc((s) => {
-																		const n = Number(s.enrollment_number);
-																		const { CSE } =
-																			(enrollmentRanges as any)[
-																				"Intg. MTech"
-																			] || {};
-																		return CSE && n >= CSE.start && n < CSE.end;
-																	}),
-																});
-																cards.push({
-																	title: "Intg. MTech - ECE",
-																	info: calc((s) => {
-																		const n = Number(s.enrollment_number);
-																		const { ECE } =
-																			(enrollmentRanges as any)[
-																				"Intg. MTech"
-																			] || {};
-																		return ECE && n >= ECE.start && n < ECE.end;
-																	}),
-																});
-																cards.push({
-																	title: "Intg. MTech - BT",
-																	info: calc((s) => {
-																		const n = Number(s.enrollment_number);
-																		const { BT } =
-																			(enrollmentRanges as any)[
-																				"Intg. MTech"
-																			] || {};
-																		return BT && n >= BT.start && n < BT.end;
-																	}),
-																});
-															}
 
-															return cards.map(({ title, info }, i) => (
-																<Card
-																	key={i}
-																	className="border card-theme"
-																	style={{
-																		backgroundColor: "var(--primary-color)",
-																		borderColor: "var(--border-color)",
-																	}}
-																>
-																	<CardContent className="p-4">
-																		<p
-																			className="text-sm"
-																			style={{ color: "var(--label-color)" }}
-																		>
-																			{title}
-																		</p>
-																		<div className="flex items-center justify-between mt-1">
-																			<Badge
-																				variant="secondary"
-																				style={{
-																					backgroundColor: "var(--card-bg)",
-																					color: "var(--accent-color)",
-																					borderColor: "var(--border-color)",
-																				}}
-																			>
-																				{info.count}
-																			</Badge>
-																			<div className="text-right">
-																				<div
-																					className="font-semibold"
-																					style={{
-																						color: "var(--success-dark)",
-																					}}
-																				>
-																					{formatPackage(info.avg)}
+																const cards: Array<{
+																	title: string;
+																	subtitle: string;
+																	info: {
+																		count: number;
+																		avg: number;
+																		median: number;
+																	};
+																}> = [];
+																if (branch === "CSE" || branch === "ECE") {
+																	const ranges =
+																		(enrollmentRanges as any)[branch] || {};
+																	const r62 = ranges["62"] as
+																		| { start: number; end: number }
+																		| undefined;
+																	const r128 = ranges["128"] as
+																		| { start: number; end: number }
+																		| undefined;
+																	if (r62) {
+																		cards.push({
+																			title: `${branch} - 62`,
+																			subtitle: "Batch of 62 students",
+																			info: calc((s) => {
+																				const n = Number(s.enrollment_number);
+																				return (
+																					Number.isFinite(n) &&
+																					n >= r62.start &&
+																					n < r62.end
+																				);
+																			}),
+																		});
+																	}
+																	if (r128) {
+																		cards.push({
+																			title: `${branch} - 128`,
+																			subtitle: "Batch of 128 students",
+																			info: calc((s) => {
+																				const n = Number(s.enrollment_number);
+																				return (
+																					Number.isFinite(n) &&
+																					n >= r128.start &&
+																					n < r128.end
+																				);
+																			}),
+																		});
+																	}
+																} else if (branch === "Intg. MTech") {
+																	cards.push({
+																		title: "Intg. MTech - CSE",
+																		subtitle: "Computer Science Engineering",
+																		info: calc((s) => {
+																			const n = Number(s.enrollment_number);
+																			const { CSE } =
+																				(enrollmentRanges as any)[
+																					"Intg. MTech"
+																				] || {};
+																			return CSE && n >= CSE.start && n < CSE.end;
+																		}),
+																	});
+																	cards.push({
+																		title: "Intg. MTech - ECE",
+																		subtitle: "Electronics & Communication",
+																		info: calc((s) => {
+																			const n = Number(s.enrollment_number);
+																			const { ECE } =
+																				(enrollmentRanges as any)[
+																					"Intg. MTech"
+																				] || {};
+																			return ECE && n >= ECE.start && n < ECE.end;
+																		}),
+																	});
+																	cards.push({
+																		title: "Intg. MTech - BT",
+																		subtitle: "Biotechnology",
+																		info: calc((s) => {
+																			const n = Number(s.enrollment_number);
+																			const { BT } =
+																				(enrollmentRanges as any)[
+																					"Intg. MTech"
+																				] || {};
+																			return BT && n >= BT.start && n < BT.end;
+																		}),
+																	});
+																}
+
+																return cards.length > 0 ? cards.map(({ title, subtitle, info }, i) => (
+																	<Card
+																		key={i}
+																		className="border card-theme overflow-hidden"
+																		style={{
+																			backgroundColor: "var(--primary-color)",
+																			borderColor: "var(--border-color)",
+																		}}
+																	>
+																		<CardContent className="p-4">
+																			<div className="flex items-center justify-between mb-3">
+																				<div>
+																					<h4
+																						className="font-bold text-sm sm:text-base"
+																						style={{ color: "var(--text-color)" }}
+																					>
+																						{title}
+																					</h4>
+																					<p
+																						className="text-xs"
+																						style={{ color: "var(--label-color)" }}
+																					>
+																						{subtitle}
+																					</p>
 																				</div>
-																				<div
-																					className="text-xs"
+																				<Badge
+																					variant="secondary"
+																					className="text-sm font-bold px-3 py-1"
 																					style={{
-																						color: "var(--label-color)",
+																						backgroundColor: "var(--accent-color)",
+																						color: "white",
 																					}}
 																				>
-																					Median:{" "}
+																					{info.count}
+																				</Badge>
+																			</div>
+																			<div className="space-y-2">
+																				<div className="flex justify-between items-center">
 																					<span
-																						className="font-semibold"
+																						className="text-sm"
+																						style={{ color: "var(--label-color)" }}
+																					>
+																						Average:
+																					</span>
+																					<span
+																						className="font-bold text-sm"
+																						style={{
+																							color: "var(--success-dark)",
+																						}}
+																					>
+																						{formatPackage(info.avg)}
+																					</span>
+																				</div>
+																				<div className="flex justify-between items-center">
+																					<span
+																						className="text-sm"
+																						style={{ color: "var(--label-color)" }}
+																					>
+																						Median:
+																					</span>
+																					<span
+																						className="font-bold text-sm"
 																						style={{
 																							color: "var(--success-dark)",
 																						}}
@@ -1773,112 +1989,203 @@ export default function StatsPage() {
 																					</span>
 																				</div>
 																			</div>
-																		</div>
-																	</CardContent>
-																</Card>
-															));
-														})()}
+																		</CardContent>
+																	</Card>
+																)) : (
+																	<div
+																		className="col-span-full text-center py-8"
+																		style={{ color: "var(--label-color)" }}
+																	>
+																		<p>No specialization data available for this branch.</p>
+																	</div>
+																);
+															})()}
+														</div>
 													</div>
 
-													{/* Student list */}
-													<div className="mt-2 flex-1 overflow-auto">
-														<div className="hidden sm:block">
-															<Table>
-																<TableHeader>
-																	<TableRow>
-																		<TableHead
-																			style={{ color: "var(--text-color)" }}
-																		>
-																			Name
-																		</TableHead>
-																		<TableHead
-																			style={{ color: "var(--text-color)" }}
-																		>
-																			Enrollment
-																		</TableHead>
-																		<TableHead
-																			style={{ color: "var(--text-color)" }}
-																		>
-																			Email
-																		</TableHead>
-																		<TableHead
-																			style={{ color: "var(--text-color)" }}
-																		>
-																			Company
-																		</TableHead>
-																		<TableHead
-																			style={{ color: "var(--text-color)" }}
-																		>
-																			Role
-																		</TableHead>
-																		<TableHead
-																			style={{ color: "var(--text-color)" }}
-																		>
-																			Package
-																		</TableHead>
-																		<TableHead
-																			style={{ color: "var(--text-color)" }}
-																		>
-																			Joining Date
-																		</TableHead>
-																	</TableRow>
-																</TableHeader>
-																<TableBody>
-																	{getBranchStudents(branch).map(
-																		(student, idx) => (
-																			<TableRow key={idx}>
-																				<TableCell
+													{/* Student list with improved mobile design */}
+													<div className="flex-1 overflow-hidden">
+														<div className="flex items-center justify-between mb-4">
+															<h3 
+																className="text-lg font-bold flex items-center gap-2"
+																style={{ color: "var(--text-color)" }}
+															>
+																<Users className="w-5 h-5" style={{ color: "var(--accent-color)" }} />
+																Student Details
+															</h3>
+															<Badge
+																variant="outline"
+																className="text-sm"
+																style={{
+																	borderColor: "var(--border-color)",
+																	color: "var(--text-color)",
+																}}
+															>
+																{getBranchStudents(branch).length} students
+															</Badge>
+														</div>
+														
+														<div className="overflow-auto max-h-96">
+															<div className="hidden sm:block">
+																<Table>
+																	<TableHeader>
+																		<TableRow>
+																			<TableHead
+																				style={{ color: "var(--text-color)" }}
+																			>
+																				Name
+																			</TableHead>
+																			<TableHead
+																				style={{ color: "var(--text-color)" }}
+																			>
+																				Enrollment
+																			</TableHead>
+																			<TableHead
+																				style={{ color: "var(--text-color)" }}
+																			>
+																				Email
+																			</TableHead>
+																			<TableHead
+																				style={{ color: "var(--text-color)" }}
+																			>
+																				Company
+																			</TableHead>
+																			<TableHead
+																				style={{ color: "var(--text-color)" }}
+																			>
+																				Role
+																			</TableHead>
+																			<TableHead
+																				style={{ color: "var(--text-color)" }}
+																			>
+																				Package
+																			</TableHead>
+																			<TableHead
+																				style={{ color: "var(--text-color)" }}
+																			>
+																				Joining Date
+																			</TableHead>
+																		</TableRow>
+																	</TableHeader>
+																	<TableBody>
+																		{getBranchStudents(branch).map(
+																			(student, idx) => (
+																				<TableRow key={idx}>
+																					<TableCell
+																						style={{ color: "var(--text-color)" }}
+																					>
+																						{student.name}
+																					</TableCell>
+																					<TableCell
+																						style={{
+																							color: "var(--label-color)",
+																						}}
+																					>
+																						{student.enrollment_number}
+																					</TableCell>
+																					<TableCell
+																						style={{
+																							color: "var(--label-color)",
+																						}}
+																					>
+																						{student.email ||
+																							`${student.enrollment_number}@${
+																								/[A-Za-z]/.test(
+																									student.enrollment_number || ""
+																								)
+																									? "mail.juit.ac.in"
+																									: "mail.jiit.ac.in"
+																							}`}
+																					</TableCell>
+																					<TableCell
+																						style={{
+																							color: "var(--label-color)",
+																						}}
+																					>
+																						{student.company}
+																					</TableCell>
+																					<TableCell
+																						style={{
+																							color: "var(--label-color)",
+																						}}
+																					>
+																						{student.role || "N/A"}
+																					</TableCell>
+																					<TableCell
+																						style={{
+																							color: "var(--success-dark)",
+																						}}
+																					>
+																						{(() => {
+																							const plc = student.placement
+																								? (student.placement as Placement)
+																								: (placements.find(
+																										(p) =>
+																											p.company ===
+																											student.company
+																								  ) as Placement);
+																							const pkg = getStudentPackage(
+																								student,
+																								plc
+																							);
+																							return pkg
+																								? formatPackage(pkg)
+																								: "TBD";
+																						})()}
+																					</TableCell>
+																					<TableCell
+																						style={{
+																							color: "var(--label-color)",
+																						}}
+																					>
+																						{formatDate(
+																							student.joining_date || ""
+																						)}
+																					</TableCell>
+																				</TableRow>
+																			)
+																		)}
+																	</TableBody>
+																</Table>
+															</div>
+
+															{/* Enhanced Mobile list */}
+															<div className="space-y-3 sm:hidden">
+																{getBranchStudents(branch).map((student, idx) => (
+																	<div
+																		key={idx}
+																		className="border rounded-xl p-4 card-theme"
+																		style={{
+																			backgroundColor: "var(--primary-color)",
+																			borderColor: "var(--border-color)",
+																		}}
+																	>
+																		<div className="flex items-start justify-between mb-3">
+																			<div className="flex-1">
+																				<h4
+																					className="font-bold text-base"
 																					style={{ color: "var(--text-color)" }}
 																				>
 																					{student.name}
-																				</TableCell>
-																				<TableCell
-																					style={{
-																						color: "var(--label-color)",
-																					}}
+																				</h4>
+																				<p
+																					className="text-sm font-mono"
+																					style={{ color: "var(--label-color)" }}
 																				>
 																					{student.enrollment_number}
-																				</TableCell>
-																				<TableCell
-																					style={{
-																						color: "var(--label-color)",
-																					}}
-																				>
-																					{student.email ||
-																						`${student.enrollment_number}@${
-																							/[A-Za-z]/.test(
-																								student.enrollment_number || ""
-																							)
-																								? "mail.juit.ac.in"
-																								: "mail.jiit.ac.in"
-																						}`}
-																				</TableCell>
-																				<TableCell
-																					style={{
-																						color: "var(--label-color)",
-																					}}
-																				>
-																					{student.company}
-																				</TableCell>
-																				<TableCell
-																					style={{
-																						color: "var(--label-color)",
-																					}}
-																				>
-																					{student.role || "N/A"}
-																				</TableCell>
-																				<TableCell
-																					style={{
-																						color: "var(--success-dark)",
-																					}}
+																				</p>
+																			</div>
+																			<div className="text-right">
+																				<div
+																					className="text-lg font-bold"
+																					style={{ color: "var(--success-dark)" }}
 																				>
 																					{(() => {
 																						const plc = student.placement
 																							? (student.placement as Placement)
 																							: (placements.find(
 																									(p) =>
-																										p.company ===
-																										student.company
+																										p.company === student.company
 																							  ) as Placement);
 																						const pkg = getStudentPackage(
 																							student,
@@ -1888,124 +2195,46 @@ export default function StatsPage() {
 																							? formatPackage(pkg)
 																							: "TBD";
 																					})()}
-																				</TableCell>
-																				<TableCell
-																					style={{
-																						color: "var(--label-color)",
-																					}}
-																				>
-																					{formatDate(
-																						student.joining_date || ""
-																					)}
-																				</TableCell>
-																			</TableRow>
-																		)
-																	)}
-																</TableBody>
-															</Table>
-														</div>
-
-														{/* Mobile list */}
-														<div className="space-y-3 sm:hidden">
-															{getBranchStudents(branch).map((student, idx) => (
-																<div
-																	key={idx}
-																	className="border rounded-lg p-3 card-theme"
-																	style={{
-																		backgroundColor: "var(--primary-color)",
-																		borderColor: "var(--border-color)",
-																	}}
-																>
-																	<div className="flex items-start justify-between">
-																		<div className="flex-1">
-																			<p
-																				className="font-semibold"
-																				style={{ color: "var(--text-color)" }}
-																			>
-																				{student.name}
-																			</p>
-																			<p
-																				className="text-xs"
-																				style={{ color: "var(--label-color)" }}
-																			>
-																				{student.enrollment_number}
-																			</p>
-																			<p
-																				className="text-xs mt-1"
-																				style={{ color: "var(--label-color)" }}
-																			>
-																				{student.email ||
-																					`${student.enrollment_number}@${
-																						/[A-Za-z]/.test(
-																							student.enrollment_number || ""
-																						)
-																							? "mail.juit.ac.in"
-																							: "mail.jiit.ac.in"
-																					}`}
-																			</p>
-																			<div
-																				className="text-xs mt-2"
-																				style={{ color: "var(--label-color)" }}
-																			>
-																				<strong
-																					style={{
-																						color: "var(--label-color)",
-																					}}
-																				>
-																					Company:{" "}
-																				</strong>
-																				{student.company}
-																			</div>
-																			<div
-																				className="text-xs mt-1"
-																				style={{ color: "var(--label-color)" }}
-																			>
-																				<strong
-																					style={{
-																						color: "var(--label-color)",
-																					}}
-																				>
-																					Role:{" "}
-																				</strong>
-																				{student.role || "N/A"}
+																				</div>
 																			</div>
 																		</div>
-																		<div className="ml-4 text-right">
-																			<p
-																				className="font-semibold text-sm"
-																				style={{ color: "var(--success-dark)" }}
-																			>
-																				{(() => {
-																					const plc = student.placement
-																						? (student.placement as Placement)
-																						: (placements.find(
-																								(p) =>
-																									p.company === student.company
-																						  ) as Placement);
-																					const pkg = getStudentPackage(
-																						student,
-																						plc
-																					);
-																					return pkg
-																						? formatPackage(pkg)
-																						: "TBD";
-																				})()}
-																			</p>
-																			<p
-																				className="text-xs mt-1"
-																				style={{ color: "var(--label-color)" }}
-																			>
-																				{student.joining_date
-																					? formatDate(student.joining_date)
-																					: "TBD"}
-																			</p>
+																		
+																		<div className="space-y-2">
+																			<div className="flex items-center gap-2">
+																				<Building className="w-4 h-4" style={{ color: "var(--accent-color)" }} />
+																				<span
+																					className="font-semibold text-sm"
+																					style={{ color: "var(--text-color)" }}
+																				>
+																					{student.company}
+																				</span>
+																			</div>
+																			<div className="flex items-center gap-2">
+																				<GraduationCap className="w-4 h-4" style={{ color: "var(--accent-color)" }} />
+																				<span
+																					className="text-sm"
+																					style={{ color: "var(--label-color)" }}
+																				>
+																					{student.role || "N/A"}
+																				</span>
+																			</div>
+																			{student.joining_date && (
+																				<div className="flex items-center gap-2">
+																					<Calendar className="w-4 h-4" style={{ color: "var(--accent-color)" }} />
+																					<span
+																						className="text-sm"
+																						style={{ color: "var(--label-color)" }}
+																					>
+																						{formatDate(student.joining_date)}
+																					</span>
+																				</div>
+																			)}
 																		</div>
 																	</div>
-																</div>
-															))}
+																))}
+															</div>
 														</div>
 													</div>
-													{/* close mt-2 space-y-4 wrapper */}
 												</div>
 											</DialogContent>
 										</Dialog>
