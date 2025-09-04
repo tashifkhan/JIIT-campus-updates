@@ -1235,204 +1235,214 @@ export default function StatsPage() {
 					</Button>
 				</div>
 
-				{/* Key Statistics */}
-				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+				{/* Key Statistics - Enhanced Design */}
+				<div className="grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
 					<Card
-						className="border card-theme hover:shadow-md transition-all duration-300"
+						className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
 						style={{
 							backgroundColor: "var(--card-bg)",
 							borderColor: "var(--border-color)",
 							color: "var(--text-color)",
 						}}
 					>
-						<CardContent className="p-6">
+						<CardContent className="p-4 sm:p-6">
 							<div className="flex items-center justify-between">
-								<div>
+								<div className="flex-1 min-w-0">
 									<p
-										className="text-sm font-medium mb-1"
+										className="text-xs sm:text-sm font-medium mb-1 truncate"
 										style={{ color: "var(--label-color)" }}
 									>
 										Total Placements
 									</p>
 									<p
-										className="text-3xl font-bold"
+										className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight"
 										style={{ color: "var(--text-color)" }}
 									>
 										{filteredStudents.length}
 									</p>
 									{filteredStudents.length !== totalStudentsPlaced && (
 										<p
-											className="text-xs"
+											className="text-xs truncate"
 											style={{ color: "var(--label-color)" }}
 										>
 											of {totalStudentsPlaced} total
 										</p>
 									)}
 								</div>
-								<Users
-									className="w-8 h-8"
-									style={{ color: "var(--accent-color)" }}
-								/>
+								<div className="ml-2 flex-shrink-0">
+									<Users
+										className="w-6 h-6 sm:w-8 sm:h-8 group-hover:scale-110 transition-transform duration-300"
+										style={{ color: "var(--accent-color)" }}
+									/>
+								</div>
 							</div>
 						</CardContent>
 					</Card>
 
 					<Card
-						className="border card-theme hover:shadow-md transition-all duration-300"
+						className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
 						style={{
 							backgroundColor: "var(--card-bg)",
 							borderColor: "var(--border-color)",
 							color: "var(--text-color)",
 						}}
 					>
-						<CardContent className="p-6">
+						<CardContent className="p-4 sm:p-6">
 							<div className="flex items-center justify-between">
-								<div>
+								<div className="flex-1 min-w-0">
 									<p
-										className="text-sm font-medium mb-1"
+										className="text-xs sm:text-sm font-medium mb-1 truncate"
 										style={{ color: "var(--label-color)" }}
 									>
 										Average Package
 									</p>
 									<p
-										className="text-3xl font-bold"
-										style={{ color: "var(--text-color)" }}
+										className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight"
+										style={{ color: "var(--success-dark)" }}
 									>
 										{formatPackage(filteredAveragePackage)}
 									</p>
 									{filteredAveragePackage !== averagePackage && (
 										<p
-											className="text-xs"
+											className="text-xs truncate"
 											style={{ color: "var(--label-color)" }}
 										>
 											overall: {formatPackage(averagePackage)}
 										</p>
 									)}
 								</div>
-								<TrendingUp
-									className="w-8 h-8"
-									style={{ color: "var(--accent-color)" }}
-								/>
+								<div className="ml-2 flex-shrink-0">
+									<TrendingUp
+										className="w-6 h-6 sm:w-8 sm:h-8 group-hover:scale-110 transition-transform duration-300"
+										style={{ color: "var(--accent-color)" }}
+									/>
+								</div>
 							</div>
 						</CardContent>
 					</Card>
 
 					<Card
-						className="border card-theme hover:shadow-md transition-all duration-300"
+						className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
 						style={{
 							backgroundColor: "var(--card-bg)",
 							borderColor: "var(--border-color)",
 							color: "var(--text-color)",
 						}}
 					>
-						<CardContent className="p-6">
+						<CardContent className="p-4 sm:p-6">
 							<div className="flex items-center justify-between">
-								<div>
+								<div className="flex-1 min-w-0">
 									<p
-										className="text-sm font-medium mb-1"
+										className="text-xs sm:text-sm font-medium mb-1 truncate"
 										style={{ color: "var(--label-color)" }}
 									>
 										Median Package
 									</p>
 									<p
-										className="text-3xl font-bold"
-										style={{ color: "var(--text-color)" }}
+										className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight"
+										style={{ color: "var(--success-dark)" }}
 									>
 										{formatPackage(filteredMedianPackage)}
 									</p>
 									{filteredMedianPackage !== medianPackage && (
 										<p
-											className="text-xs"
+											className="text-xs truncate"
 											style={{ color: "var(--label-color)" }}
 										>
 											overall: {formatPackage(medianPackage)}
 										</p>
 									)}
 								</div>
-								<TrendingUp
-									className="w-8 h-8"
-									style={{ color: "var(--accent-color)" }}
-								/>
+								<div className="ml-2 flex-shrink-0">
+									<TrendingUp
+										className="w-6 h-6 sm:w-8 sm:h-8 group-hover:scale-110 transition-transform duration-300"
+										style={{ color: "var(--accent-color)" }}
+									/>
+								</div>
 							</div>
 						</CardContent>
 					</Card>
 
 					<Card
-						className="border card-theme hover:shadow-md transition-all duration-300"
+						className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
 						style={{
 							backgroundColor: "var(--card-bg)",
 							borderColor: "var(--border-color)",
 							color: "var(--text-color)",
 						}}
 					>
-						<CardContent className="p-6">
+						<CardContent className="p-4 sm:p-6">
 							<div className="flex items-center justify-between">
-								<div>
+								<div className="flex-1 min-w-0">
 									<p
-										className="text-sm font-medium mb-1"
+										className="text-xs sm:text-sm font-medium mb-1 truncate"
 										style={{ color: "var(--label-color)" }}
 									>
 										Highest Package
 									</p>
 									<p
-										className="text-3xl font-bold"
-										style={{ color: "var(--text-color)" }}
+										className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight"
+										style={{ color: "var(--success-dark)" }}
 									>
 										{formatPackage(filteredHighestPackage)}
 									</p>
 									{filteredHighestPackage !== highestPackage && (
 										<p
-											className="text-xs"
+											className="text-xs truncate"
 											style={{ color: "var(--label-color)" }}
 										>
 											overall: {formatPackage(highestPackage)}
 										</p>
 									)}
 								</div>
-								<IndianRupee
-									className="w-8 h-8"
-									style={{ color: "var(--accent-color)" }}
-								/>
+								<div className="ml-2 flex-shrink-0">
+									<IndianRupee
+										className="w-6 h-6 sm:w-8 sm:h-8 group-hover:scale-110 transition-transform duration-300"
+										style={{ color: "var(--accent-color)" }}
+									/>
+								</div>
 							</div>
 						</CardContent>
 					</Card>
 
 					<Card
-						className="border card-theme hover:shadow-md transition-all duration-300"
+						className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group col-span-2 md:col-span-1"
 						style={{
 							backgroundColor: "var(--card-bg)",
 							borderColor: "var(--border-color)",
 							color: "var(--text-color)",
 						}}
 					>
-						<CardContent className="p-6">
+						<CardContent className="p-4 sm:p-6">
 							<div className="flex items-center justify-between">
-								<div>
+								<div className="flex-1 min-w-0">
 									<p
-										className="text-sm font-medium mb-1"
+										className="text-xs sm:text-sm font-medium mb-1 truncate"
 										style={{ color: "var(--label-color)" }}
 									>
 										Companies
 									</p>
 									<p
-										className="text-3xl font-bold"
+										className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight"
 										style={{ color: "var(--text-color)" }}
 									>
 										{filteredUniqueCompanies}
 									</p>
 									{filteredUniqueCompanies !== uniqueCompanies && (
 										<p
-											className="text-xs"
+											className="text-xs truncate"
 											style={{ color: "var(--label-color)" }}
 										>
 											of {uniqueCompanies} total
 										</p>
 									)}
 								</div>
-								<Building
-									className="w-8 h-8"
-									style={{ color: "var(--accent-color)" }}
-								/>
+								<div className="ml-2 flex-shrink-0">
+									<Building
+										className="w-6 h-6 sm:w-8 sm:h-8 group-hover:scale-110 transition-transform duration-300"
+										style={{ color: "var(--accent-color)" }}
+									/>
+								</div>
 							</div>
 						</CardContent>
 					</Card>
