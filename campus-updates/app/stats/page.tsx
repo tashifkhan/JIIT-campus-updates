@@ -94,6 +94,7 @@ export default function StatsPage() {
 	const [showStudentList, setShowStudentList] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [showAllCompanies, setShowAllCompanies] = useState(false);
+	const [showAllBranches, setShowAllBranches] = useState(false);
 	const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
@@ -114,6 +115,7 @@ export default function StatsPage() {
 	const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
 	const COMPANIES_LIMIT = 6;
+	const BRANCHES_LIMIT = 3;
 
 	// Use react-query to fetch placements
 	const { data: placementsResp, isLoading: placementsLoading } = useQuery<
@@ -1460,10 +1462,16 @@ export default function StatsPage() {
 								No branch data for current filters.
 							</div>
 						) : (
-							<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-								{Object.entries(branchStats)
-									.sort((a, b) => b[1].count - a[1].count)
-									.map(([branch, stats]) => (
+							<>
+								<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+									{(() => {
+										const branchEntries = Object.entries(branchStats)
+											.sort((a, b) => b[1].count - a[1].count);
+										const branchesToShow = showAllBranches
+											? branchEntries
+											: branchEntries.slice(0, BRANCHES_LIMIT);
+										
+										return branchesToShow.map(([branch, stats]) => (
 										<Dialog
 											key={branch}
 											open={isBranchModalOpen && selectedBranch === branch}
@@ -2285,8 +2293,37 @@ export default function StatsPage() {
 												</div>
 											</DialogContent>
 										</Dialog>
-									))}
-							</div>
+									));
+								})()}
+								</div>
+								
+								{/* Show More Button */}
+								{Object.entries(branchStats).length > BRANCHES_LIMIT && (
+									<div className="text-center mt-6">
+										<Button
+											variant="outline"
+											onClick={() => setShowAllBranches(!showAllBranches)}
+											style={{
+												borderColor: "var(--border-color)",
+												color: "var(--text-color)",
+											}}
+											className="hover-theme"
+										>
+											{showAllBranches ? (
+												<>
+													<ChevronUp className="w-4 h-4 mr-2" />
+													Show Less Branches
+												</>
+											) : (
+												<>
+													<ChevronDown className="w-4 h-4 mr-2" />
+													Show All {Object.entries(branchStats).length} Branches
+												</>
+											)}
+										</Button>
+									</div>
+								)}
+							</>
 						)}
 					</CardContent>
 				</Card>
