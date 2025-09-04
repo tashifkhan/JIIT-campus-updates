@@ -2871,17 +2871,17 @@ export default function StatsPage() {
 												borderColor: "var(--border-color)",
 											}}
 										>
-											<CardContent className="p-4">
-												<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-													<div>
+											<CardContent className="p-3 sm:p-4">
+												<div className="flex flex-col space-y-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4 sm:space-y-0">
+													<div className="order-1">
 														<h3
-															className="font-semibold"
+															className="font-semibold text-sm sm:text-base"
 															style={{ color: "var(--text-color)" }}
 														>
 															{student.name}
 														</h3>
 														<p
-															className="text-sm"
+															className="text-xs sm:text-sm"
 															style={{ color: "var(--label-color)" }}
 														>
 															{student.enrollment_number}
@@ -2900,14 +2900,14 @@ export default function StatsPage() {
 															</Badge>
 														)}
 													</div>
-													<div>
+													<div className="order-2">
 														<p
-															className="font-medium"
+															className="font-medium text-sm sm:text-base"
 															style={{ color: "var(--text-color)" }}
 														>
 															{student.company}
 														</p>
-														<div className="text-sm space-y-1">
+														<div className="text-xs sm:text-sm space-y-1">
 															{student.roles?.map((role, roleIndex) => (
 																<p
 																	key={roleIndex}
@@ -2928,7 +2928,7 @@ export default function StatsPage() {
 																</div>
 															)}
 													</div>
-													<div className="text-right md:text-left">
+													<div className="order-3 flex justify-between items-start sm:block sm:text-left">
 														<div className="space-y-1">
 															{(() => {
 																const packageValue = student.placement
@@ -2956,7 +2956,7 @@ export default function StatsPage() {
 														</div>
 														{student.joining_date && (
 															<div
-																className="flex items-center text-sm mt-1"
+																className="flex items-center text-xs mt-1"
 																style={{ color: "var(--label-color)" }}
 															>
 																<Calendar className="w-3 h-3 mr-1" />
