@@ -157,6 +157,40 @@ export default function JobsPage() {
 		return `₹${amount.toLocaleString()}`;
 	};
 
+	// Share helper used by header buttons (desktop + mobile)
+	const handleShare = async (job: Job) => {
+		try {
+			const url = `${window.location.origin}/jobs/${job.id}`;
+			const shareData = {
+				title: `${job.job_profile} at ${job.company}`,
+				text: `${job.job_profile} at ${job.company} — ${formatPackage(
+					job.package
+				)}`,
+				url,
+			};
+
+			if ((navigator as any).share) {
+				await (navigator as any).share(shareData);
+				return;
+			}
+			if (navigator.clipboard && navigator.clipboard.writeText) {
+				await navigator.clipboard.writeText(url);
+				window.alert("Job link copied to clipboard");
+				return;
+			}
+			window.open(url, "_blank");
+		} catch (err) {
+			try {
+				await navigator.clipboard.writeText(
+					`${window.location.origin}/jobs/${job.id}`
+				);
+				window.alert("Job link copied to clipboard");
+			} catch {
+				window.open(`${window.location.origin}/jobs/${job.id}`, "_blank");
+			}
+		}
+	};
+
 	const getCategoryColor = (code: number) => {
 		const baseStyle = {
 			borderColor: "var(--border-color)",
@@ -1075,11 +1109,39 @@ export default function JobsPage() {
 														<Share2Icon className="w-4 h-4" />
 														Share
 													</Button>
-													{/* <DialogClose asChild>
+													{/* Mobile actions: show icon buttons in header on small screens */}
+													<div className="flex items-center gap-2 md:hidden">
 														<Button
 															variant="ghost"
 															size="sm"
-															className="flex-shrink-0"
+															className="p-2"
+															style={{ color: "var(--text-color)" }}
+															onClick={(e) => {
+																e.stopPropagation();
+																handleShare(job);
+															}}
+														>
+															<Share2Icon className="w-5 h-5" />
+														</Button>
+
+														<Button
+															variant="ghost"
+															size="sm"
+															className="p-2"
+															style={{ color: "var(--text-color)" }}
+															onClick={(e) => {
+																e.stopPropagation();
+																setSelectedJobModal(null);
+																router.push(`/jobs/${job.id}`);
+															}}
+														>
+															<ArrowRightIcon className="w-5 h-5" />
+														</Button>
+
+														<Button
+															variant="ghost"
+															size="sm"
+															className="p-2"
 															style={{ color: "var(--text-color)" }}
 															onClick={(e) => {
 																e.stopPropagation();
@@ -1088,7 +1150,7 @@ export default function JobsPage() {
 														>
 															<XIcon className="w-5 h-5" />
 														</Button>
-													</DialogClose> */}
+													</div>
 												</div>
 											</div>
 										</DialogHeader>
