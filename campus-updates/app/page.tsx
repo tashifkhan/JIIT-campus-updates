@@ -15,7 +15,6 @@ export default function HomePage() {
 			line-height: 1.5;
 		  }
 		  .card {
-			max-width: 680px;
 			padding: 2rem 2.5rem;
 			border-radius: 14px;
 			border: 1px solid rgba(0,0,0,0.1);
