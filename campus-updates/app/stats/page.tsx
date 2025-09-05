@@ -90,6 +90,11 @@ interface Placement {
 }
 
 export default function StatsPage() {
+	return (
+		<>
+			<div>Page Down</div>
+		</>
+	);
 	const [placements, setPlacements] = useState<Placement[]>([]);
 	const [showStudentList, setShowStudentList] = useState(false);
 	const [loading, setLoading] = useState(true);

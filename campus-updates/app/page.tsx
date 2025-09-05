@@ -4,7 +4,10 @@ import NoticesClient from "@/components/NoticesClient";
 export default function HomePage() {
 	return (
 		<Layout>
-			<NoticesClient />
+			<>
+				<div>Page Down</div>
+			</>
+			{/* <NoticesClient /> */}
 		</Layout>
 	);
 }
