@@ -75,9 +75,13 @@ interface Job {
 
 export default function JobsPage() {
 	return (
-		<>
-			<div>Page Down</div>
-		</>
+		<main className="card" role="main">
+			<h1>Service unavailable Permanently</h1>
+			<p>This site will not be accessible.</p>
+			<p className="muted">
+				If you believe this is an error, please try again later.
+			</p>
+		</main>
 	);
 	const router = useRouter();
 	const [jobs, setJobs] = useState<Job[]>([]);

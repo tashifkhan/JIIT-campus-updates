@@ -7,7 +7,6 @@
 		{
 			"source": "/ph/(.*)",
 			"destination": "https://eu.i.posthog.com/$1"
-		},
-		{ "source": "/(.*)", "destination": "/maintenance.html" }
+		}
 	]
 }

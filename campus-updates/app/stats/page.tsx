@@ -91,9 +91,13 @@ interface Placement {
 
 export default function StatsPage() {
 	return (
-		<>
-			<div>Page Down</div>
-		</>
+		<main className="card" role="main">
+			<h1>Service unavailable Permanently</h1>
+			<p>This site will not be accessible.</p>
+			<p className="muted">
+				If you believe this is an error, please try again later.
+			</p>
+		</main>
 	);
 	const [placements, setPlacements] = useState<Placement[]>([]);
 	const [showStudentList, setShowStudentList] = useState(false);
