@@ -77,6 +77,7 @@ export default function JobsPage() {
 	// Secret unlock gate: clicking the word "JIIT" 7 times will set localStorage key "shh"
 	const [unlocked, setUnlocked] = useState(false);
 	const [secretClicks, setSecretClicks] = useState(0);
+
 	useEffect(() => {
 		const unlockState = () => {
 			try {
@@ -134,12 +135,24 @@ export default function JobsPage() {
 					<p>This site will not be accessible.</p>
 					<p className="muted">
 						As per the instructions of the{" "}
-						<span onClick={handleSecretClick}>JIIT</span> Administration.
+						<button
+							type="button"
+							className="linklike"
+							onClick={handleSecretClick}
+						>
+							JIIT
+						</button>{" "}
+						Administration.
 					</p>
 				</main>
 			</>
 		);
 	}
+
+	return <JobsPageContent />;
+}
+
+function JobsPageContent() {
 	const router = useRouter();
 	const [jobs, setJobs] = useState<Job[]>([]);
 	const [selectedJobModal, setSelectedJobModal] = useState<Job | null>(null);
