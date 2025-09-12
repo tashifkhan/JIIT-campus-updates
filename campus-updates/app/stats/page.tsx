@@ -2123,91 +2123,179 @@ export default function StatsPage() {
 																	</h3>
 																	<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 																		{cards.map(
-																			({ title, subtitle, info }, i) => (
-																				<Card
-																					key={i}
-																					className="border card-theme overflow-hidden"
-																					style={{
-																						backgroundColor:
-																							"var(--primary-color)",
-																						borderColor: "var(--border-color)",
-																					}}
-																				>
-																					<CardContent className="p-4">
-																						<div className="flex items-center justify-between mb-3">
-																							<div>
-																								<h4
-																									className="font-bold text-sm sm:text-base"
-																									style={{
-																										color: "var(--text-color)",
-																									}}
-																								>
-																									{title}
-																								</h4>
-																								<p
-																									className="text-xs"
-																									style={{
-																										color: "var(--label-color)",
-																									}}
-																								>
-																									{subtitle}
-																								</p>
+																			({ title, subtitle, info }, i) => {
+																				// Get total count for this specialization from student_count.json
+																				const getSpecializationTotal = (
+																					title: string
+																				) => {
+																					if (title.includes("CSE - 62"))
+																						return (
+																							(studentCounts as any).CSE?.[
+																								"62"
+																							] || 0
+																						);
+																					if (title.includes("CSE - 128"))
+																						return (
+																							(studentCounts as any).CSE?.[
+																								"128"
+																							] || 0
+																						);
+																					if (title.includes("ECE - 62"))
+																						return (
+																							(studentCounts as any).ECE?.[
+																								"62"
+																							] || 0
+																						);
+																					if (title.includes("ECE - 128"))
+																						return (
+																							(studentCounts as any).ECE?.[
+																								"128"
+																							] || 0
+																						);
+																					if (
+																						title.includes("Intg. MTech - CSE")
+																					)
+																						return (
+																							(studentCounts as any)[
+																								"Intg. MTech"
+																							]?.CSE || 0
+																						);
+																					if (
+																						title.includes("Intg. MTech - ECE")
+																					)
+																						return (
+																							(studentCounts as any)[
+																								"Intg. MTech"
+																							]?.ECE || 0
+																						);
+																					if (
+																						title.includes("Intg. MTech - BT")
+																					)
+																						return (
+																							(studentCounts as any)[
+																								"Intg. MTech"
+																							]?.BT || 0
+																						);
+																					return 0;
+																				};
+																				const totalCount =
+																					getSpecializationTotal(title);
+																				const percentage =
+																					totalCount > 0
+																						? (info.count / totalCount) * 100
+																						: null;
+
+																				return (
+																					<Card
+																						key={i}
+																						className="border card-theme overflow-hidden"
+																						style={{
+																							backgroundColor:
+																								"var(--primary-color)",
+																							borderColor:
+																								"var(--border-color)",
+																						}}
+																					>
+																						<CardContent className="p-4">
+																							<div className="flex items-center justify-between mb-3">
+																								<div>
+																									<h4
+																										className="font-bold text-sm sm:text-base"
+																										style={{
+																											color:
+																												"var(--text-color)",
+																										}}
+																									>
+																										{title}
+																									</h4>
+																									<p
+																										className="text-xs"
+																										style={{
+																											color:
+																												"var(--label-color)",
+																										}}
+																									>
+																										{subtitle}
+																									</p>
+																								</div>
+																								<div className="text-right">
+																									<Badge
+																										variant="secondary"
+																										className="text-sm font-bold px-3 py-1"
+																										style={{
+																											backgroundColor:
+																												"var(--accent-color)",
+																											color: "white",
+																										}}
+																									>
+																										{info.count}
+																										{totalCount > 0 && (
+																											<span className="text-xs font-medium ml-1">
+																												/ {totalCount}
+																											</span>
+																										)}
+																									</Badge>
+																									{percentage !== null && (
+																										<p
+																											className="text-xs mt-1 font-semibold"
+																											style={{
+																												color:
+																													"var(--success-dark)",
+																											}}
+																										>
+																											{formatPercent(
+																												percentage
+																											)}
+																										</p>
+																									)}
+																								</div>
 																							</div>
-																							<Badge
-																								variant="secondary"
-																								className="text-sm font-bold px-3 py-1"
-																								style={{
-																									backgroundColor:
-																										"var(--accent-color)",
-																									color: "white",
-																								}}
-																							>
-																								{info.count}
-																							</Badge>
-																						</div>
-																						<div className="space-y-2">
-																							<div className="flex justify-between items-center">
-																								<span
-																									className="text-sm"
-																									style={{
-																										color: "var(--label-color)",
-																									}}
-																								>
-																									Average:
-																								</span>
-																								<span
-																									className="font-bold text-sm"
-																									style={{
-																										color:
-																											"var(--success-dark)",
-																									}}
-																								>
-																									{formatPackage(info.avg)}
-																								</span>
+																							<div className="space-y-2">
+																								<div className="flex justify-between items-center">
+																									<span
+																										className="text-sm"
+																										style={{
+																											color:
+																												"var(--label-color)",
+																										}}
+																									>
+																										Average:
+																									</span>
+																									<span
+																										className="font-bold text-sm"
+																										style={{
+																											color:
+																												"var(--success-dark)",
+																										}}
+																									>
+																										{formatPackage(info.avg)}
+																									</span>
+																								</div>
+																								<div className="flex justify-between items-center">
+																									<span
+																										className="text-sm"
+																										style={{
+																											color:
+																												"var(--label-color)",
+																										}}
+																									>
+																										Median:
+																									</span>
+																									<span
+																										className="font-bold text-sm"
+																										style={{
+																											color:
+																												"var(--success-dark)",
+																										}}
+																									>
+																										{formatPackage(info.median)}
+																									</span>
+																								</div>
 																							</div>
-																							<div className="flex justify-between items-center">
-																								<span
-																									className="text-sm"
-																									style={{
-																										color: "var(--label-color)",
-																									}}
-																								>
-																									Median:
-																								</span>
-																								<span
-																									className="font-bold text-sm"
-																									style={{
-																										color:
-																											"var(--success-dark)",
-																									}}
-																								>
-																									{formatPackage(info.median)}
-																								</span>
-																							</div>
-																						</div>
-																					</CardContent>
-																				</Card>
-																			)
+																						</CardContent>
+																					</Card>
+																				);
+																			}
 																		)}
 																	</div>
 																</div>
@@ -2546,6 +2634,18 @@ export default function StatsPage() {
 								</p>
 								<p
 									className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight"
+									style={{ color: "var(--text-color)" }}
+								>
+									{filteredPlacedInCountedBranches}
+									<span
+										className="text-base sm:text-xl font-medium ml-1"
+										style={{ color: "var(--label-color)" }}
+									>
+										/ {overallTotalStudentsExclJUIT}
+									</span>
+								</p>
+								<p
+									className="text-xs truncate font-semibold"
 									style={{ color: "var(--success-dark)" }}
 								>
 									{formatPercent(filteredOverallPlacementPct)}
