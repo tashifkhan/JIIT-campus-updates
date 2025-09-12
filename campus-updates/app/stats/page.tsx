@@ -1359,20 +1359,33 @@ export default function StatsPage() {
 										className="text-xs sm:text-sm font-medium mb-1 truncate"
 										style={{ color: "var(--label-color)" }}
 									>
-										Total Placements
+										Placement Rate
 									</p>
 									<p
 										className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight"
 										style={{ color: "var(--text-color)" }}
 									>
-										{filteredStudents.length}
+										{filteredPlacedInCountedBranches}
+										<span
+											className="text-base sm:text-xl font-medium ml-1"
+											style={{ color: "var(--label-color)" }}
+										>
+											/ {overallTotalStudentsExclJUIT}
+										</span>
 									</p>
-									{filteredStudents.length !== totalStudentsPlaced && (
+									<p
+										className="text-xs truncate font-semibold"
+										style={{ color: "var(--success-dark)" }}
+									>
+										{formatPercent(filteredOverallPlacementPct)}
+									</p>
+									{Math.abs(filteredOverallPlacementPct - overallPlacementPct) >
+										0.05 && (
 										<p
 											className="text-xs truncate"
 											style={{ color: "var(--label-color)" }}
 										>
-											of {totalStudentsPlaced} total
+											overall: {formatPercent(overallPlacementPct)}
 										</p>
 									)}
 								</div>
@@ -1776,7 +1789,7 @@ export default function StatsPage() {
 																</div>
 															</div>
 															<div className="space-y-2">
-																<div className="flex justify-between items-center">
+																{/* <div className="flex justify-between items-center">
 																	<span
 																		className="text-sm"
 																		style={{ color: "var(--label-color)" }}
@@ -1789,7 +1802,7 @@ export default function StatsPage() {
 																	>
 																		{formatPackage((stats as any).avgPackage)}
 																	</span>
-																</div>
+																</div> */}
 																<div className="flex justify-between items-center">
 																	<span
 																		className="text-sm"
@@ -2612,7 +2625,7 @@ export default function StatsPage() {
 				</Card>
 
 				{/* Overall Placement Rate (excludes JUIT) */}
-				<Card
+				{/* <Card
 					className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
 					style={{
 						backgroundColor: "var(--card-bg)",
@@ -2668,7 +2681,7 @@ export default function StatsPage() {
 							</div>
 						</div>
 					</CardContent>
-				</Card>
+				</Card> */}
 
 				{/* Company-wise Statistics */}
 				<Card className="card-theme">
