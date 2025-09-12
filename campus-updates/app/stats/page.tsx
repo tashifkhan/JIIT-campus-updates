@@ -1343,7 +1343,7 @@ export default function StatsPage() {
 				</div>
 
 				{/* Key Statistics - Enhanced Design */}
-				<div className="grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+				<div className="grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
 					<Card
 						className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
 						style={{
@@ -1526,7 +1526,7 @@ export default function StatsPage() {
 					</Card>
 
 					<Card
-						className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group col-span-2 md:col-span-1"
+						className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
 						style={{
 							backgroundColor: "var(--card-bg)",
 							borderColor: "var(--border-color)",
