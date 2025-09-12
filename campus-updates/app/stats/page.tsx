@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, ChangeEvent } from "react";
+import { useState, useEffect, ChangeEvent, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,13 +56,8 @@ import {
 	Search,
 	MapPin,
 } from "lucide-react";
-
-import enrollmentRanges from "./enrollmemt_range.json"; // enrollment mapping
-// Mtech & JUIT enrollment pattern i didn't want to figure out sooo
-// 24* -> MTech
-// contains alphabets -> JUIT
-// len 9 -> JUIT
-
+import enrollmentRanges from "./enrollmemt_range.json";
+import studentCounts from "./student_count.json";
 interface Role {
 	role: string;
 	package: number;
@@ -131,12 +126,7 @@ export default function StatsPage() {
 						</p>
 						<p className="m-0 text-sm opacity-70">
 							As per the instructions of the{" "}
-							<span
-								onClick={handleSecretClick}
-							>
-								JIIT
-							</span>{" "}
-							Administration.
+							<span onClick={handleSecretClick}>JIIT</span> Administration.
 						</p>
 					</div>
 				</main>
@@ -198,6 +188,11 @@ export default function StatsPage() {
 
 		// Package value is already in LPA
 		return `₹${packageValue.toFixed(1)} LPA`;
+	};
+
+	const formatPercent = (value?: number | null) => {
+		if (value == null || Number.isNaN(value)) return "N/A";
+		return `${value.toFixed(1)}%`;
 	};
 
 	// Compute a fallback package for a company when no students are recorded.
@@ -670,6 +665,65 @@ export default function StatsPage() {
 				: sorted[Math.floor(sorted.length / 2)]
 			: 0;
 	});
+
+	// Branch totals derived from student_count.json (sum nested keys when present)
+	const branchTotalCounts = useMemo(() => {
+		const totals: Record<string, number> = {};
+		try {
+			Object.entries(studentCounts as any).forEach(([branch, counts]) => {
+				if (counts && typeof counts === "object") {
+					const sum = Object.values(counts).reduce(
+						(a: number, c: any) => a + Number(c || 0),
+						0
+					);
+					totals[branch] = sum;
+				} else if (typeof counts === "number") {
+					totals[branch] = counts;
+				}
+			});
+		} catch {
+			// ignore
+		}
+		return totals;
+	}, []);
+
+	const branchesWithTotals = useMemo(
+		() => new Set(Object.keys(branchTotalCounts)),
+		[branchTotalCounts]
+	);
+
+	// Overall denominator excludes JUIT by virtue of only including branches present in student_count.json
+	const overallTotalStudentsExclJUIT = useMemo(
+		() => Object.values(branchTotalCounts).reduce((a, c) => a + c, 0),
+		[branchTotalCounts]
+	);
+
+	// Overall numerator (all placements but only for branches present in student_count.json)
+	const totalPlacedInCountedBranches = useMemo(() => {
+		return placements.reduce((sum: number, placement: Placement) => {
+			const inc = placement.students_selected.filter((s) =>
+				branchesWithTotals.has(getBranch(s.enrollment_number))
+			).length;
+			return sum + inc;
+		}, 0);
+	}, [placements, branchesWithTotals]);
+
+	// Filtered numerator (current filters applied) but still only branches present in student_count.json
+	const filteredPlacedInCountedBranches = useMemo(() => {
+		return filteredStudents.filter((s: any) =>
+			branchesWithTotals.has(getBranch(s.enrollment_number))
+		).length;
+	}, [filteredStudents, branchesWithTotals]);
+
+	const overallPlacementPct =
+		overallTotalStudentsExclJUIT > 0
+			? (totalPlacedInCountedBranches / overallTotalStudentsExclJUIT) * 100
+			: 0;
+
+	const filteredOverallPlacementPct =
+		overallTotalStudentsExclJUIT > 0
+			? (filteredPlacedInCountedBranches / overallTotalStudentsExclJUIT) * 100
+			: 0;
 
 	// Clear filters function
 	const clearFilters = () => {
@@ -1289,7 +1343,7 @@ export default function StatsPage() {
 				</div>
 
 				{/* Key Statistics - Enhanced Design */}
-				<div className="grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+				<div className="grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
 					<Card
 						className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
 						style={{
@@ -1576,12 +1630,33 @@ export default function StatsPage() {
 																		>
 																			{branch}
 																		</h3>
-																		<p
-																			className="text-xs"
-																			style={{ color: "var(--label-color)" }}
-																		>
-																			{(stats as any).count} students
-																		</p>
+																		{(() => {
+																			const totalForBranch =
+																				branchTotalCounts[branch] || 0;
+																			const pct =
+																				totalForBranch > 0
+																					? ((stats as any).count /
+																							totalForBranch) *
+																					  100
+																					: null;
+																			return (
+																				<p
+																					className="text-xs"
+																					style={{
+																						color: "var(--label-color)",
+																					}}
+																				>
+																					{(stats as any).count} placed
+																					{totalForBranch ? (
+																						<>
+																							{" "}
+																							of {totalForBranch} •{" "}
+																							{formatPercent(pct)}
+																						</>
+																					) : null}
+																				</p>
+																			);
+																		})()}
 																	</div>
 																</div>
 																<div className="text-right">
@@ -1657,26 +1732,49 @@ export default function StatsPage() {
 																		>
 																			{branch}
 																		</h3>
-																		<p
-																			className="text-xs"
-																			style={{ color: "var(--label-color)" }}
-																		>
-																			{(stats as any).count} students placed
-																		</p>
+																		{(() => {
+																			const totalForBranch =
+																				branchTotalCounts[branch] || 0;
+																			const pct =
+																				totalForBranch > 0
+																					? ((stats as any).count /
+																							totalForBranch) *
+																					  100
+																					: null;
+																			return (
+																				<p
+																					className="text-xs"
+																					style={{
+																						color: "var(--label-color)",
+																					}}
+																				>
+																					{(stats as any).count} placed
+																					{totalForBranch ? (
+																						<>
+																							{" "}
+																							of {totalForBranch} •{" "}
+																							{formatPercent(pct)}
+																						</>
+																					) : null}
+																				</p>
+																			);
+																		})()}
 																	</div>
 																</div>
-																<Badge
-																	variant="secondary"
-																	className="px-2 py-1 text-xs font-semibold"
-																	style={{
-																		backgroundColor: "var(--accent-color)",
-																		color: "white",
-																	}}
-																>
-																	{(stats as any).count}
-																</Badge>
+																<div className="text-right">
+																	<Badge
+																		variant="secondary"
+																		className="px-2 py-1 text-xs font-semibold"
+																		style={{
+																			backgroundColor: "var(--accent-color)",
+																			color: "white",
+																		}}
+																	>
+																		Avg:{" "}
+																		{formatPackage((stats as any).avgPackage)}
+																	</Badge>
+																</div>
 															</div>
-
 															<div className="space-y-2">
 																<div className="flex justify-between items-center">
 																	<span
@@ -1780,26 +1878,59 @@ export default function StatsPage() {
 													<div className="mt-1 sm:mt-2 space-y-4 sm:space-y-6 max-h-[85vh] sm:max-h-[80vh] overflow-y-auto">
 														{/* Enhanced Branch Summary */}
 														<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-															<div
-																className="border rounded-lg p-2 sm:p-4 text-center card-theme"
-																style={{
-																	backgroundColor: "var(--primary-color)",
-																	borderColor: "var(--border-color)",
-																}}
-															>
-																<div
-																	className="text-lg sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2"
-																	style={{ color: "var(--text-color)" }}
-																>
-																	{(stats as any).count}
-																</div>
-																<p
-																	className="text-xs sm:text-sm font-medium"
-																	style={{ color: "var(--label-color)" }}
-																>
-																	Students
-																</p>
-															</div>
+															{(() => {
+																const totalForBranch =
+																	branchTotalCounts[branch] || 0;
+																const pct =
+																	totalForBranch > 0
+																		? ((stats as any).count / totalForBranch) *
+																		  100
+																		: null;
+																return (
+																	<div
+																		className="border rounded-lg p-2 sm:p-4 text-center card-theme"
+																		style={{
+																			backgroundColor: "var(--primary-color)",
+																			borderColor: "var(--border-color)",
+																		}}
+																	>
+																		<div
+																			className="text-lg sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2"
+																			style={{ color: "var(--text-color)" }}
+																		>
+																			{(stats as any).count}
+																			{totalForBranch ? (
+																				<span
+																					className="text-base sm:text-xl font-medium ml-1"
+																					style={{
+																						color: "var(--label-color)",
+																					}}
+																				>
+																					/ {totalForBranch}
+																				</span>
+																			) : null}
+																		</div>
+																		<p
+																			className="text-xs sm:text-sm font-medium"
+																			style={{ color: "var(--label-color)" }}
+																		>
+																			{totalForBranch
+																				? "Placed / Total"
+																				: "Students"}
+																			{totalForBranch ? (
+																				<span
+																					className="block font-semibold"
+																					style={{
+																						color: "var(--success-dark)",
+																					}}
+																				>
+																					{formatPercent(pct)}
+																				</span>
+																			) : null}
+																		</p>
+																	</div>
+																);
+															})()}
 															<div
 																className="border rounded-lg p-2 sm:p-4 text-center card-theme"
 																style={{
@@ -2389,6 +2520,53 @@ export default function StatsPage() {
 								)}
 							</>
 						)}
+					</CardContent>
+				</Card>
+
+				{/* Overall Placement Rate (excludes JUIT) */}
+				<Card
+					className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
+					style={{
+						backgroundColor: "var(--card-bg)",
+						borderColor: "var(--border-color)",
+						color: "var(--text-color)",
+					}}
+				>
+					<CardContent className="p-4 sm:p-6">
+						<div className="flex items-center justify-between">
+							<div className="flex-1 min-w-0">
+								<p
+									className="text-xs sm:text-sm font-medium mb-1 truncate"
+									style={{ color: "var(--label-color)" }}
+								>
+									Placement Rate{" "}
+									<span className="ml-1 text-[10px] opacity-70">
+										(excl. JUIT)
+									</span>
+								</p>
+								<p
+									className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight"
+									style={{ color: "var(--success-dark)" }}
+								>
+									{formatPercent(filteredOverallPlacementPct)}
+								</p>
+								{Math.abs(filteredOverallPlacementPct - overallPlacementPct) >
+									0.05 && (
+									<p
+										className="text-xs truncate"
+										style={{ color: "var(--label-color)" }}
+									>
+										overall: {formatPercent(overallPlacementPct)}
+									</p>
+								)}
+							</div>
+							<div className="ml-2 flex-shrink-0">
+								<TrendingUp
+									className="w-6 h-6 sm:w-8 sm:h-8 group-hover:scale-110 transition-transform duration-300"
+									style={{ color: "var(--accent-color)" }}
+								/>
+							</div>
+						</div>
 					</CardContent>
 				</Card>
 
