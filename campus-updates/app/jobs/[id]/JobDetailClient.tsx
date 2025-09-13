@@ -37,6 +37,7 @@ interface Job {
 	location: string;
 	package: number;
 	package_info: string;
+	annum_months?: string;
 	required_skills: string[];
 	hiring_flow: string[];
 	placement_type: string | null;
@@ -81,9 +82,19 @@ export default function JobDetailClient({ job }: { job: Job }) {
 		return `${dateStr} at ${timeStr}`;
 	};
 
-	const formatPackage = (amount: number) => {
+	const formatPackage = (job: Job) => {
+		const amount = job.package;
+		const annumMonths = job.annum_months;
+
+		// Check if annum_months exists and starts with "M" (case insensitive)
+		const isMonthly =
+			annumMonths &&
+			(annumMonths.toUpperCase().startsWith("M") ||
+				annumMonths.toLowerCase().startsWith("m"));
+
 		if (amount >= 100000) {
-			return `₹${(amount / 100000).toFixed(1)} LPA`;
+			const suffix = isMonthly ? "LPM" : "LPA";
+			return `₹${(amount / 100000).toFixed(1)} ${suffix}`;
 		}
 		return `₹${amount.toLocaleString()}`;
 	};
@@ -286,7 +297,7 @@ export default function JobDetailClient({ job }: { job: Job }) {
 								className="text-2xl font-bold"
 								style={{ color: "var(--text-color)" }}
 							>
-								{formatPackage(jobLocal.package)}
+								{formatPackage(jobLocal)}
 							</p>
 						</CardContent>
 					</Card>

@@ -63,6 +63,7 @@ interface Job {
 	location: string;
 	package: number;
 	package_info: string;
+	annum_months?: string;
 	required_skills: string[];
 	hiring_flow: string[];
 	placement_type: string | null;
@@ -210,9 +211,19 @@ function JobsPageContent() {
 		return `${dateStr} at ${timeStr}`;
 	};
 
-	const formatPackage = (amount: number) => {
+	const formatPackage = (job: Job) => {
+		const amount = job.package;
+		const annumMonths = job.annum_months;
+
+		// Check if annum_months exists and starts with "M" (case insensitive)
+		const isMonthly =
+			annumMonths &&
+			(annumMonths.toUpperCase().startsWith("M") ||
+				annumMonths.toLowerCase().startsWith("m"));
+
 		if (amount >= 100000) {
-			return `₹${(amount / 100000).toFixed(1)} LPA`;
+			const suffix = isMonthly ? "LPM" : "LPA";
+			return `₹${(amount / 100000).toFixed(1)} ${suffix}`;
 		}
 		return `₹${amount.toLocaleString()}`;
 	};
@@ -223,9 +234,7 @@ function JobsPageContent() {
 			const url = `${window.location.origin}/jobs/${job.id}`;
 			const shareData = {
 				title: `${job.job_profile} at ${job.company}`,
-				text: `${job.job_profile} at ${job.company} — ${formatPackage(
-					job.package
-				)}`,
+				text: `${job.job_profile} at ${job.company} — ${formatPackage(job)}`,
 				url,
 			};
 
@@ -916,7 +925,7 @@ function JobsPageContent() {
 											className="text-lg font-bold block"
 											style={{ color: "var(--text-color)" }}
 										>
-											{formatPackage(job.package)}
+											{formatPackage(job)}
 										</span>
 									</div>
 									<div
@@ -1143,7 +1152,7 @@ function JobsPageContent() {
 																title: `${job.job_profile} at ${job.company}`,
 																text: `${job.job_profile} at ${
 																	job.company
-																} — ${formatPackage(job.package)}`,
+																} — ${formatPackage(job)}`,
 																url,
 															};
 
@@ -1247,7 +1256,7 @@ function JobsPageContent() {
 														className="text-lg font-bold"
 														style={{ color: "var(--text-color)" }}
 													>
-														{formatPackage(job.package)}
+														{formatPackage(job)}
 													</p>
 												</div>
 												<div
