@@ -81,14 +81,43 @@ export default function JobsPage() {
 	const [secretClicks, setSecretClicks] = useState(0);
 
 	useEffect(() => {
-		const unlockState = () => {
+		const checkAndUnlockFromQuery = () => {
 			try {
-				return typeof window !== "undefined" && !!localStorage.getItem("shh");
+				if (typeof window === "undefined") return false;
+				const params = new URLSearchParams(window.location.search);
+				if (params.has("shh")) {
+					try {
+						localStorage.setItem("shh", "1");
+					} catch {
+						/* ignore */
+					}
+					setUnlocked(true);
+					// Clean the URL (remove ?shh) without reloading
+					params.delete("shh");
+					const newUrl = `${window.location.pathname}${
+						params.toString() ? `?${params.toString()}` : ""
+					}${window.location.hash || ""}`;
+					window.history.replaceState({}, "", newUrl);
+					return true;
+				}
 			} catch {
-				return false;
+				// ignore
 			}
+			return false;
 		};
-		setUnlocked(unlockState());
+
+		// If not unlocked via query, fall back to localStorage check
+		const unlockedFromQuery = checkAndUnlockFromQuery();
+		if (!unlockedFromQuery) {
+			const hasLocal = (() => {
+				try {
+					return typeof window !== "undefined" && !!localStorage.getItem("shh");
+				} catch {
+					return false;
+				}
+			})();
+			setUnlocked(hasLocal);
+		}
 	}, []);
 
 	const handleSecretClick = () => {

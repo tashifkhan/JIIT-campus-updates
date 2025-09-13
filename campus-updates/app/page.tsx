@@ -14,6 +14,29 @@ export default function HomePage() {
 	});
 	const [secretClicks, setSecretClicks] = useState(0);
 
+	useEffect(() => {
+		// Support unlocking via ?shh query parameter and then clean it from the URL
+		try {
+			if (typeof window === "undefined") return;
+			const params = new URLSearchParams(window.location.search);
+			if (params.has("shh")) {
+				try {
+					localStorage.setItem("shh", "1");
+				} catch {
+					/* ignore */
+				}
+				setUnlocked(true);
+				params.delete("shh");
+				const newUrl = `${window.location.pathname}${
+					params.toString() ? `?${params.toString()}` : ""
+				}${window.location.hash || ""}`;
+				window.history.replaceState({}, "", newUrl);
+			}
+		} catch {
+			// ignore
+		}
+	}, []);
+
 	const handleSecretClick = () => {
 		setSecretClicks((c) => {
 			const next = c + 1;
