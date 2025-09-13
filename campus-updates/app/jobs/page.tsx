@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useTransition } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import Layout from "@/components/Layout";
@@ -134,6 +134,7 @@ export default function JobsPage() {
 
 function JobsPageContent() {
 	const router = useRouter();
+	const [isPending, startTransition] = useTransition();
 	const [jobs, setJobs] = useState<Job[]>([]);
 	const [selectedJobModal, setSelectedJobModal] = useState<Job | null>(null);
 	const [loading, setLoading] = useState(true);
@@ -779,17 +780,23 @@ function JobsPageContent() {
 								backgroundColor: "var(--card-bg)",
 								borderColor: "var(--border-color)",
 								color: "var(--text-color)",
+								opacity: isPending ? 0.7 : 1,
+								pointerEvents: isPending ? "none" : "auto",
 							}}
 							role="button"
 							tabIndex={0}
 							onClick={() => {
 								// Open quick view modal on card click instead of navigating
-								setSelectedJobModal(job);
+								startTransition(() => {
+									setSelectedJobModal(job);
+								});
 							}}
 							onKeyDown={(e) => {
 								if (e.key === "Enter" || e.key === " ") {
 									e.preventDefault();
-									setSelectedJobModal(job);
+									startTransition(() => {
+										setSelectedJobModal(job);
+									});
 								}
 							}}
 						>
@@ -1612,15 +1619,19 @@ function JobsPageContent() {
 													style={{
 														backgroundColor: "var(--accent-color)",
 														color: "var(--bg-color)",
+														opacity: isPending ? 0.7 : 1,
 													}}
+													disabled={isPending}
 													onClick={(e) => {
 														e.stopPropagation();
 														setSelectedJobModal(null);
-														router.push(`/jobs/${job.id}`);
+														startTransition(() => {
+															router.push(`/jobs/${job.id}`);
+														});
 													}}
 												>
 													<ArrowRightIcon className="w-4 h-4 mr-2" />
-													Open Full Page
+													{isPending ? "Loading..." : "Open Full Page"}
 												</Button>
 											</div>
 										</div>
