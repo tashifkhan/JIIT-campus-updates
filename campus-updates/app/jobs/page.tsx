@@ -43,6 +43,7 @@ import {
 	FileTextIcon,
 	ExternalLinkIcon,
 	ArrowRightIcon,
+	Loader2Icon,
 } from "lucide-react";
 
 interface Job {
@@ -1072,13 +1073,25 @@ function JobsPageContent() {
 											backgroundColor: "var(--accent-color)",
 											color: "var(--bg-color)",
 										}}
+										disabled={isPending}
 										onClick={(e) => {
 											e.stopPropagation();
-											router.push(`/jobs/${job.id}`);
+											startTransition(() => {
+												router.push(`/jobs/${job.id}`);
+											});
 										}}
 									>
-										Full Details
-										<ArrowRightIcon className="w-4 h-4 ml-1" />
+										{isPending ? (
+											<span className="flex items-center gap-2">
+												<Loader2Icon className="w-4 h-4 animate-spin" />
+												Loading...
+											</span>
+										) : (
+											<>
+												Full Details
+												<ArrowRightIcon className="w-4 h-4 ml-1" />
+											</>
+										)}
 									</Button>
 								</div>
 
@@ -1128,13 +1141,25 @@ function JobsPageContent() {
 															color: "var(--accent-color)",
 															backgroundColor: "transparent",
 														}}
+														disabled={isPending}
 														onClick={(e) => {
 															e.stopPropagation();
-															router.push(`/jobs/${job.id}`);
+															startTransition(() => {
+																router.push(`/jobs/${job.id}`);
+															});
 														}}
 													>
-														<ArrowRightIcon className="w-4 h-4" />
-														Full Page
+														{isPending ? (
+															<span className="flex items-center gap-2">
+																<Loader2Icon className="w-4 h-4 animate-spin" />
+																Loading...
+															</span>
+														) : (
+															<>
+																<ArrowRightIcon className="w-4 h-4" />
+																Full Page
+															</>
+														)}
 													</Button>
 													<Button
 														variant="outline"
@@ -1204,13 +1229,20 @@ function JobsPageContent() {
 															size="sm"
 															className="p-2"
 															style={{ color: "var(--text-color)" }}
+															disabled={isPending}
 															onClick={(e) => {
 																e.stopPropagation();
 																setSelectedJobModal(null);
-																router.push(`/jobs/${job.id}`);
+																startTransition(() => {
+																	router.push(`/jobs/${job.id}`);
+																});
 															}}
 														>
-															<ArrowRightIcon className="w-5 h-5" />
+															{isPending ? (
+																<Loader2Icon className="w-5 h-5 animate-spin" />
+															) : (
+																<ArrowRightIcon className="w-5 h-5" />
+															)}
 														</Button>
 
 														<Button
