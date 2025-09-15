@@ -18,7 +18,7 @@ import {
 	getStudentPackage,
 } from "@/lib/stats";
 
-const BRANCHES_LIMIT = 6;
+const BRANCHES_LIMIT = 3;
 const COMPANIES_LIMIT = 6;
 // Flattened index of enrollment ranges -> branch, built from JSON once
 const ENROLLMENT_BRANCH_RANGES: Array<{
