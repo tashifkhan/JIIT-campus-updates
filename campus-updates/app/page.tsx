@@ -1,6 +1,6 @@
 "use client";
 import Layout from "@/components/Layout";
-import NoticesClient from "@/components/NoticesClient";
+import NoticesClient from "@/components/notice/NoticesClient";
 import { useEffect, useState } from "react";
 
 export default function HomePage() {

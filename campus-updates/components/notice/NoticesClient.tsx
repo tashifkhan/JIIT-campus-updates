@@ -27,8 +27,8 @@ import {
 	PaginationPrevious,
 } from "@/components/ui/pagination";
 
-import NoticesFilters from "@/components/NoticesFilters";
-import ShortlistTable from "@/components/ShortlistTable";
+import NoticesFilters from "@/components/notice/NoticesFilters";
+import ShortlistTable from "@/components/notice/ShortlistTable";
 import {
 	Notice as NoticeType,
 	parseFormattedMessage,
