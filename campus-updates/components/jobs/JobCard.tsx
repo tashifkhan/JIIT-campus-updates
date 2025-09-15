@@ -45,7 +45,20 @@ export default function JobCard({ job, onQuickView }: Props) {
 			}}
 			role="button"
 			tabIndex={0}
-			onClick={() => onQuickView(job)}
+			onClick={() => {
+				if (
+					typeof window !== "undefined" &&
+					window.matchMedia("(max-width: 767px)").matches
+				) {
+					// On mobile, go directly to full page
+					startTransition(() => {
+						router.push(`/jobs/${job.id}`);
+					});
+				} else {
+					// On larger screens, open quick view
+					onQuickView(job);
+				}
+			}}
 			onKeyDown={(e) => {
 				if (e.key === "Enter" || e.key === " ") {
 					e.preventDefault();
@@ -299,7 +312,16 @@ export default function JobCard({ job, onQuickView }: Props) {
 						}}
 						onClick={(e) => {
 							e.stopPropagation();
-							onQuickView(job);
+							if (
+								typeof window !== "undefined" &&
+								window.matchMedia("(max-width: 767px)").matches
+							) {
+								startTransition(() => {
+									router.push(`/jobs/${job.id}`);
+								});
+							} else {
+								onQuickView(job);
+							}
 						}}
 					>
 						Quick View
