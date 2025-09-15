@@ -21,8 +21,11 @@ import {
 const BRANCHES_LIMIT = 6;
 const COMPANIES_LIMIT = 6;
 // Flattened index of enrollment ranges -> branch, built from JSON once
-const ENROLLMENT_BRANCH_RANGES: Array<{ branch: string; start: number; end: number }> =
-	buildBranchRangesFromJson(enrollmentRanges as any);
+const ENROLLMENT_BRANCH_RANGES: Array<{
+	branch: string;
+	start: number;
+	end: number;
+}> = buildBranchRangesFromJson(enrollmentRanges as any);
 
 export default function StatsPage() {
 	const { data, isLoading: loading } = useQuery({
@@ -573,21 +576,35 @@ export default function StatsPage() {
 }
 
 // Build branch ranges index from JSON
-function buildBranchRangesFromJson(json: any): Array<{ branch: string; start: number; end: number }> {
+function buildBranchRangesFromJson(
+	json: any
+): Array<{ branch: string; start: number; end: number }> {
 	const ranges: Array<{ branch: string; start: number; end: number }> = [];
 	if (!json || typeof json !== "object") return ranges;
 	Object.entries(json).forEach(([branch, data]) => {
 		if (branch === "Intg. MTech" && data && typeof data === "object") {
 			// Intg. MTech nested per sub-branch
 			Object.values(data as any).forEach((sub: any) => {
-				if (sub && typeof sub.start === "number" && typeof sub.end === "number") {
-					ranges.push({ branch: "Intg. MTech", start: sub.start, end: sub.end });
+				if (
+					sub &&
+					typeof sub.start === "number" &&
+					typeof sub.end === "number"
+				) {
+					ranges.push({
+						branch: "Intg. MTech",
+						start: sub.start,
+						end: sub.end,
+					});
 				}
 			});
 		} else if (data && typeof data === "object") {
 			// Regular branches with batch keys (e.g., "62", "128")
 			Object.values(data as any).forEach((entry: any) => {
-				if (entry && typeof entry.start === "number" && typeof entry.end === "number") {
+				if (
+					entry &&
+					typeof entry.start === "number" &&
+					typeof entry.end === "number"
+				) {
 					ranges.push({ branch, start: entry.start, end: entry.end });
 				}
 			});
@@ -601,12 +618,16 @@ function buildBranchRangesFromJson(json: any): Array<{ branch: string; start: nu
 // Branch resolver based on enrollment number falling within known ranges
 function getBranch(enrollment: string): string {
 	if (!enrollment) return "Other";
-	// Extract digits from enrollment to form a comparable number
+	const hasAlpha = /[A-Za-z]/.test(enrollment);
 	const digits = (enrollment.match(/\d+/g) || []).join("");
+	// JUIT rule: alpha present or 9-digit numeric id
+	if (hasAlpha || digits.length === 9) return "JUIT";
+	// MTech rule: first two digits are 24
+	if (digits.startsWith("24")) return "MTech";
 	if (!digits) return "Other";
 	const num = Number(digits);
 	if (!Number.isFinite(num)) return "Other";
-	// Binary search could be used; linear scan is fine given small list
+	// Match against configured ranges (including Intg. MTech and others)
 	for (const r of ENROLLMENT_BRANCH_RANGES) {
 		if (num >= r.start && num < r.end) return r.branch;
 	}

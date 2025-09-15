@@ -19,22 +19,15 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import {
+	GraduationCap,
+	Users,
 	Building,
 	Calendar,
-	ChevronDown,
 	ChevronUp,
-	GraduationCap,
-	MapPin,
-	TrendingUp,
-	Users,
+	ChevronDown,
 } from "lucide-react";
-import {
-	Placement,
-	StudentWithPlacement,
-	formatDate,
-	formatPackage,
-	formatPercent,
-} from "@/lib/stats";
+import type { Placement, StudentWithPlacement } from "@/lib/stats";
+import { formatDate, formatPackage, formatPercent } from "@/lib/stats";
 
 type BranchStats = Record<
 	string,
@@ -456,6 +449,313 @@ export default function BranchSection({
 														</p>
 													</div>
 												</div>
+												{/* Branch Specializations (batches or sub-branches) */}
+												{(() => {
+													const toNum = (enr?: string) => {
+														if (!enr) return NaN;
+														const d = (enr.match(/\d+/g) || []).join("");
+														return d ? Number(d) : NaN;
+													};
+													const students = getBranchStudents(branch);
+													const ranges = (enrollmentRanges as any)?.[branch];
+													if (!ranges || typeof ranges !== "object")
+														return null;
+
+													type SubStat = {
+														label: string;
+														placed: number;
+														total?: number | null;
+														pct?: number | null;
+														avg?: number;
+														median?: number;
+													};
+
+													const computeStatsFor = (
+														filterFn: (n: number) => boolean
+													): {
+														placed: number;
+														avg: number;
+														median: number;
+													} => {
+														const filtered = students.filter((s) => {
+															const n = toNum(s.enrollment_number);
+															return Number.isFinite(n) && filterFn(n);
+														});
+														const pkgs: number[] = [];
+														filtered.forEach((s) => {
+															const plc =
+																s.placement ||
+																(placements.find(
+																	(p) => p.company === s.company
+																) as Placement);
+															const pkg = plc ? pkgFrom(s, plc) : null;
+															if (pkg != null && pkg > 0) pkgs.push(pkg);
+														});
+														const placed = filtered.length;
+														const avg = pkgs.length
+															? pkgs.reduce((a, c) => a + c, 0) / pkgs.length
+															: 0;
+														const sorted = [...pkgs].sort((a, b) => a - b);
+														const median = sorted.length
+															? sorted.length % 2
+																? sorted[(sorted.length - 1) >> 1]
+																: (sorted[sorted.length / 2 - 1] +
+																		sorted[sorted.length / 2]) /
+																  2
+															: 0;
+														return { placed, avg, median };
+													};
+
+													const subs: SubStat[] = [];
+													if (branch === "Intg. MTech") {
+														Object.entries(ranges).forEach(
+															([subBranch, entry]: any) => {
+																if (
+																	entry &&
+																	typeof entry.start === "number" &&
+																	typeof entry.end === "number"
+																) {
+																	const { placed, avg, median } =
+																		computeStatsFor(
+																			(n) => n >= entry.start && n < entry.end
+																		);
+																	const total: number | null =
+																		studentCounts?.["Intg. MTech"] &&
+																		typeof studentCounts["Intg. MTech"][
+																			subBranch
+																		] === "number"
+																			? (studentCounts["Intg. MTech"][
+																					subBranch
+																			  ] as number)
+																			: null;
+																	const pct =
+																		total && total > 0
+																			? (placed / total) * 100
+																			: null;
+																	subs.push({
+																		label: `Intg. MTech - ${subBranch}`,
+																		placed,
+																		total,
+																		pct,
+																		avg,
+																		median,
+																	});
+																}
+															}
+														);
+													} else {
+														Object.entries(ranges).forEach(
+															([batchKey, entry]: any) => {
+																if (
+																	entry &&
+																	typeof entry.start === "number" &&
+																	typeof entry.end === "number"
+																) {
+																	const { placed, avg, median } =
+																		computeStatsFor(
+																			(n) => n >= entry.start && n < entry.end
+																		);
+																	const total: number | null =
+																		studentCounts?.[branch] &&
+																		typeof studentCounts[branch][batchKey] ===
+																			"number"
+																			? (studentCounts[branch][
+																					batchKey
+																			  ] as number)
+																			: null;
+																	const pct =
+																		total && total > 0
+																			? (placed / total) * 100
+																			: null;
+																	subs.push({
+																		label: `${branch} - ${batchKey}`,
+																		placed,
+																		total,
+																		pct,
+																		avg,
+																		median,
+																	});
+																}
+															}
+														);
+													}
+
+													if (!subs.length) return null;
+
+													const pctBarColor = (pct?: number | null) => {
+														if (pct == null) return "var(--accent-color)";
+														if (pct >= 60) return "var(--success-dark)";
+														if (pct >= 40) return "var(--accent-color)";
+														return "#6b7280"; // neutral
+													};
+
+													return (
+														<div className="mt-2 sm:mt-6">
+															<h4
+																className="text-sm sm:text-base font-semibold mb-2 sm:mb-3 flex items-center gap-2"
+																style={{ color: "var(--text-color)" }}
+															>
+																<GraduationCap
+																	className="w-4 h-4 sm:w-5 sm:h-5"
+																	style={{ color: "var(--accent-color)" }}
+																/>
+																Branch Specializations
+															</h4>
+
+															{/* Single row, dynamic columns, horizontal scroll if needed */}
+															<div className="overflow-x-auto">
+																<div className="grid grid-flow-col auto-cols-[minmax(260px,1fr)] gap-3 sm:gap-4 min-w-max">
+																	{subs
+																		.sort(
+																			(a, b) => (b.total ?? 0) - (a.total ?? 0)
+																		)
+																		.map((sc, idx) => (
+																			<div
+																				key={idx}
+																				className="border rounded-xl p-3 sm:p-4 card-theme group transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
+																				style={{
+																					backgroundColor:
+																						"var(--primary-color)",
+																					borderColor: "var(--border-color)",
+																				}}
+																			>
+																				<div className="flex items-start justify-between gap-3">
+																					<div className="min-w-0">
+																						<h5
+																							className="font-semibold text-base sm:text-lg truncate"
+																							style={{
+																								color: "var(--text-color)",
+																							}}
+																						>
+																							{sc.label}
+																						</h5>
+																						{sc.pct != null ? (
+																							<div className="mt-2">
+																								<div
+																									className="h-2 rounded-full overflow-hidden"
+																									style={{
+																										backgroundColor:
+																											"var(--card-bg)",
+																									}}
+																									aria-hidden
+																								>
+																									<div
+																										className="h-full rounded-full transition-all"
+																										style={{
+																											width: `${Math.min(
+																												100,
+																												Math.max(0, sc.pct || 0)
+																											)}%`,
+																											backgroundColor:
+																												pctBarColor(sc.pct),
+																										}}
+																									/>
+																								</div>
+																								<div className="mt-1 text-[11px] sm:text-xs font-medium">
+																									<span
+																										style={{
+																											color:
+																												"var(--label-color)",
+																										}}
+																									>
+																										Placement rate:
+																									</span>{" "}
+																									<span
+																										className="font-semibold"
+																										style={{
+																											color:
+																												"var(--text-color)",
+																										}}
+																									>
+																										{formatPercent(sc.pct)}
+																									</span>
+																								</div>
+																							</div>
+																						) : (
+																							<p
+																								className="text-[11px] sm:text-xs mt-1"
+																								style={{
+																									color: "var(--label-color)",
+																								}}
+																							>
+																								Placed: {sc.placed}
+																							</p>
+																						)}
+																					</div>
+																					{sc.total ? (
+																						<Badge
+																							className="px-2 py-1 text-xs sm:text-sm font-semibold shadow-sm"
+																							style={{
+																								backgroundColor:
+																									"var(--accent-color)",
+																								color: "white",
+																							}}
+																						>
+																							<span className="font-semibold">
+																								{sc.placed}
+																							</span>
+																							<span className="ml-1 text-[8px] sm:text-xs font-medium opacity-90">
+																								/ {sc.total}
+																							</span>
+																						</Badge>
+																					) : null}
+																				</div>
+
+																				<div className="grid grid-cols-2 gap-2 mt-3 sm:mt-4">
+																					<div
+																						className="rounded-lg p-2"
+																						style={{
+																							backgroundColor: "var(--card-bg)",
+																						}}
+																					>
+																						<p
+																							className="text-[11px] sm:text-xs"
+																							style={{
+																								color: "var(--label-color)",
+																							}}
+																						>
+																							Average
+																						</p>
+																						<p
+																							className="text-sm sm:text-base font-semibold"
+																							style={{
+																								color: "var(--success-dark)",
+																							}}
+																						>
+																							{formatPackage(sc.avg || 0)}
+																						</p>
+																					</div>
+																					<div
+																						className="rounded-lg p-2"
+																						style={{
+																							backgroundColor: "var(--card-bg)",
+																						}}
+																					>
+																						<p
+																							className="text-[11px] sm:text-xs"
+																							style={{
+																								color: "var(--label-color)",
+																							}}
+																						>
+																							Median
+																						</p>
+																						<p
+																							className="text-sm sm:text-base font-semibold"
+																							style={{
+																								color: "var(--success-dark)",
+																							}}
+																						>
+																							{formatPackage(sc.median || 0)}
+																						</p>
+																					</div>
+																				</div>
+																			</div>
+																		))}
+																</div>
+															</div>
+														</div>
+													);
+												})()}
 
 												{/* Student list */}
 												<div className="flex-1 overflow-hidden">
