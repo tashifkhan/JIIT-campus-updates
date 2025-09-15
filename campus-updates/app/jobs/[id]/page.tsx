@@ -1,4 +1,4 @@
-import JobDetailClient from "./JobDetailClient";
+import JobDetailClient from "../../../components/JobDetailClient";
 import React from "react";
 
 type Job = {
