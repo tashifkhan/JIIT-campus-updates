@@ -56,6 +56,36 @@ export default function PlacedStudentsSection({
 	const [sortKey, setSortKey] = useState<SortKey>("name");
 	const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
+	// Helper function to get the correct package value
+	const getStudentPackage = (student: StudentWithPlacement): number => {
+		// If student has a package, use it
+		if (student.package != null) {
+			return student.package;
+		}
+
+		// Otherwise, try to get package from the matching role in placement
+		if (student.placement && student.role) {
+			const matchingRole = student.placement.roles.find(
+				(r) => r.role === student.role
+			);
+			if (matchingRole?.package != null) {
+				return matchingRole.package;
+			}
+		}
+
+		// Fallback to the highest package in placement roles
+		if (student.placement) {
+			const packages = student.placement.roles
+				.filter((r) => r.package != null)
+				.map((r) => r.package as number);
+			if (packages.length > 0) {
+				return Math.max(...packages);
+			}
+		}
+
+		return 0;
+	};
+
 	const sortStudentsList = (students: StudentWithPlacement[]) => {
 		const list = [...students];
 		list.sort((a, b) => {
@@ -76,25 +106,9 @@ export default function PlacedStudentsSection({
 				const db = b.joining_date ? new Date(b.joining_date).getTime() : 0;
 				return (da - db) * dir;
 			}
-			const pa = a.placement
-				? a.package ??
-				  a.placement.roles.find((r) => r.role === a.role)?.package ??
-				  Math.max(
-						...a.placement.roles
-							.filter((r) => r.package != null)
-							.map((r) => r.package as number)
-				  )
-				: a.package ?? 0;
-			const pb = b.placement
-				? b.package ??
-				  b.placement.roles.find((r) => r.role === b.role)?.package ??
-				  Math.max(
-						...b.placement.roles
-							.filter((r) => r.package != null)
-							.map((r) => r.package as number)
-				  )
-				: b.package ?? 0;
-			return ((pa ?? 0) - (pb ?? 0)) * dir;
+			const pa = getStudentPackage(a);
+			const pb = getStudentPackage(b);
+			return (pa - pb) * dir;
 		});
 		return list;
 	};
@@ -330,7 +344,7 @@ export default function PlacedStudentsSection({
 														className="font-semibold text-sm"
 														style={{ color: "var(--success-dark)" }}
 													>
-														{formatPackage(student.package as number | null)}
+														{formatPackage(getStudentPackage(student))}
 													</p>
 												</div>
 												{student.joining_date && (
