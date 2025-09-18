@@ -42,6 +42,7 @@ const categoryIcons: Record<string, any> = {
 	"job posting": BellIcon,
 	shortlisting: TrendingUpIcon,
 	update: CalendarIcon,
+	"placement offer": IndianRupeeIcon,
 };
 
 type Props = {};
@@ -62,11 +63,21 @@ export default function NoticesClient({}: Props) {
 		},
 	});
 
+	// Placement offers
+	const { data: rawOffers, isLoading: isLoadingOffers } = useQuery<any[]>({
+		queryKey: ["placement-offers"],
+		queryFn: async () => {
+			const res = await fetch("/api/placement-offers", { cache: "no-store" });
+			const json = await res.json();
+			if (!json.ok)
+				throw new Error(json.error || "Failed to fetch placement offers");
+			return json.data || [];
+		},
+	});
+
 	// Normalize the data on client side
 	const notices = useMemo(() => {
-		if (!rawNotices) return [];
-
-		return rawNotices
+		const normalizedNotices = (rawNotices || [])
 			.map((n) => {
 				// _id may be ObjectId / BSON - convert to string
 				const id =
@@ -123,7 +134,6 @@ export default function NoticesClient({}: Props) {
 					shortlisted_students: n.shortlisted_students ?? null,
 				};
 			})
-			.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
 			.map((n) => ({
 				...n,
 				category: (n.category || "")
@@ -131,9 +141,93 @@ export default function NoticesClient({}: Props) {
 					.trim()
 					.replace(/^\[?shortlist(ing)?\]?$/, "shortlisting"),
 			}));
-	}, [rawNotices]);
 
-	const loading = isLoading;
+		const normalizedOffers = (rawOffers || []).map((o) => {
+			const rawId =
+				o._id && typeof o._id === "object" && typeof o._id.toString === "function"
+					? o._id.toString()
+					: o._id || o.id;
+			// Prefer createdAt, then saved_at, then updated_at, then now
+			const createdAt = o.createdAt
+				? new Date(o.createdAt).getTime()
+				: o.saved_at
+				? new Date(o.saved_at).getTime()
+				: o.updated_at
+				? new Date(o.updated_at).getTime()
+				: Date.now();
+
+			// Compute a representative role and CTC
+			const roles: Array<{ role?: string; package?: number; package_details?: string }> =
+				Array.isArray(o.roles) ? o.roles : [];
+			const primaryRole = roles.find((r) => !!r?.role)?.role || "Offer";
+			const packages = roles
+				.map((r) => (typeof r?.package === "number" ? r.package : null))
+				.filter((x) => x != null) as number[];
+			const bestPackage = packages.length
+				? Math.max(...packages)
+				: o.students_selected?.[0]?.package ?? null;
+			const ctcText = bestPackage != null ? `${bestPackage} LPA` : "";
+
+			// Build a markdown-ish formatted message compatible with existing parser
+			const parts: string[] = [];
+			parts.push("**Placement Offer**");
+			if (o.company) parts.push(`**Company:** ${o.company}`);
+			if (primaryRole) parts.push(`**Role:** ${primaryRole}`);
+			if (ctcText) parts.push(`**CTC:** ${ctcText}`);
+			if (Array.isArray(o.job_location) && o.job_location.length)
+				parts.push(`**Location:** ${o.job_location.join(", ")}`);
+			if (o.joining_date)
+				parts.push(
+					`Joining Date: ${new Date(o.joining_date).toLocaleDateString("en-IN", {
+						year: "numeric",
+						month: "short",
+						day: "numeric",
+					})}`
+				);
+			if (o.number_of_offers != null)
+				parts.push(`Number of Offers: ${o.number_of_offers}`);
+			if (o.additional_info) parts.push(String(o.additional_info));
+
+			const formatted_message = parts.join("\n\n");
+
+			const shortlisted_students = Array.isArray(o.students_selected)
+				? o.students_selected.map((s: any) => ({
+					name: s.name,
+					enrollment_number: s.enrollment_number ?? s.enroll ?? null,
+				}))
+				: null;
+
+			return {
+				_id: rawId,
+				id: String(rawId),
+				title: o.email_subject || null,
+				content: null,
+				author: o.email_sender || null,
+				createdAt,
+				updatedAt: createdAt,
+				category: "placement offer",
+				matched_job: null,
+				matched_job_id: null,
+				job_company: o.company || null,
+				job_role: primaryRole || null,
+				package: ctcText || null,
+				package_breakdown: roles
+					.map((r) => (r?.package_details ? `- ${r.role || "Role"}: ${r.package_details}` : ""))
+					.filter(Boolean)
+					.join("\n"),
+				formatted_message,
+				location: Array.isArray(o.job_location) ? o.job_location.join(", ") : null,
+				sent_to_telegram: null,
+				updated_at: o.updated_at || null,
+				shortlisted_students,
+			};
+		});
+
+		return [...normalizedNotices, ...normalizedOffers]
+			.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+	}, [rawNotices, rawOffers]);
+
+	const loading = isLoading || isLoadingOffers;
 	// Filters
 	const [query, setQuery] = useState("");
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -153,10 +247,11 @@ export default function NoticesClient({}: Props) {
 			if (selectedCategories.length && !selectedCategories.includes(n.category))
 				return false;
 			if (onlyShortlisted) {
-				const parsedCount =
-					n.category === "shortlisting"
-						? parseShortlistFromText(n.formatted_message).length
-						: 0;
+				const isShortlistCategory =
+					n.category === "shortlisting" || n.category === "placement offer";
+				const parsedCount = isShortlistCategory
+					? parseShortlistFromText(n.formatted_message).length
+					: 0;
 				const providedCount = n.shortlisted_students?.length ?? 0;
 				if (providedCount + parsedCount === 0) return false;
 			}
@@ -287,8 +382,10 @@ export default function NoticesClient({}: Props) {
 										}}
 									>
 										<IconComponent className="w-3 h-3 mr-2" />
-										{notice.category.charAt(0).toUpperCase() +
-											notice.category.slice(1)}
+										{notice.category
+											.split(" ")
+											.map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+											.join(" ")}
 									</Badge>
 								</div>
 								{(notice.createdAt || notice.author) && (
@@ -309,7 +406,8 @@ export default function NoticesClient({}: Props) {
 							</CardHeader>
 							<CardContent className="pt-0">
 								{notice.category === "update" ||
-								notice.category === "job posting" ? (
+								notice.category === "job posting" ||
+								notice.category === "placement offer" ? (
 									<div className="space-y-4">
 										{parsedMessage.title && (
 											<div className="mb-4">

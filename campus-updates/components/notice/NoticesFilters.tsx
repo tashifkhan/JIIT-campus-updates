@@ -73,7 +73,10 @@ export default function NoticesFilters({
 											);
 										}}
 									>
-										{cat.charAt(0).toUpperCase() + cat.slice(1)}
+										{cat
+											.split(" ")
+											.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+											.join(" ")}
 									</DropdownMenuCheckboxItem>
 								))}
 							</DropdownMenuContent>
