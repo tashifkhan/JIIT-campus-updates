@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
 	CalendarIcon,
 	BuildingIcon,
@@ -194,7 +193,8 @@ export default function NoticesClient({}: Props) {
 				);
 			if (o.number_of_offers != null)
 				parts.push(`Number of Offers: ${o.number_of_offers}`);
-			if (o.additional_info) parts.push(String(o.additional_info));
+			// Note: We intentionally skip including additional_info for placement offers
+			// so that it doesn't render in the body and doesn't trigger deadline parsing.
 
 			const formatted_message = parts.join("\n\n");
 
@@ -505,34 +505,35 @@ export default function NoticesClient({}: Props) {
 											</div>
 										)}
 
-										{parsedMessage.deadline && (
-											<div
-												className="border rounded-lg p-3 mb-4"
-												style={{
-													backgroundColor: "var(--primary-color)",
-													borderColor: "var(--border-color)",
-												}}
-											>
-												<div className="flex items-center">
-													<CalendarIcon
-														className="w-5 h-5 mr-2"
-														style={{ color: "var(--accent-color)" }}
-													/>
-													<span
-														className="font-semibold"
-														style={{ color: "var(--text-color)" }}
-													>
-														Deadline:{" "}
-													</span>
-													<span
-														className="ml-1 font-medium"
-														style={{ color: "var(--accent-color)" }}
-													>
-														{parsedMessage.deadline}
-													</span>
+										{parsedMessage.deadline &&
+											notice.category !== "placement offer" && (
+												<div
+													className="border rounded-lg p-3 mb-4"
+													style={{
+														backgroundColor: "var(--primary-color)",
+														borderColor: "var(--border-color)",
+													}}
+												>
+													<div className="flex items-center">
+														<CalendarIcon
+															className="w-5 h-5 mr-2"
+															style={{ color: "var(--accent-color)" }}
+														/>
+														<span
+															className="font-semibold"
+															style={{ color: "var(--text-color)" }}
+														>
+															Deadline:{" "}
+														</span>
+														<span
+															className="ml-1 font-medium"
+															style={{ color: "var(--accent-color)" }}
+														>
+															{parsedMessage.deadline}
+														</span>
+													</div>
 												</div>
-											</div>
-										)}
+											)}
 
 										{parsedMessage.body && (
 											<div
