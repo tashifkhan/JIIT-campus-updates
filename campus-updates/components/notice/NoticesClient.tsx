@@ -144,21 +144,26 @@ export default function NoticesClient({}: Props) {
 
 		const normalizedOffers = (rawOffers || []).map((o) => {
 			const rawId =
-				o._id && typeof o._id === "object" && typeof o._id.toString === "function"
+				o._id &&
+				typeof o._id === "object" &&
+				typeof o._id.toString === "function"
 					? o._id.toString()
 					: o._id || o.id;
-			// Prefer createdAt, then saved_at, then updated_at, then now
+			// Prefer createdAt, then saved_at, then updated_at; otherwise leave null so it sorts last
 			const createdAt = o.createdAt
 				? new Date(o.createdAt).getTime()
 				: o.saved_at
 				? new Date(o.saved_at).getTime()
 				: o.updated_at
 				? new Date(o.updated_at).getTime()
-				: Date.now();
+				: null;
 
 			// Compute a representative role and CTC
-			const roles: Array<{ role?: string; package?: number; package_details?: string }> =
-				Array.isArray(o.roles) ? o.roles : [];
+			const roles: Array<{
+				role?: string;
+				package?: number;
+				package_details?: string;
+			}> = Array.isArray(o.roles) ? o.roles : [];
 			const primaryRole = roles.find((r) => !!r?.role)?.role || "Offer";
 			const packages = roles
 				.map((r) => (typeof r?.package === "number" ? r.package : null))
@@ -178,11 +183,14 @@ export default function NoticesClient({}: Props) {
 				parts.push(`**Location:** ${o.job_location.join(", ")}`);
 			if (o.joining_date)
 				parts.push(
-					`Joining Date: ${new Date(o.joining_date).toLocaleDateString("en-IN", {
-						year: "numeric",
-						month: "short",
-						day: "numeric",
-					})}`
+					`Joining Date: ${new Date(o.joining_date).toLocaleDateString(
+						"en-IN",
+						{
+							year: "numeric",
+							month: "short",
+							day: "numeric",
+						}
+					)}`
 				);
 			if (o.number_of_offers != null)
 				parts.push(`Number of Offers: ${o.number_of_offers}`);
@@ -192,9 +200,9 @@ export default function NoticesClient({}: Props) {
 
 			const shortlisted_students = Array.isArray(o.students_selected)
 				? o.students_selected.map((s: any) => ({
-					name: s.name,
-					enrollment_number: s.enrollment_number ?? s.enroll ?? null,
-				}))
+						name: s.name,
+						enrollment_number: s.enrollment_number ?? s.enroll ?? null,
+				  }))
 				: null;
 
 			return {
@@ -212,19 +220,31 @@ export default function NoticesClient({}: Props) {
 				job_role: primaryRole || null,
 				package: ctcText || null,
 				package_breakdown: roles
-					.map((r) => (r?.package_details ? `- ${r.role || "Role"}: ${r.package_details}` : ""))
+					.map((r) =>
+						r?.package_details
+							? `- ${r.role || "Role"}: ${r.package_details}`
+							: ""
+					)
 					.filter(Boolean)
 					.join("\n"),
 				formatted_message,
-				location: Array.isArray(o.job_location) ? o.job_location.join(", ") : null,
+				location: Array.isArray(o.job_location)
+					? o.job_location.join(", ")
+					: null,
 				sent_to_telegram: null,
 				updated_at: o.updated_at || null,
 				shortlisted_students,
 			};
 		});
 
-		return [...normalizedNotices, ...normalizedOffers]
-			.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+		return [...normalizedNotices, ...normalizedOffers].sort((a, b) => {
+			const aTime = a.createdAt ?? null;
+			const bTime = b.createdAt ?? null;
+			if (aTime == null && bTime == null) return 0;
+			if (aTime == null) return 1; // a goes after b
+			if (bTime == null) return -1; // b goes after a
+			return bTime - aTime; // newer first
+		});
 	}, [rawNotices, rawOffers]);
 
 	const loading = isLoading || isLoadingOffers;
@@ -384,7 +404,9 @@ export default function NoticesClient({}: Props) {
 										<IconComponent className="w-3 h-3 mr-2" />
 										{notice.category
 											.split(" ")
-											.map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+											.map(
+												(w: string) => w.charAt(0).toUpperCase() + w.slice(1)
+											)
 											.join(" ")}
 									</Badge>
 								</div>
@@ -394,8 +416,14 @@ export default function NoticesClient({}: Props) {
 										style={{ color: "var(--label-color)" }}
 									>
 										<div className="flex items-center space-x-2">
-											{notice.author && (
-												<span className="font-medium">By {notice.author}</span>
+											{notice.category == "placement offer" ? (
+												<span className="font-medium">By Placement Bot </span>
+											) : (
+												notice.author && (
+													<span className="font-medium">
+														By {notice.author}
+													</span>
+												)
 											)}
 										</div>
 										{notice.createdAt && (
