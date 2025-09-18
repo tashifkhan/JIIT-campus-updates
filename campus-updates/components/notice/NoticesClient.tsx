@@ -381,13 +381,12 @@ export default function NoticesClient({}: Props) {
 
 					return (
 						<Card
-							key={notice.id}
-							className="border-l-4 hover:shadow-md transition-all duration-300 card-theme"
+								key={notice.id}
+								className="notice-card transition-all duration-300 card-theme"
 							style={{
 								backgroundColor: "var(--card-bg)",
 								borderColor: "var(--border-color)",
 								color: "var(--text-color)",
-								borderLeftColor: "var(--accent-color)",
 							}}
 						>
 							<CardHeader className="pb-3">
