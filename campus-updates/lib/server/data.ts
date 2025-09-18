@@ -12,19 +12,19 @@ export async function getCollection(collectionName: string) {
   return db.collection(collectionName);
 }
 
-export async function getJobs(filter: any = {}, limit = 100) {
+export async function getJobs(filter: any = {}, limit = 1000) {
   const col = await getCollection("Jobs");
   const docs = await col.find(filter).sort({ createdAt: -1 }).limit(limit).toArray();
   return docs;
 }
 
-export async function getNotices(filter: any = {}, limit = 200) {
+export async function getNotices(filter: any = {}, limit = 1000) {
   const col = await getCollection("Notices");
   const docs = await col.find(filter).sort({ createdAt: -1 }).limit(limit).toArray();
   return docs;
 }
 
-export async function getPlacementOffers(filter: any = {}, limit = 100) {
+export async function getPlacementOffers(filter: any = {}, limit = 1000) {
   const col = await getCollection("PlacementOffers");
   const docs = await col.find(filter).sort({ createdAt: -1 }).limit(limit).toArray();
   return docs;
