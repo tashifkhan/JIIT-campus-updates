@@ -131,25 +131,6 @@ export default function ShortlistTable({
 
 			{expanded && (
 				<>
-					{/* Mobile-only action row: show export on small screens when expanded */}
-					<div className="md:hidden px-4 pb-3">
-						<div className="flex items-center justify-end">
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={exportCsv}
-								className="text-sm font-medium hover-theme inline-flex"
-								style={{
-									backgroundColor: "var(--card-bg)",
-									borderColor: "var(--border-color)",
-									color: "var(--accent-color)",
-								}}
-							>
-								<DownloadIcon className="w-4 h-4 mr-2" /> Export CSV
-							</Button>
-						</div>
-					</div>
-
 					<div className="px-4 pb-3">
 						<div className="mb-3">
 							<div className="flex items-center gap-3">
@@ -168,9 +149,6 @@ export default function ShortlistTable({
 											style={{ color: "var(--label-color)" }}
 										/>
 									</div>
-								</div>
-								<div className="text-sm text-muted-foreground">
-									{filtered.length} / {students.length}
 								</div>
 							</div>
 						</div>
