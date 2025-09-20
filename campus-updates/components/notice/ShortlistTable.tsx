@@ -1,9 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { DownloadIcon } from "lucide-react";
 import { UsersIcon } from "lucide-react";
+
+import { Search } from "lucide-react";
 
 type Student = {
 	name: string;
@@ -23,10 +26,29 @@ export default function ShortlistTable({
 	expanded,
 	onToggle,
 }: Props) {
+	const [query, setQuery] = useState("");
+
+	// simple debounced value to avoid filtering on every keystroke
+	const [debouncedQuery, setDebouncedQuery] = useState(query);
+	useEffect(() => {
+		const id = setTimeout(() => setDebouncedQuery(query.trim()), 250);
+		return () => clearTimeout(id);
+	}, [query]);
+
+	// filter by name or enrollment number (case-insensitive)
+	const filtered = useMemo(() => {
+		if (!debouncedQuery) return students;
+		const q = debouncedQuery.toLowerCase();
+		return students.filter(
+			(s) =>
+				(s.name || "").toLowerCase().includes(q) ||
+				(s.enrollment_number || "").toLowerCase().includes(q)
+		);
+	}, [students, debouncedQuery]);
 	const exportCsv = () => {
 		const rows = [
 			["Name", "Enrollment Number", "Email", "Venue"],
-			...students.map((s) => [
+			...filtered.map((s) => [
 				s.name,
 				s.enrollment_number,
 				s.email || "",
@@ -128,87 +150,112 @@ export default function ShortlistTable({
 						</div>
 					</div>
 
-					<div
-						className="overflow-x-auto max-h-80 overflow-y-auto border rounded-lg"
-						style={{
-							borderColor: "var(--border-color)",
-							backgroundColor: "var(--card-bg)",
-						}}
-					>
-						<table className="w-full text-sm">
-							<thead
-								className="sticky top-0 border-b"
-								style={{
-									backgroundColor: "var(--primary-color)",
-									borderColor: "var(--border-color)",
-								}}
-							>
-								<tr>
-									<th
-										className="text-left py-3 px-4 font-semibold"
-										style={{ color: "var(--accent-color)" }}
-									>
-										Name
-									</th>
-									<th
-										className="text-left py-3 px-4 font-semibold"
-										style={{ color: "var(--accent-color)" }}
-									>
-										Enrollment
-									</th>
-									<th
-										className="text-left py-3 px-4 font-semibold"
-										style={{ color: "var(--accent-color)" }}
-									>
-										Email
-									</th>
-									<th
-										className="text-left py-3 px-4 font-semibold"
-										style={{ color: "var(--accent-color)" }}
-									>
-										Venue
-									</th>
-								</tr>
-							</thead>
-							<tbody>
-								{students.map((student, idx) => (
-									<tr
-										key={idx}
-										className="border-b last:border-b-0 hover-theme"
-										style={{
-											borderColor: "var(--border-color)",
-											backgroundColor:
-												idx % 2 ? "var(--card-bg)" : "var(--primary-color)",
-										}}
-									>
-										<td
-											className="py-3 px-4 font-medium"
-											style={{ color: "var(--text-color)" }}
-										>
-											{student.name}
-										</td>
-										<td
-											className="py-3 px-4 font-mono text-sm"
+					<div className="px-4 pb-3">
+						<div className="mb-3">
+							<div className="flex items-center gap-3">
+								<div className="w-full">
+									<label className="sr-only">Search shortlist</label>
+									<div className="relative">
+										<Input
+											value={query}
+											onChange={(e) => setQuery(e.target.value)}
+											placeholder="Search name or enrollment number"
+											aria-label="Search students by name or enrollment number"
+											className="pl-10"
+										/>
+										<Search
+											className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2"
 											style={{ color: "var(--label-color)" }}
+										/>
+									</div>
+								</div>
+								<div className="text-sm text-muted-foreground">
+									{filtered.length} / {students.length}
+								</div>
+							</div>
+						</div>
+						<div
+							className="overflow-x-auto max-h-80 overflow-y-auto border rounded-lg"
+							style={{
+								borderColor: "var(--border-color)",
+								backgroundColor: "var(--card-bg)",
+							}}
+						>
+							<table className="w-full text-sm">
+								<thead
+									className="sticky top-0 border-b"
+									style={{
+										backgroundColor: "var(--primary-color)",
+										borderColor: "var(--border-color)",
+									}}
+								>
+									<tr>
+										<th
+											className="text-left py-3 px-4 font-semibold"
+											style={{ color: "var(--accent-color)" }}
 										>
-											{student.enrollment_number}
-										</td>
-										<td
-											className="py-3 px-4 text-sm"
-											style={{ color: "var(--label-color)" }}
+											Name
+										</th>
+										<th
+											className="text-left py-3 px-4 font-semibold"
+											style={{ color: "var(--accent-color)" }}
 										>
-											{student.email ?? "-"}
-										</td>
-										<td
-											className="py-3 px-4 text-sm"
-											style={{ color: "var(--label-color)" }}
+											Enrollment
+										</th>
+										<th
+											className="text-left py-3 px-4 font-semibold"
+											style={{ color: "var(--accent-color)" }}
 										>
-											{student.venue ?? "-"}
-										</td>
+											Email
+										</th>
+										<th
+											className="text-left py-3 px-4 font-semibold"
+											style={{ color: "var(--accent-color)" }}
+										>
+											Venue
+										</th>
 									</tr>
-								))}
-							</tbody>
-						</table>
+								</thead>
+								<tbody>
+									{filtered.map((student, idx) => (
+										<tr
+											key={student.enrollment_number || idx}
+											className="border-b last:border-b-0 hover-theme"
+											style={{
+												borderColor: "var(--border-color)",
+												backgroundColor:
+													idx % 2 ? "var(--card-bg)" : "var(--primary-color)",
+											}}
+										>
+											<td
+												className="py-3 px-4 font-medium"
+												style={{ color: "var(--text-color)" }}
+											>
+												{student.name}
+											</td>
+											<td
+												className="py-3 px-4 font-mono text-sm"
+												style={{ color: "var(--label-color)" }}
+											>
+												{student.enrollment_number}
+											</td>
+											<td
+												className="py-3 px-4 text-sm"
+												style={{ color: "var(--label-color)" }}
+											>
+												{student.email ?? "-"}
+											</td>
+											<td
+												className="py-3 px-4 text-sm"
+												style={{ color: "var(--label-color)" }}
+											>
+												{student.venue ?? "-"}
+											</td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+						</div>
 					</div>
 				</>
 			)}
