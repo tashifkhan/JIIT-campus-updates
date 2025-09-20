@@ -35,6 +35,7 @@ import {
 	formatHiringProcess,
 	formatDateTime,
 	parseShortlistFromText,
+	isPlacementBotPost,
 } from "@/lib/notices";
 
 const categoryIcons: Record<string, any> = {
@@ -44,9 +45,11 @@ const categoryIcons: Record<string, any> = {
 	"placement offer": IndianRupeeIcon,
 };
 
-type Props = {};
+type Props = {
+	hideShortPlacements?: boolean;
+};
 
-export default function NoticesClient({}: Props) {
+export default function NoticesClient({ hideShortPlacements = false }: Props) {
 	const router = useRouter();
 	const [isPending, startTransition] = useTransition();
 	const [pendingJobId, setPendingJobId] = useState<string | null>(null);
@@ -237,7 +240,35 @@ export default function NoticesClient({}: Props) {
 			};
 		});
 
-		return [...normalizedNotices, ...normalizedOffers].sort((a, b) => {
+		// Combine and filter out bot-like short placement announcements
+		const combined = [...normalizedNotices, ...normalizedOffers].filter(
+			(n) => !isPlacementBotPost(n)
+		);
+
+		// Additional filtering for short placement announcements if requested
+		const finalFiltered = hideShortPlacements
+			? combined.filter((n) => {
+					// Hide notices that are just short announcements like "1 student have been placed at..."
+					// but keep detailed placement offers
+					const text = (n.formatted_message || "").toLowerCase();
+					const isShortAnnouncement =
+						(text.includes("student have been placed at") ||
+							text.includes("student has been placed at")) &&
+						text.length < 400; // short messages only
+
+					const isDetailedOffer =
+						n.category === "placement offer" &&
+						(text.includes("company:") ||
+							text.includes("role:") ||
+							text.includes("ctc:") ||
+							text.includes("joining date:"));
+
+					// Keep detailed offers, hide short announcements
+					return !isShortAnnouncement || isDetailedOffer;
+			  })
+			: combined;
+
+		return finalFiltered.sort((a, b) => {
 			const aTime = a.createdAt ?? null;
 			const bTime = b.createdAt ?? null;
 			if (aTime == null && bTime == null) return 0;
@@ -381,8 +412,8 @@ export default function NoticesClient({}: Props) {
 
 					return (
 						<Card
-								key={notice.id}
-								className="notice-card transition-all duration-300 card-theme"
+							key={notice.id}
+							className="notice-card transition-all duration-300 card-theme"
 							style={{
 								backgroundColor: "var(--card-bg)",
 								borderColor: "var(--border-color)",

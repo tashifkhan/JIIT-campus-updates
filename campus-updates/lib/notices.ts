@@ -322,3 +322,34 @@ export const extractShortlistingSections = (text: string, noticeData?: any) => {
     ...companyRole,
   };
 };
+
+// Heuristic to detect short placement-bot style posts that only announce placements
+// and should be hidden from the main feed. This covers examples like:
+// "1 student have been placed at InterviewBit." with a short formatted_message
+// and a congratulatory line. It's intentionally conservative to avoid dropping
+// legitimate, detailed placement updates.
+export const isPlacementBotPost = (notice: Partial<Notice> | { formatted_message?: string; title?: string; author?: string; content?: string }) => {
+  const n: any = notice as any;
+  const text = `${n.formatted_message || ""}\n${n.title || ""}\n${n.content || ""}`.toLowerCase();
+
+  // Common short patterns seen in placement bot posts
+  const shortAnnouncementPatterns = [
+    /\bstudent(s)? have been placed at\b/i, // e.g. "1 student have been placed at InterviewBit."
+    /\bstudent(s)? has been placed at\b/i, // grammar variants
+    /congratulations to all selected/i,
+    /positions:\s*/i,
+    /sde intern:\s*\d+ offer/i,
+  ];
+
+  // If author looks like a bot
+  const author = String(n.author || "").toLowerCase();
+  if (author && /bot|placementbot|placement-bot|placement_bot/i.test(author)) return true;
+
+  // If message is very short and matches announcement patterns, hide it
+  const lengthThreshold = 300; // chars; messages shorter than this and matching pattern are suspicious
+  const isShort = (text || "").trim().length > 0 && (text || "").trim().length < lengthThreshold;
+
+  const matchesPattern = shortAnnouncementPatterns.some((re) => re.test(text));
+
+  return isShort && matchesPattern;
+};

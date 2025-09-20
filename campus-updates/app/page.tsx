@@ -80,7 +80,7 @@ export default function HomePage() {
 
 	return (
 		<Layout>
-			<NoticesClient />
+			<NoticesClient hideShortPlacements={true} />
 		</Layout>
 	);
 }
