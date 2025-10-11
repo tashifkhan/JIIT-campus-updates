@@ -27,6 +27,7 @@ const navigation = [
 	{ name: "Updates", href: "/", icon: HomeIcon },
 	{ name: "Jobs", href: "/jobs", icon: BriefcaseIcon },
 	{ name: "Stats", href: "/stats", icon: TrendingUpIcon },
+	{ name: "Policy", href: "/policy", icon: BookOpenIcon },
 	// { name: "Campus", href: "/campus", icon: CalendarIcon },
 ];
 
