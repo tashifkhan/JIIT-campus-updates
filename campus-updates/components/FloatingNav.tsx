@@ -58,22 +58,7 @@ const FloatingNav = ({ items }: { items?: Item[] }) => {
 		}
 	};
 
-	// Fallback items if none provided so component is usable standalone
-	const defaultItems: Item[] = [
-		{ id: 0, href: "/", icon: <Home size={20} />, label: "Home" },
-		{ id: 1, href: "/jobs", icon: <Search size={20} />, label: "Jobs" },
-		{ id: 2, href: "/", icon: <Bell size={20} />, label: "Alerts" },
-		{ id: 3, href: "/", icon: <User size={20} />, label: "Profile" },
-		{ id: 4, href: "/", icon: <Bookmark size={20} />, label: "Saved" },
-		{
-			id: 5,
-			href: "/settings",
-			icon: <Settings size={20} />,
-			label: "Settings",
-		},
-	];
-
-	const menu = items && items.length > 0 ? items : defaultItems;
+	const menu = items || [];
 
 	return (
 		<div className="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-lg px-2">

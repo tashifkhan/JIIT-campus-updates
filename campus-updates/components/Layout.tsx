@@ -25,9 +25,9 @@ import FloatingNav from "./FloatingNav";
 
 const navigation = [
 	{ name: "Updates", href: "/", icon: HomeIcon },
+	{ name: "Policy", href: "/policy", icon: BookOpenIcon },
 	{ name: "Jobs", href: "/jobs", icon: BriefcaseIcon },
 	{ name: "Stats", href: "/stats", icon: TrendingUpIcon },
-	{ name: "Policy", href: "/policy", icon: BookOpenIcon },
 	// { name: "Campus", href: "/campus", icon: CalendarIcon },
 ];
 
@@ -100,6 +100,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 					</div>
 					<div className="flex items-center gap-2">
 						<ThemeSwitcher compact />
+						<Link href="/policy" className="pr-2">
+							<div
+								className="p-2 rounded-full transition-colors hover:bg-[var(--primary-color)] hover:text-[var(--accent-color)]"
+								style={{ color: "var(--text-color)" }}
+								aria-label="Policy"
+							>
+								<BookOpenIcon className="w-4 h-5" />
+							</div>
+						</Link>
 
 						<Link
 							href="https://t.me/SupersetNotificationBot"
@@ -138,37 +147,39 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 						}}
 					>
 						<nav className="px-4 py-2 space-y-1">
-							{navigation.map((item) => {
-								const Icon = item.icon;
-								const isActive = pathname === item.href;
-								return (
-									<Link
-										key={item.name}
-										href={item.href}
-										onClick={() => setMobileMenuOpen(false)}
-										className={cn(
-											"flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors border",
-											isActive
-												? "border-theme"
-												: "border-transparent hover-theme"
-										)}
-										style={{
-											color: isActive
-												? "var(--accent-color)"
-												: "var(--text-color)",
-											backgroundColor: isActive
-												? "var(--primary-color)"
-												: "transparent",
-											borderColor: isActive
-												? "var(--accent-color)"
-												: "transparent",
-										}}
-									>
-										<Icon className="w-4 h-4 mr-3" />
-										{item.name}
-									</Link>
-								);
-							})}
+							{navigation
+								.filter((item) => item.href !== "/policy")
+								.map((item) => {
+									const Icon = item.icon;
+									const isActive = pathname === item.href;
+									return (
+										<Link
+											key={item.name}
+											href={item.href}
+											onClick={() => setMobileMenuOpen(false)}
+											className={cn(
+												"flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors border",
+												isActive
+													? "border-theme"
+													: "border-transparent hover-theme"
+											)}
+											style={{
+												color: isActive
+													? "var(--accent-color)"
+													: "var(--text-color)",
+												backgroundColor: isActive
+													? "var(--primary-color)"
+													: "transparent",
+												borderColor: isActive
+													? "var(--accent-color)"
+													: "transparent",
+											}}
+										>
+											<Icon className="w-4 h-4 mr-3" />
+											{item.name}
+										</Link>
+									);
+								})}
 						</nav>
 					</div>
 				)}
@@ -341,15 +352,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 			{/* Mobile Floating Navigation (uses theme variables from ThemeProvider) */}
 			<FloatingNav
 				items={[
-					...navigation.map((n, idx) => {
-						const Icon = n.icon as any;
-						return {
-							id: idx,
-							href: n.href,
-							icon: <Icon className="w-5 h-5 mb-1" />,
-							label: n.name,
-						};
-					}),
+					...navigation
+						.filter((item) => item.href !== "/policy")
+						.map((n, idx) => {
+							const Icon = n.icon as any;
+							return {
+								id: idx,
+								href: n.href,
+								icon: <Icon className="w-5 h-5 mb-1" />,
+								label: n.name,
+							};
+						}),
 					{
 						id: 999,
 						icon: <WrenchIcon className="w-5 h-5 mb-1" />,
