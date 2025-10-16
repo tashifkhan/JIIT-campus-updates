@@ -10,6 +10,7 @@ import SummaryCards from "@/components/stats/SummaryCards";
 import BranchSection from "@/components/stats/BranchSection";
 import CompanySection from "@/components/stats/CompanySection";
 import PlacedStudentsSection from "@/components/stats/PlacedStudentsSection";
+import PlacementDistributionChart from "@/components/stats/PlacementDistributionChart";
 import enrollmentRanges from "./enrollmemt_range.json";
 import studentCounts from "./student_count.json";
 import {
@@ -612,6 +613,12 @@ export default function StatsPage() {
 					enrollmentRanges={enrollmentRanges}
 					studentCounts={studentCounts}
 					placements={placements}
+				/>
+
+				{/* Placement Distribution Chart */}
+				<PlacementDistributionChart
+					students={filteredStudents}
+					getBranch={getBranch}
 				/>
 
 				{/* Companies */}
