@@ -80,6 +80,9 @@ export default function PlacementDistributionChart({
 	// State for chart type (area or line)
 	const [chartType, setChartType] = useState<"area" | "line">("area");
 
+	// State for branch-specific view
+	const [showBranchSpecific, setShowBranchSpecific] = useState(false);
+
 	// Toggle branch selection
 	const toggleBranch = (branch: string) => {
 		setSelectedBranches((prev) => {
@@ -282,7 +285,7 @@ export default function PlacementDistributionChart({
 								</span>
 							</div>
 						</div>
-						<div className="flex items-center gap-2">
+						<div className="flex items-center gap-2 flex-wrap">
 							<Button
 								variant={chartType === "area" ? "default" : "outline"}
 								size="sm"
@@ -300,6 +303,22 @@ export default function PlacementDistributionChart({
 							>
 								<LineChart className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
 								<span className="hidden sm:inline">Line</span>
+							</Button>
+							<Button
+								variant={showBranchSpecific ? "default" : "outline"}
+								size="sm"
+								onClick={() => setShowBranchSpecific(!showBranchSpecific)}
+								className="h-7 sm:h-8 text-xs sm:text-sm"
+								title={
+									showBranchSpecific
+										? "Show combined view"
+										: "Show individual branch graphs"
+								}
+							>
+								<TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+								<span className="hidden sm:inline">
+									{showBranchSpecific ? "Combined" : "Individual"}
+								</span>
 							</Button>
 						</div>
 					</div>
@@ -412,7 +431,171 @@ export default function PlacementDistributionChart({
 							No placement data available
 						</p>
 					</div>
+				) : showBranchSpecific ? (
+					// Individual branch graphs
+					<div className="space-y-6">
+						{Array.from(selectedBranches)
+							.sort()
+							.map((branch) => {
+								const color = getBranchColor(branch);
+								const branchStudents = students.filter(
+									(s) => getBranch(s.enrollment_number) === branch
+								);
+								const branchPackages = branchStudents
+									.map((s) => getStudentPackage(s, s.placement))
+									.filter((p): p is number => p != null && p > 0);
+
+								const avgPkg =
+									branchPackages.length > 0
+										? branchPackages.reduce((a, b) => a + b, 0) /
+										  branchPackages.length
+										: 0;
+
+								return (
+									<div
+										key={branch}
+										className="rounded-lg border-2 p-3 sm:p-4"
+										style={{
+											borderColor: color,
+											backgroundColor: `${color}05`,
+										}}
+									>
+										<div className="flex items-center justify-between mb-3">
+											<div className="flex items-center gap-2">
+												<div
+													className="w-3 h-3 rounded-full"
+													style={{ backgroundColor: color }}
+												/>
+												<h3
+													className="font-semibold text-sm sm:text-base"
+													style={{ color: "var(--text-color)" }}
+												>
+													{branch}
+												</h3>
+											</div>
+											<div className="text-right text-xs sm:text-sm">
+												<span style={{ color: "var(--label-color)" }}>
+													{branchStudents.length} students
+												</span>
+												<span
+													className="ml-2 font-semibold"
+													style={{ color: "var(--text-color)" }}
+												>
+													₹{avgPkg.toFixed(1)} LPA
+												</span>
+											</div>
+										</div>
+										<div className="w-full h-[250px] sm:h-[300px]">
+											<ResponsiveContainer width="100%" height="100%">
+												{chartType === "area" ? (
+													<AreaChart
+														data={chartData}
+														margin={{
+															top: 10,
+															right: 10,
+															left: -20,
+															bottom: 0,
+														}}
+													>
+														<defs>
+															<linearGradient
+																id={`gradient-${branch}`}
+																x1="0"
+																y1="0"
+																x2="0"
+																y2="1"
+															>
+																<stop
+																	offset="5%"
+																	stopColor={color}
+																	stopOpacity={0.8}
+																/>
+																<stop
+																	offset="95%"
+																	stopColor={color}
+																	stopOpacity={0.1}
+																/>
+															</linearGradient>
+														</defs>
+														<CartesianGrid
+															strokeDasharray="3 3"
+															className="stroke-slate-200 dark:stroke-slate-700"
+															opacity={0.3}
+														/>
+														<XAxis
+															dataKey="range"
+															className="text-[10px] sm:text-xs"
+															tick={{ fill: "var(--label-color)" }}
+															angle={-45}
+															textAnchor="end"
+															height={60}
+														/>
+														<YAxis
+															className="text-[10px] sm:text-xs"
+															tick={{ fill: "var(--label-color)" }}
+															width={35}
+														/>
+														<Tooltip content={<CustomTooltip />} />
+														<Area
+															type="monotone"
+															dataKey={branch}
+															stroke={color}
+															strokeWidth={3}
+															fill={`url(#gradient-${branch})`}
+															fillOpacity={1}
+															name={branch}
+															animationDuration={1000}
+														/>
+													</AreaChart>
+												) : (
+													<RechartsLineChart
+														data={chartData}
+														margin={{
+															top: 10,
+															right: 10,
+															left: -20,
+															bottom: 0,
+														}}
+													>
+														<CartesianGrid
+															strokeDasharray="3 3"
+															className="stroke-slate-200 dark:stroke-slate-700"
+															opacity={0.3}
+														/>
+														<XAxis
+															dataKey="range"
+															className="text-[10px] sm:text-xs"
+															tick={{ fill: "var(--label-color)" }}
+															angle={-45}
+															textAnchor="end"
+															height={60}
+														/>
+														<YAxis
+															className="text-[10px] sm:text-xs"
+															tick={{ fill: "var(--label-color)" }}
+															width={35}
+														/>
+														<Tooltip content={<CustomTooltip />} />
+														<Line
+															type="monotone"
+															dataKey={branch}
+															stroke={color}
+															strokeWidth={3}
+															dot={{ r: 4, fill: color }}
+															activeDot={{ r: 6 }}
+															name={branch}
+															animationDuration={1000}
+														/>
+													</RechartsLineChart>
+												)}
+											</ResponsiveContainer>
+										</div>
+									</div>
+								);
+							})}
+					</div>
 				) : (
+					// Combined graph
 					<div className="w-full h-[300px] sm:h-[400px] lg:h-[500px]">
 						<ResponsiveContainer width="100%" height="100%">
 							{chartType === "area" ? (
@@ -610,8 +793,8 @@ export default function PlacementDistributionChart({
 					</div>
 				)}
 
-				{/* Legend with statistics per branch */}
-				{selectedBranches.size > 0 && (
+				{/* Legend with statistics per branch - only show in combined view */}
+				{selectedBranches.size > 0 && !showBranchSpecific && (
 					<div className="mt-4 sm:mt-6 space-y-2 sm:space-y-3">
 						{/* Overall statistics card - prominent */}
 						<div
