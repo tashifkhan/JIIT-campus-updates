@@ -308,62 +308,88 @@ export default function PlacementDistributionChart({
 			<CardContent>
 				{/* Branch selector badges */}
 				<div className="mb-4 sm:mb-6">
-					<div className="flex items-center justify-between mb-2 sm:mb-3 gap-2">
-						<p
-							className="text-xs sm:text-sm font-medium"
-							style={{ color: "var(--label-color)" }}
-						>
-							Select Branches:
-						</p>
+					<div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
+						<div className="flex items-center gap-2">
+							<p
+								className="text-xs sm:text-sm font-semibold"
+								style={{ color: "var(--text-color)" }}
+							>
+								Select Branches:
+							</p>
+							<span
+								className="text-xs px-2 py-0.5 rounded-full"
+								style={{
+									backgroundColor: "var(--accent-color)20",
+									color: "var(--accent-color)",
+								}}
+							>
+								{selectedBranches.size}/{availableBranches.length}
+							</span>
+						</div>
 						<button
 							onClick={toggleAllBranches}
-							className="text-xs font-medium hover:opacity-80 transition-opacity whitespace-nowrap"
-							style={{ color: "var(--accent-color)" }}
+							className="text-xs sm:text-sm font-medium px-3 py-1.5 rounded-md transition-all hover:scale-105 active:scale-95"
+							style={{
+								backgroundColor: "var(--accent-color)15",
+								color: "var(--accent-color)",
+							}}
 						>
 							{selectedBranches.size === availableBranches.length
-								? "Deselect All"
+								? "Clear All"
 								: "Select All"}
 						</button>
 					</div>
 					{/* Horizontal scroll container for mobile */}
-					<div className="overflow-x-auto pb-2 -mx-2 px-2 sm:overflow-visible">
-						<div className="flex sm:flex-wrap gap-2 min-w-max sm:min-w-0">
-							{availableBranches.map((branch) => {
-								const isSelected = selectedBranches.has(branch);
-								const color = getBranchColor(branch);
+					<div className="relative">
+						<div className="overflow-x-auto pb-2 -mx-2 px-2 sm:overflow-visible scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600 scrollbar-track-transparent">
+							<div className="flex sm:flex-wrap gap-2 min-w-max sm:min-w-0">
+								{availableBranches.map((branch) => {
+									const isSelected = selectedBranches.has(branch);
+									const color = getBranchColor(branch);
 
-								return (
-									<button
-										key={branch}
-										onClick={() => toggleBranch(branch)}
-										className="transition-all duration-200 hover:scale-105 flex-shrink-0"
-									>
-										<Badge
-											variant={isSelected ? "default" : "outline"}
-											className="cursor-pointer text-xs sm:text-sm px-2.5 sm:px-3 py-1 sm:py-1.5 whitespace-nowrap"
-											style={
-												isSelected
-													? {
-															backgroundColor: color,
-															borderColor: color,
-															color: "white",
-													  }
-													: {
-															borderColor: color,
-															color: color,
-													  }
-											}
+									return (
+										<button
+											key={branch}
+											onClick={() => toggleBranch(branch)}
+											className="group relative transition-all duration-200 hover:scale-105 active:scale-95 flex-shrink-0"
 										>
-											<div
-												className="w-2 h-2 rounded-full mr-1.5 sm:mr-2"
-												style={{ backgroundColor: color }}
-											/>
-											{branch}
-										</Badge>
-									</button>
-								);
-							})}
+											<Badge
+												variant={isSelected ? "default" : "outline"}
+												className="cursor-pointer text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 whitespace-nowrap font-medium shadow-sm hover:shadow-md transition-all"
+												style={
+													isSelected
+														? {
+																backgroundColor: color,
+																borderColor: color,
+																color: "white",
+																border: "2px solid",
+														  }
+														: {
+																borderColor: `${color}80`,
+																color: color,
+																backgroundColor: `${color}08`,
+																border: "2px solid",
+														  }
+												}
+											>
+												<div
+													className="w-2 h-2 rounded-full mr-1.5 sm:mr-2 transition-transform group-hover:scale-125"
+													style={{
+														backgroundColor: isSelected ? "white" : color,
+														boxShadow: isSelected
+															? `0 0 0 2px ${color}`
+															: "none",
+													}}
+												/>
+												{branch}
+											</Badge>
+										</button>
+									);
+								})}
+							</div>
 						</div>
+						{/* Scroll indicator for mobile */}
+						<div className="sm:hidden absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-white dark:from-slate-900 to-transparent pointer-events-none" />
 					</div>
 				</div>
 
