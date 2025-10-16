@@ -233,6 +233,9 @@ export default function PlacementDistributionChart({
 										{entry.name}
 									</span>
 								</div>
+								<span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+									{entry.value}
+								</span>
 							</div>
 						))}
 				</div>
@@ -244,19 +247,21 @@ export default function PlacementDistributionChart({
 		<Card className="card-theme">
 			<CardHeader>
 				<CardTitle
-					className="flex items-center justify-between flex-wrap gap-4"
+					className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4"
 					style={{ color: "var(--text-color)" }}
 				>
 					<div className="flex items-center gap-2">
 						<TrendingUp
-							className="w-5 h-5"
+							className="w-5 h-5 sm:w-6 sm:h-6"
 							style={{ color: "var(--accent-color)" }}
 						/>
-						Placement Distribution Across Packages
+						<span className="text-base sm:text-lg lg:text-xl">
+							Placement Distribution Across Packages
+						</span>
 					</div>
-					<div className="flex items-center gap-4 flex-wrap">
-						<div className="flex items-center gap-3 text-sm">
-							<div className="flex items-center gap-2">
+					<div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+						<div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm">
+							<div className="flex items-center gap-1.5 sm:gap-2">
 								<span style={{ color: "var(--label-color)" }}>Students:</span>
 								<span
 									className="font-semibold"
@@ -265,7 +270,7 @@ export default function PlacementDistributionChart({
 									{stats.total}
 								</span>
 							</div>
-							<div className="flex items-center gap-2">
+							<div className="flex items-center gap-1.5 sm:gap-2">
 								<span style={{ color: "var(--label-color)" }}>
 									Avg Package:
 								</span>
@@ -282,19 +287,19 @@ export default function PlacementDistributionChart({
 								variant={chartType === "area" ? "default" : "outline"}
 								size="sm"
 								onClick={() => setChartType("area")}
-								className="h-8"
+								className="h-7 sm:h-8 text-xs sm:text-sm"
 							>
-								<BarChart3 className="w-4 h-4 mr-1" />
-								Area
+								<BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+								<span className="hidden sm:inline">Area</span>
 							</Button>
 							<Button
 								variant={chartType === "line" ? "default" : "outline"}
 								size="sm"
 								onClick={() => setChartType("line")}
-								className="h-8"
+								className="h-7 sm:h-8 text-xs sm:text-sm"
 							>
-								<LineChart className="w-4 h-4 mr-1" />
-								Line
+								<LineChart className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+								<span className="hidden sm:inline">Line</span>
 							</Button>
 						</div>
 					</div>
@@ -302,89 +307,97 @@ export default function PlacementDistributionChart({
 			</CardHeader>
 			<CardContent>
 				{/* Branch selector badges */}
-				<div className="mb-6">
-					<div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+				<div className="mb-4 sm:mb-6">
+					<div className="flex items-center justify-between mb-2 sm:mb-3 gap-2">
 						<p
-							className="text-sm font-medium"
+							className="text-xs sm:text-sm font-medium"
 							style={{ color: "var(--label-color)" }}
 						>
-							Select Branches to Compare:
+							Select Branches:
 						</p>
-						<div className="flex items-center gap-3">
-							<button
-								onClick={toggleAllBranches}
-								className="text-xs font-medium hover:opacity-80 transition-opacity"
-								style={{ color: "var(--accent-color)" }}
-							>
-								{selectedBranches.size === availableBranches.length
-									? "Deselect All"
-									: "Select All"}
-							</button>
-						</div>
+						<button
+							onClick={toggleAllBranches}
+							className="text-xs font-medium hover:opacity-80 transition-opacity whitespace-nowrap"
+							style={{ color: "var(--accent-color)" }}
+						>
+							{selectedBranches.size === availableBranches.length
+								? "Deselect All"
+								: "Select All"}
+						</button>
 					</div>
-					<div className="flex flex-wrap gap-2">
-						{availableBranches.map((branch) => {
-							const isSelected = selectedBranches.has(branch);
-							const color = getBranchColor(branch);
+					{/* Horizontal scroll container for mobile */}
+					<div className="overflow-x-auto pb-2 -mx-2 px-2 sm:overflow-visible">
+						<div className="flex sm:flex-wrap gap-2 min-w-max sm:min-w-0">
+							{availableBranches.map((branch) => {
+								const isSelected = selectedBranches.has(branch);
+								const color = getBranchColor(branch);
 
-							return (
-								<button
-									key={branch}
-									onClick={() => toggleBranch(branch)}
-									className="transition-all duration-200 hover:scale-105"
-								>
-									<Badge
-										variant={isSelected ? "default" : "outline"}
-										className="cursor-pointer text-sm px-3 py-1.5"
-										style={
-											isSelected
-												? {
-														backgroundColor: color,
-														borderColor: color,
-														color: "white",
-												  }
-												: {
-														borderColor: color,
-														color: color,
-												  }
-										}
+								return (
+									<button
+										key={branch}
+										onClick={() => toggleBranch(branch)}
+										className="transition-all duration-200 hover:scale-105 flex-shrink-0"
 									>
-										<div
-											className="w-2 h-2 rounded-full mr-2"
-											style={{ backgroundColor: color }}
-										/>
-										{branch}
-									</Badge>
-								</button>
-							);
-						})}
+										<Badge
+											variant={isSelected ? "default" : "outline"}
+											className="cursor-pointer text-xs sm:text-sm px-2.5 sm:px-3 py-1 sm:py-1.5 whitespace-nowrap"
+											style={
+												isSelected
+													? {
+															backgroundColor: color,
+															borderColor: color,
+															color: "white",
+													  }
+													: {
+															borderColor: color,
+															color: color,
+													  }
+											}
+										>
+											<div
+												className="w-2 h-2 rounded-full mr-1.5 sm:mr-2"
+												style={{ backgroundColor: color }}
+											/>
+											{branch}
+										</Badge>
+									</button>
+								);
+							})}
+						</div>
 					</div>
 				</div>
 
 				{/* Chart */}
 				{selectedBranches.size === 0 ? (
 					<div
-						className="text-center py-12"
+						className="text-center py-8 sm:py-12"
 						style={{ color: "var(--label-color)" }}
 					>
-						<p className="text-lg">
+						<p className="text-sm sm:text-base lg:text-lg px-4">
 							Select at least one branch to view the distribution
 						</p>
 					</div>
 				) : chartData.length === 0 ? (
 					<div
-						className="text-center py-12"
+						className="text-center py-8 sm:py-12"
 						style={{ color: "var(--label-color)" }}
 					>
-						<p className="text-lg">No placement data available</p>
+						<p className="text-sm sm:text-base lg:text-lg">
+							No placement data available
+						</p>
 					</div>
 				) : (
-					<div className="w-full h-[500px]">
+					<div className="w-full h-[300px] sm:h-[400px] lg:h-[500px]">
 						<ResponsiveContainer width="100%" height="100%">
 							{chartType === "area" ? (
 								<AreaChart
 									data={chartData}
-									margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+									margin={{
+										top: 10,
+										right: 10,
+										left: -20,
+										bottom: 0,
+									}}
 								>
 									<defs>
 										{Array.from(selectedBranches).map((branch) => {
@@ -438,31 +451,25 @@ export default function PlacementDistributionChart({
 									/>
 									<XAxis
 										dataKey="range"
-										className="text-xs"
+										className="text-[10px] sm:text-xs"
 										tick={{ fill: "var(--label-color)" }}
-										label={{
-											value: "Package Range (LPA)",
-											position: "insideBottom",
-											offset: -5,
-											style: { fill: "var(--label-color)", fontSize: 12 },
-										}}
+										angle={-45}
+										textAnchor="end"
+										height={60}
 									/>
 									<YAxis
-										className="text-xs"
+										className="text-[10px] sm:text-xs"
 										tick={{ fill: "var(--label-color)" }}
-										label={{
-											value: "Number of Students",
-											angle: -90,
-											position: "insideLeft",
-											style: { fill: "var(--label-color)", fontSize: 12 },
-										}}
+										width={35}
 									/>
 									<Tooltip content={<CustomTooltip />} />
 									<Legend
 										wrapperStyle={{
-											paddingTop: "20px",
+											paddingTop: "10px",
+											fontSize: "11px",
 										}}
 										iconType="circle"
+										iconSize={8}
 									/>
 									{/* Render branch areas */}
 									{Array.from(selectedBranches)
@@ -500,7 +507,12 @@ export default function PlacementDistributionChart({
 							) : (
 								<RechartsLineChart
 									data={chartData}
-									margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+									margin={{
+										top: 10,
+										right: 10,
+										left: -20,
+										bottom: 0,
+									}}
 								>
 									<CartesianGrid
 										strokeDasharray="3 3"
@@ -509,31 +521,25 @@ export default function PlacementDistributionChart({
 									/>
 									<XAxis
 										dataKey="range"
-										className="text-xs"
+										className="text-[10px] sm:text-xs"
 										tick={{ fill: "var(--label-color)" }}
-										label={{
-											value: "Package Range (LPA)",
-											position: "insideBottom",
-											offset: -5,
-											style: { fill: "var(--label-color)", fontSize: 12 },
-										}}
+										angle={-45}
+										textAnchor="end"
+										height={60}
 									/>
 									<YAxis
-										className="text-xs"
+										className="text-[10px] sm:text-xs"
 										tick={{ fill: "var(--label-color)" }}
-										label={{
-											value: "Number of Students",
-											angle: -90,
-											position: "insideLeft",
-											style: { fill: "var(--label-color)", fontSize: 12 },
-										}}
+										width={35}
 									/>
 									<Tooltip content={<CustomTooltip />} />
 									<Legend
 										wrapperStyle={{
-											paddingTop: "20px",
+											paddingTop: "10px",
+											fontSize: "11px",
 										}}
 										iconType="circle"
+										iconSize={8}
 									/>
 									{/* Render branch lines */}
 									{Array.from(selectedBranches)
@@ -546,9 +552,9 @@ export default function PlacementDistributionChart({
 													type="monotone"
 													dataKey={branch}
 													stroke={color}
-													strokeWidth={3}
-													dot={{ r: 4, fill: color }}
-													activeDot={{ r: 6 }}
+													strokeWidth={2}
+													dot={{ r: 3, fill: color }}
+													activeDot={{ r: 5 }}
 													name={branch}
 													animationDuration={1000}
 												/>
@@ -559,15 +565,15 @@ export default function PlacementDistributionChart({
 										type="monotone"
 										dataKey="Overall"
 										stroke="var(--text-color)"
-										strokeWidth={4}
+										strokeWidth={3}
 										strokeDasharray="5 5"
 										dot={{
-											r: 5,
+											r: 4,
 											fill: "var(--text-color)",
 											strokeWidth: 2,
 											stroke: "var(--accent-color)",
 										}}
-										activeDot={{ r: 7 }}
+										activeDot={{ r: 6 }}
 										name="Overall (All Students)"
 										animationDuration={1000}
 										className="[stroke:var(--text-color)]"
@@ -580,39 +586,39 @@ export default function PlacementDistributionChart({
 
 				{/* Legend with statistics per branch */}
 				{selectedBranches.size > 0 && (
-					<div className="mt-6 space-y-3">
+					<div className="mt-4 sm:mt-6 space-y-2 sm:space-y-3">
 						{/* Overall statistics card - prominent */}
 						<div
-							className="flex items-center justify-between p-4 rounded-lg border-2 border-dashed shadow-sm"
+							className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 rounded-lg border-2 border-dashed shadow-sm gap-2"
 							style={{
 								borderColor: "var(--text-color)",
 								backgroundColor: "var(--accent-color)15",
 							}}
 						>
-							<div className="flex items-center gap-3">
+							<div className="flex items-center gap-2 sm:gap-3">
 								<div
-									className="w-4 h-4 rounded-full border-2"
+									className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 flex-shrink-0"
 									style={{
 										backgroundColor: "var(--text-color)",
 										borderColor: "var(--accent-color)",
 									}}
 								/>
 								<span
-									className="font-bold text-base"
+									className="font-bold text-sm sm:text-base"
 									style={{ color: "var(--text-color)" }}
 								>
-									Overall (All Students - All Branches)
+									Overall (All Students)
 								</span>
 							</div>
-							<div className="text-right">
+							<div className="text-left sm:text-right pl-5 sm:pl-0">
 								<div
-									className="text-sm"
+									className="text-xs sm:text-sm"
 									style={{ color: "var(--label-color)" }}
 								>
 									{stats.overallTotal} students
 								</div>
 								<div
-									className="text-lg font-bold"
+									className="text-base sm:text-lg font-bold"
 									style={{ color: "var(--text-color)" }}
 								>
 									₹{stats.overallAvg.toFixed(1)} LPA
@@ -621,7 +627,7 @@ export default function PlacementDistributionChart({
 						</div>
 
 						{/* Individual branch statistics */}
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
 							{Array.from(selectedBranches)
 								.sort()
 								.map((branch) => {
@@ -643,36 +649,36 @@ export default function PlacementDistributionChart({
 									return (
 										<div
 											key={branch}
-											className="flex items-center justify-between p-3 rounded-lg border"
+											className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg border"
 											style={{
 												borderColor: color,
 												backgroundColor: `${color}10`,
 											}}
 										>
-											<div className="flex items-center gap-2">
+											<div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
 												<div
-													className="w-3 h-3 rounded-full"
+													className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0"
 													style={{ backgroundColor: color }}
 												/>
 												<span
-													className="font-medium text-sm"
+													className="font-medium text-xs sm:text-sm truncate"
 													style={{ color: "var(--text-color)" }}
 												>
 													{branch}
 												</span>
 											</div>
-											<div className="text-right">
+											<div className="text-right flex-shrink-0 ml-2">
 												<div
-													className="text-xs"
+													className="text-[10px] sm:text-xs"
 													style={{ color: "var(--label-color)" }}
 												>
-													{branchStudents.length} students
+													{branchStudents.length}
 												</div>
 												<div
-													className="text-sm font-semibold"
+													className="text-xs sm:text-sm font-semibold whitespace-nowrap"
 													style={{ color: "var(--text-color)" }}
 												>
-													₹{avgPkg.toFixed(1)} LPA
+													₹{avgPkg.toFixed(1)}
 												</div>
 											</div>
 										</div>
