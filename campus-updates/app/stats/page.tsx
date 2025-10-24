@@ -226,9 +226,14 @@ export default function StatsPage() {
 		() => new Set(allStudents.map((s) => s.company)).size,
 		[allStudents]
 	);
+	// Exclude these branches when computing average/median package
+	const EXCLUDED_BRANCHES = new Set(["JUIT", "Other", "MTech"]);
 	const allPackages = useMemo(() => {
 		const pkgs: number[] = [];
 		allStudents.forEach((s) => {
+			const branch = getBranch(s.enrollment_number);
+			// skip excluded branches (JUIT, Other, MTech)
+			if (EXCLUDED_BRANCHES.has(branch)) return;
 			const v = getStudentPackage(s, s.placement);
 			if (v != null && v > 0) pkgs.push(v);
 		});
@@ -250,6 +255,8 @@ export default function StatsPage() {
 	const filteredPackages = useMemo(() => {
 		const pkgs: number[] = [];
 		filteredStudents.forEach((s) => {
+			const branch = getBranch(s.enrollment_number);
+			if (EXCLUDED_BRANCHES.has(branch)) return;
 			const v = getStudentPackage(s, s.placement);
 			if (v != null && v > 0) pkgs.push(v);
 		});
