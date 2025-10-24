@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,10 @@ const BRANCH_COLORS: Record<string, string> = {
 
 const DEFAULT_COLOR = "#94a3b8"; // slate-400
 
+// Default branches to select (case-insensitive)
+const DEFAULT_SELECTED = ["CSE", "IT", "ECE"];
+const DEFAULT_SELECTED_UPPER = DEFAULT_SELECTED.map((s) => s.toUpperCase());
+
 // Helper to get color for branch (case-insensitive and handles variations)
 const getBranchColor = (branch: string): string => {
 	// Direct match first
@@ -72,10 +76,34 @@ export default function PlacementDistributionChart({
 		return Array.from(branches).sort();
 	}, [students, getBranch]);
 
-	// State for selected branches (initially all selected)
+	// State for selected branches (initially select only DEFAULT_SELECTED if available)
 	const [selectedBranches, setSelectedBranches] = useState<Set<string>>(
-		new Set(availableBranches)
+		new Set(
+			availableBranches.filter((b) =>
+				DEFAULT_SELECTED_UPPER.includes(b.toUpperCase())
+			)
+		)
 	);
+
+	// When availableBranches changes, apply defaults if user hasn't selected any of the default branches yet.
+	useEffect(() => {
+		if (availableBranches.length === 0) return;
+
+		const hasAnyDefaultSelected = Array.from(selectedBranches).some((s) =>
+			DEFAULT_SELECTED_UPPER.includes(s.toUpperCase())
+		);
+
+		if (!hasAnyDefaultSelected) {
+			const initial = new Set(
+				availableBranches.filter((b) =>
+					DEFAULT_SELECTED_UPPER.includes(b.toUpperCase())
+				)
+			);
+			if (initial.size > 0) {
+				setSelectedBranches(initial);
+			}
+		}
+	}, [availableBranches, selectedBranches]);
 
 	// State for chart type (area or line)
 	const [chartType, setChartType] = useState<"area" | "line">("area");
