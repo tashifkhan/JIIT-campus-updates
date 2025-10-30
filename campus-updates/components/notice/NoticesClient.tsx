@@ -49,6 +49,21 @@ type Props = {
 	hideShortPlacements?: boolean;
 };
 
+/**
+ * NoticesClient
+ *
+ * High-level flow of how the notice cards are built and shown on the page:
+ * 1) Fetch raw notices and placement offers via React Query.
+ * 2) Normalize both datasets into a single common shape (company/role/ctc, timestamps, etc.).
+ * 3) Optionally filter out short bot-like announcements and apply user filters (query/category/onlyShortlisted).
+ * 4) Paginate the filtered list into `currentNotices`.
+ * 5) Render a Card (from shadcn/ui) for each notice in `currentNotices`.
+ *
+ * Where the cards are actually created:
+ * - See the map over `currentNotices` near the bottom of this file: `{currentNotices.map((notice) => ( <Card>...</Card> ))}`.
+ *   Each iteration returns a single notice Card composed of a header and a content section.
+ *   The content section switches its layout by category (job posting/update/placement offer vs shortlisting vs generic update).
+ */
 export default function NoticesClient({ hideShortPlacements = false }: Props) {
 	const router = useRouter();
 	const [isPending, startTransition] = useTransition();
@@ -78,6 +93,8 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 	});
 
 	// Normalize the data on client side
+	// This prepares a uniform shape so the renderer can create identical Card structures
+	// regardless of whether the source is a "notice" or a "placement offer".
 	const notices = useMemo(() => {
 		const normalizedNotices = (rawNotices || [])
 			.map((n) => {
@@ -113,6 +130,17 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 					  }
 					: null;
 
+				// Formating fix for the trailling brackets in the ctc breakdown
+				if (n.package[n.package.length - 1] == "(") {
+					n.package = n.package?.slice(0, -1);
+				}
+				if (
+					!n.package_breakdown ||
+					n.package_breakdown[n.package_breakdown.length - 1] == ")"
+				) {
+					n.package_breakdown = n.package_breakdown?.slice(0, -1);
+				}
+
 				return {
 					// copy scalar fields explicitly to avoid passing BSON objects
 					_id: id,
@@ -127,7 +155,10 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 					matched_job_id: n.matched_job_id ?? null,
 					job_company: n.job_company ?? null,
 					job_role: n.job_role ?? null,
+					// "package" is the primary CTC text (e.g., "8 LPA") if provided by the source notice
 					package: n.package ?? null,
+					// "package_breakdown" is a markdown-ish multi-line string summarizing components
+					// like Base/Fix/Bonus etc. It’s displayed by consumers that choose to render it.
 					package_breakdown: n.package_breakdown ?? null,
 					formatted_message: n.formatted_message ?? null,
 					location: n.location ?? null,
@@ -170,6 +201,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 			const packages = roles
 				.map((r) => (typeof r?.package === "number" ? r.package : null))
 				.filter((x) => x != null) as number[];
+			// `bestPackage` picks the max package across roles (if any), fallback to the first student's package
 			const bestPackage = packages.length
 				? Math.max(...packages)
 				: o.students_selected?.[0]?.package ?? null;
@@ -221,7 +253,10 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 				matched_job_id: null,
 				job_company: o.company || null,
 				job_role: primaryRole || null,
+				// `package` is the headline CTC to show on the card (e.g., "8 LPA").
 				package: ctcText || null,
+				// `package_breakdown` aggregates each role's detailed package lines (if available),
+				// resulting in a markdown list suitable for rendering in a details/expandable section.
 				package_breakdown: roles
 					.map((r) =>
 						r?.package_details
@@ -292,6 +327,8 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 		[notices]
 	);
 
+	// Apply UI filters (search text, category chips, and "Only shortlisted")
+	// The result of this memo feeds into pagination and ultimately into the Card rendering.
 	const filteredNotices = useMemo(() => {
 		const q = query.trim().toLowerCase();
 		return notices.filter((n) => {
@@ -321,6 +358,9 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 	const startIndex = (currentPage - 1) * itemsPerPage;
 	const endIndex = startIndex + itemsPerPage;
 	const currentNotices = filteredNotices.slice(startIndex, endIndex);
+
+	// NOTE: Cards are rendered for each item in `currentNotices` below.
+	// Look for `{currentNotices.map((notice) => { ... return (<Card>...</Card>) })}`.
 
 	useEffect(() => {
 		setCurrentPage(1);
@@ -379,6 +419,12 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 			</Card>
 
 			<div className="space-y-6">
+				{/*
+					CARD CREATION ENTRY POINT
+					- This map is where each Notice becomes a visual Card.
+					- The Card uses shadcn/ui `Card`, `CardHeader`, and `CardContent` components.
+					- Data for the card comes from `notice` and parsed fields from `parseFormattedMessage`.
+				*/}
 				{currentNotices.map((notice) => {
 					const IconComponent = categoryIcons[notice.category] ?? BellIcon;
 					const parsed =
@@ -420,6 +466,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 								color: "var(--text-color)",
 							}}
 						>
+							{/* Card header: category badge + author/date */}
 							<CardHeader className="pb-3">
 								<div className="flex items-center justify-between">
 									<Badge
@@ -462,11 +509,13 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 									</div>
 								)}
 							</CardHeader>
+							{/* Card body: category-specific layout */}
 							<CardContent className="pt-0">
 								{notice.category === "update" ||
 								notice.category === "job posting" ||
 								notice.category === "placement offer" ? (
 									<div className="space-y-4">
+										{/* Job Posting / Update / Placement Offer details block */}
 										{parsedMessage.title && (
 											<div className="mb-4">
 												<h3
@@ -488,6 +537,10 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 													borderColor: "var(--border-color)",
 												}}
 											>
+												{/* Top summary row includes CTC (aka package) on the right.
+													   If you’re looking for the "package breakdown" it’s stored on the
+													   notice object as `notice.package_breakdown` (markdown-style list)
+													   but is not rendered here by default. */}
 												<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
 													{parsedMessage.company && (
 														<div className="flex items-center">
@@ -584,6 +637,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 											</div>
 										)}
 
+										{/* Eligibility section for job postings */}
 										{eligibilityCriteria && eligibilityCriteria.length > 0 && (
 											<div
 												className="rounded-lg border p-4"
@@ -679,6 +733,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 											</div>
 										)}
 
+										{/* Hiring process steps (numbered chips) */}
 										{hiringSteps.length > 0 && (
 											<div
 												className="rounded-lg border p-4"
@@ -720,6 +775,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 									</div>
 								) : notice.category === "shortlisting" ? (
 									<div className="space-y-4">
+										{/* Shortlisting: compact header with company/role/ctc */}
 										{parsedMessage.title && (
 											<div className="mb-4">
 												<h3
@@ -740,6 +796,9 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 													borderColor: "var(--border-color)",
 												}}
 											>
+												{/* Shortlisting header shows CTC (package) if present.
+												   Any detailed package breakdown, when needed, can be
+												   rendered using `notice.package_breakdown`. */}
 												<div className="flex flex-wrap gap-3 items-center justify-between">
 													<div className="flex flex-wrap gap-2">
 														{parsedMessage.company && (
@@ -788,6 +847,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 									</div>
 								) : (
 									<div className="space-y-4">
+										{/* Fallback generic render using parsed body */}
 										{parsedMessage.title && (
 											<div className="mb-4">
 												<h3
@@ -817,6 +877,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 									</div>
 								)}
 
+								{/* Shortlist table (collapsible) shown when students are present */}
 								{hasShortlistedStudents && (
 									<div
 										className="border-t pt-4"
@@ -842,6 +903,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 									</div>
 								)}
 
+								{/* Related job link tile shown when `matched_job` points to a job in the system */}
 								{notice.matched_job && (
 									<div
 										className="border-t pt-4"
