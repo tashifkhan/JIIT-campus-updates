@@ -253,6 +253,8 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 				matched_job_id: null,
 				job_company: o.company || null,
 				job_role: primaryRole || null,
+				// Carry over the offers count so we can filter zero-placement offers
+				number_of_offers: o.number_of_offers ?? null,
 				// `package` is the headline CTC to show on the card (e.g., "8 LPA").
 				package: ctcText || null,
 				// `package_breakdown` aggregates each role's detailed package lines (if available),
@@ -298,8 +300,15 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 							text.includes("ctc:") ||
 							text.includes("joining date:"));
 
+					// Additionally hide placement-offer cards with zero placed students
+					// If number_of_offers is explicitly 0 OR students list length is 0, drop it
+					const zeroPlacedOffer =
+						n.category === "placement offer" &&
+						((n as any).number_of_offers === 0 ||
+							(n.shortlisted_students?.length ?? 0) === 0);
+
 					// Keep detailed offers, hide short announcements
-					return !isShortAnnouncement || isDetailedOffer;
+					return (!isShortAnnouncement || isDetailedOffer) && !zeroPlacedOffer;
 			  })
 			: combined;
 
