@@ -121,11 +121,16 @@ export const parseFormattedMessage = (message: string, category: string) => {
       !line.match(/company:|role:|ctc:|location:|posted\s*by|on:/i) &&
       !line.match(/📢|🎉|job posting|shortlisting update|announcement/i)
     ) {
-      bodyLines.push(rawLine);
+      // Drop orphan bracket-only lines like ")" or "("
+      if (!/^\s*[(){}\[\]]\s*$/.test(line)) {
+        bodyLines.push(rawLine);
+      }
     }
   }
 
   body = bodyLines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+  // Sanitize CTC text for trailing orphan "(" e.g., "4.5 LPA ("
+  if (ctc) ctc = ctc.replace(/\s*\($/, "").trim();
   eligibility = eligibilityLines.join("\n").trim();
   hiringProcess = hiringLines.join("\n").trim();
 

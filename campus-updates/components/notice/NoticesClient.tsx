@@ -130,15 +130,15 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 					  }
 					: null;
 
-				// Formating fix for the trailling brackets in the ctc breakdown
-				if (n.package[n.package.length - 1] == "(") {
-					n.package = n.package?.slice(0, -1);
+				// Formatting fix for trailing brackets in the CTC text/breakdown
+				if (typeof n.package === "string" && n.package.endsWith("(")) {
+					n.package = n.package.slice(0, -1);
 				}
 				if (
-					!n.package_breakdown ||
-					n.package_breakdown[n.package_breakdown.length - 1] == ")"
+					typeof n.package_breakdown === "string" &&
+					n.package_breakdown.endsWith(")")
 				) {
-					n.package_breakdown = n.package_breakdown?.slice(0, -1);
+					n.package_breakdown = n.package_breakdown.slice(0, -1);
 				}
 
 				return {
