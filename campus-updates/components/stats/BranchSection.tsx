@@ -117,14 +117,6 @@ export default function BranchSection({
 												<div className="sm:hidden">
 													<div className="flex items-center justify-between mb-3">
 														<div className="flex items-center gap-3">
-															<div
-																className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
-																style={{
-																	backgroundColor: "var(--accent-color)",
-																}}
-															>
-																{branch.charAt(0)}
-															</div>
 															<div>
 																<h3
 																	className="font-bold text-base leading-tight"
@@ -214,14 +206,6 @@ export default function BranchSection({
 												<div className="hidden sm:block">
 													<div className="flex items-center justify-between mb-3">
 														<div className="flex items-center gap-3">
-															<div
-																className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
-																style={{
-																	backgroundColor: "var(--accent-color)",
-																}}
-															>
-																{branch.charAt(0)}
-															</div>
 															<div>
 																<h3
 																	className="font-bold text-lg"
@@ -308,12 +292,6 @@ export default function BranchSection({
 														className="text-lg font-bold flex items-center gap-2"
 														style={{ color: "var(--text-color)" }}
 													>
-														<div
-															className="w-6 h-6 rounded-full flex items-center justify-center text-white font-bold text-xs"
-															style={{ backgroundColor: "var(--accent-color)" }}
-														>
-															{branch.charAt(0)}
-														</div>
 														{branch} Details
 													</DialogTitle>
 												</div>
@@ -322,12 +300,6 @@ export default function BranchSection({
 														className="text-xl sm:text-2xl font-bold flex items-center gap-3"
 														style={{ color: "var(--text-color)" }}
 													>
-														<div
-															className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold"
-															style={{ backgroundColor: "var(--accent-color)" }}
-														>
-															{branch.charAt(0)}
-														</div>
 														{branch} - Detailed Analytics
 													</DialogTitle>
 												</div>
