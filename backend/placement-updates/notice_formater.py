@@ -6,7 +6,8 @@ from rapidfuzz import fuzz, process
 from dotenv import load_dotenv
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.prompts import ChatPromptTemplate
 from langgraph.graph import StateGraph, END
@@ -40,6 +41,7 @@ class Job(BaseModel):
     location: str
     package: float
     package_info: str
+    annum_months: Optional[str]
     required_skills: List[str]
     hiring_flow: List[str]
     placement_type: Optional[str] = None
@@ -79,7 +81,7 @@ class NoticeFormatter:
     def __init__(
         self,
         google_api_key: Optional[str] = None,
-        model: str = "gemini-2.0-flash-lite",
+        model: str = "gemini-2.5-flash-lite",
         temperature: float = 0,
     ):
         self.llm = ChatGoogleGenerativeAI(
@@ -95,6 +97,7 @@ class NoticeFormatter:
         """Normalize LLM message content (can be str or list of parts) to a string."""
         if isinstance(content, str):
             return content
+
         if isinstance(content, list):
             parts: List[str] = []
             for p in content:
@@ -102,19 +105,103 @@ class NoticeFormatter:
                     parts.append(p)
                 elif isinstance(p, dict) and "text" in p:
                     parts.append(str(p["text"]))
+
             return "\n".join(parts)
+
         return str(content)
+
+    @staticmethod
+    def _format_ms_epoch_to_ist(
+        ms: Optional[int],
+        fmt: str = "%B %d, %Y at %I:%M %p %Z",
+    ) -> str:
+        """Convert milliseconds epoch to a formatted string in Asia/Kolkata (IST).
+
+        Returns 'Not specified' if input is falsy.
+        """
+        if not ms:
+            return "Not specified"
+        try:
+            # timestamps in the codebase are milliseconds
+            ts = float(ms) / 1000.0
+            # build aware datetime from UTC then convert to Asia/Kolkata
+            dt_utc = datetime.fromtimestamp(ts, tz=timezone.utc)
+            ist = dt_utc.astimezone(ZoneInfo("Asia/Kolkata"))
+            return ist.strftime(fmt)
+
+        except Exception:
+            return "Not specified"
+
+    @staticmethod
+    def _prettify_raw_text(raw: str) -> str:
+        """Lightly format the raw extracted text for direct sending.
+
+        - Collapse more than one consecutive blank line into a single blank line.
+        - Strip trailing spaces on each line.
+        - Ensure the overall message is trimmed.
+        """
+        if not raw:
+            return ""
+
+        lines = [ln.rstrip() for ln in raw.splitlines()]
+        cleaned: List[str] = []
+        blank = False
+
+        for ln in lines:
+            if ln.strip() == "":
+                if not blank:  # first blank line allowed
+                    cleaned.append("")
+                blank = True
+            else:
+                cleaned.append(ln)
+                blank = False
+
+        return "\n".join(cleaned).strip()
+
+    @staticmethod
+    def _format_package(amount: Any, annum_months: Optional[str] = None) -> str:
+        """Format a numeric package amount into a human friendly string.
+
+        - If amount >= 100000, represent as lakhs with one decimal and use
+          'LPM' when annum_months starts with 'M' (monthly) else 'LPA'.
+        - Otherwise, show rupee with thousand separators.
+        """
+        if amount is None:
+            return "Not specified"
+
+        try:
+            amt = float(amount)
+
+        except Exception:
+            return str(amount)
+
+        is_monthly = False
+        if isinstance(annum_months, str) and annum_months.strip():
+            is_monthly = annum_months.strip().lower().startswith("m")
+
+        if amt >= 100000:
+            suffix = "LPM" if is_monthly else "LPA"
+            return f"₹{(amt / 100000):.1f} {suffix}"
+
+        # show with separators; preserve cents when needed
+        if amt.is_integer():
+            return f"₹{int(amt):,}"
+
+        return f"₹{amt:,.2f}"
 
     @staticmethod
     def format_html_breakdown(html_content: Optional[str]) -> str:
         """Parse HTML content into a multi-line readable string."""
         if not html_content:
             return ""
+
         soup = BeautifulSoup(html_content, "html.parser")
         lines: List[str] = []
+
         for table in soup.find_all("table"):
             if not isinstance(table, Tag):
                 continue
+
             for row in table.find_all("tr"):
                 if not isinstance(row, Tag):
                     continue
@@ -125,25 +212,34 @@ class NoticeFormatter:
                 ]
                 if cells:
                     lines.append(" | ".join(cells))
+
         for element in soup.find_all(["p", "li"]):
             text = element.get_text(separator=" ", strip=True)
             if text:
                 lines.append(text)
+
         if not lines:
             fallback_text = soup.get_text(separator="\n", strip=True)
             if fallback_text:
                 lines.append(fallback_text)
+
         if not lines:
             return ""
+
         result = "\n".join(lines).replace("\xa0", " ").strip()
         return f"(\n{result}\n)" if result else ""
 
-    # Graph Nodes
     # -------- graph node handlers ---------
     def extract_text(self, state: PostState) -> PostState:
         """Extract clean text from the notice's HTML content."""
-        soup = BeautifulSoup(state["notice"].content, "html.parser")
-        text = soup.get_text(separator="\n", strip=True)
+        soup = BeautifulSoup(
+            state["notice"].content,
+            "html.parser",
+        )
+        text = soup.get_text(
+            separator="\n",
+            strip=True,
+        )
         state["raw_text"] = (state["notice"].title + "\n" + text).strip()
         state["id"] = state["notice"].id
         print("--- 1. Text Extracted ---")
@@ -155,16 +251,34 @@ class NoticeFormatter:
             [
                 (
                     "system",
-                    "You are a classifier. Categorize the notice into one of: "
-                    "[update, shortlisting, announcement, hackathon, webinar, job posting].",
+                    "You are a strict single-label classifier. Read the notice and output ONLY one lowercase label from this set (no punctuation, no extra words):\n"
+                    "update, shortlisting, announcement, hackathon, webinar, job posting\n\n"
+                    "Definitions / decision guide:\n"
+                    "- update: Minor operational / procedural info, timetable shifts, portal status, brief changes with no list of selected students and not primarily event-focused. especially for ongoing placement / job drives.\n"
+                    "- shortlisting: Contains a list (or table) of selected / shortlisted candidate names, rolls, or enrollments for a role, round, or company.\n"
+                    "- announcement: General broad notice to all students (holiday, policy, generic info) that is not a job posting, not a shortlist, and not clearly an event (webinar/hackathon).\n"
+                    "- hackathon: Describes a hackathon / coding competition (often includes theme, duration, prizes, team size).\n"
+                    "- webinar: Describes an online/offline seminar / session with a speaker, topic, time (learning / informational session).\n"
+                    "- job posting: Describes an opportunity to apply for a job/internship/placement including company + role (and often CTC, eligibility, deadline).\n\n"
+                    "Tie-break rules:\n"
+                    "1. If it has a shortlist table/list of names -> shortlisting.\n"
+                    "2. If it is clearly a job opportunity with application instructions -> job posting (even if called announcement).\n"
+                    "3. If it invites to a hackathon competition -> hackathon.\n"
+                    "4. If it invites to a talk/session/seminar -> webinar.\n"
+                    "5. If it is a generic info broadcast with broad audience and no action list -> announcement.\n"
+                    "6. Minor status/info changes -> update.\n\n"
+                    "Respond with ONLY the label (e.g., job posting).",
                 ),
                 ("human", "{raw_text}"),
             ]
         )
+
         chain = classification_prompt | self.llm
         result = chain.invoke({"raw_text": state.get("raw_text", "")})
+
         category = self._ensure_str_content(result.content).strip().lower()
         state["category"] = category
+
         print(f"--- 2. Classified as: {category} ---")
         return state
 
@@ -182,6 +296,7 @@ class NoticeFormatter:
                 ("human", "Text: {raw_text}"),
             ]
         )
+
         extraction_chain = company_extraction_prompt | self.llm
         result = extraction_chain.invoke({"raw_text": notice_text})
         extracted_names_str = self._ensure_str_content(result.content).strip()
@@ -219,6 +334,7 @@ class NoticeFormatter:
             state["matched_job_id"] = best_overall_match_job.id
             state["job_location"] = best_overall_match_job.location
             print(f"--- 3. Matched Job ID: {best_overall_match_job.id} ---")
+
         else:
             state["matched_job"] = None
             state["matched_job_id"] = None
@@ -236,6 +352,8 @@ class NoticeFormatter:
                     "You are an information extractor. Based on the category, extract structured details. Your response MUST be a valid JSON object.\n\n"
                     "- For shortlisting: extract a list of students under the key 'students', each with 'name' and 'enrollment'. Also extract 'company_name' and 'role' if mentioned.\n"
                     "- For job posting: extract 'company_name', 'role', 'package', and 'deadline'.\n"
+                    "- For webinar: extract 'event_name', 'topic', 'speaker', 'date', 'time', 'venue', 'registration_link', and 'deadline' if present.\n"
+                    "- For hackathon: extract 'event_name', 'theme', 'start_date', 'end_date', 'registration_deadline', 'registration_link', 'prize_pool', 'team_size', and 'venue' if present.\n"
                     "- For all others: extract relevant details based on the context (e.g., 'message', 'event_name', etc.).",
                 ),
                 ("human", "Category: {category}\n\nNotice:\n{raw_text}"),
@@ -255,6 +373,7 @@ class NoticeFormatter:
         try:
             state["extracted"] = json.loads(cleaned_json_str)
             print("--- 4. Information Extracted Successfully ---")
+
         except json.JSONDecodeError:
             print("--- 4. FAILED to parse JSON from LLM ---")
             state["extracted"] = {
@@ -271,11 +390,21 @@ class NoticeFormatter:
         job_location = state.get("job_location") or (job.location if job else None)
         notice: Notice = state["notice"]
 
-        post_date = datetime.fromtimestamp(notice.updatedAt / 1000).strftime(
-            "%B %d, %Y at %I:%M %p"
-        )
+        post_date = self._format_ms_epoch_to_ist(notice.updatedAt)
         title = notice.title
         msg_parts = [f"**{title}**\n"]
+
+        # --- Simple passthrough formatting for 'update' or 'announcement' ---
+        if cat in {"update", "announcement"}:
+            raw_text = state.get("raw_text", "")
+            prettified = self._prettify_raw_text(raw_text)
+
+            # Append attribution footer
+            prettified += f"\n\n*Posted by*: {notice.author} \n*On:* {post_date}"
+            state["formatted_message"] = prettified
+
+            print("--- 5. Message Formatted (passthrough) ---")
+            return state
 
         if cat == "shortlisting":
             students = data.get("students", [])
@@ -287,13 +416,14 @@ class NoticeFormatter:
                 ]
             )
             total_shortlisted = data.get("total_shortlisted", len(students))
+
             company_name = job.company if job else data.get("company_name", "N/A")
             role = job.job_profile if job else data.get("role", "N/A")
             package_info: Optional[str]
             package_breakdown: str
+
             if job:
-                package_lpa = job.package / 100000
-                package_info = f"{package_lpa:.2f} LPA"
+                package_info = self._format_package(job.package, job.annum_months)
                 package_breakdown = self.format_html_breakdown(job.package_info)
             else:
                 extracted_package = data.get("package")
@@ -303,36 +433,161 @@ class NoticeFormatter:
             msg_parts.append("**🎉 Shortlisting Update**")
             msg_parts.append(f"**Company:** {company_name}")
             msg_parts.append(f"**Role:** {role}")
+
             if job_location:
                 msg_parts.append(f"**Location:** {job_location}")
+
             msg_parts.append("")
             if total_shortlisted > 0 and student_list:
                 msg_parts.append(f"**Total Shortlisted:** {total_shortlisted}")
                 msg_parts.append("Congratulations to the following students:")
                 msg_parts.append(student_list)
+                msg_parts.append("\n")
 
             if job and job.hiring_flow:
                 hiring_flow_list = "\n".join(
                     [f"{i+1}. {step}" for i, step in enumerate(job.hiring_flow)]
                 )
                 msg_parts.append(f"\n**Hiring Process:**\n{hiring_flow_list}")
+
             if package_info:
                 msg_parts.append(f"\n**CTC:** {package_info} {package_breakdown}")
+
+        elif cat == "webinar":
+
+            def _fmt_dt(val: Any) -> Optional[str]:
+                if not val:
+                    return None
+
+                try:
+                    # numeric epoch (ms or s). Assume ms if big number.
+                    num = float(str(val))
+                    if num > 10_000_000_000:  # clearly ms
+                        return self._format_ms_epoch_to_ist(int(num))
+
+                    # treat as seconds
+                    return self._format_ms_epoch_to_ist(int(num * 1000))
+
+                except Exception:
+                    # try ISO
+                    try:
+                        dt = datetime.fromisoformat(str(val))
+
+                        if dt.tzinfo is None:
+                            dt = dt.replace(tzinfo=timezone.utc)
+
+                        return dt.astimezone(ZoneInfo("Asia/Kolkata")).strftime(
+                            "%B %d, %Y at %I:%M %p %Z"
+                        )
+
+                    except Exception:
+                        return str(val)
+
+            event_name = data.get("event_name") or title
+            topic = data.get("topic") or data.get("subject")
+            speaker = data.get("speaker") or data.get("speakers")
+            date_field = data.get("date")
+            time_field = data.get("time")
+            venue = data.get("venue") or data.get("location") or data.get("platform")
+            reg_link = (
+                data.get("registration_link") or data.get("link") or data.get("url")
+            )
+            deadline_raw = data.get("deadline")
+            deadline_fmt = _fmt_dt(deadline_raw) if deadline_raw else None
+            date_fmt = _fmt_dt(date_field) if date_field else None
+
+            msg_parts.append("**🎓 Webinar Details**")
+            msg_parts.append(f"**Event:** {event_name}")
+            if topic:
+                msg_parts.append(f"**Topic:** {topic}")
+            if speaker:
+                msg_parts.append(f"**Speaker:** {speaker}")
+            if date_fmt and time_field:
+                msg_parts.append(f"**When:** {date_fmt} | {time_field}")
+            elif date_fmt:
+                msg_parts.append(f"**When:** {date_fmt}")
+            elif time_field:
+                msg_parts.append(f"**Time:** {time_field}")
+            if venue:
+                msg_parts.append(f"**Venue / Platform:** {venue}")
+            if reg_link:
+                msg_parts.append(f"**Registration:** {reg_link}")
+            if deadline_fmt:
+                msg_parts.append(f"⚠️ **Deadline:** {deadline_fmt}")
+
+        elif cat == "hackathon":
+
+            def _fmt_dt(val: Any) -> Optional[str]:
+                if not val:
+                    return None
+                try:
+                    num = float(str(val))
+
+                    if num > 10_000_000_000:
+                        return self._format_ms_epoch_to_ist(int(num))
+
+                    return self._format_ms_epoch_to_ist(int(num * 1000))
+
+                except Exception:
+                    try:
+                        dt = datetime.fromisoformat(str(val))
+                        if dt.tzinfo is None:
+                            dt = dt.replace(tzinfo=timezone.utc)
+
+                        return dt.astimezone(ZoneInfo("Asia/Kolkata")).strftime(
+                            "%B %d, %Y at %I:%M %p %Z"
+                        )
+                    except Exception:
+                        return str(val)
+
+            event_name = data.get("event_name") or title
+            theme = data.get("theme") or data.get("topic")
+
+            start_date = _fmt_dt(data.get("start_date"))
+            end_date = _fmt_dt(data.get("end_date"))
+
+            reg_deadline = _fmt_dt(data.get("registration_deadline"))
+            reg_link = (
+                data.get("registration_link") or data.get("link") or data.get("url")
+            )
+
+            prize_pool = data.get("prize_pool")
+            team_size = data.get("team_size")
+
+            venue = data.get("venue") or data.get("location") or data.get("platform")
+
+            msg_parts.append("**🏁 Hackathon**")
+
+            msg_parts.append(f"**Event:** {event_name}")
+
+            if theme:
+                msg_parts.append(f"**Theme:** {theme}")
+            if start_date or end_date:
+                if start_date and end_date:
+                    msg_parts.append(f"**Duration:** {start_date} — {end_date}")
+                else:
+                    msg_parts.append(f"**Date:** {start_date or end_date}")
+            if team_size:
+                msg_parts.append(f"**Team Size:** {team_size}")
+            if prize_pool:
+                msg_parts.append(f"**Prize Pool:** {prize_pool}")
+            if venue:
+                msg_parts.append(f"**Venue / Platform:** {venue}")
+            if reg_link:
+                msg_parts.append(f"**Registration:** {reg_link}")
+            if reg_deadline:
+                msg_parts.append(f"⚠️ **Registration Deadline:** {reg_deadline}")
 
         elif cat == "job posting":
             if job:
                 company_name = job.company
                 role = job.job_profile
                 job_location = job.location
-                package_lpa = job.package / 100000
-                package_info = f"{package_lpa:.2f} LPA"
+                package_info = self._format_package(job.package, job.annum_months)
                 package_breakdown = self.format_html_breakdown(job.package_info)
-                deadline = (
-                    datetime.fromtimestamp(job.deadline / 1000).strftime(
-                        "%B %d, %Y, %I:%M %p"
-                    )
-                    if job.deadline
-                    else "Not specified"
+
+                deadline = self._format_ms_epoch_to_ist(
+                    job.deadline, fmt="%B %d, %Y, %I:%M %p %Z"
                 )
 
                 eligibility_list = [
@@ -342,6 +597,7 @@ class NoticeFormatter:
                     eligibility_list.append(
                         f"- **{mark.level} Marks:** {mark.criteria} CGPA or equivalent"
                     )
+
                 eligibility_str = "**Eligibility Criteria:**\n" + "\n".join(
                     eligibility_list
                 )
@@ -350,27 +606,61 @@ class NoticeFormatter:
                     [f"{i+1}. {step}" for i, step in enumerate(job.hiring_flow)]
                 )
                 hiring_flow_str = f"**Hiring Flow:**\n{hiring_flow_list}"
+
             else:
                 company_name = data.get("company_name", "N/A")
                 role = data.get("role", "N/A")
                 job_location = None
                 package_info = data.get("package", "Not specified")
                 package_breakdown = ""
-                deadline = data.get("deadline", "Not specified")
+
+                raw_deadline = data.get("deadline")
+                if raw_deadline is None:
+                    deadline = "Not specified"
+
+                else:
+                    try:
+                        num = float(str(raw_deadline))
+                        deadline = self._format_ms_epoch_to_ist(
+                            int(num), fmt="%B %d, %Y, %I:%M %p %Z"
+                        )
+
+                    except Exception:
+                        try:
+                            dt = datetime.fromisoformat(str(raw_deadline))
+                            if dt.tzinfo is None:
+                                dt = dt.replace(tzinfo=timezone.utc)
+                            deadline = dt.astimezone(ZoneInfo("Asia/Kolkata")).strftime(
+                                "%B %d, %Y, %I:%M %p %Z"
+                            )
+                        except Exception:
+                            deadline = str(raw_deadline)
+
                 eligibility_str = ""
                 hiring_flow_str = ""
 
             msg_parts.append("**📢 Job Posting**")
             msg_parts.append(f"**Company:** {company_name}")
             msg_parts.append(f"**Role:** {role}")
+
             if job_location:
                 msg_parts.append(f"**Location:** {job_location}")
+
             msg_parts.append(f"**CTC:** {package_info} {package_breakdown}\n")
+
             if eligibility_str:
                 msg_parts.append(eligibility_str + "\n")
             if hiring_flow_str:
                 msg_parts.append(hiring_flow_str)
+
             msg_parts.append(f"\n⚠️ **Deadline:** {deadline}")
+
+            job_id_for_link = job.id if job else state.get("matched_job_id")
+            if job_id_for_link:
+                details_url = (
+                    f"http://jiit-placement-updates.tashif.codes/jobs/{job_id_for_link}"
+                )
+                msg_parts.append(f"\n\n🔗 Detailed JD: {details_url}")
 
         else:
             message_content = data.get(
@@ -378,11 +668,22 @@ class NoticeFormatter:
             )
             msg_parts.append(f"**🔔 {cat.capitalize()}**\n")
             msg_parts.append(message_content.replace(title, "").strip())
+
             if data.get("deadline"):
-                msg_parts.append(f"\n⚠️ **Deadline:** {data.get('deadline')}")
+                raw_d = data.get("deadline")
+                try:
+                    num = float(str(raw_d))
+                    d_str = self._format_ms_epoch_to_ist(
+                        int(num), fmt="%B %d, %Y, %I:%M %p %Z"
+                    )
+                except Exception:
+                    d_str = str(raw_d)
+
+                msg_parts.append(f"\n⚠️ **Deadline:** {d_str}")
 
         msg_parts.append(f"*Posted by*: {notice.author} \n*On:* {post_date}")
         state["formatted_message"] = "\n".join(msg_parts)
+
         print("--- 5. Message Formatted ---")
         return state
 
@@ -417,7 +718,9 @@ class NoticeFormatter:
         )
         if matched_job:
             pkg_lpa = matched_job.package / 100000
-            pkg_str = f"{pkg_lpa:.2f} LPA"
+            pkg_str = self._format_package(
+                matched_job.package, matched_job.annum_months
+            )
             pkg_breakdown = self.format_html_breakdown(matched_job.package_info)
         else:
             pkg_val = extracted.get("package")

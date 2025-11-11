@@ -39,6 +39,12 @@ class EligibilityMark(BaseModel):
     criteria: float
 
 
+class Document(BaseModel):
+    name: str
+    identifier: str
+    url: Optional[str] = None
+
+
 class Job(BaseModel):
     id: str
     job_profile: str
@@ -54,10 +60,12 @@ class Job(BaseModel):
     job_description: str
     location: str
     package: float
+    annum_months: Optional[str]
     package_info: str
     required_skills: List[str]
     hiring_flow: List[str]
     placement_type: Optional[str] = None
+    documents: List[Document] = []
 
 
 class SupersetClient:
@@ -180,6 +188,34 @@ class SupersetClient:
         response.raise_for_status()
         return response.json()
 
+    def get_document_url(
+        self, user: User, job_id: str, document_id: str
+    ) -> Optional[str]:
+        """Fetch the URL for a specific document"""
+        if not user or not user.uuid or not user.sessionKey:
+            raise ValueError("User must be logged in to fetch document URLs")
+        if not job_id or not document_id:
+            raise ValueError("Job ID and document ID must be provided")
+
+        url = f"{self.BASE_URL}/students/{user.uuid}/job_profiles/{job_id}/documents/{document_id}/url"
+        headers = {
+            **self._common_headers(),
+            "Authorization": f"Custom {user.sessionKey}",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+        }
+
+        try:
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            result = response.json()
+            return result.get("url")
+
+        except Exception as e:
+            print(f"Error fetching document URL for {document_id}: {e}")
+            return None
+
     @staticmethod
     def structure_job_listing(job: dict) -> Job:
         category_mapping = {
@@ -211,6 +247,7 @@ class SupersetClient:
         tmp["package_info"] = ""
         tmp["required_skills"] = []
         tmp["hiring_flow"] = []
+        tmp["documents"] = []
 
         if job_details:
             for ganda_deatils in job_details.get("eligibilityCheckResult", {}).get(
@@ -253,8 +290,17 @@ class SupersetClient:
                     tmp["location"] = more_details.get("location")
                 if more_details.get("package"):
                     tmp["package"] = more_details.get("package")
+                    if tmp["package"] is None or tmp["package"] <= 0:
+                        if more_details.get("ctcMin"):
+                            tmp["package"] = more_details.get("ctcMin")
+                        elif more_details.get("ctcMax"):
+                            tmp["package"] = more_details.get("ctcMax")
+                        else:
+                            tmp["package"] = 0
                 if more_details.get("ctcAdditionalInfo"):
                     tmp["package_info"] = more_details.get("ctcAdditionalInfo")
+                if more_details.get("ctcInterval"):
+                    tmp["annum_months"] = more_details.get("ctcInterval")
                 if more_details.get("requiredSkills"):
                     tmp["required_skills"].extend(more_details.get("requiredSkills"))
                 if more_details.get("stages"):
@@ -273,6 +319,18 @@ class SupersetClient:
 
             tmp["placement_type"] = job_details.get("positionType", "")
 
+            # Process documents
+            documents = job_details.get("jobProfile", []).get("documents", [])
+            for doc in documents:
+                if doc.get("name") and doc.get("identifier"):
+                    tmp["documents"].append(
+                        {
+                            "name": doc.get("name"),
+                            "identifier": doc.get("identifier"),
+                            "url": None,  # URL will be fetched separately
+                        }
+                    )
+
         return Job(**tmp)
 
     def get_job_listings(
@@ -285,6 +343,8 @@ class SupersetClient:
             raise ValueError("User must be logged in to fetch job listings")
 
         all_job_listings: List[dict] = []
+        seen_job_ids = set()
+
         for u in users:
             url = f"{self.BASE_URL}/students/{u.uuid}/job_profiles"
             params = {"_loader_": "false"}
@@ -301,14 +361,12 @@ class SupersetClient:
             response.raise_for_status()
             job_listings = response.json()
 
-            if job_listings:
-                all_job_listings.extend(job_listings)
-            else:
-                for job in job_listings:
-                    if job["jobProfileIdentifier"] not in [
-                        j["jobProfileIdentifier"] for j in all_job_listings
-                    ]:
-                        all_job_listings.append(job)
+            # Deduplicate by jobProfileIdentifier using set for O(1) lookups
+            for job in job_listings:
+                job_id = job.get("jobProfileIdentifier")
+                if job_id and job_id not in seen_job_ids:
+                    seen_job_ids.add(job_id)
+                    all_job_listings.append(job)
 
         job_listings_sorted = sorted(
             all_job_listings, key=lambda x: x.get("createdAt", 0), reverse=True
@@ -325,7 +383,18 @@ class SupersetClient:
 
         formatted_job_listings: List[Job] = []
         for job in job_listings_sorted:
-            formatted_job_listings.append(self.structure_job_listing(job))
+            structured_job = self.structure_job_listing(job)
+
+            # Fetch document URLs for each document
+            job_id = job.get("jobProfileIdentifier")
+            if job_id and structured_job.documents:
+                for doc in structured_job.documents:
+                    if doc.identifier:
+                        doc.url = self.get_document_url(
+                            detail_user, job_id, doc.identifier
+                        )
+
+            formatted_job_listings.append(structured_job)
         return formatted_job_listings
 
     def update_notices(
@@ -352,9 +421,11 @@ class SupersetClient:
             raise ValueError("User must be logged in to update job listings")
 
         new_job_listings = self.get_job_listings(users, limit=20)
+        existing_job_ids = {job.id for job in job_listings}
         for job in new_job_listings:
-            if job not in job_listings:
+            if job.id not in existing_job_ids:
                 job_listings.append(job)
+                existing_job_ids.add(job.id)
         job_listings_sorted = sorted(
             job_listings,
             key=lambda x: (

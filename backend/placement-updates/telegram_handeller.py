@@ -16,7 +16,6 @@ from telegram.ext import (
 from notice_formater import NoticeFormatter, Notice as LLMNotice, Job as LLMJob
 
 
-
 dotenv.load_dotenv()
 
 
@@ -30,7 +29,6 @@ class TelegramBot:
             Bot(token=self.TELEGRAM_BOT_TOKEN) if self.TELEGRAM_BOT_TOKEN else None
         )
         self.logger.info("TelegramBot initialized")
-
 
     # Bot Command Handlers
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -46,44 +44,59 @@ class TelegramBot:
             first_name=user.first_name,
             last_name=user.last_name,
         )
+        welcome_text = []
 
         if success:
             if "reactivated" in message.lower():
-                welcome_text = f"Welcome back {user.first_name}! 👋\n\n"
-                welcome_text += "Your subscription has been reactivated!\n"
-                welcome_text += (
+                welcome_text.append(
+                    f"Welcome back {user.first_name}! 👋\n\n"
+                    "Your subscription has been reactivated!\n"
                     "You'll now receive job posting updates automatically.\n\n"
                 )
             else:
-                welcome_text = f"Hello {user.first_name}! 👋\n\n"
-                welcome_text += "Welcome to SuperSet Placement Notifications Bot!\n"
-                welcome_text += "You'll receive job posting updates automatically.\n\n"
+                welcome_text.append(
+                    f"Hello {user.first_name}! 👋\n\n"
+                    "Welcome to SuperSet Placement Notifications Bot!\n"
+                    "You'll receive job posting updates automatically.\n\n"
+                )
 
-            welcome_text += "Commands:\n"
-            welcome_text += "/start - Register for notifications\n"
-            welcome_text += "/stop - Stop receiving notifications\n"
-            welcome_text += "/status - Check your subscription status\n"
-            welcome_text += "/stats - Get Placement Statistics\n"
-            welcome_text += "/web - Get JIIT Suite Links\n\n"
+            welcome_text.append(
+                "<b>Commands:</b>\n"
+                "  /start - Register for notifications\n"
+                "  /stop - Stop receiving notifications\n"
+                "  /status - Check your subscription status\n"
+                "  /stats - Get Placement Statistics\n"
+                "  /web - Get JIIT Suite Links\n\n"
+            )
 
-            welcome_text += "PWA at https://jiit-placement-updates.tashif.codes"
+            welcome_text.append(
+                "<i>btw...</i>\n"
+                "here are some links you might wanna look at -\n"
+                f"1. <a href='https://jiit-placement-updates.tashif.codes'>Placement Updates PWA</a>\n"
+                f"2. <a href='https://jiit-timetable.tashif.codes'>Timetable</a>\n"
+                f"3. <a href='https://sophos-autologin.tashif.codes'>Wifi (Sophos) Auto Login</a>\n"
+                f"4. <a href='https://jportal.tashif.codes'>JPortal</a>"
+            )
 
         else:
             if "already exists and is active" in message:
-                welcome_text = f"Hi {user.first_name}! 👋\n\n"
-                welcome_text += "You're already registered and active for SuperSet placement notifications.\n"
-                welcome_text += (
+                welcome_text.append(
+                    f"Hi {user.first_name}! 👋\n\n"
+                    "You're already registered and active for SuperSet placement notifications.\n"
                     "You'll continue receiving job posting updates automatically.\n\n"
                 )
                 welcome_text += "Use /status to check your subscription details."
             else:
-                welcome_text = f"Hello {user.first_name}! 👋\n\n"
-                welcome_text += (
+                welcome_text.append(
+                    f"Hello {user.first_name}! 👋\n\n"
                     "There was an issue with your registration. Please try again.\n"
                 )
-                welcome_text += f"Error: {message}"
+                welcome_text.append(f"Error: {message}")
 
-        await update.message.reply_text(welcome_text)
+        await update.message.reply_text(
+            "".join(welcome_text),
+            parse_mode="HTML",
+        )
         safe_print(f"User {user.id} (@{user.username}) started the bot - {message}")
 
     async def stop_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -133,7 +146,6 @@ class TelegramBot:
         await update.message.reply_text(text)
         safe_print(f"Status response sent to user {user.id}")
 
-    
     async def stats_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /stats command (admin only)"""
         user = update.effective_user
@@ -144,12 +156,11 @@ class TelegramBot:
 
             if not stats or "error" in stats:
                 msg = "❌ Unable to compute placement statistics."
-                
+
                 if isinstance(stats, dict) and stats.get("error"):
                     msg += f" Error: {stats.get('error')}"
-                
+
                 await update.message.reply_text(msg)
-                
 
             text = "📊 Placement Statistics:\n\n"
             text += f"Placements processed: {stats.get('placements_count', 0)}\n"
@@ -158,7 +169,6 @@ class TelegramBot:
             text += f"Median package: {stats.get('median_package', 0.0):.2f} LPA\n"
             text += f"Highest package: {stats.get('highest_package', 0.0):.2f} LPA\n"
             text += f"Unique companies: {stats.get('unique_companies', 0)}\n\n"
-            
 
             await update.message.reply_text(text)
             safe_print(f"{user.id} (@{user.username}) requested placement stats")
@@ -167,7 +177,6 @@ class TelegramBot:
             error_msg = f"Error getting placement statistics: {e}"
             await update.message.reply_text(f"❌ {error_msg}")
             safe_print(error_msg)
-
 
     async def users_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /users command (admin only)"""
@@ -209,7 +218,6 @@ class TelegramBot:
             error_msg = f"Error getting user list: {e}"
             await update.message.reply_text(f"❌ {error_msg}")
             safe_print(error_msg)
-
 
     async def boo_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /boo command (admin only) for broadcasting messages"""
@@ -296,7 +304,9 @@ class TelegramBot:
             safe_print(error_msg)
 
     async def scrapyyy_command(
-        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+        self,
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE,
     ):
         """Handle /scrapyyy command (admin only): run main.py workflow"""
         user = update.effective_user
@@ -310,7 +320,7 @@ class TelegramBot:
             return
 
         await update.message.reply_text("⏳ Running main workflow (main.py)...")
-        
+
         try:
             # call main.py's main to refresh data (scraping)
             from main import main as run_main_process
@@ -318,7 +328,7 @@ class TelegramBot:
             # main() here is the scraper/orchestrator; try calling with daemon_mode
             try:
                 result = run_main_process(daemon_mode=True)
-            
+
             except TypeError:
                 # fallback to calling without args
                 result = run_main_process()
@@ -331,7 +341,7 @@ class TelegramBot:
                 await update.message.reply_text(
                     f"⚠️ main.py workflow completed with issues (exit code: {result})"
                 )
-        
+
         except Exception as e:
             await update.message.reply_text(f"❌ Error running main.py workflow: {e}")
 
@@ -430,6 +440,7 @@ class TelegramBot:
                         except Exception:
                             pass
             return 0
+
         except Exception:
             return 0
 
@@ -468,6 +479,7 @@ class TelegramBot:
                         f"⚠️  Partial send: {chunks_sent}/{len(chunks)} chunks sent"
                     )
                 return success
+
             else:
                 # Single message, send normally
                 return self._send_single_message(message, parse_mode)
@@ -710,21 +722,34 @@ class TelegramBot:
 
     def convert_markdown_to_html(self, text):
         """Convert markdown to HTML for Telegram"""
+        if not text:
+            return ""
+
+        # Add an extra blank line after Deadline lines for readability
+        # (ensures a visual separation before following sections)
+        text = re.sub(r"(?m)^(.*Deadline:.*)$", r"\1\n", text)
+
         # Convert headers to bold
         text = re.sub(r"^##\s+(.*?)$", r"<b>\1</b>", text, flags=re.MULTILINE)
         text = re.sub(r"^###\s+(.*?)$", r"<b>\1</b>", text, flags=re.MULTILINE)
 
-        # Convert bold text
+        # Convert bold text **...** -> <b>...</b>
         text = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", text)
 
-        # Convert italic text
+        # Convert italic text _..._ -> <i>...</i>
         text = re.sub(r"_(.*?)_", r"<i>\1</i>", text)
 
-        # Convert blockquotes
+        # Convert blockquotes > ... -> italic
         text = re.sub(r"^>\s+(.*?)$", r"<i>\1</i>", text, flags=re.MULTILINE)
 
-        # Convert code blocks (though Telegram has limited support)
+        # Convert inline code `...` -> <code>...</code>
         text = re.sub(r"`(.*?)`", r"<code>\1</code>", text)
+
+        # Convert single *...* (italic) to <i>...</i> but avoid touching already converted **...**
+        text = re.sub(r"(?<!\*)\*(?!\*)(.*?)\*(?!\*)", r"<i>\1</i>", text)
+
+        # Collapse excessive blank lines to maximum two, trim edges
+        text = re.sub(r"\n{3,}", "\n\n", text).strip()
 
         return text
 
@@ -968,9 +993,10 @@ class TelegramBot:
         """Send new posts to all registered users instead of just one chat"""
         try:
             # Use Notices collection now. Fetch all notices where sent_to_telegram != True
+            # Fetch unsent notices and sort ascending by createdAt so older notices are sent first
             cursor = self.db_manager.notices_collection.find(
                 {"sent_to_telegram": {"$ne": True}}
-            ).sort("createdAt", -1)
+            ).sort("createdAt", 1)
             unsent_notices = list(cursor)
 
             if not unsent_notices:
@@ -1005,14 +1031,20 @@ class TelegramBot:
                     if not formatted:
                         # Convert DB notice dict to LLM Notice model
                         try:
-                            llm_notice = LLMNotice(**{
-                                "id": notice.get("id"),
-                                "title": notice.get("title", ""),
-                                "content": notice.get("content", ""),
-                                "author": notice.get("author", ""),
-                                "updatedAt": self._ts_to_int(notice.get("updatedAt")),
-                                "createdAt": self._ts_to_int(notice.get("createdAt")),
-                            })
+                            llm_notice = LLMNotice(
+                                **{
+                                    "id": notice.get("id"),
+                                    "title": notice.get("title", ""),
+                                    "content": notice.get("content", ""),
+                                    "author": notice.get("author", ""),
+                                    "updatedAt": self._ts_to_int(
+                                        notice.get("updatedAt")
+                                    ),
+                                    "createdAt": self._ts_to_int(
+                                        notice.get("createdAt")
+                                    ),
+                                }
+                            )
                         except Exception:
                             # Fallback minimal mapping
                             llm_notice = LLMNotice(
@@ -1056,6 +1088,54 @@ class TelegramBot:
                         )
                         continue
 
+                    # Post-process formatted string to improve readability and standardize fields
+                    if formatted is None:
+                        formatted = ""
+
+                    # Normalize CLASS_X -> 10th and CLASS_XII -> 12th
+                    # e.g. "CLASS_X Marks: 60.0 CGPA or equivalent" -> "10th: 60.0% (or equivalent)"
+                    formatted = re.sub(
+                        r"CLASS[_\s]*X(?:\s*Marks)?\s*:\s*([0-9]+(?:\.[0-9]+)?)\s*CGPA(?:\s*or equivalent)?",
+                        r"10th: \1%",
+                        formatted,
+                        flags=re.IGNORECASE,
+                    )
+                    formatted = formatted.replace("CLASS_X Marks:", "10th Marks:")
+
+                    formatted = re.sub(
+                        r"CLASS[_\s]*XII(?:\s*Marks)?\s*:\s*([0-9]+(?:\.[0-9]+)?)\s*CGPA(?:\s*or equivalent)?",
+                        r"12th: \1%",
+                        formatted,
+                        flags=re.IGNORECASE,
+                    )
+                    formatted = formatted.replace("CLASS_XII Marks:", "12th Marks:")
+
+                    # UG marks -> "UG - Current CGPA requirement: x.y"
+                    formatted = re.sub(
+                        r"UG(?:\s*Marks)?\s*:\s*([0-9]+(?:\.[0-9]+)?)\s*CGPA(?:\s*or equivalent)?",
+                        r"Current CGPA requirement: \1",
+                        formatted,
+                        flags=re.IGNORECASE,
+                    )
+                    formatted = formatted.replace(
+                        "UG Marks:", "Current CGPA requirement: "
+                    )
+
+                    formatted = formatted.replace("CGPA or equivalent", "")
+
+                    # Replace detailed CTC / Salary Package Details block with a concise Package Description
+                    # If a CTC line is present (optionally followed by a parenthetical description),
+                    # keep the CTC on one line, add two newlines, then add a Package Description block.
+                    formatted = re.sub(
+                        r"(?:\n|^)\s*(CTC\s*:\s*([0-9]+(?:\.[0-9]+)?\s*(?:LPA|lpa|Lakh|lakh|Lakhs|lakhs)?))(?:\s*\(.*?\))?(?:\n|$)",
+                        r"\n\1\n\nPackage Description:\nCTC: \2\n",
+                        formatted,
+                        flags=re.IGNORECASE,
+                    )
+
+                    # Ensure spacing: convert multiple blank lines to a maximum of two, strip leading/trailing whitespace
+                    formatted = re.sub(r"\n{3,}", "\n\n", formatted).strip()
+
                     # Use HTML send to preserve formatting where possible
                     html_message = self.convert_markdown_to_html(formatted)
 
@@ -1063,7 +1143,10 @@ class TelegramBot:
                         # Mark notice as sent in Notices collection
                         try:
                             self.db_manager.notices_collection.update_one(
-                                {"_id": notice["_id"], "sent_to_telegram": {"$ne": True}},
+                                {
+                                    "_id": notice["_id"],
+                                    "sent_to_telegram": {"$ne": True},
+                                },
                                 {
                                     "$set": {
                                         "sent_to_telegram": True,
@@ -1087,7 +1170,9 @@ class TelegramBot:
                     time.sleep(1)
 
                 except Exception as e:
-                    safe_print(f"Exception while sending notice {notice.get('id')}: {e}")
+                    safe_print(
+                        f"Exception while sending notice {notice.get('id')}: {e}"
+                    )
 
             safe_print(
                 f"Broadcast summary: {successful_notices}/{len(unsent_notices)} notices sent successfully"
@@ -1098,10 +1183,20 @@ class TelegramBot:
             safe_print(f"Error in send_new_posts_to_all_users: {e}")
             return False
 
-    def web_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def web_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle the /web command"""
         safe_print("Web command received")
-        context.bot.send_message(chat_id=update.effective_chat.id, text="https://jiit-placement-updates.tashif.codes\nhttps://jiit-timetable.tashif.codes\nhttps://jportal.tashif.codes")
+        text = (
+            f"<b>Jaypee Tools:</b>\n"
+            f"1. <a href='https://jiit-placement-updates.tashif.codes'>Placement Updates</a>\n"
+            f"2. <a href='https://jiit-timetable.tashif.codes'>Timetable</a>\n"
+            f"3. <a href='https://sophos-autologin.tashif.codes'>Wifi (Sophos) Auto Login</a>\n"
+            f"4. <a href='https://jportal.tashif.codes'>JPortal</a>"
+        )
+        try:
+            await update.message.reply_text(text, parse_mode="HTML")
+        except Exception as e:
+            safe_print(f"Error in web_command: {e}")
 
     def start_bot_server(self):
         """Start the bot server to handle user interactions"""
