@@ -11,6 +11,7 @@ import BranchSection from "@/components/stats/BranchSection";
 import CompanySection from "@/components/stats/CompanySection";
 import PlacedStudentsSection from "@/components/stats/PlacedStudentsSection";
 import PlacementDistributionChart from "@/components/stats/PlacementDistributionChart";
+import OfficialPlacements from "@/components/stats/OfficialPlacements";
 import enrollmentRanges from "./enrollmemt_range.json";
 import studentCounts from "./student_count.json";
 import {
@@ -38,6 +39,8 @@ export default function StatsPage() {
 			return json.data as Placement[];
 		},
 	});
+
+
 
 	const placements: Placement[] = Array.isArray(data) ? (data as any) : [];
 
@@ -547,6 +550,10 @@ export default function StatsPage() {
 						</p>
 					</div>
 				</div>
+				
+				{/* Official placement data banner */}
+				<OfficialPlacements />
+				{/* End official placement data banner */}
 
 				{/* Filters */}
 				<FiltersSheet
