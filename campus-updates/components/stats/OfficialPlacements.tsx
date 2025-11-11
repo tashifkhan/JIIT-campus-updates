@@ -2,12 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import Image from "next/image";
+// import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, ExternalLink, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 
 type Batch = {
   batch_name: string;
@@ -45,6 +45,21 @@ export default function OfficialPlacements() {
   const activeBatch = data?.batches?.find(b => b.is_active);
   const defaultBatchValue = activeBatch?.batch_name || data?.batches?.[0]?.batch_name || "";
 
+  // Helper function to extract main batch name and additional info from parentheses
+  const parseBatchName = (batchName: string) => {
+    const match = batchName.match(/^(.+?)\s*\((.+)\)$/);
+    if (match) {
+      return {
+        main: match[1].trim(),
+        extra: match[2].trim(),
+      };
+    }
+    return {
+      main: batchName,
+      extra: null,
+    };
+  };
+
   return (
     <Card 
       className="border card-theme hover:shadow-lg transition-all duration-300"
@@ -55,34 +70,37 @@ export default function OfficialPlacements() {
       }}
     >
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-lg font-bold mb-2" style={{ color: "var(--text-color)" }}>
-                Official Placement Data
-              </CardTitle>
+        <CollapsibleTrigger asChild>
+          <CardHeader className="pb-3 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-lg font-bold" style={{ color: "var(--text-color)" }}>
+                  Official Placement Data
+                </CardTitle>
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href="https://jiit.ac.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-xs flex items-center gap-1 opacity-70 hover:opacity-100 transition-opacity"
+                  style={{ color: "var(--accent-color)" }}
+                >
+                  <span className="hidden sm:inline">Visit Source</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+                <div className="p-1">
+                  {isOpen ? (
+                    <ChevronUp className="w-5 h-5" style={{ color: "var(--label-color)" }} />
+                  ) : (
+                    <ChevronDown className="w-5 h-5" style={{ color: "var(--label-color)" }} />
+                  )}
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <a
-                href="https://jiit.ac.in"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs flex items-center gap-1 opacity-70 hover:opacity-100 transition-opacity"
-                style={{ color: "var(--accent-color)" }}
-              >
-                <span className="hidden sm:inline">Visit Source</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-              <CollapsibleTrigger className="p-1 hover:bg-black/5 dark:hover:bg-white/5 rounded transition-colors">
-                {isOpen ? (
-                  <ChevronUp className="w-5 h-5" style={{ color: "var(--label-color)" }} />
-                ) : (
-                  <ChevronDown className="w-5 h-5" style={{ color: "var(--label-color)" }} />
-                )}
-              </CollapsibleTrigger>
-            </div>
-          </div>
-        </CardHeader>
+          </CardHeader>
+        </CollapsibleTrigger>
 
         <CollapsibleContent>
           <CardContent className="pt-0">
@@ -103,35 +121,52 @@ export default function OfficialPlacements() {
                 {/* Tabs for different batches */}
                 {data.batches && data.batches.length > 0 && (
                   <Tabs defaultValue={defaultBatchValue} className="w-full">
-                    <TabsList className="w-full justify-start flex-wrap h-auto gap-1">
-                      {data.batches.map((batch) => (
-                        <TabsTrigger
-                          key={batch.batch_name}
-                          value={batch.batch_name}
-                          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground relative"
-                        >
-                          {batch.batch_name}
-                          {batch.is_active && (
-                            <Badge 
-                              variant="secondary" 
-                              className="ml-2 text-[10px] px-1 py-0 h-4"
-                              style={{ 
-                                backgroundColor: "var(--accent-color)", 
-                                color: "white" 
-                              }}
-                            >
-                              Active
-                            </Badge>
-                          )}
-                        </TabsTrigger>
-                      ))}
+                    <TabsList className="grid w-full grid-cols-2 h-auto p-1 bg-muted/50">
+                      {data.batches.map((batch) => {
+                        const { main } = parseBatchName(batch.batch_name);
+                        return (
+                          <TabsTrigger
+                            key={batch.batch_name}
+                            value={batch.batch_name}
+                            className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-md px-3 py-2.5 text-sm font-medium transition-all"
+                          >
+                            {main}
+                          </TabsTrigger>
+                        );
+                      })}
                     </TabsList>
 
-                    {data.batches.map((batch) => (
-                      <TabsContent key={batch.batch_name} value={batch.batch_name} className="mt-4">
-                        <div className="space-y-3">
-                          {/* Placement Pointers */}
-                          <div 
+                    {data.batches.map((batch) => {
+                      const { extra } = parseBatchName(batch.batch_name);
+                      return (
+                        <TabsContent key={batch.batch_name} value={batch.batch_name} className="mt-4">
+                          <div className="space-y-3">
+                            {/* Badge for extra info */}
+                            {extra && (
+                              <div className="flex items-center gap-2">
+                                <Badge 
+                                  variant="secondary"
+                                  className="text-xs px-2.5 py-1"
+                                  style={{
+                                    backgroundColor: "var(--accent-color)",
+                                    color: "white",
+                                  }}
+                                >
+                                  {extra}
+                                </Badge>
+                                {batch.is_active && (
+                                  <Badge 
+                                    variant="outline"
+                                    className="text-xs px-2.5 py-1"
+                                  >
+                                    Active
+                                  </Badge>
+                                )}
+                              </div>
+                            )}
+                            
+                            {/* Placement Pointers */}
+                            <div 
                             className="rounded-lg p-4 space-y-2"
                             style={{ 
                               backgroundColor: "var(--bg-color)",
@@ -161,7 +196,8 @@ export default function OfficialPlacements() {
                           </div>
                         </div>
                       </TabsContent>
-                    ))}
+                      );
+                    })}
                   </Tabs>
                 )}
 
