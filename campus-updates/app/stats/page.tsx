@@ -555,6 +555,18 @@ export default function StatsPage() {
 				<OfficialPlacements />
 				{/* End official placement data banner */}
 
+				{/* Divider between official and unofficial data */}
+				<div className="relative my-8">
+					<div className="absolute inset-0 flex items-center">
+						<div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
+					</div>
+					<div className="relative flex justify-center text-sm">
+						<span className="px-4 py-2 bg-white dark:bg-slate-950 text-gray-600 dark:text-gray-400 font-medium rounded-lg border border-gray-300 dark:border-gray-700">
+							Unofficial Data (Tracked by Students - May contain errors)
+						</span>
+					</div>
+				</div>
+
 				{/* Filters */}
 				<FiltersSheet
 					open={showFilters}
