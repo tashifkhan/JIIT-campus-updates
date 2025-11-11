@@ -19,7 +19,6 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import {
-	GraduationCap,
 	Users,
 	Building,
 	Calendar,
@@ -71,10 +70,6 @@ export default function BranchSection({
 					style={{ color: "var(--text-color)" }}
 				>
 					<div className="flex items-center gap-2">
-						<GraduationCap
-							className="w-5 h-5 mr-2"
-							style={{ color: "var(--accent-color)" }}
-						/>
 						Branch-wise Placements
 					</div>
 				</CardTitle>
@@ -595,10 +590,6 @@ export default function BranchSection({
 																className="text-sm sm:text-base font-semibold mb-2 sm:mb-3 flex items-center gap-2"
 																style={{ color: "var(--text-color)" }}
 															>
-																<GraduationCap
-																	className="w-4 h-4 sm:w-5 sm:h-5"
-																	style={{ color: "var(--accent-color)" }}
-																/>
 																Branch Specializations
 															</h4>
 
@@ -968,10 +959,7 @@ export default function BranchSection({
 																			</span>
 																		</div>
 																		<div className="flex items-center gap-2">
-																			<GraduationCap
-																				className="w-4 h-4"
-																				style={{ color: "var(--accent-color)" }}
-																			/>
+
 																			<span
 																				className="text-sm"
 																				style={{ color: "var(--label-color)" }}

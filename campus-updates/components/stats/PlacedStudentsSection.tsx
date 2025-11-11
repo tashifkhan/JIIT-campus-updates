@@ -17,7 +17,6 @@ import {
 	ChevronDown,
 	Eye,
 	EyeOff,
-	GraduationCap,
 	MapPin,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -118,7 +117,6 @@ export default function PlacedStudentsSection({
 			<CardHeader className="pb-6">
 				<div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
 					<CardTitle className="flex items-center gap-3 text-xl">
-						<GraduationCap className="w-6 h-6 text-primary" />
 						<div>
 							<h2 className="text-xl font-bold">Placed Students</h2>
 						</div>

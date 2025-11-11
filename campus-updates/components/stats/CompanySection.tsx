@@ -18,7 +18,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { Building, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import {
 	Placement,
 	StudentWithPlacement,
@@ -73,10 +73,6 @@ export default function CompanySection({
 					style={{ color: "var(--text-color)" }}
 				>
 					<div className="flex items-center gap-2">
-						<Building
-							className="w-5 h-5 mr-2"
-							style={{ color: "var(--accent-color)" }}
-						/>
 						Company-wise Placements
 						{hasActiveFilters && (
 							<Badge
