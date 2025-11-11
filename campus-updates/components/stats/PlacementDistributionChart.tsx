@@ -309,25 +309,25 @@ export default function PlacementDistributionChart({
 								</span>
 							</div>
 						</div>
-						<div className="flex items-center gap-2 flex-wrap">
-							<Button
-								variant={chartType === "area" ? "default" : "outline"}
-								size="sm"
-								onClick={() => setChartType("area")}
-								className="h-7 sm:h-8 text-xs sm:text-sm"
-							>
-								<BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
-								<span className="hidden sm:inline">Area</span>
-							</Button>
-							<Button
-								variant={chartType === "line" ? "default" : "outline"}
-								size="sm"
-								onClick={() => setChartType("line")}
-								className="h-7 sm:h-8 text-xs sm:text-sm"
-							>
-								<LineChart className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
-								<span className="hidden sm:inline">Line</span>
-							</Button>
+					<div className="flex items-center gap-2 flex-wrap">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => setChartType(chartType === "area" ? "line" : "area")}
+							className="h-7 sm:h-8 text-xs sm:text-sm"
+						>
+							{chartType === "area" ? (
+								<>
+									<BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+									<span className="hidden sm:inline">Area</span>
+								</>
+							) : (
+								<>
+									<LineChart className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+									<span className="hidden sm:inline">Line</span>
+								</>
+							)}
+						</Button>
 							<Button
 								variant={showBranchSpecific ? "default" : "outline"}
 								size="sm"
