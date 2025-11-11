@@ -29,3 +29,9 @@ export async function getPlacementOffers(filter: any = {}, limit = 1000) {
   const docs = await col.find(filter).sort({ createdAt: -1 }).limit(limit).toArray();
   return docs;
 }
+
+export async function getOfficialPlacementData() {
+  const col = await getCollection("OfficialPlacementData");
+  const doc = await col.findOne({ _id: "latest_jiit_placement_data" } as any);
+  return doc;
+}
