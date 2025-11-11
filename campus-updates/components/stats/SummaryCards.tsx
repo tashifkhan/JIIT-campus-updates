@@ -1,7 +1,6 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Building, IndianRupee, TrendingUp, Users } from "lucide-react";
 import { formatPercent, formatPackage } from "@/lib/stats";
 
 type Props = {
@@ -23,7 +22,7 @@ export default function SummaryCards({
 	companies,
 }: Props) {
 	return (
-		<div className="grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+		<div className="grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-5 text-center">
 			{/* Placement Rate */}
 			<Card
 				className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
@@ -69,12 +68,6 @@ export default function SummaryCards({
 								</p>
 							)}
 						</div>
-						<div className="ml-2 flex-shrink-0">
-							<Users
-								className="w-6 h-6 sm:w-8 sm:h-8 group-hover:scale-110 transition-transform duration-300"
-								style={{ color: "var(--accent-color)" }}
-							/>
-						</div>
 					</div>
 				</CardContent>
 			</Card>
@@ -111,12 +104,6 @@ export default function SummaryCards({
 									overall: {formatPackage(packages.overallAvg)}
 								</p>
 							)}
-						</div>
-						<div className="ml-2 flex-shrink-0">
-							<TrendingUp
-								className="w-6 h-6 sm:w-8 sm:h-8 group-hover:scale-110 transition-transform duration-300"
-								style={{ color: "var(--accent-color)" }}
-							/>
 						</div>
 					</div>
 				</CardContent>
@@ -155,12 +142,7 @@ export default function SummaryCards({
 								</p>
 							)}
 						</div>
-						<div className="ml-2 flex-shrink-0">
-							<TrendingUp
-								className="w-6 h-6 sm:w-8 sm:h-8 group-hover:scale-110 transition-transform duration-300"
-								style={{ color: "var(--accent-color)" }}
-							/>
-						</div>
+
 					</div>
 				</CardContent>
 			</Card>
@@ -198,12 +180,7 @@ export default function SummaryCards({
 								</p>
 							)}
 						</div>
-						<div className="ml-2 flex-shrink-0">
-							<IndianRupee
-								className="w-6 h-6 sm:w-8 sm:h-8 group-hover:scale-110 transition-transform duration-300"
-								style={{ color: "var(--accent-color)" }}
-							/>
-						</div>
+
 					</div>
 				</CardContent>
 			</Card>
@@ -240,12 +217,6 @@ export default function SummaryCards({
 									of {companies.total} total
 								</p>
 							)}
-						</div>
-						<div className="ml-2 flex-shrink-0">
-							<Building
-								className="w-6 h-6 sm:w-8 sm:h-8 group-hover:scale-110 transition-transform duration-300"
-								style={{ color: "var(--accent-color)" }}
-							/>
 						</div>
 					</div>
 				</CardContent>
