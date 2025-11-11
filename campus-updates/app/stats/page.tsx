@@ -562,7 +562,7 @@ export default function StatsPage() {
 					</div>
 					<div className="relative flex justify-center text-sm">
 						<span className="px-4 py-2 bg-white dark:bg-slate-950 text-gray-600 dark:text-gray-400 font-medium rounded-lg border border-gray-300 dark:border-gray-700">
-							Unofficial Data (Tracked by Students - May contain errors)
+							Unofficial Data (May contain errors)
 						</span>
 					</div>
 				</div>
