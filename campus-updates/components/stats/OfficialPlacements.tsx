@@ -143,10 +143,10 @@ export default function OfficialPlacements() {
                           <div className="space-y-3">
                             {/* Badge for extra info */}
                             {extra && (
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <Badge 
                                   variant="secondary"
-                                  className="text-xs px-2.5 py-1"
+                                  className="text-xs font-medium px-3 py-1.5 rounded-full shadow-sm"
                                   style={{
                                     backgroundColor: "var(--accent-color)",
                                     color: "white",
@@ -157,7 +157,11 @@ export default function OfficialPlacements() {
                                 {batch.is_active && (
                                   <Badge 
                                     variant="outline"
-                                    className="text-xs px-2.5 py-1"
+                                    className="text-xs font-medium px-3 py-1.5 rounded-full"
+                                    style={{
+                                      borderColor: "var(--accent-color)",
+                                      color: "var(--accent-color)",
+                                    }}
                                   >
                                     Active
                                   </Badge>
