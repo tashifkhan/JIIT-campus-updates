@@ -30,7 +30,7 @@ type OfficialData = {
 };
 
 export default function OfficialPlacements() {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   
   const { data, isLoading, error } = useQuery<OfficialData>({
     queryKey: ["official-placement"],
