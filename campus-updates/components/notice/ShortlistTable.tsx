@@ -180,18 +180,6 @@ export default function ShortlistTable({
 										>
 											Enrollment
 										</th>
-										<th
-											className="text-left py-3 px-4 font-semibold"
-											style={{ color: "var(--accent-color)" }}
-										>
-											Email
-										</th>
-										<th
-											className="text-left py-3 px-4 font-semibold"
-											style={{ color: "var(--accent-color)" }}
-										>
-											Venue
-										</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -216,18 +204,6 @@ export default function ShortlistTable({
 												style={{ color: "var(--label-color)" }}
 											>
 												{student.enrollment_number}
-											</td>
-											<td
-												className="py-3 px-4 text-sm"
-												style={{ color: "var(--label-color)" }}
-											>
-												{student.email ?? "-"}
-											</td>
-											<td
-												className="py-3 px-4 text-sm"
-												style={{ color: "var(--label-color)" }}
-											>
-												{student.venue ?? "-"}
 											</td>
 										</tr>
 									))}
