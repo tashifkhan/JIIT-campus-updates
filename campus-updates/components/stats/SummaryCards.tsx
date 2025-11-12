@@ -102,7 +102,7 @@ export default function SummaryCards({
 								style={{ color: "var(--success-dark)" }}
 							>
 								₹{packages.avg.toFixed(1)}{" "}
-								<span className="text-sm sm:text-base lg:text-lg">LPA</span>
+								<span className="text-sm sm:text-base lg:text-lg" style={{ color: "var(--label-color)" }}>LPA</span>
 							</p>
 							{packages.avg !== packages.overallAvg && (
 								<p
@@ -140,7 +140,7 @@ export default function SummaryCards({
 								style={{ color: "var(--success-dark)" }}
 							>
 								₹{packages.median.toFixed(1)}{" "}
-								<span className="text-sm sm:text-base lg:text-lg">LPA</span>
+								<span className="text-sm sm:text-base lg:text-lg" style={{ color: "var(--label-color)" }}>LPA</span>
 							</p>
 							{packages.median !== packages.overallMedian && (
 								<p
@@ -179,7 +179,7 @@ export default function SummaryCards({
 								style={{ color: "var(--success-dark)" }}
 							>
 								₹{packages.highest.toFixed(1)}{" "}
-								<span className="text-sm sm:text-base lg:text-lg">LPA</span>
+								<span className="text-sm sm:text-base lg:text-lg" style={{ color: "var(--label-color)" }}>LPA</span>
 							</p>
 							{packages.highest !== packages.overallHighest && (
 								<p
