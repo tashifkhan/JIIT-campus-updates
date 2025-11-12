@@ -170,6 +170,15 @@ export default function StatsPage() {
 		[placements]
 	);
 
+	// Exclude these branches from all calculations and displays
+	const EXCLUDED_BRANCHES = new Set(["JUIT", "Other", "MTech"]);
+	
+	// Filter out excluded branches from all students
+	const includedStudents = useMemo(
+		() => allStudents.filter((s) => !EXCLUDED_BRANCHES.has(getBranch(s.enrollment_number))),
+		[allStudents]
+	);
+
 	const hasActiveFilters =
 		searchQuery !== "" ||
 		selectedCompanies.length > 0 ||
@@ -179,7 +188,7 @@ export default function StatsPage() {
 		packageRange[1] !== 100;
 
 	const filteredStudents: StudentWithPlacement[] = useMemo(() => {
-		return allStudents.filter((student) => {
+		return includedStudents.filter((student) => {
 			const plc = student.placement;
 
 			// search
@@ -215,7 +224,7 @@ export default function StatsPage() {
 			return true;
 		});
 	}, [
-		allStudents,
+		includedStudents,
 		searchQuery,
 		selectedCompanies,
 		selectedRoles,
@@ -223,25 +232,21 @@ export default function StatsPage() {
 		packageRange,
 	]);
 
-	// Overall stats
-	const totalStudentsPlaced = allStudents.length;
+	// Overall stats (excluding JUIT, Other, MTech)
+	const totalStudentsPlaced = includedStudents.length;
 	const uniqueCompanies = useMemo(
 		() => new Set(allStudents.map((s) => s.company)).size,
 		[allStudents]
 	);
-	// Exclude these branches when computing average/median package
-	const EXCLUDED_BRANCHES = new Set(["JUIT", "Other", "MTech"]);
+	
 	const allPackages = useMemo(() => {
 		const pkgs: number[] = [];
-		allStudents.forEach((s) => {
-			const branch = getBranch(s.enrollment_number);
-			// skip excluded branches (JUIT, Other, MTech)
-			if (EXCLUDED_BRANCHES.has(branch)) return;
+		includedStudents.forEach((s) => {
 			const v = getStudentPackage(s, s.placement);
 			if (v != null && v > 0) pkgs.push(v);
 		});
 		return pkgs;
-	}, [allStudents]);
+	}, [includedStudents]);
 	const averagePackage = allPackages.length
 		? allPackages.reduce((a, c) => a + c, 0) / allPackages.length
 		: 0;
@@ -254,12 +259,10 @@ export default function StatsPage() {
 			: (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
 	})();
 
-	// Filtered stats
+	// Filtered stats (already filtered to exclude JUIT, Other, MTech via filteredStudents)
 	const filteredPackages = useMemo(() => {
 		const pkgs: number[] = [];
 		filteredStudents.forEach((s) => {
-			const branch = getBranch(s.enrollment_number);
-			if (EXCLUDED_BRANCHES.has(branch)) return;
 			const v = getStudentPackage(s, s.placement);
 			if (v != null && v > 0) pkgs.push(v);
 		});
@@ -283,7 +286,7 @@ export default function StatsPage() {
 		[filteredStudents]
 	);
 
-	// Company stats
+	// Company stats (using ALL students including JUIT, Other, MTech)
 	const companyStats = useMemo(() => {
 		const acc: Record<
 			string,
@@ -392,11 +395,14 @@ export default function StatsPage() {
 		return acc;
 	}, [filteredStudents]);
 
-	// Branch totals (for denominator)
+	// Branch totals (for denominator) - exclude JUIT, Other, MTech
 	const branchTotalCounts = useMemo(() => {
 		const totals: Record<string, number> = {};
 		try {
 			Object.entries(studentCounts as any).forEach(([branch, counts]) => {
+				// Skip excluded branches
+				if (EXCLUDED_BRANCHES.has(branch)) return;
+				
 				if (counts && typeof counts === "object") {
 					const sum = Object.values(counts).reduce(
 						(a: number, c: any) => a + Number(c || 0),
@@ -420,9 +426,10 @@ export default function StatsPage() {
 	);
 	const totalPlacedInCountedBranches = useMemo(() => {
 		return placements.reduce((sum, p) => {
-			const inc = p.students_selected.filter((s) =>
-				branchesWithTotals.has(getBranch(s.enrollment_number))
-			).length;
+			const inc = p.students_selected.filter((s) => {
+				const branch = getBranch(s.enrollment_number);
+				return branchesWithTotals.has(branch) && !EXCLUDED_BRANCHES.has(branch);
+			}).length;
 			return sum + inc;
 		}, 0);
 	}, [placements, branchesWithTotals]);
@@ -448,7 +455,7 @@ export default function StatsPage() {
 		return sortStudentsList(base.filter((s) => s.company === companyName));
 	};
 	const getBranchStudents = (branchName: string) => {
-		const base = hasActiveFilters ? filteredStudents : allStudents;
+		const base = hasActiveFilters ? filteredStudents : includedStudents;
 		return sortStudentsList(
 			base.filter((s) => getBranch(s.enrollment_number) === branchName)
 		);
@@ -668,8 +675,8 @@ export default function StatsPage() {
 
 				{/* Placed students */}
 				<PlacedStudentsSection
-					filteredStudents={filteredStudents}
-					totalStudentsPlaced={totalStudentsPlaced}
+					filteredStudents={hasActiveFilters ? filteredStudents : allStudents}
+					totalStudentsPlaced={allStudents.length}
 					filteredHighestPackage={filteredHighestPackage}
 					highestPackage={highestPackage}
 					filteredAveragePackage={filteredAveragePackage}

@@ -25,16 +25,13 @@ type Props = {
 	getBranch: (enrollment: string) => string;
 };
 
-// Color palette for branches - vibrant and distinguishable colors
+// Color palette for branches - vibrant and distinguishable colors (excluded: JUIT, Other, MTech)
 const BRANCH_COLORS: Record<string, string> = {
 	CSE: "#3b82f6", // blue
 	ECE: "#f59e0b", // amber
 	IT: "#10b981", // emerald
 	"Intg. MTech": "#ec4899", // pink
 	Biotech: "#14b8a6", // teal
-	MTech: "#6366f1", // indigo
-	JUIT: "#84cc16", // lime
-	Other: "#64748b", // slate
 };
 
 const DEFAULT_COLOR = "#94a3b8"; // slate-400
@@ -64,12 +61,15 @@ export default function PlacementDistributionChart({
 	students,
 	getBranch,
 }: Props) {
-	// Get all unique branches from students
+	// Exclude these branches from all displays
+	const EXCLUDED_BRANCHES = new Set(["JUIT", "Other", "MTech"]);
+	
+	// Get all unique branches from students (excluding JUIT, Other, MTech)
 	const availableBranches = useMemo(() => {
 		const branches = new Set<string>();
 		students.forEach((s) => {
 			const branch = getBranch(s.enrollment_number);
-			if (branch && branch !== "Other") {
+			if (branch && !EXCLUDED_BRANCHES.has(branch)) {
 				branches.add(branch);
 			}
 		});
