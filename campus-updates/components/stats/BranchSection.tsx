@@ -448,6 +448,7 @@ export default function BranchSection({
 													type SubStat = {
 														label: string;
 														placed: number;
+														totalOffers?: number;
 														total?: number | null;
 														pct?: number | null;
 														avg?: number;
@@ -458,6 +459,7 @@ export default function BranchSection({
 														filterFn: (n: number) => boolean
 													): {
 														placed: number;
+														totalOffers: number;
 														avg: number;
 														median: number;
 													} => {
@@ -465,6 +467,8 @@ export default function BranchSection({
 															const n = toNum(s.enrollment_number);
 															return Number.isFinite(n) && filterFn(n);
 														});
+														
+														const totalOffers = filtered.length; // Total count including multiple offers
 														
 														// Track highest package per unique student
 														const studentMaxPackages: Map<string, number> = new Map();
@@ -504,7 +508,7 @@ export default function BranchSection({
 																		sorted[sorted.length / 2]) /
 																  2
 															: 0;
-														return { placed, avg, median };
+														return { placed, totalOffers, avg, median };
 													};
 
 													const subs: SubStat[] = [];
@@ -516,7 +520,7 @@ export default function BranchSection({
 																	typeof entry.start === "number" &&
 																	typeof entry.end === "number"
 																) {
-																	const { placed, avg, median } =
+																	const { placed, totalOffers, avg, median } =
 																		computeStatsFor(
 																			(n) => n >= entry.start && n < entry.end
 																		);
@@ -536,6 +540,7 @@ export default function BranchSection({
 																	subs.push({
 																		label: `Intg. MTech - ${subBranch}`,
 																		placed,
+																		totalOffers,
 																		total,
 																		pct,
 																		avg,
@@ -552,7 +557,7 @@ export default function BranchSection({
 																	typeof entry.start === "number" &&
 																	typeof entry.end === "number"
 																) {
-																	const { placed, avg, median } =
+																	const { placed, totalOffers, avg, median } =
 																		computeStatsFor(
 																			(n) => n >= entry.start && n < entry.end
 																		);
@@ -571,6 +576,7 @@ export default function BranchSection({
 																	subs.push({
 																		label: `${branch} - ${batchKey}`,
 																		placed,
+																		totalOffers,
 																		total,
 																		pct,
 																		avg,
@@ -681,21 +687,31 @@ export default function BranchSection({
 																						)}
 																					</div>
 																					{sc.total ? (
-																						<Badge
-																							className="px-2 py-1 text-xs sm:text-sm font-semibold shadow-sm"
-																							style={{
-																								backgroundColor:
-																									"var(--accent-color)",
-																								color: "white",
-																							}}
-																						>
-																							<span className="font-semibold">
-																								{sc.placed}
-																							</span>
-																							<span className="ml-1 text-[8px] sm:text-xs font-medium opacity-90">
-																								/ {sc.total}
-																							</span>
-																						</Badge>
+																						<div className="flex flex-col items-end gap-1">
+																							<Badge
+																								className="px-2 py-1 text-xs sm:text-sm font-semibold shadow-sm"
+																								style={{
+																									backgroundColor:
+																										"var(--accent-color)",
+																									color: "white",
+																								}}
+																							>
+																								<span className="font-semibold">
+																									{sc.placed}
+																								</span>
+																								<span className="ml-1 text-[8px] sm:text-xs font-medium opacity-90">
+																									/ {sc.total}
+																								</span>
+																							</Badge>
+																							{sc.totalOffers && sc.totalOffers !== sc.placed && (
+																								<span
+																									className="text-[9px] sm:text-[10px] font-medium opacity-75"
+																									style={{ color: "var(--label-color)" }}
+																								>
+																									{sc.totalOffers} offers
+																								</span>
+																							)}
+																						</div>
 																					) : null}
 																				</div>
 
@@ -776,7 +792,7 @@ export default function BranchSection({
 																color: "var(--text-color)",
 															}}
 														>
-															{getBranchStudents(branch).length} students
+															{getBranchStudents(branch).length} offers
 														</Badge>
 													</div>
 
