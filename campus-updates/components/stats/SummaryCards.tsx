@@ -14,15 +14,22 @@ type Props = {
 		overallHighest: number;
 	};
 	companies: { filtered: number; total: number };
+	offers?: {
+		filteredUniqueStudents: number;
+		totalUniqueStudents: number;
+		filteredTotalOffers: number;
+		totalOffers: number;
+	};
 };
 
 export default function SummaryCards({
 	placement,
 	packages,
 	companies,
+	offers,
 }: Props) {
 	return (
-		<div className="grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-5 text-center">
+		<div className="grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-6 text-center">
 			{/* Placement Rate */}
 			<Card
 				className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
@@ -221,6 +228,52 @@ export default function SummaryCards({
 					</div>
 				</CardContent>
 			</Card>
+
+			{/* Total Offers */}
+			{offers && (
+				<Card
+					className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
+					style={{
+						backgroundColor: "var(--card-bg)",
+						borderColor: "var(--border-color)",
+						color: "var(--text-color)",
+					}}
+				>
+					<CardContent className="p-4 sm:p-6">
+						<div className="flex items-center justify-between">
+							<div className="flex-1 min-w-0">
+								<p
+									className="text-xs sm:text-sm font-medium mb-1 truncate"
+									style={{ color: "var(--label-color)" }}
+								>
+									Total Offers
+								</p>
+								<p
+									className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight"
+									style={{ color: "var(--text-color)" }}
+								>
+									{offers.filteredTotalOffers}
+								</p>
+								<p
+									className="text-xs truncate font-medium"
+									style={{ color: "var(--label-color)" }}
+								>
+									{offers.filteredUniqueStudents} unique students
+								</p>
+								{(offers.filteredTotalOffers !== offers.totalOffers || 
+								  offers.filteredUniqueStudents !== offers.totalUniqueStudents) && (
+									<p
+										className="text-xs truncate"
+										style={{ color: "var(--label-color)" }}
+									>
+										overall: {offers.totalOffers} offers ({offers.totalUniqueStudents} students)
+									</p>
+								)}
+							</div>
+						</div>
+					</CardContent>
+				</Card>
+			)}
 		</div>
 	);
 }

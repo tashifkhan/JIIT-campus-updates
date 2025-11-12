@@ -233,7 +233,20 @@ export default function StatsPage() {
 	]);
 
 	// Overall stats (excluding JUIT, Other, MTech)
-	const totalStudentsPlaced = includedStudents.length;
+	// Track unique students (by enrollment number) and total offers
+	const uniqueStudentsPlaced = useMemo(() => {
+		const uniqueEnrollments = new Set<string>();
+		includedStudents.forEach((s) => {
+			if (s.enrollment_number) {
+				uniqueEnrollments.add(s.enrollment_number);
+			}
+		});
+		return uniqueEnrollments.size;
+	}, [includedStudents]);
+	
+	const totalOffers = includedStudents.length; // Total number of offers (including multiple offers per student)
+	const totalStudentsPlaced = uniqueStudentsPlaced; // For backward compatibility
+	
 	const uniqueCompanies = useMemo(
 		() => new Set(allStudents.map((s) => s.company)).size,
 		[allStudents]
@@ -241,10 +254,22 @@ export default function StatsPage() {
 	
 	const allPackages = useMemo(() => {
 		const pkgs: number[] = [];
+		const studentMaxPackages: Map<string, number> = new Map();
+		
+		// Track highest package per unique student
 		includedStudents.forEach((s) => {
+			if (!s.enrollment_number) return;
 			const v = getStudentPackage(s, s.placement);
-			if (v != null && v > 0) pkgs.push(v);
+			if (v != null && v > 0) {
+				const currentMax = studentMaxPackages.get(s.enrollment_number) || 0;
+				if (v > currentMax) {
+					studentMaxPackages.set(s.enrollment_number, v);
+				}
+			}
 		});
+		
+		// Convert to array for calculations
+		studentMaxPackages.forEach((pkg) => pkgs.push(pkg));
 		return pkgs;
 	}, [includedStudents]);
 	const averagePackage = allPackages.length
@@ -260,6 +285,18 @@ export default function StatsPage() {
 	})();
 
 	// Filtered stats (already filtered to exclude JUIT, Other, MTech via filteredStudents)
+	const filteredUniqueStudentsPlaced = useMemo(() => {
+		const uniqueEnrollments = new Set<string>();
+		filteredStudents.forEach((s) => {
+			if (s.enrollment_number) {
+				uniqueEnrollments.add(s.enrollment_number);
+			}
+		});
+		return uniqueEnrollments.size;
+	}, [filteredStudents]);
+	
+	const filteredTotalOffers = filteredStudents.length;
+	
 	const filteredPackages = useMemo(() => {
 		const pkgs: number[] = [];
 		filteredStudents.forEach((s) => {
@@ -359,27 +396,45 @@ export default function StatsPage() {
 			string,
 			{
 				count: number;
+				uniqueCount: number;
 				packages: number[];
 				avgPackage: number;
 				highest: number;
 				median: number;
 			}
 		> = {};
+		
+		// Track unique enrollments per branch
+		const branchEnrollments: Record<string, Set<string>> = {};
+		
 		filteredStudents.forEach((s) => {
 			const b = getBranch(s.enrollment_number);
 			if (!acc[b])
 				acc[b] = {
 					count: 0,
+					uniqueCount: 0,
 					packages: [],
 					avgPackage: 0,
 					highest: 0,
 					median: 0,
 				};
-			acc[b].count += 1;
+			if (!branchEnrollments[b]) {
+				branchEnrollments[b] = new Set();
+			}
+			
+			acc[b].count += 1; // Total offers
+			if (s.enrollment_number) {
+				branchEnrollments[b].add(s.enrollment_number);
+			}
+			
 			const v = getStudentPackage(s, s.placement);
 			if (v != null && v > 0) acc[b].packages.push(v);
 		});
+		
+		// Set unique counts
 		Object.keys(acc).forEach((b) => {
+			acc[b].uniqueCount = branchEnrollments[b]?.size || 0;
+			
 			const pkgs = acc[b].packages;
 			acc[b].avgPackage = pkgs.length
 				? pkgs.reduce((a, c) => a + c, 0) / pkgs.length
@@ -425,21 +480,27 @@ export default function StatsPage() {
 		[branchTotalCounts]
 	);
 	const totalPlacedInCountedBranches = useMemo(() => {
-		return placements.reduce((sum, p) => {
-			const inc = p.students_selected.filter((s) => {
+		const uniqueEnrollments = new Set<string>();
+		placements.forEach((p) => {
+			p.students_selected.forEach((s) => {
 				const branch = getBranch(s.enrollment_number);
-				return branchesWithTotals.has(branch) && !EXCLUDED_BRANCHES.has(branch);
-			}).length;
-			return sum + inc;
-		}, 0);
+				if (branchesWithTotals.has(branch) && !EXCLUDED_BRANCHES.has(branch) && s.enrollment_number) {
+					uniqueEnrollments.add(s.enrollment_number);
+				}
+			});
+		});
+		return uniqueEnrollments.size;
 	}, [placements, branchesWithTotals]);
-	const filteredPlacedInCountedBranches = useMemo(
-		() =>
-			filteredStudents.filter((s) =>
-				branchesWithTotals.has(getBranch(s.enrollment_number))
-			).length,
-		[filteredStudents, branchesWithTotals]
-	);
+	
+	const filteredPlacedInCountedBranches = useMemo(() => {
+		const uniqueEnrollments = new Set<string>();
+		filteredStudents.forEach((s) => {
+			if (branchesWithTotals.has(getBranch(s.enrollment_number)) && s.enrollment_number) {
+				uniqueEnrollments.add(s.enrollment_number);
+			}
+		});
+		return uniqueEnrollments.size;
+	}, [filteredStudents, branchesWithTotals]);
 	const overallPlacementPct = overallTotalStudentsExclJUIT
 		? (totalPlacedInCountedBranches / overallTotalStudentsExclJUIT) * 100
 		: 0;
@@ -634,6 +695,12 @@ export default function StatsPage() {
 					companies={{
 						filtered: filteredUniqueCompanies,
 						total: uniqueCompanies,
+					}}
+					offers={{
+						filteredUniqueStudents: filteredUniqueStudentsPlaced,
+						totalUniqueStudents: uniqueStudentsPlaced,
+						filteredTotalOffers: filteredTotalOffers,
+						totalOffers: totalOffers,
 					}}
 				/>
 

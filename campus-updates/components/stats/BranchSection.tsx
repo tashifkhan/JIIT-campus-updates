@@ -127,16 +127,20 @@ export default function BranchSection({
 																{(() => {
 																	const totalForBranch =
 																		branchTotalCounts[branch] || 0;
+																	const uniqueCount = (stats as any).uniqueCount || stats.count;
 																	const pct =
 																		totalForBranch > 0
-																			? (stats.count / totalForBranch) * 100
+																			? (uniqueCount / totalForBranch) * 100
 																			: null;
 																	return (
 																		<p
 																			className="text-xs"
 																			style={{ color: "var(--label-color)" }}
 																		>
-																			{stats.count} placed
+																			{uniqueCount} placed
+																			{stats.count !== uniqueCount && (
+																				<> ({stats.count} offers)</>
+																			)}
 																			{totalForBranch ? (
 																				<>
 																					{" "}
@@ -216,16 +220,20 @@ export default function BranchSection({
 																{(() => {
 																	const totalForBranch =
 																		branchTotalCounts[branch] || 0;
+																	const uniqueCount = (stats as any).uniqueCount || stats.count;
 																	const pct =
 																		totalForBranch > 0
-																			? (stats.count / totalForBranch) * 100
+																			? (uniqueCount / totalForBranch) * 100
 																			: null;
 																	return (
 																		<p
 																			className="text-xs"
 																			style={{ color: "var(--label-color)" }}
 																		>
-																			{stats.count} placed
+																			{uniqueCount} placed
+																			{stats.count !== uniqueCount && (
+																				<> ({stats.count} offers)</>
+																			)}
 																			{totalForBranch ? (
 																				<>
 																					{" "}
@@ -310,9 +318,10 @@ export default function BranchSection({
 													{(() => {
 														const totalForBranch =
 															branchTotalCounts[branch] || 0;
+														const uniqueCount = (stats as any).uniqueCount || stats.count;
 														const pct =
 															totalForBranch > 0
-																? (stats.count / totalForBranch) * 100
+																? (uniqueCount / totalForBranch) * 100
 																: null;
 														return (
 															<div
@@ -326,7 +335,7 @@ export default function BranchSection({
 																	className="text-lg sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2"
 																	style={{ color: "var(--text-color)" }}
 																>
-																	{stats.count}
+																	{uniqueCount}
 																	{totalForBranch ? (
 																		<span
 																			className="text-base sm:text-xl font-medium ml-1"
@@ -343,6 +352,14 @@ export default function BranchSection({
 																	{totalForBranch
 																		? "Placed / Total"
 																		: "Students"}
+																	{stats.count !== uniqueCount && (
+																		<span
+																			className="block text-[10px] sm:text-xs"
+																			style={{ color: "var(--success-dark)" }}
+																		>
+																			({stats.count} offers)
+																		</span>
+																	)}
 																	{totalForBranch ? (
 																		<span
 																			className="block font-semibold"
