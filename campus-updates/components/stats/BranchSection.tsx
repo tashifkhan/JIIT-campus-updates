@@ -547,7 +547,8 @@ export default function BranchSection({
 														);
 													}
 
-													if (!subs.length) return null;
+													// Don't show subsections if there's only one (it's redundant)
+													if (!subs.length || subs.length === 1) return null;
 
 													const pctBarColor = (pct?: number | null) => {
 														if (pct == null) return "var(--accent-color)";
