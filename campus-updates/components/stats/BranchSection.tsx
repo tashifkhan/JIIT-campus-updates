@@ -352,14 +352,6 @@ export default function BranchSection({
 																	{totalForBranch
 																		? "Placed / Total"
 																		: "Students"}
-																	{stats.count !== uniqueCount && (
-																		<span
-																			className="block text-[10px] sm:text-xs"
-																			style={{ color: "var(--success-dark)" }}
-																		>
-																			({stats.count} offers)
-																		</span>
-																	)}
 																	{totalForBranch ? (
 																		<span
 																			className="block font-semibold"
