@@ -465,17 +465,34 @@ export default function BranchSection({
 															const n = toNum(s.enrollment_number);
 															return Number.isFinite(n) && filterFn(n);
 														});
-														const pkgs: number[] = [];
+														
+														// Track highest package per unique student
+														const studentMaxPackages: Map<string, number> = new Map();
+														const uniqueEnrollments = new Set<string>();
+														
 														filtered.forEach((s) => {
-															const plc =
-																s.placement ||
-																(placements.find(
-																	(p) => p.company === s.company
-																) as Placement);
-															const pkg = plc ? pkgFrom(s, plc) : null;
-															if (pkg != null && pkg > 0) pkgs.push(pkg);
+															if (s.enrollment_number) {
+																uniqueEnrollments.add(s.enrollment_number);
+																const plc =
+																	s.placement ||
+																	(placements.find(
+																		(p) => p.company === s.company
+																	) as Placement);
+																const pkg = plc ? pkgFrom(s, plc) : null;
+																if (pkg != null && pkg > 0) {
+																	const currentMax = studentMaxPackages.get(s.enrollment_number) || 0;
+																	if (pkg > currentMax) {
+																		studentMaxPackages.set(s.enrollment_number, pkg);
+																	}
+																}
+															}
 														});
-														const placed = filtered.length;
+														
+														// Get all max packages for unique students
+														const pkgs: number[] = [];
+														studentMaxPackages.forEach((pkg) => pkgs.push(pkg));
+														
+														const placed = uniqueEnrollments.size; // Use unique count
 														const avg = pkgs.length
 															? pkgs.reduce((a, c) => a + c, 0) / pkgs.length
 															: 0;

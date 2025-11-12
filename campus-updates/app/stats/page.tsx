@@ -299,10 +299,22 @@ export default function StatsPage() {
 	
 	const filteredPackages = useMemo(() => {
 		const pkgs: number[] = [];
+		const studentMaxPackages: Map<string, number> = new Map();
+		
+		// Track highest package per unique student
 		filteredStudents.forEach((s) => {
+			if (!s.enrollment_number) return;
 			const v = getStudentPackage(s, s.placement);
-			if (v != null && v > 0) pkgs.push(v);
+			if (v != null && v > 0) {
+				const currentMax = studentMaxPackages.get(s.enrollment_number) || 0;
+				if (v > currentMax) {
+					studentMaxPackages.set(s.enrollment_number, v);
+				}
+			}
 		});
+		
+		// Convert to array for calculations
+		studentMaxPackages.forEach((pkg) => pkgs.push(pkg));
 		return pkgs;
 	}, [filteredStudents]);
 	const filteredAveragePackage = filteredPackages.length
@@ -404,8 +416,9 @@ export default function StatsPage() {
 			}
 		> = {};
 		
-		// Track unique enrollments per branch
+		// Track unique enrollments per branch and their highest packages
 		const branchEnrollments: Record<string, Set<string>> = {};
+		const branchStudentMaxPackages: Record<string, Map<string, number>> = {};
 		
 		filteredStudents.forEach((s) => {
 			const b = getBranch(s.enrollment_number);
@@ -421,21 +434,34 @@ export default function StatsPage() {
 			if (!branchEnrollments[b]) {
 				branchEnrollments[b] = new Set();
 			}
+			if (!branchStudentMaxPackages[b]) {
+				branchStudentMaxPackages[b] = new Map();
+			}
 			
 			acc[b].count += 1; // Total offers
 			if (s.enrollment_number) {
 				branchEnrollments[b].add(s.enrollment_number);
+				
+				// Track highest package per student in this branch
+				const v = getStudentPackage(s, s.placement);
+				if (v != null && v > 0) {
+					const currentMax = branchStudentMaxPackages[b].get(s.enrollment_number) || 0;
+					if (v > currentMax) {
+						branchStudentMaxPackages[b].set(s.enrollment_number, v);
+					}
+				}
 			}
-			
-			const v = getStudentPackage(s, s.placement);
-			if (v != null && v > 0) acc[b].packages.push(v);
 		});
 		
-		// Set unique counts
+		// Calculate statistics using unique students' highest packages
 		Object.keys(acc).forEach((b) => {
 			acc[b].uniqueCount = branchEnrollments[b]?.size || 0;
 			
-			const pkgs = acc[b].packages;
+			// Get all max packages for unique students in this branch
+			const pkgs: number[] = [];
+			branchStudentMaxPackages[b]?.forEach((pkg) => pkgs.push(pkg));
+			
+			acc[b].packages = pkgs;
 			acc[b].avgPackage = pkgs.length
 				? pkgs.reduce((a, c) => a + c, 0) / pkgs.length
 				: 0;
