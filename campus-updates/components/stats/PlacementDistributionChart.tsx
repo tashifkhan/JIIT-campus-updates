@@ -63,7 +63,7 @@ export default function PlacementDistributionChart({
 }: Props) {
 	// Exclude these branches from all displays
 	const EXCLUDED_BRANCHES = new Set(["JUIT", "Other", "MTech"]);
-	
+
 	// Get all unique branches from students (excluding JUIT, Other, MTech)
 	const availableBranches = useMemo(() => {
 		const branches = new Set<string>();
@@ -289,7 +289,7 @@ export default function PlacementDistributionChart({
 					<div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
 						<div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm">
 							<div className="flex items-center gap-1.5 sm:gap-2">
-								<span style={{ color: "var(--label-color)" }}>Students:</span>
+								<span style={{ color: "var(--label-color)" }}>offers:</span>
 								<span
 									className="font-semibold"
 									style={{ color: "var(--text-color)" }}
@@ -309,25 +309,27 @@ export default function PlacementDistributionChart({
 								</span>
 							</div>
 						</div>
-					<div className="flex items-center gap-2 flex-wrap">
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => setChartType(chartType === "area" ? "line" : "area")}
-							className="h-7 sm:h-8 text-xs sm:text-sm"
-						>
-							{chartType === "area" ? (
-								<>
-									<BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
-									<span className="hidden sm:inline">Area</span>
-								</>
-							) : (
-								<>
-									<LineChart className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
-									<span className="hidden sm:inline">Line</span>
-								</>
-							)}
-						</Button>
+						<div className="flex items-center gap-2 flex-wrap">
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() =>
+									setChartType(chartType === "area" ? "line" : "area")
+								}
+								className="h-7 sm:h-8 text-xs sm:text-sm"
+							>
+								{chartType === "area" ? (
+									<>
+										<BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+										<span className="hidden sm:inline">Area</span>
+									</>
+								) : (
+									<>
+										<LineChart className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+										<span className="hidden sm:inline">Line</span>
+									</>
+								)}
+							</Button>
 							<Button
 								variant={showBranchSpecific ? "default" : "outline"}
 								size="sm"
@@ -499,7 +501,7 @@ export default function PlacementDistributionChart({
 											</div>
 											<div className="text-right text-xs sm:text-sm">
 												<span style={{ color: "var(--label-color)" }}>
-													{branchStudents.length} students
+													{branchStudents.length} offers
 												</span>
 												<span
 													className="ml-2 font-semibold"
@@ -732,7 +734,7 @@ export default function PlacementDistributionChart({
 										strokeDasharray="5 5"
 										fill="url(#color-Overall)"
 										fillOpacity={0.8}
-										name="Overall (All Students)"
+										name="Overall (All offers)"
 										animationDuration={1000}
 										className="[stroke:var(--text-color)]"
 									/>
@@ -807,7 +809,7 @@ export default function PlacementDistributionChart({
 											stroke: "var(--accent-color)",
 										}}
 										activeDot={{ r: 6 }}
-										name="Overall (All Students)"
+										name="Overall (All offers)"
 										animationDuration={1000}
 										className="[stroke:var(--text-color)]"
 									/>
@@ -840,7 +842,7 @@ export default function PlacementDistributionChart({
 									className="font-bold text-sm sm:text-base"
 									style={{ color: "var(--text-color)" }}
 								>
-									Overall (All Students)
+									Overall (All offers)
 								</span>
 							</div>
 							<div className="text-left sm:text-right pl-5 sm:pl-0">
@@ -848,7 +850,7 @@ export default function PlacementDistributionChart({
 									className="text-xs sm:text-sm"
 									style={{ color: "var(--label-color)" }}
 								>
-									{stats.overallTotal} students
+									{stats.overallTotal} offers
 								</div>
 								<div
 									className="text-base sm:text-lg font-bold"
