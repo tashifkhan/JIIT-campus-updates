@@ -24,6 +24,9 @@ export interface Placement {
   additional_info: string;
   email_subject: string;
   email_sender: string;
+  saved_at?: string;
+  createdAt?: string;
+  _id?: string;
 }
 
 export type StudentWithPlacement = Student & {

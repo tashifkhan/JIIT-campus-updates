@@ -11,6 +11,7 @@ import BranchSection from "@/components/stats/BranchSection";
 import CompanySection from "@/components/stats/CompanySection";
 import PlacedStudentsSection from "@/components/stats/PlacedStudentsSection";
 import PlacementDistributionChart from "@/components/stats/PlacementDistributionChart";
+import PlacementTimeline from "@/components/stats/PlacementTimeline";
 import OfficialPlacements from "@/components/stats/OfficialPlacements";
 import enrollmentRanges from "./enrollmemt_range.json";
 import studentCounts from "./student_count.json";
@@ -39,8 +40,6 @@ export default function StatsPage() {
 			return json.data as Placement[];
 		},
 	});
-
-
 
 	const placements: Placement[] = Array.isArray(data) ? (data as any) : [];
 
@@ -172,10 +171,13 @@ export default function StatsPage() {
 
 	// Exclude these branches from all calculations and displays
 	const EXCLUDED_BRANCHES = new Set(["JUIT", "Other", "MTech"]);
-	
+
 	// Filter out excluded branches from all students
 	const includedStudents = useMemo(
-		() => allStudents.filter((s) => !EXCLUDED_BRANCHES.has(getBranch(s.enrollment_number))),
+		() =>
+			allStudents.filter(
+				(s) => !EXCLUDED_BRANCHES.has(getBranch(s.enrollment_number))
+			),
 		[allStudents]
 	);
 
@@ -243,19 +245,19 @@ export default function StatsPage() {
 		});
 		return uniqueEnrollments.size;
 	}, [includedStudents]);
-	
+
 	const totalOffers = includedStudents.length; // Total number of offers (including multiple offers per student)
 	const totalStudentsPlaced = uniqueStudentsPlaced; // For backward compatibility
-	
+
 	const uniqueCompanies = useMemo(
 		() => new Set(allStudents.map((s) => s.company)).size,
 		[allStudents]
 	);
-	
+
 	const allPackages = useMemo(() => {
 		const pkgs: number[] = [];
 		const studentMaxPackages: Map<string, number> = new Map();
-		
+
 		// Track highest package per unique student
 		includedStudents.forEach((s) => {
 			if (!s.enrollment_number) return;
@@ -267,7 +269,7 @@ export default function StatsPage() {
 				}
 			}
 		});
-		
+
 		// Convert to array for calculations
 		studentMaxPackages.forEach((pkg) => pkgs.push(pkg));
 		return pkgs;
@@ -294,13 +296,13 @@ export default function StatsPage() {
 		});
 		return uniqueEnrollments.size;
 	}, [filteredStudents]);
-	
+
 	const filteredTotalOffers = filteredStudents.length;
-	
+
 	const filteredPackages = useMemo(() => {
 		const pkgs: number[] = [];
 		const studentMaxPackages: Map<string, number> = new Map();
-		
+
 		// Track highest package per unique student
 		filteredStudents.forEach((s) => {
 			if (!s.enrollment_number) return;
@@ -312,7 +314,7 @@ export default function StatsPage() {
 				}
 			}
 		});
-		
+
 		// Convert to array for calculations
 		studentMaxPackages.forEach((pkg) => pkgs.push(pkg));
 		return pkgs;
@@ -415,11 +417,11 @@ export default function StatsPage() {
 				median: number;
 			}
 		> = {};
-		
+
 		// Track unique enrollments per branch and their highest packages
 		const branchEnrollments: Record<string, Set<string>> = {};
 		const branchStudentMaxPackages: Record<string, Map<string, number>> = {};
-		
+
 		filteredStudents.forEach((s) => {
 			const b = getBranch(s.enrollment_number);
 			if (!acc[b])
@@ -437,30 +439,31 @@ export default function StatsPage() {
 			if (!branchStudentMaxPackages[b]) {
 				branchStudentMaxPackages[b] = new Map();
 			}
-			
+
 			acc[b].count += 1; // Total offers
 			if (s.enrollment_number) {
 				branchEnrollments[b].add(s.enrollment_number);
-				
+
 				// Track highest package per student in this branch
 				const v = getStudentPackage(s, s.placement);
 				if (v != null && v > 0) {
-					const currentMax = branchStudentMaxPackages[b].get(s.enrollment_number) || 0;
+					const currentMax =
+						branchStudentMaxPackages[b].get(s.enrollment_number) || 0;
 					if (v > currentMax) {
 						branchStudentMaxPackages[b].set(s.enrollment_number, v);
 					}
 				}
 			}
 		});
-		
+
 		// Calculate statistics using unique students' highest packages
 		Object.keys(acc).forEach((b) => {
 			acc[b].uniqueCount = branchEnrollments[b]?.size || 0;
-			
+
 			// Get all max packages for unique students in this branch
 			const pkgs: number[] = [];
 			branchStudentMaxPackages[b]?.forEach((pkg) => pkgs.push(pkg));
-			
+
 			acc[b].packages = pkgs;
 			acc[b].avgPackage = pkgs.length
 				? pkgs.reduce((a, c) => a + c, 0) / pkgs.length
@@ -483,7 +486,7 @@ export default function StatsPage() {
 			Object.entries(studentCounts as any).forEach(([branch, counts]) => {
 				// Skip excluded branches
 				if (EXCLUDED_BRANCHES.has(branch)) return;
-				
+
 				if (counts && typeof counts === "object") {
 					const sum = Object.values(counts).reduce(
 						(a: number, c: any) => a + Number(c || 0),
@@ -510,18 +513,25 @@ export default function StatsPage() {
 		placements.forEach((p) => {
 			p.students_selected.forEach((s) => {
 				const branch = getBranch(s.enrollment_number);
-				if (branchesWithTotals.has(branch) && !EXCLUDED_BRANCHES.has(branch) && s.enrollment_number) {
+				if (
+					branchesWithTotals.has(branch) &&
+					!EXCLUDED_BRANCHES.has(branch) &&
+					s.enrollment_number
+				) {
 					uniqueEnrollments.add(s.enrollment_number);
 				}
 			});
 		});
 		return uniqueEnrollments.size;
 	}, [placements, branchesWithTotals]);
-	
+
 	const filteredPlacedInCountedBranches = useMemo(() => {
 		const uniqueEnrollments = new Set<string>();
 		filteredStudents.forEach((s) => {
-			if (branchesWithTotals.has(getBranch(s.enrollment_number)) && s.enrollment_number) {
+			if (
+				branchesWithTotals.has(getBranch(s.enrollment_number)) &&
+				s.enrollment_number
+			) {
 				uniqueEnrollments.add(s.enrollment_number);
 			}
 		});
@@ -644,7 +654,7 @@ export default function StatsPage() {
 						</p>
 					</div>
 				</div>
-				
+
 				{/* Official placement data banner */}
 				<OfficialPlacements />
 				{/* End official placement data banner */}
@@ -728,6 +738,15 @@ export default function StatsPage() {
 						filteredTotalOffers: filteredTotalOffers,
 						totalOffers: totalOffers,
 					}}
+				/>
+
+				{/* Placement Timeline */}
+				<PlacementTimeline
+					placements={
+						hasActiveFilters
+							? Array.from(new Set(filteredStudents.map((s) => s.placement)))
+							: placements
+					}
 				/>
 
 				{/* Branches */}
