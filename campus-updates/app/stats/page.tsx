@@ -740,15 +740,6 @@ export default function StatsPage() {
 					}}
 				/>
 
-				{/* Placement Timeline */}
-				<PlacementTimeline
-					placements={
-						hasActiveFilters
-							? Array.from(new Set(filteredStudents.map((s) => s.placement)))
-							: placements
-					}
-				/>
-
 				{/* Branches */}
 				<BranchSection
 					BRANCHES_LIMIT={BRANCHES_LIMIT}
@@ -763,6 +754,16 @@ export default function StatsPage() {
 				{/* Placement Distribution Chart */}
 				<PlacementDistributionChart
 					students={filteredStudents}
+					getBranch={getBranch}
+				/>
+
+				{/* Placement Timeline */}
+				<PlacementTimeline
+					placements={
+						hasActiveFilters
+							? Array.from(new Set(filteredStudents.map((s) => s.placement)))
+							: placements
+					}
 					getBranch={getBranch}
 				/>
 
