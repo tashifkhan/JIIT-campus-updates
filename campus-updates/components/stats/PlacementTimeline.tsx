@@ -19,14 +19,19 @@ import { Placement, getStudentPackage } from "@/lib/stats";
 
 type Props = {
 	placements: Placement[];
+	getBranch: (enrollment: string) => string;
 };
 
 type TimeFrame = "day" | "month";
 type MetricView = "count" | "package" | "combined";
 
-export default function PlacementTimeline({ placements }: Props) {
+export default function PlacementTimeline({ placements, getBranch }: Props) {
 	const [timeFrame, setTimeFrame] = useState<TimeFrame>("day");
 	const [view, setView] = useState<MetricView>("combined");
+	const [isCumulative, setIsCumulative] = useState(true);
+
+	// Exclude these branches
+	const EXCLUDED_BRANCHES = new Set(["JUIT", "Other", "MTech"]);
 
 	// Process data into time buckets
 	const chartData = useMemo(() => {
@@ -68,14 +73,14 @@ export default function PlacementTimeline({ placements }: Props) {
 			)
 			.sort((a, b) => a.derivedDate.getTime() - b.derivedDate.getTime());
 
-		// Group by date
+		// Group by date first
 		const groups: Record<
 			string,
 			{
 				date: string;
 				originalDate: Date;
-				offers: number;
-				students: number;
+				uniqueEnrollments: Set<string>;
+				totalOffers: number;
 				packages: number[];
 			}
 		> = {};
@@ -86,17 +91,24 @@ export default function PlacementTimeline({ placements }: Props) {
 				groups[key] = {
 					date: key,
 					originalDate: p.derivedDate,
-					offers: 0,
-					students: 0,
+					uniqueEnrollments: new Set(),
+					totalOffers: 0,
 					packages: [],
 				};
 			}
 
-			groups[key].offers += 1;
-			groups[key].students += p.students_selected.length;
-
-			// Collect packages
+			// Process students
 			p.students_selected.forEach((s) => {
+				// Filter by branch
+				const branch = getBranch(s.enrollment_number);
+				if (EXCLUDED_BRANCHES.has(branch)) return;
+
+				// Add to stats
+				groups[key].totalOffers += 1;
+				if (s.enrollment_number) {
+					groups[key].uniqueEnrollments.add(s.enrollment_number);
+				}
+
 				const pkg = getStudentPackage(s, p);
 				if (pkg && pkg > 0) {
 					groups[key].packages.push(pkg);
@@ -104,37 +116,77 @@ export default function PlacementTimeline({ placements }: Props) {
 			});
 		});
 
-		// Calculate stats per group and convert to array
-		return (
-			Object.values(groups)
-				.map((g) => {
-					const avgPkg = g.packages.length
-						? g.packages.reduce((a, b) => a + b, 0) / g.packages.length
-						: 0;
+		// Convert to array and sort by time
+		const sortedGroups = Object.values(groups)
+			.map((g) => ({
+				...g,
+				timestamp: g.originalDate.getTime(),
+			}))
+			.sort((a, b) => a.timestamp - b.timestamp);
 
-					// Median
-					const sortedPkgs = [...g.packages].sort((a, b) => a - b);
-					const medianPkg = sortedPkgs.length
-						? sortedPkgs.length % 2
-							? sortedPkgs[(sortedPkgs.length - 1) >> 1]
-							: (sortedPkgs[sortedPkgs.length / 2 - 1] +
-									sortedPkgs[sortedPkgs.length / 2]) /
-							  2
-						: 0;
+		// If cumulative, process running totals
+		if (isCumulative) {
+			const runningUniqueStudents = new Set<string>();
+			let runningTotalOffers = 0;
+			const runningPackages: number[] = [];
 
-					return {
-						date: g.date,
-						timestamp: g.originalDate.getTime(), // for sorting if needed
-						offers: g.offers,
-						students: g.students,
-						avgPackage: Number(avgPkg.toFixed(2)),
-						medianPackage: Number(medianPkg.toFixed(2)),
-					};
-				})
-				// Sort by timestamp to ensure correct order (especially for month view which might mix years if not careful, but our key logic handles it mostly. Better to sort by timestamp)
-				.sort((a, b) => a.timestamp - b.timestamp)
-		);
-	}, [placements, timeFrame]);
+			return sortedGroups.map((g) => {
+				// Update running totals
+				g.uniqueEnrollments.forEach((s) => runningUniqueStudents.add(s));
+				runningTotalOffers += g.totalOffers;
+				g.packages.forEach((p) => runningPackages.push(p));
+
+				// Calculate cumulative stats
+				const avgPkg = runningPackages.length
+					? runningPackages.reduce((a, b) => a + b, 0) / runningPackages.length
+					: 0;
+
+				// Median (this can be slow for large datasets, but fine for <1000 points)
+				const sortedPkgs = [...runningPackages].sort((a, b) => a - b);
+				const medianPkg = sortedPkgs.length
+					? sortedPkgs.length % 2
+						? sortedPkgs[(sortedPkgs.length - 1) >> 1]
+						: (sortedPkgs[sortedPkgs.length / 2 - 1] +
+								sortedPkgs[sortedPkgs.length / 2]) /
+						  2
+					: 0;
+
+				return {
+					date: g.date,
+					timestamp: g.originalDate.getTime(),
+					uniqueStudents: runningUniqueStudents.size,
+					totalOffers: runningTotalOffers,
+					avgPackage: Number(avgPkg.toFixed(2)),
+					medianPackage: Number(medianPkg.toFixed(2)),
+				};
+			});
+		}
+
+		// Non-cumulative (Individual)
+		return sortedGroups.map((g) => {
+			const avgPkg = g.packages.length
+				? g.packages.reduce((a, b) => a + b, 0) / g.packages.length
+				: 0;
+
+			const sortedPkgs = [...g.packages].sort((a, b) => a - b);
+			const medianPkg = sortedPkgs.length
+				? sortedPkgs.length % 2
+					? sortedPkgs[(sortedPkgs.length - 1) >> 1]
+					: (sortedPkgs[sortedPkgs.length / 2 - 1] +
+							sortedPkgs[sortedPkgs.length / 2]) /
+					  2
+				: 0;
+
+			return {
+				date: g.date,
+				timestamp: g.originalDate.getTime(),
+				uniqueStudents: g.uniqueEnrollments.size,
+				totalOffers: g.totalOffers,
+				avgPackage: Number(avgPkg.toFixed(2)),
+				medianPackage: Number(medianPkg.toFixed(2)),
+			};
+		});
+	}, [placements, timeFrame, getBranch, isCumulative]);
 
 	const CustomTooltip = ({ active, payload, label }: any) => {
 		if (!active || !payload || !payload.length) return null;
@@ -142,7 +194,7 @@ export default function PlacementTimeline({ placements }: Props) {
 		return (
 			<div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3">
 				<p className="font-semibold mb-2 text-slate-900 dark:text-slate-100">
-					{label}
+					{label} {isCumulative ? "(Cumulative)" : ""}
 				</p>
 				<div className="space-y-1">
 					{payload.map((entry: any, index: number) => (
@@ -178,6 +230,27 @@ export default function PlacementTimeline({ placements }: Props) {
 					</div>
 
 					<div className="flex flex-wrap items-center gap-2">
+						<div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+							<Button
+								variant={isCumulative ? "secondary" : "ghost"}
+								size="sm"
+								onClick={() => setIsCumulative(true)}
+								className="h-7 text-xs"
+							>
+								Cumulative
+							</Button>
+							<Button
+								variant={!isCumulative ? "secondary" : "ghost"}
+								size="sm"
+								onClick={() => setIsCumulative(false)}
+								className="h-7 text-xs"
+							>
+								Individual
+							</Button>
+						</div>
+
+						<div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block" />
+
 						<div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
 							<Button
 								variant={timeFrame === "day" ? "secondary" : "ghost"}
@@ -265,8 +338,8 @@ export default function PlacementTimeline({ placements }: Props) {
 								<>
 									<Bar
 										yAxisId="left"
-										dataKey="students"
-										name="Students Placed"
+										dataKey="uniqueStudents"
+										name="Unique Students"
 										fill="#3b82f6"
 										radius={[4, 4, 0, 0]}
 										maxBarSize={50}
@@ -274,8 +347,8 @@ export default function PlacementTimeline({ placements }: Props) {
 									/>
 									<Bar
 										yAxisId="left"
-										dataKey="offers"
-										name="Offers Released"
+										dataKey="totalOffers"
+										name="Total Offers"
 										fill="#10b981"
 										radius={[4, 4, 0, 0]}
 										maxBarSize={50}
