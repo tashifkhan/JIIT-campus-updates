@@ -81,7 +81,7 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 				originalDate: Date;
 				uniqueEnrollments: Set<string>;
 				totalOffers: number;
-				packages: number[];
+				studentMaxPackages: Map<string, number>;
 			}
 		> = {};
 
@@ -93,7 +93,7 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 					originalDate: p.derivedDate,
 					uniqueEnrollments: new Set(),
 					totalOffers: 0,
-					packages: [],
+					studentMaxPackages: new Map(),
 				};
 			}
 
@@ -107,11 +107,15 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 				groups[key].totalOffers += 1;
 				if (s.enrollment_number) {
 					groups[key].uniqueEnrollments.add(s.enrollment_number);
-				}
 
-				const pkg = getStudentPackage(s, p);
-				if (pkg && pkg > 0) {
-					groups[key].packages.push(pkg);
+					const pkg = getStudentPackage(s, p);
+					if (pkg && pkg > 0) {
+						const currentMax =
+							groups[key].studentMaxPackages.get(s.enrollment_number) || 0;
+						if (pkg > currentMax) {
+							groups[key].studentMaxPackages.set(s.enrollment_number, pkg);
+						}
+					}
 				}
 			});
 		});
@@ -128,21 +132,30 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 		if (isCumulative) {
 			const runningUniqueStudents = new Set<string>();
 			let runningTotalOffers = 0;
-			const runningPackages: number[] = [];
+			const runningStudentMaxPackages = new Map<string, number>();
 
 			return sortedGroups.map((g) => {
 				// Update running totals
 				g.uniqueEnrollments.forEach((s) => runningUniqueStudents.add(s));
 				runningTotalOffers += g.totalOffers;
-				g.packages.forEach((p) => runningPackages.push(p));
+
+				// Update running max packages
+				g.studentMaxPackages.forEach((pkg, enrollment) => {
+					const current = runningStudentMaxPackages.get(enrollment) || 0;
+					if (pkg > current) {
+						runningStudentMaxPackages.set(enrollment, pkg);
+					}
+				});
+
+				const currentPackages = Array.from(runningStudentMaxPackages.values());
 
 				// Calculate cumulative stats
-				const avgPkg = runningPackages.length
-					? runningPackages.reduce((a, b) => a + b, 0) / runningPackages.length
+				const avgPkg = currentPackages.length
+					? currentPackages.reduce((a, b) => a + b, 0) / currentPackages.length
 					: 0;
 
-				// Median (this can be slow for large datasets, but fine for <1000 points)
-				const sortedPkgs = [...runningPackages].sort((a, b) => a - b);
+				// Median
+				const sortedPkgs = [...currentPackages].sort((a, b) => a - b);
 				const medianPkg = sortedPkgs.length
 					? sortedPkgs.length % 2
 						? sortedPkgs[(sortedPkgs.length - 1) >> 1]
@@ -164,11 +177,13 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 
 		// Non-cumulative (Individual)
 		return sortedGroups.map((g) => {
-			const avgPkg = g.packages.length
-				? g.packages.reduce((a, b) => a + b, 0) / g.packages.length
+			const currentPackages = Array.from(g.studentMaxPackages.values());
+
+			const avgPkg = currentPackages.length
+				? currentPackages.reduce((a, b) => a + b, 0) / currentPackages.length
 				: 0;
 
-			const sortedPkgs = [...g.packages].sort((a, b) => a - b);
+			const sortedPkgs = [...currentPackages].sort((a, b) => a - b);
 			const medianPkg = sortedPkgs.length
 				? sortedPkgs.length % 2
 					? sortedPkgs[(sortedPkgs.length - 1) >> 1]
