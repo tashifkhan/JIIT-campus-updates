@@ -19,6 +19,7 @@ import {
 } from "recharts";
 import type { StudentWithPlacement } from "@/lib/stats";
 import { getStudentPackage } from "@/lib/stats";
+import { BranchPicker } from "./BranchPicker";
 
 type Props = {
 	students: StudentWithPlacement[];
@@ -112,25 +113,8 @@ export default function PlacementDistributionChart({
 	const [showBranchSpecific, setShowBranchSpecific] = useState(false);
 
 	// Toggle branch selection
-	const toggleBranch = (branch: string) => {
-		setSelectedBranches((prev) => {
-			const next = new Set(prev);
-			if (next.has(branch)) {
-				next.delete(branch);
-			} else {
-				next.add(branch);
-			}
-			return next;
-		});
-	};
-
-	// Select/Deselect all branches
-	const toggleAllBranches = () => {
-		if (selectedBranches.size === availableBranches.length) {
-			setSelectedBranches(new Set());
-		} else {
-			setSelectedBranches(new Set(availableBranches));
-		}
+	const handleBranchChange = (branches: Set<string>) => {
+		setSelectedBranches(branches);
 	};
 
 	// Prepare data for the chart
@@ -286,6 +270,7 @@ export default function PlacementDistributionChart({
 							Placement Distribution Across Packages
 						</span>
 					</div>
+
 					<div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
 						<div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm">
 							<div className="flex items-center gap-1.5 sm:gap-2">
@@ -310,22 +295,32 @@ export default function PlacementDistributionChart({
 							</div>
 						</div>
 						<div className="flex items-center gap-2 flex-wrap">
+							<BranchPicker
+								availableBranches={availableBranches}
+								selectedBranches={selectedBranches}
+								onChange={handleBranchChange}
+							/>
 							<Button
 								variant="outline"
 								size="sm"
 								onClick={() =>
 									setChartType(chartType === "area" ? "line" : "area")
 								}
-								className="h-7 sm:h-8 text-xs sm:text-sm"
+								className="h-8 w-8 p-0 sm:w-auto sm:px-3"
+								title={
+									chartType === "area"
+										? "Switch to Line Chart"
+										: "Switch to Area Chart"
+								}
 							>
 								{chartType === "area" ? (
 									<>
-										<BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+										<BarChart3 className="h-4 w-4 sm:mr-2" />
 										<span className="hidden sm:inline">Area</span>
 									</>
 								) : (
 									<>
-										<LineChart className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+										<LineChart className="h-4 w-4 sm:mr-2" />
 										<span className="hidden sm:inline">Line</span>
 									</>
 								)}
@@ -334,14 +329,14 @@ export default function PlacementDistributionChart({
 								variant={showBranchSpecific ? "default" : "outline"}
 								size="sm"
 								onClick={() => setShowBranchSpecific(!showBranchSpecific)}
-								className="h-7 sm:h-8 text-xs sm:text-sm"
+								className="h-8 w-8 p-0 sm:w-auto sm:px-3"
 								title={
 									showBranchSpecific
 										? "Show combined view"
 										: "Show individual branch graphs"
 								}
 							>
-								<TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+								<TrendingUp className="h-4 w-4 sm:mr-2" />
 								<span className="hidden sm:inline">
 									{showBranchSpecific ? "Combined" : "Individual"}
 								</span>
@@ -352,91 +347,6 @@ export default function PlacementDistributionChart({
 			</CardHeader>
 			<CardContent>
 				{/* Branch selector badges */}
-				<div className="mb-4 sm:mb-6">
-					<div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
-						<div className="flex items-center gap-2">
-							<p
-								className="text-xs sm:text-sm font-semibold"
-								style={{ color: "var(--text-color)" }}
-							>
-								Select Branches:
-							</p>
-							<span
-								className="text-xs px-2 py-0.5 rounded-full"
-								style={{
-									backgroundColor: "var(--accent-color)20",
-									color: "var(--accent-color)",
-								}}
-							>
-								{selectedBranches.size}/{availableBranches.length}
-							</span>
-						</div>
-						<button
-							onClick={toggleAllBranches}
-							className="text-xs sm:text-sm font-medium px-3 py-1.5 rounded-md transition-all hover:scale-105 active:scale-95"
-							style={{
-								backgroundColor: "var(--accent-color)15",
-								color: "var(--accent-color)",
-							}}
-						>
-							{selectedBranches.size === availableBranches.length
-								? "Clear All"
-								: "Select All"}
-						</button>
-					</div>
-					{/* Horizontal scroll container for mobile */}
-					<div className="relative">
-						<div className="overflow-x-auto pb-2 -mx-2 px-2 sm:overflow-visible scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600 scrollbar-track-transparent">
-							<div className="flex sm:flex-wrap gap-2 min-w-max sm:min-w-0">
-								{availableBranches.map((branch) => {
-									const isSelected = selectedBranches.has(branch);
-									const color = getBranchColor(branch);
-
-									return (
-										<button
-											key={branch}
-											onClick={() => toggleBranch(branch)}
-											className="group relative transition-all duration-200 hover:scale-105 active:scale-95 flex-shrink-0"
-										>
-											<Badge
-												variant={isSelected ? "default" : "outline"}
-												className="cursor-pointer text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 whitespace-nowrap font-medium shadow-sm hover:shadow-md transition-all"
-												style={
-													isSelected
-														? {
-																backgroundColor: color,
-																borderColor: color,
-																color: "white",
-																border: "2px solid",
-														  }
-														: {
-																borderColor: `${color}80`,
-																color: color,
-																backgroundColor: `${color}08`,
-																border: "2px solid",
-														  }
-												}
-											>
-												<div
-													className="w-2 h-2 rounded-full mr-1.5 sm:mr-2 transition-transform group-hover:scale-125"
-													style={{
-														backgroundColor: isSelected ? "white" : color,
-														boxShadow: isSelected
-															? `0 0 0 2px ${color}`
-															: "none",
-													}}
-												/>
-												{branch}
-											</Badge>
-										</button>
-									);
-								})}
-							</div>
-						</div>
-						{/* Scroll indicator for mobile */}
-						<div className="sm:hidden absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-white dark:from-slate-900 to-transparent pointer-events-none" />
-					</div>
-				</div>
 
 				{/* Chart */}
 				{selectedBranches.size === 0 ? (
