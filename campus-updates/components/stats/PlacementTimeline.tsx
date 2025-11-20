@@ -22,11 +22,11 @@ type Props = {
 	getBranch: (enrollment: string) => string;
 };
 
-type TimeFrame = "day" | "month";
+type TimeFrame = "month" | "day";
 type MetricView = "count" | "package" | "combined";
 
 export default function PlacementTimeline({ placements, getBranch }: Props) {
-	const [timeFrame, setTimeFrame] = useState<TimeFrame>("day");
+	const [timeFrame, setTimeFrame] = useState<TimeFrame>("month");
 	const [view, setView] = useState<MetricView>("combined");
 	const [isCumulative, setIsCumulative] = useState(true);
 
@@ -268,20 +268,20 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 
 						<div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
 							<Button
-								variant={timeFrame === "day" ? "secondary" : "ghost"}
-								size="sm"
-								onClick={() => setTimeFrame("day")}
-								className="h-7 text-xs"
-							>
-								Day
-							</Button>
-							<Button
 								variant={timeFrame === "month" ? "secondary" : "ghost"}
 								size="sm"
 								onClick={() => setTimeFrame("month")}
 								className="h-7 text-xs"
 							>
 								Month
+							</Button>
+							<Button
+								variant={timeFrame === "day" ? "secondary" : "ghost"}
+								size="sm"
+								onClick={() => setTimeFrame("day")}
+								className="h-7 text-xs"
+							>
+								Day
 							</Button>
 						</div>
 
