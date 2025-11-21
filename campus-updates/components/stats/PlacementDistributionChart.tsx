@@ -429,7 +429,7 @@ export default function PlacementDistributionChart({
 														margin={{
 															top: 10,
 															right: 10,
-															left: -20,
+															left: 0,
 															bottom: 0,
 														}}
 													>
@@ -489,7 +489,7 @@ export default function PlacementDistributionChart({
 														margin={{
 															top: 10,
 															right: 10,
-															left: -20,
+															left: 0,
 															bottom: 0,
 														}}
 													>
@@ -540,7 +540,7 @@ export default function PlacementDistributionChart({
 									margin={{
 										top: 10,
 										right: 10,
-										left: -20,
+										left: 0,
 										bottom: 0,
 									}}
 								>
@@ -655,7 +655,7 @@ export default function PlacementDistributionChart({
 									margin={{
 										top: 10,
 										right: 10,
-										left: -20,
+										left: 0,
 										bottom: 0,
 									}}
 								>
