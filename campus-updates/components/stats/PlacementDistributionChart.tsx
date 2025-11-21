@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, BarChart3, LineChart } from "lucide-react";
+
 import {
 	AreaChart,
 	Area,
@@ -300,47 +300,46 @@ export default function PlacementDistributionChart({
 								selectedBranches={selectedBranches}
 								onChange={handleBranchChange}
 							/>
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={() =>
-									setChartType(chartType === "area" ? "line" : "area")
-								}
-								className="h-8 w-8 p-0 sm:w-auto sm:px-3"
-								title={
-									chartType === "area"
-										? "Switch to Line Chart"
-										: "Switch to Area Chart"
-								}
-							>
-								{chartType === "area" ? (
-									<>
-										<BarChart3 className="h-4 w-4 sm:mr-2" />
-										<span className="hidden sm:inline">Area</span>
-									</>
-								) : (
-									<>
-										<LineChart className="h-4 w-4 sm:mr-2" />
-										<span className="hidden sm:inline">Line</span>
-									</>
-								)}
-							</Button>
-							<Button
-								variant={showBranchSpecific ? "default" : "outline"}
-								size="sm"
-								onClick={() => setShowBranchSpecific(!showBranchSpecific)}
-								className="h-8 w-8 p-0 sm:w-auto sm:px-3"
-								title={
-									showBranchSpecific
-										? "Show combined view"
-										: "Show individual branch graphs"
-								}
-							>
-								<TrendingUp className="h-4 w-4 sm:mr-2" />
-								<span className="hidden sm:inline">
-									{showBranchSpecific ? "Combined" : "Individual"}
-								</span>
-							</Button>
+
+							<div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+								<Button
+									variant={chartType === "area" ? "secondary" : "ghost"}
+									size="sm"
+									onClick={() => setChartType("area")}
+									className="h-7 text-xs"
+								>
+									Area
+								</Button>
+								<Button
+									variant={chartType === "line" ? "secondary" : "ghost"}
+									size="sm"
+									onClick={() => setChartType("line")}
+									className="h-7 text-xs"
+								>
+									Line
+								</Button>
+							</div>
+
+							<div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block" />
+
+							<div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+								<Button
+									variant={!showBranchSpecific ? "secondary" : "ghost"}
+									size="sm"
+									onClick={() => setShowBranchSpecific(false)}
+									className="h-7 text-xs"
+								>
+									Combined
+								</Button>
+								<Button
+									variant={showBranchSpecific ? "secondary" : "ghost"}
+									size="sm"
+									onClick={() => setShowBranchSpecific(true)}
+									className="h-7 text-xs"
+								>
+									Individual
+								</Button>
+							</div>
 						</div>
 					</div>
 				</CardTitle>
