@@ -25,7 +25,7 @@ import {
 	formatDate,
 	formatPackage,
 } from "@/lib/stats";
-import { Building2, Users } from "lucide-react";
+import { Users } from "lucide-react";
 
 type CompanyStats = Record<
 	string,
@@ -114,18 +114,13 @@ export default function CompanySection({
 								<CardContent className="p-4">
 									<div className="flex items-center justify-between mb-3">
 										<div className="flex items-center gap-3">
-											<div className="p-2 rounded-lg bg-muted/50">
-												<Building2 className="w-5 h-5 text-muted-foreground" />
-											</div>
-											<div>
-												<h3
-													className="font-bold text-lg leading-tight line-clamp-1"
-													style={{ color: "var(--text-color)" }}
-													title={company}
-												>
-													{company}
-												</h3>
-											</div>
+											<h3
+												className="font-bold text-lg leading-tight line-clamp-1"
+												style={{ color: "var(--text-color)" }}
+												title={company}
+											>
+												{company}
+											</h3>
 										</div>
 									</div>
 
