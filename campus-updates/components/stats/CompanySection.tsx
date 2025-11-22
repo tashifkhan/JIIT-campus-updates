@@ -25,6 +25,7 @@ import {
 	formatDate,
 	formatPackage,
 } from "@/lib/stats";
+import { Building2, Users } from "lucide-react";
 
 type CompanyStats = Record<
 	string,
@@ -100,7 +101,7 @@ export default function CompanySection({
 							}}
 						>
 							<Card
-								className="border card-theme cursor-pointer hover:shadow-lg transition-all duration-300"
+								className="border card-theme cursor-pointer hover:shadow-lg transition-all duration-300 active:scale-[0.98]"
 								style={{
 									backgroundColor: "var(--primary-color)",
 									borderColor: "var(--border-color)",
@@ -111,85 +112,59 @@ export default function CompanySection({
 								}}
 							>
 								<CardContent className="p-4">
-									<div className="flex justify-between items-start mb-2">
-										<h3
-											className="font-semibold flex-1"
-											style={{ color: "var(--text-color)" }}
-										>
-											{company}
-										</h3>
+									<div className="flex items-center justify-between mb-3">
+										<div className="flex items-center gap-3">
+											<div className="p-2 rounded-lg bg-muted/50">
+												<Building2 className="w-5 h-5 text-muted-foreground" />
+											</div>
+											<div>
+												<h3
+													className="font-bold text-lg leading-tight line-clamp-1"
+													style={{ color: "var(--text-color)" }}
+													title={company}
+												>
+													{company}
+												</h3>
+											</div>
+										</div>
 									</div>
-									<div className="space-y-2 text-sm">
-										<div className="flex justify-between">
-											<span style={{ color: "var(--label-color)" }}>
-												Students Placed:
-											</span>
-											<Badge
-												variant="secondary"
-												style={{
-													backgroundColor: "var(--card-bg)",
-													color: "var(--accent-color)",
-													borderColor: "var(--border-color)",
-												}}
-											>
-												{stats.studentsCount}
-											</Badge>
-										</div>
-										<div className="flex justify-between">
-											<span style={{ color: "var(--label-color)" }}>
-												Avg Package:
-											</span>
-											<span
-												className="font-semibold"
-												style={{ color: "var(--success-dark)" }}
-											>
-												{stats.studentsCount > 0
-													? formatPackage(stats.avgPackage)
-													: getCompanyFallbackPackage(company) > 0
-													? `${formatPackage(
-															getCompanyFallbackPackage(company)
-													  )} (assumed)`
-													: formatPackage(0)}
-											</span>
-										</div>
+
+									<div
+										className="grid grid-cols-2 gap-4 pt-2 border-t"
+										style={{ borderColor: "var(--border-color)" }}
+									>
 										<div>
-											<span
-												className="block mb-1"
+											<p
+												className="text-xs"
 												style={{ color: "var(--label-color)" }}
 											>
-												Profiles:
-											</span>
-											<div className="flex flex-wrap gap-1">
-												{Array.from(stats.profiles)
-													.slice(0, 3)
-													.map((profile: any, idx: number) => (
-														<Badge
-															key={idx}
-															variant="outline"
-															className="text-xs"
-															style={{
-																backgroundColor: "var(--card-bg)",
-																borderColor: "var(--border-color)",
-																color: "var(--text-color)",
-															}}
-														>
-															{profile}
-														</Badge>
-													))}
-												{Array.from(stats.profiles).length > 3 && (
-													<Badge
-														variant="outline"
-														className="text-xs"
-														style={{
-															backgroundColor: "var(--card-bg)",
-															borderColor: "var(--border-color)",
-															color: "var(--text-color)",
-														}}
-													>
-														+{Array.from(stats.profiles).length - 3} more
-													</Badge>
-												)}
+												Students Placed
+											</p>
+											<div className="flex items-center gap-1.5 mt-0.5">
+												<Users className="w-3.5 h-3.5 text-muted-foreground" />
+												<span
+													className="font-bold"
+													style={{ color: "var(--text-color)" }}
+												>
+													{stats.studentsCount}
+												</span>
 											</div>
+										</div>
+										<div className="text-right">
+											<p
+												className="text-xs"
+												style={{ color: "var(--label-color)" }}
+											>
+												Avg Package
+											</p>
+											<p
+												className="font-bold"
+												style={{ color: "var(--success-dark)" }}
+											>
+												{formatPackage(
+													stats.avgPackage || getCompanyFallbackPackage(company)
+												)}
+											</p>
 										</div>
 									</div>
 								</CardContent>
