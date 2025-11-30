@@ -32,9 +32,9 @@ const FloatingNav = ({ items }: { items?: Item[] }) => {
 	};
 
   return (
-    <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+    <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-xs sm:max-w-sm">
       <div
-        className="relative flex items-center justify-center gap-6 rounded-full px-6 py-3 shadow-[0_0_20px_rgba(0,0,0,0.1)] border backdrop-blur-xl overflow-hidden bg-card/80"
+        className="relative flex items-center justify-between gap-1 rounded-full px-2 py-2 shadow-2xl border backdrop-blur-xl bg-card/80"
         style={{
           borderColor: "var(--border-color)",
         }}
@@ -42,15 +42,18 @@ const FloatingNav = ({ items }: { items?: Item[] }) => {
         {/* Active Indicator Glow */}
         <motion.div
           layoutId="active-indicator"
-          className="absolute w-16 h-16 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full blur-2xl -z-10"
-          style={{ opacity: 0.5 }}
+          className="absolute w-12 h-12 rounded-full blur-xl -z-10"
+          style={{ 
+            backgroundColor: "var(--accent-color)",
+            opacity: 0.4 
+          }}
           animate={{
             left: `calc(${active * (100 / Math.max(1, menu.length))}% + ${
               100 / Math.max(1, menu.length) / 2
             }%)`,
             translateX: "-50%",
           }}
-          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
         />
 
         {menu.map((item, index) => {
@@ -58,30 +61,20 @@ const FloatingNav = ({ items }: { items?: Item[] }) => {
           return (
             <motion.div
               key={item.id}
-              className="relative flex flex-col items-center group"
+              className="relative flex flex-col items-center justify-center flex-1"
             >
               <motion.button
                 onClick={() => handleClick(index, item)}
-                whileHover={{ scale: 1.2 }}
-                animate={{ scale: isActive ? 1.4 : 1 }}
-                className="flex items-center justify-center w-14 h-14 relative z-10 transition-colors"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                animate={{ scale: isActive ? 1.2 : 1 }}
+                className="flex items-center justify-center w-12 h-12 rounded-full relative z-10 transition-colors"
                 style={{
                   color: isActive ? "var(--accent-color)" : "var(--label-color)",
                 }}
               >
                 {item.icon}
               </motion.button>
-
-              <span
-                className="absolute bottom-full mb-2 px-2 py-1 text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border shadow-sm backdrop-blur-md"
-                style={{
-                  backgroundColor: "var(--card-bg)",
-                  color: "var(--text-color)",
-                  borderColor: "var(--border-color)",
-                }}
-              >
-                {item.label}
-              </span>
             </motion.div>
           );
         })}
