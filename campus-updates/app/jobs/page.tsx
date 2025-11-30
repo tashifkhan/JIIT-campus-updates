@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Layout from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Job } from "@/components/jobs/types";
 import JobFilters from "@/components/jobs/JobFilters";
@@ -248,98 +247,94 @@ function JobsPageContent() {
 
 	if (loading) {
 		return (
-			<Layout>
-				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-					{[...Array(6)].map((_, i) => (
-						<Card key={i} className="animate-pulse card-theme">
-							{/* skeleton block */}
-							<div className="p-5 space-y-3">
-								<div
-									className="h-6 rounded w-3/4"
-									style={{ backgroundColor: "var(--primary-color)" }}
-								/>
-								<div
-									className="h-4 rounded w-1/2"
-									style={{ backgroundColor: "var(--primary-color)" }}
-								/>
-								<div
-									className="h-3 rounded w-full"
-									style={{ backgroundColor: "var(--primary-color)" }}
-								/>
-							</div>
-						</Card>
-					))}
-				</div>
-			</Layout>
+			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+				{[...Array(6)].map((_, i) => (
+					<Card key={i} className="animate-pulse card-theme">
+						{/* skeleton block */}
+						<div className="p-5 space-y-3">
+							<div
+								className="h-6 rounded w-3/4"
+								style={{ backgroundColor: "var(--primary-color)" }}
+							/>
+							<div
+								className="h-4 rounded w-1/2"
+								style={{ backgroundColor: "var(--primary-color)" }}
+							/>
+							<div
+								className="h-3 rounded w-full"
+								style={{ backgroundColor: "var(--primary-color)" }}
+							/>
+						</div>
+					</Card>
+				))}
+			</div>
 		);
 	}
 
 	return (
-		<Layout>
-			<div className="max-w-7xl mx-auto">
-				<div className="text-center mb-8">
-					<h1
-						className="text-2xl lg:text-3xl font-bold mb-2"
-						style={{ color: "var(--text-color)" }}
-					>
-						Job Opportunities
-					</h1>
-					<p style={{ color: "var(--label-color)" }}>
-						Explore campus placement opportunities
-					</p>
-				</div>
-
-				<JobFilters
-					jobs={jobs}
-					values={{
-						query,
-						selectedCategories,
-						selectedLocations,
-						selectedGenders,
-						selectedCourses,
-						minPackageLpa,
-						cgpaRange,
-						cgpaInputMin,
-						cgpaInputMax,
-						openOnly,
-					}}
-					onChange={{
-						setQuery,
-						setSelectedCategories: (u) =>
-							setSelectedCategories((prev) => u(prev)),
-						setSelectedLocations: (u) =>
-							setSelectedLocations((prev) => u(prev)),
-						setSelectedGenders: (u) => setSelectedGenders((prev) => u(prev)),
-						setSelectedCourses: (u) => setSelectedCourses((prev) => u(prev)),
-						setMinPackageLpa,
-						setCgpaRange,
-						setCgpaInputMin,
-						setCgpaInputMax,
-						setOpenOnly,
-						clearFilters,
-					}}
-					derived={{
-						maxPackageLpa,
-						maxCgpa,
-						resultsCount: filteredJobs.length,
-					}}
-				/>
-
-				<div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-					{filteredJobs.map((job) => (
-						<JobCard
-							key={job.id}
-							job={job}
-							onQuickView={(j) => setSelectedJobModal(j)}
-						/>
-					))}
-				</div>
-				<QuickViewDialog
-					job={selectedJobModal}
-					open={!!selectedJobModal}
-					onOpenChange={(open) => !open && setSelectedJobModal(null)}
-				/>
+		<div className="max-w-7xl mx-auto">
+			<div className="text-center mb-8">
+				<h1
+					className="text-2xl lg:text-3xl font-bold mb-2"
+					style={{ color: "var(--text-color)" }}
+				>
+					Job Opportunities
+				</h1>
+				<p style={{ color: "var(--label-color)" }}>
+					Explore campus placement opportunities
+				</p>
 			</div>
-		</Layout>
+
+			<JobFilters
+				jobs={jobs}
+				values={{
+					query,
+					selectedCategories,
+					selectedLocations,
+					selectedGenders,
+					selectedCourses,
+					minPackageLpa,
+					cgpaRange,
+					cgpaInputMin,
+					cgpaInputMax,
+					openOnly,
+				}}
+				onChange={{
+					setQuery,
+					setSelectedCategories: (u) =>
+						setSelectedCategories((prev) => u(prev)),
+					setSelectedLocations: (u) =>
+						setSelectedLocations((prev) => u(prev)),
+					setSelectedGenders: (u) => setSelectedGenders((prev) => u(prev)),
+					setSelectedCourses: (u) => setSelectedCourses((prev) => u(prev)),
+					setMinPackageLpa,
+					setCgpaRange,
+					setCgpaInputMin,
+					setCgpaInputMax,
+					setOpenOnly,
+					clearFilters,
+				}}
+				derived={{
+					maxPackageLpa,
+					maxCgpa,
+					resultsCount: filteredJobs.length,
+				}}
+			/>
+
+			<div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+				{filteredJobs.map((job) => (
+					<JobCard
+						key={job.id}
+						job={job}
+						onQuickView={(j) => setSelectedJobModal(j)}
+					/>
+				))}
+			</div>
+			<QuickViewDialog
+				job={selectedJobModal}
+				open={!!selectedJobModal}
+				onOpenChange={(open) => !open && setSelectedJobModal(null)}
+			/>
+		</div>
 	);
 }

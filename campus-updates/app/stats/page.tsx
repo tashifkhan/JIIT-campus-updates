@@ -2,7 +2,6 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Layout from "@/components/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import FiltersSheet from "@/components/stats/FiltersSheet";
 import ExportCsvButton from "@/components/stats/ExportCsvButton";
@@ -600,26 +599,24 @@ export default function StatsPage() {
 
 	if (loading) {
 		return (
-			<Layout>
-				<div className="max-w-7xl mx-auto space-y-8">
-					<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-						{[...Array(4)].map((_, i) => (
-							<Card key={i} className="animate-pulse card-theme">
-								<CardContent className="p-6">
-									<div
-										className="h-8 rounded mb-2"
-										style={{ backgroundColor: "var(--primary-color)" }}
-									/>
-									<div
-										className="h-4 rounded w-1/2"
-										style={{ backgroundColor: "var(--primary-color)" }}
-									/>
-								</CardContent>
-							</Card>
-						))}
-					</div>
+			<div className="max-w-7xl mx-auto space-y-8">
+				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+					{[...Array(4)].map((_, i) => (
+						<Card key={i} className="animate-pulse card-theme">
+							<CardContent className="p-6">
+								<div
+									className="h-8 rounded mb-2"
+									style={{ backgroundColor: "var(--primary-color)" }}
+								/>
+								<div
+									className="h-4 rounded w-1/2"
+									style={{ backgroundColor: "var(--primary-color)" }}
+								/>
+							</CardContent>
+						</Card>
+					))}
 				</div>
-			</Layout>
+			</div>
 		);
 	}
 
@@ -639,166 +636,164 @@ export default function StatsPage() {
 	};
 
 	return (
-		<Layout>
-			<div className="max-w-7xl mx-auto space-y-8">
-				<div className="text-center mb-8">
-					<div className="text-center sm:text-left">
-						<h1
-							className="text-2xl text-center lg:text-3xl font-bold mb-2"
-							style={{ color: "var(--text-color)" }}
-						>
-							Placement Statistics
-						</h1>
-						<p className="text-center" style={{ color: "var(--label-color)" }}>
-							Campus placement data and analytics
-						</p>
-					</div>
+		<div className="max-w-7xl mx-auto space-y-8">
+			<div className="text-center mb-8">
+				<div className="text-center sm:text-left">
+					<h1
+						className="text-2xl text-center lg:text-3xl font-bold mb-2"
+						style={{ color: "var(--text-color)" }}
+					>
+						Placement Statistics
+					</h1>
+					<p className="text-center" style={{ color: "var(--label-color)" }}>
+						Campus placement data and analytics
+					</p>
 				</div>
-
-				{/* Official placement data banner */}
-				<OfficialPlacements />
-				{/* End official placement data banner */}
-
-				{/* Divider between official and unofficial data */}
-				<div className="relative my-8">
-					<div className="absolute inset-0 flex items-center">
-						<div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
-					</div>
-					<div className="relative flex justify-center text-sm">
-						<span className="px-4 py-2 bg-white dark:bg-slate-950 text-gray-600 dark:text-gray-400 font-medium rounded-lg border border-gray-300 dark:border-gray-700">
-							Unofficial Data (May contain errors)
-						</span>
-					</div>
-				</div>
-
-				{/* Filters */}
-				<FiltersSheet
-					open={showFilters}
-					onOpenChange={setShowFilters}
-					hasActiveFilters={hasActiveFilters}
-					totals={{
-						students: filteredStudents.length,
-						totalStudents: totalStudentsPlaced,
-						companies: filteredUniqueCompanies,
-						totalCompanies: uniqueCompanies,
-					}}
-					options={{
-						companies: availableCompanies,
-						roles: availableRoles,
-						locations: availableLocations as string[],
-					}}
-					state={{
-						searchQuery,
-						selectedCompanies,
-						selectedRoles,
-						selectedLocations,
-						packageRange,
-					}}
-					setState={(next) => {
-						if (next.searchQuery !== undefined)
-							setSearchQuery(next.searchQuery);
-						if (next.selectedCompanies !== undefined)
-							setSelectedCompanies(next.selectedCompanies);
-						if (next.selectedRoles !== undefined)
-							setSelectedRoles(next.selectedRoles);
-						if (next.selectedLocations !== undefined)
-							setSelectedLocations(next.selectedLocations);
-						if (next.packageRange !== undefined)
-							setPackageRange(next.packageRange);
-					}}
-					clearFilters={clearFilters}
-				/>
-
-				{/* Export CSV */}
-				<ExportCsvButton onClick={exportToCSV} />
-
-				{/* Summary cards */}
-				<SummaryCards
-					placement={{
-						placed: filteredPlacedInCountedBranches,
-						total: overallTotalStudentsExclJUIT,
-						pct: filteredOverallPlacementPct,
-						overallPct: overallPlacementPct,
-					}}
-					packages={{
-						avg: filteredAveragePackage,
-						median: filteredMedianPackage,
-						highest: filteredHighestPackage,
-						overallAvg: averagePackage,
-						overallMedian: medianPackage,
-						overallHighest: highestPackage,
-					}}
-					companies={{
-						filtered: filteredUniqueCompanies,
-						total: uniqueCompanies,
-					}}
-					offers={{
-						filteredUniqueStudents: filteredUniqueStudentsPlaced,
-						totalUniqueStudents: uniqueStudentsPlaced,
-						filteredTotalOffers: filteredTotalOffers,
-						totalOffers: totalOffers,
-					}}
-				/>
-
-				{/* Branches */}
-				<BranchSection
-					BRANCHES_LIMIT={BRANCHES_LIMIT}
-					branchStats={branchStats as any}
-					branchTotalCounts={branchTotalCounts}
-					getBranchStudents={getBranchStudents}
-					enrollmentRanges={enrollmentRanges}
-					studentCounts={studentCounts}
-					placements={placements}
-				/>
-
-				{/* Placement Distribution Chart */}
-				<PlacementDistributionChart
-					students={filteredStudents}
-					getBranch={getBranch}
-				/>
-
-				{/* Placement Timeline */}
-				<PlacementTimeline
-					placements={
-						hasActiveFilters
-							? Array.from(new Set(filteredStudents.map((s) => s.placement)))
-							: placements
-					}
-					getBranch={getBranch}
-				/>
-
-				{/* Companies */}
-				<CompanySection
-					COMPANIES_LIMIT={COMPANIES_LIMIT}
-					companyEntries={companyEntries as any}
-					filteredUniqueCompanies={filteredUniqueCompanies}
-					uniqueCompanies={uniqueCompanies}
-					hasActiveFilters={hasActiveFilters}
-					placements={placements}
-					getCompanyStudents={getCompanyStudents}
-					getCompanyFallbackPackage={(company) => {
-						const plc = placements.find((p) => p.company === company);
-						if (!plc) return 0;
-						const viable = plc.roles.filter((r) => r.package != null);
-						return viable.length
-							? Math.max(...viable.map((r) => r.package as number))
-							: 0;
-					}}
-				/>
-
-				{/* Placed students */}
-				<PlacedStudentsSection
-					filteredStudents={hasActiveFilters ? filteredStudents : allStudents}
-					totalStudentsPlaced={allStudents.length}
-					filteredHighestPackage={filteredHighestPackage}
-					highestPackage={highestPackage}
-					filteredAveragePackage={filteredAveragePackage}
-					averagePackage={averagePackage}
-					filteredUniqueCompanies={filteredUniqueCompanies}
-					uniqueCompanies={uniqueCompanies}
-				/>
 			</div>
-		</Layout>
+
+			{/* Official placement data banner */}
+			<OfficialPlacements />
+			{/* End official placement data banner */}
+
+			{/* Divider between official and unofficial data */}
+			<div className="relative my-8">
+				<div className="absolute inset-0 flex items-center">
+					<div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
+				</div>
+				<div className="relative flex justify-center text-sm">
+					<span className="px-4 py-2 bg-white dark:bg-slate-950 text-gray-600 dark:text-gray-400 font-medium rounded-lg border border-gray-300 dark:border-gray-700">
+						Unofficial Data (May contain errors)
+					</span>
+				</div>
+			</div>
+
+			{/* Filters */}
+			<FiltersSheet
+				open={showFilters}
+				onOpenChange={setShowFilters}
+				hasActiveFilters={hasActiveFilters}
+				totals={{
+					students: filteredStudents.length,
+					totalStudents: totalStudentsPlaced,
+					companies: filteredUniqueCompanies,
+					totalCompanies: uniqueCompanies,
+				}}
+				options={{
+					companies: availableCompanies,
+					roles: availableRoles,
+					locations: availableLocations as string[],
+				}}
+				state={{
+					searchQuery,
+					selectedCompanies,
+					selectedRoles,
+					selectedLocations,
+					packageRange,
+				}}
+				setState={(next) => {
+					if (next.searchQuery !== undefined)
+						setSearchQuery(next.searchQuery);
+					if (next.selectedCompanies !== undefined)
+						setSelectedCompanies(next.selectedCompanies);
+					if (next.selectedRoles !== undefined)
+						setSelectedRoles(next.selectedRoles);
+					if (next.selectedLocations !== undefined)
+						setSelectedLocations(next.selectedLocations);
+					if (next.packageRange !== undefined)
+						setPackageRange(next.packageRange);
+				}}
+				clearFilters={clearFilters}
+			/>
+
+			{/* Export CSV */}
+			<ExportCsvButton onClick={exportToCSV} />
+
+			{/* Summary cards */}
+			<SummaryCards
+				placement={{
+					placed: filteredPlacedInCountedBranches,
+					total: overallTotalStudentsExclJUIT,
+					pct: filteredOverallPlacementPct,
+					overallPct: overallPlacementPct,
+				}}
+				packages={{
+					avg: filteredAveragePackage,
+					median: filteredMedianPackage,
+					highest: filteredHighestPackage,
+					overallAvg: averagePackage,
+					overallMedian: medianPackage,
+					overallHighest: highestPackage,
+				}}
+				companies={{
+					filtered: filteredUniqueCompanies,
+					total: uniqueCompanies,
+				}}
+				offers={{
+					filteredUniqueStudents: filteredUniqueStudentsPlaced,
+					totalUniqueStudents: uniqueStudentsPlaced,
+					filteredTotalOffers: filteredTotalOffers,
+					totalOffers: totalOffers,
+				}}
+			/>
+
+			{/* Branches */}
+			<BranchSection
+				BRANCHES_LIMIT={BRANCHES_LIMIT}
+				branchStats={branchStats as any}
+				branchTotalCounts={branchTotalCounts}
+				getBranchStudents={getBranchStudents}
+				enrollmentRanges={enrollmentRanges}
+				studentCounts={studentCounts}
+				placements={placements}
+			/>
+
+			{/* Placement Distribution Chart */}
+			<PlacementDistributionChart
+				students={filteredStudents}
+				getBranch={getBranch}
+			/>
+
+			{/* Placement Timeline */}
+			<PlacementTimeline
+				placements={
+					hasActiveFilters
+						? Array.from(new Set(filteredStudents.map((s) => s.placement)))
+						: placements
+				}
+				getBranch={getBranch}
+			/>
+
+			{/* Companies */}
+			<CompanySection
+				COMPANIES_LIMIT={COMPANIES_LIMIT}
+				companyEntries={companyEntries as any}
+				filteredUniqueCompanies={filteredUniqueCompanies}
+				uniqueCompanies={uniqueCompanies}
+				hasActiveFilters={hasActiveFilters}
+				placements={placements}
+				getCompanyStudents={getCompanyStudents}
+				getCompanyFallbackPackage={(company) => {
+					const plc = placements.find((p) => p.company === company);
+					if (!plc) return 0;
+					const viable = plc.roles.filter((r) => r.package != null);
+					return viable.length
+						? Math.max(...viable.map((r) => r.package as number))
+						: 0;
+				}}
+			/>
+
+			{/* Placed students */}
+			<PlacedStudentsSection
+				filteredStudents={hasActiveFilters ? filteredStudents : allStudents}
+				totalStudentsPlaced={allStudents.length}
+				filteredHighestPackage={filteredHighestPackage}
+				highestPackage={highestPackage}
+				filteredAveragePackage={filteredAveragePackage}
+				averagePackage={averagePackage}
+				filteredUniqueCompanies={filteredUniqueCompanies}
+				uniqueCompanies={uniqueCompanies}
+			/>
+		</div>
 	);
 }
 

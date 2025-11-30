@@ -374,18 +374,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 			/>
 
 			{/* Mobile Tools Menu (Centered Popup) */}
-			<FloatingActionMenu
-				isOpen={toolsOpen}
-				onClose={() => setToolsOpen(false)}
-				options={tools.map((t) => {
-					const Icon = t.icon;
-					return {
-						label: t.name,
-						onClick: () => window.open(t.href, "_blank"),
-						Icon: Icon ? <Icon className="w-5 h-5" /> : undefined,
-					};
-				})}
-			/>
+			<div className="lg:hidden">
+				<FloatingActionMenu
+					isOpen={toolsOpen}
+					onClose={() => setToolsOpen(false)}
+					options={tools.map((t) => {
+						const Icon = t.icon;
+						return {
+							label: t.name,
+							onClick: () => window.open(t.href, "_blank"),
+							Icon: Icon ? <Icon className="w-5 h-5" /> : undefined,
+						};
+					})}
+				/>
+			</div>
 
 			{/* Bottom padding for mobile nav to avoid content overlap */}
 			<div className="lg:hidden h-24"></div>

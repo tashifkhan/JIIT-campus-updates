@@ -1,4 +1,3 @@
-import Layout from "@/components/Layout";
 import PolicyClient from "@/components/policy/PolicyClient";
 
 export const metadata = {
@@ -9,17 +8,16 @@ export const metadata = {
 export default function PolicyPage() {
 	return (
 		<>
-			<Layout>
-				<div className="max-w-7xl mx-auto">
-					<PolicyClient>
-						<p>
-							This policy consolidates updates from February 8, 2025, April 13,
-							2025, and August 8, 2025.
-						</p>
+			<div className="max-w-7xl mx-auto">
+				<PolicyClient>
+					<p>
+						This policy consolidates updates from February 8, 2025, April 13,
+						2025, and August 8, 2025.
+					</p>
 
-						<h2 id="general-placement-drive-rules">
-							I. General Placement Drive Rules (Effective June 1, 2026 onwards)
-						</h2>
+					<h2 id="general-placement-drive-rules">
+						I. General Placement Drive Rules (Effective June 1, 2026 onwards)
+					</h2>
 						<ul>
 							<li>
 								<strong>Eligibility:</strong> Placement drives will{" "}
@@ -379,7 +377,6 @@ export default function PolicyPage() {
 						</ul>
 					</PolicyClient>
 				</div>
-			</Layout>
 		</>
 	);
 }

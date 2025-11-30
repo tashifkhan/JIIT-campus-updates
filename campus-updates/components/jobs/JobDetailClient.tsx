@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -199,20 +198,19 @@ export default function JobDetailClient({ job }: { job: Job }) {
 	};
 
 	return (
-		<Layout>
-			<div className="max-w-4xl mx-auto p-4">
-				<Button
-					variant="outline"
-					onClick={() => router.back()}
-					className="mb-6 hover-theme"
-					style={{
-						borderColor: "var(--border-color)",
-						color: "var(--text-color)",
-					}}
-				>
-					<ArrowLeftIcon className="w-4 h-4 mr-2" />
-					Back
-				</Button>
+		<div className="max-w-4xl mx-auto p-4">
+			<Button
+				variant="outline"
+				onClick={() => router.back()}
+				className="mb-6 hover-theme"
+				style={{
+					borderColor: "var(--border-color)",
+					color: "var(--text-color)",
+				}}
+			>
+				<ArrowLeftIcon className="w-4 h-4 mr-2" />
+				Back
+			</Button>
 
 				<Button
 					variant="outline"
@@ -716,6 +714,5 @@ export default function JobDetailClient({ job }: { job: Job }) {
 					</CardContent>
 				</Card>
 			</div>
-		</Layout>
 	);
 }

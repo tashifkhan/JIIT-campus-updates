@@ -5,6 +5,8 @@ import { PostHogProvider } from "@/components/providor";
 import { Analytics } from "@vercel/analytics/next";
 import ReactQueryProvider from "@/components/ReactQueryProvider";
 
+import Layout from "@/components/Layout";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -63,7 +65,9 @@ export default function RootLayout({
 					apiKey={process.env.NEXT_PUBLIC_POSTHOG_KEY}
 					options={{ api_host: "/ph" }}
 				>
-					<ReactQueryProvider>{children}</ReactQueryProvider>
+					<ReactQueryProvider>
+						<Layout>{children}</Layout>
+					</ReactQueryProvider>
 					<Analytics />
 					{/* JSON-LD structured data for site */}
 					<script
