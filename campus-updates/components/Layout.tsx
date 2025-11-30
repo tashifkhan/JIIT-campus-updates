@@ -22,6 +22,7 @@ import {
 	BookOpenIcon,
 } from "lucide-react";
 import FloatingNav from "./FloatingNav";
+import FloatingActionMenu from "./FloatingActionMenu";
 
 const navigation = [
 	{ name: "Updates", href: "/", icon: HomeIcon },
@@ -367,112 +368,27 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 						id: 999,
 						icon: <WrenchIcon className="w-5 h-5 mb-1" />,
 						label: "Tools",
-						onClick: () => setToolsOpen(true),
+						onClick: () => setToolsOpen(!toolsOpen),
 					},
 				]}
 			/>
 
+			{/* Mobile Tools Menu (Centered Popup) */}
+			<FloatingActionMenu
+				isOpen={toolsOpen}
+				onClose={() => setToolsOpen(false)}
+				options={tools.map((t) => {
+					const Icon = t.icon;
+					return {
+						label: t.name,
+						onClick: () => window.open(t.href, "_blank"),
+						Icon: Icon ? <Icon className="w-5 h-5" /> : undefined,
+					};
+				})}
+			/>
+
 			{/* Bottom padding for mobile nav to avoid content overlap */}
 			<div className="lg:hidden h-24"></div>
-
-			{/* Mobile Tools Overlay - Redesigned */}
-			<AnimatePresence>
-				{toolsOpen && (
-					<motion.div
-						className="fixed inset-0 z-50 flex items-end justify-end lg:hidden"
-						initial="hidden"
-						animate="visible"
-						exit="hidden"
-						variants={{
-							hidden: { opacity: 0 },
-							visible: { opacity: 1 },
-						}}
-						transition={{ duration: 0.18 }}
-					>
-						{/* Overlay background */}
-						<motion.div
-							className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-							onClick={() => setToolsOpen(false)}
-							aria-label="Close tools modal"
-							tabIndex={0}
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							exit={{ opacity: 0 }}
-							transition={{ duration: 0.2 }}
-						/>
-						{/* Modal card */}
-						<motion.div
-							className="relative max-w-md ml-auto mr-0 bg-card rounded-2xl shadow-xl p-5 border border-theme mb-20"
-							style={{
-								backgroundColor: "var(--card-bg)",
-								borderColor: "var(--border-color)",
-							}}
-							role="dialog"
-							aria-modal="true"
-							initial={{ y: 40, opacity: 0, scale: 0.98 }}
-							animate={{ y: 0, opacity: 1, scale: 1 }}
-							exit={{ y: 30, opacity: 0, scale: 0.98 }}
-							transition={{ type: "spring", stiffness: 360, damping: 30 }}
-						>
-							{/* <button
-								className="absolute top-3 right-3 p-2 rounded-full hover-theme"
-								onClick={() => setToolsOpen(false)}
-								aria-label="Close"
-								style={{ backgroundColor: "var(--primary-color-lite)" }}
-							>
-								<XIcon
-									className="w-5 h-5"
-									style={{ color: "var(--label-color)" }}
-								/>
-							</button> */}
-							<motion.div
-								className="flex flex-col gap-3"
-								initial="hidden"
-								animate="visible"
-								exit="hidden"
-								variants={{
-									hidden: {},
-									visible: {
-										transition: { staggerChildren: 0.06, delayChildren: 0.04 },
-									},
-								}}
-							>
-								{tools.map((t) => {
-									const ToolIcon = t.icon;
-									return (
-										<motion.a
-											key={t.href}
-											href={t.href}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all border border-transparent focus:outline-none focus:ring-2 focus:ring-accent"
-											style={{
-												color: "var(--text-color)",
-												backgroundColor: "var(--primary-color-lite)",
-											}}
-											initial={{ y: 8, opacity: 0 }}
-											animate={{ y: 0, opacity: 1 }}
-											exit={{ y: 6, opacity: 0 }}
-											transition={{
-												type: "spring",
-												stiffness: 400,
-												damping: 30,
-											}}
-											whileHover={{ scale: 1.02 }}
-											whileTap={{ scale: 0.995 }}
-										>
-											{ToolIcon && (
-												<ToolIcon className="w-6 h-6 flex-shrink-0" />
-											)}
-											<span className="truncate">{t.name}</span>
-										</motion.a>
-									);
-								})}
-							</motion.div>
-						</motion.div>
-					</motion.div>
-				)}
-			</AnimatePresence>
 		</div>
 	);
 }

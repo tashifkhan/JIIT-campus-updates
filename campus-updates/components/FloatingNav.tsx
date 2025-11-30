@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Home, Search, Bell, User, Settings, Bookmark } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 type Item = {
@@ -14,95 +13,79 @@ type Item = {
 };
 
 const FloatingNav = ({ items }: { items?: Item[] }) => {
+	const menu = items || [];
 	const [active, setActive] = useState(0);
-	const [indicatorStyle, setIndicatorStyle] = useState({ width: 0, left: 0 });
-	const containerRef = useRef<HTMLDivElement>(null);
-	const btnRefs = useRef<(HTMLButtonElement | null)[]>([]);
 	const pathname = usePathname();
 	const router = useRouter();
 
 	useEffect(() => {
-		if (!items) return;
-		const idx = items.findIndex((i) => i.href && pathname === i.href);
+		if (!menu || menu.length === 0) return;
+		const idx = menu.findIndex((i) => i.href && pathname === i.href);
 		if (idx >= 0) setActive(idx);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [pathname, items]);
 
-	useEffect(() => {
-		const updateIndicator = () => {
-			const btn = btnRefs.current[active];
-			const container = containerRef.current;
-			if (!btn || !container) return;
-			const btnRect = btn.getBoundingClientRect();
-			const containerRect = container.getBoundingClientRect();
-
-			setIndicatorStyle({
-				width: btnRect.width,
-				left: btnRect.left - containerRect.left,
-			});
-		};
-
-		updateIndicator();
-		window.addEventListener("resize", updateIndicator);
-		return () => window.removeEventListener("resize", updateIndicator);
-	}, [active]);
-
 	const handleClick = (index: number, item: Item) => {
 		setActive(index);
-		if (item.onClick) {
-			item.onClick();
-			return;
-		}
-		if (item.href) {
-			router.push(item.href);
-		}
+		if (item.onClick) return item.onClick();
+		if (item.href) router.push(item.href);
 	};
 
-	const menu = items || [];
+  return (
+    <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+      <div
+        className="relative flex items-center justify-center gap-6 rounded-full px-6 py-3 shadow-[0_0_20px_rgba(0,0,0,0.1)] border backdrop-blur-xl overflow-hidden bg-card/80"
+        style={{
+          borderColor: "var(--border-color)",
+        }}
+      >
+        {/* Active Indicator Glow */}
+        <motion.div
+          layoutId="active-indicator"
+          className="absolute w-16 h-16 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full blur-2xl -z-10"
+          style={{ opacity: 0.5 }}
+          animate={{
+            left: `calc(${active * (100 / Math.max(1, menu.length))}% + ${
+              100 / Math.max(1, menu.length) / 2
+            }%)`,
+            translateX: "-50%",
+          }}
+          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        />
 
-	return (
-		<div className="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-lg px-2">
-			<div
-				ref={containerRef}
-				className="relative flex items-center justify-between rounded-full px-1 py-2 border shadow-xl"
-				style={{
-					backgroundColor: "var(--card-bg)",
-					borderColor: "var(--border-color)",
-				}}
-			>
-				{menu.map((item, index) => (
-					<button
-						key={item.id}
-						ref={(el) => (btnRefs.current[index] = el)}
-						onClick={() => handleClick(index, item)}
-						className="relative flex flex-col items-center justify-center flex-1 px-2 py-2 text-sm font-medium"
-						style={{
-							color:
-								pathname === item.href
-									? "var(--accent-color)"
-									: "var(--label-color)",
-						}}
-					>
-						<div className="z-10">{item.icon}</div>
-						{/* Show labels (uses theme text color) */}
-						<span
-							className="text-xs mt-1 block truncate"
-							style={{ color: "var(--text-color)" }}
-						>
-							{item.label}
-						</span>
-					</button>
-				))}
+        {menu.map((item, index) => {
+          const isActive = index === active;
+          return (
+            <motion.div
+              key={item.id}
+              className="relative flex flex-col items-center group"
+            >
+              <motion.button
+                onClick={() => handleClick(index, item)}
+                whileHover={{ scale: 1.2 }}
+                animate={{ scale: isActive ? 1.4 : 1 }}
+                className="flex items-center justify-center w-14 h-14 relative z-10 transition-colors"
+                style={{
+                  color: isActive ? "var(--accent-color)" : "var(--label-color)",
+                }}
+              >
+                {item.icon}
+              </motion.button>
 
-				<motion.div
-					animate={indicatorStyle}
-					transition={{ type: "spring", stiffness: 400, damping: 30 }}
-					className="absolute top-1 bottom-1 rounded-full"
-					style={{ backgroundColor: "var(--accent-color)", opacity: 0.12 }}
-				/>
-			</div>
-		</div>
-	);
-};
-
-export default FloatingNav;
+              <span
+                className="absolute bottom-full mb-2 px-2 py-1 text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border shadow-sm backdrop-blur-md"
+                style={{
+                  backgroundColor: "var(--card-bg)",
+                  color: "var(--text-color)",
+                  borderColor: "var(--border-color)",
+                }}
+              >
+                {item.label}
+              </span>
+            </motion.div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};export default FloatingNav;
