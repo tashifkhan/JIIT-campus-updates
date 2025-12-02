@@ -71,7 +71,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
 	return (
 		<div
-			className="min-h-screen lg:h-screen lg:overflow-hidden"
+			className="min-h-screen lg:min-h-0 lg:h-screen lg:overflow-hidden"
 			style={{ backgroundColor: "var(--bg-color)" }}
 		>
 			{/* Mobile Header */}
@@ -188,7 +188,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
 			<div className="lg:flex lg:h-full">
 				{/* Desktop Sidebar */}
-				<div className="hidden lg:flex lg:flex-shrink-0">
+				<div className="hidden lg:flex lg:flex-shrink-0 lg:h-full">
 					<div
 						className="flex flex-col w-64 border-r border-theme h-full overflow-hidden"
 						style={{
@@ -234,7 +234,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 							</Link>
 						</div>
 
-						<nav className="flex-1 px-4 py-6 space-y-2 overflow-auto">
+						<nav className="flex-1 px-4 py-6 space-y-2 overflow-auto min-h-0">
 							{navigation.map((item) => {
 								const Icon = item.icon;
 								const isActive = pathname === item.href;
