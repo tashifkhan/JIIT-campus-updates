@@ -231,7 +231,7 @@ export const parseShortlistFromText = (text: string) => {
   const seen = new Set<string>();
   const cleaned = text.replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
 
-  const patternA = /([A-Za-z][A-Za-z.'\- ]+?)\s*\((\d{7,})\)/g;
+  const patternA = /([A-Za-z][A-Za-z.'\- ]+?)\s*\(([A-Za-z0-9]{7,})\)/g;
   let matchA: RegExpExecArray | null;
   while ((matchA = patternA.exec(cleaned))) {
     const name = matchA[1].trim();
@@ -243,7 +243,7 @@ export const parseShortlistFromText = (text: string) => {
   }
 
   const patternB =
-    /(\d+\s+)?(\d{7,})\s+([^@\d][A-Za-z .'-]+?)(?:\s+([\w.+-]+@[\w.-]+\.[A-Za-z]{2,}))?(?:\s+(CL\d+|[A-Z]{2}\d+))(?=\s|$)/g;
+    /(\d+\s+)?([A-Za-z0-9]{7,})\s+([^@\d][A-Za-z .'-]+?)(?:\s+([\w.+-]+@[\w.-]+\.[A-Za-z]{2,}))?(?:\s+(CL\d+|[A-Z]{2}\d+))(?=\s|$)/g;
   let matchB: RegExpExecArray | null;
   while ((matchB = patternB.exec(cleaned))) {
     const enroll = matchB[2];
