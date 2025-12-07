@@ -9,6 +9,9 @@ JIIT Campus Updates is a web application that aggregates placement notices, job 
 
 This README documents how to run the frontend and the Python bot, what environment variables are required, and how the scheduling works.
 
+## Analytics (sed it got shut yet visitors lol)
+![2025-12-08_02 09 51 copy](https://github.com/user-attachments/assets/af523024-0611-405e-907d-12ef36d93b34)
+
 ## Quick status
 
 - Frontend: Next.js app located in `campus-updates/` (use `pnpm`/`npm`/`yarn` as you prefer; a `pnpm-lock.yaml` is present).
