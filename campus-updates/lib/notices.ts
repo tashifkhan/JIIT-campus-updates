@@ -163,10 +163,23 @@ export const formatEligibility = (eligibilityText: string) => {
 
   const getLevelFromContext = (text: string) => {
     const t = text.toLowerCase();
-    if (t.includes("10th") || t.includes("xth") || t.includes("ssc"))
-      return "Xth";
-    if (t.includes("12th") || t.includes("xiith") || t.includes("hsc"))
+    
+    // Check XII before X to avoid partial matches if any
+    if (
+      t.includes("12th") ||
+      t.includes("xiith") ||
+      t.includes("hsc") ||
+      t.includes("class_xii")
+    )
       return "XIIth";
+
+    if (
+      t.includes("10th") ||
+      t.includes("xth") ||
+      t.includes("ssc") ||
+      t.includes("class_x")
+    )
+      return "Xth";
     if (
       t.includes("current") ||
       t.includes("ug") ||
@@ -211,15 +224,19 @@ export const formatEligibility = (eligibilityText: string) => {
 
     // Parse Marks/CGPA using context
     // We look for a number at the end (or near end) of the string
-    // e.g. "Xth: 70", "Xth - 70%", "Marks (10th): 70.0"
+    // e.g. "Xth: 70", "Xth - 70%", "Marks (10th): 70.0", "CLASS_X Marks: 70.0 CGPA or equivalent"
+    // Relaxed regex: Find the last number-like pattern, optionally followed by unit/text
     const valueMatch = line.match(
-      /(?:[:=-]|\s+|^)\s*(\d+\.?\d*)\s*(cgpa|%|percent)?\s*$/i
+      /(?:[:=-]|\s+|^)\s*(\d+\.?\d*)\s*(cgpa|%|percent)?/i
     );
 
+    // If multiple numbers, we prefer the one that looks like a score (marks logic usually implies implied context)
+    // But realistically, lines are short. Finding the *first* valid number after separator is usually safer.
+    // The previous regex `\s*(\d+\.?\d*)\s*(cgpa|%|percent)?\s*$/i` forced end of line.
+    
     if (valueMatch) {
       const rawValue = valueMatch[1];
       // Infer unit: if "cgpa" or value <= 10 (heuristic), use CGPA, else %
-      // User requested explicit check, but we can default safely
       let unit = valueMatch[2]
         ? valueMatch[2].toLowerCase().includes("cgpa")
           ? "CGPA"
@@ -228,22 +245,8 @@ export const formatEligibility = (eligibilityText: string) => {
         ? "CGPA"
         : "%";
 
+      // Context is everything before the match
       const context = line.substring(0, valueMatch.index).trim();
-      
-      // If the line started with a degree (e.g. "M.Tech - 5 CGPA"),
-      // we might want it as general OR as a marks criteria.
-      // Current requirement: "M.Tech. Post Graduate - 5 CGPA" -> Show as list (general)?
-      // User said: "if there is no current cgpa requirements then they shd just just play the all the other requements as a list only"
-      // But if it is "M.Tech - 5 CGPA", it's a specific requirement.
-      // Let's treat it as marks if we can parse context, but if context is a degree name, maybe force general?
-      // Actually, my `isDegreeLine` check above handles "M.Tech - Biotechnology". 
-      // "M.Tech - 5 CGPA" matches `marks` regex inside it? 
-      // Loop condition: `if (isDegreeLine(line) && !line.match(/cgpa|marks|%/i))`
-      // So "M.Tech - 5 CGPA" FAILS that check (it has CGPA), so it comes here.
-      // Context: "M.Tech -". Level: "M.Tech".
-      // This will render "M.Tech : 5 CGPA". This seems arguably correct/better than bullet?
-      // But if the user strictly wants "Xth", "XIIth", "UG", then "M.Tech" as a level might be weird if inconsistent.
-      // Let's stick to parsing it.
 
       if (context) {
         const level = getLevelFromContext(context);
