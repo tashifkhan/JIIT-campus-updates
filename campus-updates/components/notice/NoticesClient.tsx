@@ -375,6 +375,11 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 		setCurrentPage(1);
 	}, [query, selectedCategories, onlyShortlisted, itemsPerPage]);
 
+	// Scroll to top when page changes
+	useEffect(() => {
+		window.scrollTo({ top: 0, behavior: "smooth" });
+	}, [currentPage]);
+
 	if (loading) {
 		return (
 			<div className="space-y-4">
