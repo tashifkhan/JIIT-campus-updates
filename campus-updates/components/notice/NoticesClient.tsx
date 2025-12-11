@@ -279,7 +279,12 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 
 		// Combine and filter out bot-like short placement announcements
 		const combined = [...normalizedNotices, ...normalizedOffers].filter(
-			(n) => !isPlacementBotPost(n)
+			(n) =>
+				!isPlacementBotPost(n) &&
+				!(
+					typeof n.package === "string" &&
+					n.package.toLowerCase().trim() === "none"
+				)
 		);
 
 		// Additional filtering for short placement announcements if requested

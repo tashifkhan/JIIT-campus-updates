@@ -155,33 +155,62 @@ export const formatEligibility = (eligibilityText: string) => {
     .filter(Boolean);
   const criteria: any[] = [];
 
+  const isDegreeLine = (line: string) => {
+    return (
+      /^B\.?Tech|^M\.?Tech|^MBA|^MCA|^BBA|^BCA/i.test(line) ||
+      line.includes(" - ")
+    );
+  };
+
   for (const line of lines) {
     if (line.match(/courses?:|branches?:/i)) {
       const coursesMatch =
         line.match(/courses?:\s*(.+)/i) || line.match(/branches?:\s*(.+)/i);
       if (coursesMatch) {
+        const vals = coursesMatch[1]
+          .split(",")
+          .map((c) => c.trim())
+          .filter(Boolean);
         criteria.push({
           type: "courses",
-          value: coursesMatch[1].split(",").map((c) => c.trim()),
+          value: vals,
         });
       }
-    } else if (line.match(/cgpa|marks|percentage/i)) {
-      const marksMatch = line.match(/(\w+).*?(\d+\.?\d*)\s*(cgpa|%|percent)/i);
-      if (marksMatch) {
-        criteria.push({
-          type: "marks",
-          level: marksMatch[1],
-          value: marksMatch[2],
-          unit: marksMatch[3],
-        });
-      }
+      continue;
+    }
+
+    const lower = line.toLowerCase();
+    const explicitKeyMatch = line.match(
+      /(current\s*cgpa|cgpa|marks|percentage|xth|xii(?:th)?|10th|12th|graduation)\s*(?:requirement)?\s*[:=-]?\s*(\d+\.?\d*)/i
+    );
+    const numberUnitMatch = line.match(
+      /(\w[\w\s]*?)\s*[:=-]?\s*(\d+\.?\d*)\s*(cgpa|%|percent)/i
+    );
+
+    if (explicitKeyMatch && !isDegreeLine(line)) {
+      criteria.push({
+        type: "marks",
+        level: explicitKeyMatch[1].trim(),
+        value: explicitKeyMatch[2],
+        unit: lower.includes("cgpa") ? "CGPA" : "%",
+      });
+    } else if (numberUnitMatch && !isDegreeLine(line)) {
+      criteria.push({
+        type: "marks",
+        level: numberUnitMatch[1].trim(),
+        value: numberUnitMatch[2],
+        unit: numberUnitMatch[3],
+      });
     } else if (line.match(/no\s*backlogs?/i)) {
       criteria.push({ type: "requirement", value: "No backlogs" });
-    } else if (line.trim() && !line.match(/^-|^\*|^\d+\./)) {
-      criteria.push({
-        type: "general",
-        value: line.replace(/^\-\s*|\*\s*/, "").trim(),
-      });
+    } else {
+      const val = line.replace(/^[-•\d.\)]+\s*|\*\s*/, "").trim();
+      if (val && !val.match(/eligibility criteria:?/i)) {
+        criteria.push({
+          type: "general",
+          value: val,
+        });
+      }
     }
   }
 
