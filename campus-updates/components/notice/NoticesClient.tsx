@@ -591,7 +591,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 																	className="font-semibold"
 																	style={{ color: "var(--text-color)" }}
 																>
-																	{parsedMessage.ctc}
+																	{parsedMessage.ctc.replace(/^₹\s?/, "")}
 																</span>
 															</div>
 														)}
@@ -838,20 +838,22 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 															</Badge>
 														)}
 													</div>
-													{parsedMessage.ctc && (
-														<Badge
-															variant="outline"
-															className="font-medium"
-															style={{
-																backgroundColor: "var(--primary-color)",
-																color: "var(--accent-color)",
-																borderColor: "var(--border-color)",
-															}}
-														>
-															<IndianRupeeIcon className="w-3 h-3 mr-1" />
-															{parsedMessage.ctc}
-														</Badge>
-													)}
+													{parsedMessage.ctc &&
+														parsedMessage.ctc.toLowerCase().trim() !==
+															"none" && (
+															<Badge
+																variant="outline"
+																className="font-medium"
+																style={{
+																	backgroundColor: "var(--primary-color)",
+																	color: "var(--accent-color)",
+																	borderColor: "var(--border-color)",
+																}}
+															>
+																<IndianRupeeIcon className="w-3 h-3 mr-1" />
+																{parsedMessage.ctc.replace(/^₹\s?/, "")}
+															</Badge>
+														)}
 												</div>
 											</div>
 										)}
