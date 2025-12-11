@@ -279,12 +279,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 
 		// Combine and filter out bot-like short placement announcements
 		const combined = [...normalizedNotices, ...normalizedOffers].filter(
-			(n) =>
-				!isPlacementBotPost(n) &&
-				!(
-					typeof n.package === "string" &&
-					n.package.toLowerCase().trim() === "none"
-				)
+			(n) => !isPlacementBotPost(n)
 		);
 
 		// Additional filtering for short placement announcements if requested
@@ -584,20 +579,22 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 															</Badge>
 														</div>
 													)}
-													{parsedMessage.ctc && (
-														<div className="flex items-center">
-															<IndianRupeeIcon
-																className="w-4 h-4 mr-2"
-																style={{ color: "var(--accent-color)" }}
-															/>
-															<span
-																className="font-semibold"
-																style={{ color: "var(--text-color)" }}
-															>
-																{parsedMessage.ctc}
-															</span>
-														</div>
-													)}
+													{parsedMessage.ctc &&
+														parsedMessage.ctc.toLowerCase().trim() !==
+															"none" && (
+															<div className="flex items-center">
+																<IndianRupeeIcon
+																	className="w-4 h-4 mr-2"
+																	style={{ color: "var(--accent-color)" }}
+																/>
+																<span
+																	className="font-semibold"
+																	style={{ color: "var(--text-color)" }}
+																>
+																	{parsedMessage.ctc}
+																</span>
+															</div>
+														)}
 												</div>
 											</div>
 										)}
