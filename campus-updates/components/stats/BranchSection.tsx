@@ -69,9 +69,7 @@ export default function BranchSection({
 					className="flex items-center justify-between"
 					style={{ color: "var(--text-color)" }}
 				>
-					<div className="flex items-center gap-2">
-						Branch-wise Placements
-					</div>
+					<div className="flex items-center gap-2">Branch-wise Placements</div>
 				</CardTitle>
 			</CardHeader>
 			<CardContent>
@@ -127,7 +125,8 @@ export default function BranchSection({
 																{(() => {
 																	const totalForBranch =
 																		branchTotalCounts[branch] || 0;
-																	const uniqueCount = (stats as any).uniqueCount || stats.count;
+																	const uniqueCount =
+																		(stats as any).uniqueCount || stats.count;
 																	const pct =
 																		totalForBranch > 0
 																			? (uniqueCount / totalForBranch) * 100
@@ -220,7 +219,8 @@ export default function BranchSection({
 																{(() => {
 																	const totalForBranch =
 																		branchTotalCounts[branch] || 0;
-																	const uniqueCount = (stats as any).uniqueCount || stats.count;
+																	const uniqueCount =
+																		(stats as any).uniqueCount || stats.count;
 																	const pct =
 																		totalForBranch > 0
 																			? (uniqueCount / totalForBranch) * 100
@@ -318,7 +318,8 @@ export default function BranchSection({
 													{(() => {
 														const totalForBranch =
 															branchTotalCounts[branch] || 0;
-														const uniqueCount = (stats as any).uniqueCount || stats.count;
+														const uniqueCount =
+															(stats as any).uniqueCount || stats.count;
 														const pct =
 															totalForBranch > 0
 																? (uniqueCount / totalForBranch) * 100
@@ -459,13 +460,14 @@ export default function BranchSection({
 															const n = toNum(s.enrollment_number);
 															return Number.isFinite(n) && filterFn(n);
 														});
-														
+
 														const totalOffers = filtered.length; // Total count including multiple offers
-														
+
 														// Track highest package per unique student
-														const studentMaxPackages: Map<string, number> = new Map();
+														const studentMaxPackages: Map<string, number> =
+															new Map();
 														const uniqueEnrollments = new Set<string>();
-														
+
 														filtered.forEach((s) => {
 															if (s.enrollment_number) {
 																uniqueEnrollments.add(s.enrollment_number);
@@ -476,18 +478,24 @@ export default function BranchSection({
 																	) as Placement);
 																const pkg = plc ? pkgFrom(s, plc) : null;
 																if (pkg != null && pkg > 0) {
-																	const currentMax = studentMaxPackages.get(s.enrollment_number) || 0;
+																	const currentMax =
+																		studentMaxPackages.get(
+																			s.enrollment_number
+																		) || 0;
 																	if (pkg > currentMax) {
-																		studentMaxPackages.set(s.enrollment_number, pkg);
+																		studentMaxPackages.set(
+																			s.enrollment_number,
+																			pkg
+																		);
 																	}
 																}
 															}
 														});
-														
+
 														// Get all max packages for unique students
 														const pkgs: number[] = [];
 														studentMaxPackages.forEach((pkg) => pkgs.push(pkg));
-														
+
 														const placed = uniqueEnrollments.size; // Use unique count
 														const avg = pkgs.length
 															? pkgs.reduce((a, c) => a + c, 0) / pkgs.length
@@ -695,14 +703,19 @@ export default function BranchSection({
 																									/ {sc.total}
 																								</span>
 																							</Badge>
-																							{sc.totalOffers && sc.totalOffers !== sc.placed && (
-																								<span
-																									className="text-[9px] sm:text-[10px] font-medium opacity-75"
-																									style={{ color: "var(--label-color)" }}
-																								>
-																									{sc.totalOffers} offers
-																								</span>
-																							)}
+																							{sc.totalOffers &&
+																								sc.totalOffers !==
+																									sc.placed && (
+																									<span
+																										className="text-[9px] sm:text-[10px] font-medium opacity-75"
+																										style={{
+																											color:
+																												"var(--label-color)",
+																										}}
+																									>
+																										{sc.totalOffers} offers
+																									</span>
+																								)}
 																						</div>
 																					) : null}
 																				</div>
@@ -803,11 +816,7 @@ export default function BranchSection({
 																		>
 																			Enrollment
 																		</TableHead>
-																		<TableHead
-																			style={{ color: "var(--text-color)" }}
-																		>
-																			Email
-																		</TableHead>
+
 																		<TableHead
 																			style={{ color: "var(--text-color)" }}
 																		>
@@ -846,20 +855,7 @@ export default function BranchSection({
 																				>
 																					{student.enrollment_number}
 																				</TableCell>
-																				<TableCell
-																					style={{
-																						color: "var(--label-color)",
-																					}}
-																				>
-																					{student.email ||
-																						`${student.enrollment_number}@${
-																							/[A-Za-z]/.test(
-																								student.enrollment_number || ""
-																							)
-																								? "mail.juit.ac.in"
-																								: "mail.jiit.ac.in"
-																						}`}
-																				</TableCell>
+
 																				<TableCell
 																					style={{
 																						color: "var(--label-color)",
@@ -974,7 +970,6 @@ export default function BranchSection({
 																			</span>
 																		</div>
 																		<div className="flex items-center gap-2">
-
 																			<span
 																				className="text-sm"
 																				style={{ color: "var(--label-color)" }}

@@ -9,7 +9,6 @@ export interface Role {
 export interface Student {
   name: string;
   enrollment_number: string;
-  email: string | null;
   role: string;
   package: number | null;
 }
@@ -22,8 +21,6 @@ export interface Placement {
   students_selected: Student[];
   number_of_offers: number;
   additional_info: string;
-  email_subject: string;
-  email_sender: string;
   saved_at?: string;
   createdAt?: string;
   _id?: string;

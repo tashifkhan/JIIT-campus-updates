@@ -243,9 +243,9 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 			return {
 				_id: rawId,
 				id: String(rawId),
-				title: o.email_subject || null,
+				title: null,
 				content: null,
-				author: o.email_sender || null,
+				author: null,
 				createdAt,
 				updatedAt: createdAt,
 				category: "placement offer",

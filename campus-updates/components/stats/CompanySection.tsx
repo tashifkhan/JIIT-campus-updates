@@ -181,9 +181,7 @@ export default function CompanySection({
 													<TableHead style={{ color: "var(--text-color)" }}>
 														Enrollment
 													</TableHead>
-													<TableHead style={{ color: "var(--text-color)" }}>
-														Email
-													</TableHead>
+
 													<TableHead style={{ color: "var(--text-color)" }}>
 														Role
 													</TableHead>
@@ -207,16 +205,7 @@ export default function CompanySection({
 														<TableCell style={{ color: "var(--label-color)" }}>
 															{student.enrollment_number}
 														</TableCell>
-														<TableCell style={{ color: "var(--label-color)" }}>
-															{student.email ||
-																`${student.enrollment_number}@${
-																	/[A-Za-z]/.test(
-																		student.enrollment_number || ""
-																	)
-																		? "mail.juit.ac.in"
-																		: "mail.jiit.ac.in"
-																}`}
-														</TableCell>
+
 														<TableCell style={{ color: "var(--label-color)" }}>
 															{student.role || "N/A"}
 														</TableCell>
@@ -292,19 +281,7 @@ export default function CompanySection({
 															>
 																{student.enrollment_number}
 															</p>
-															<p
-																className="text-xs mt-1"
-																style={{ color: "var(--label-color)" }}
-															>
-																{student.email ||
-																	`${student.enrollment_number}@${
-																		/[A-Za-z]/.test(
-																			student.enrollment_number || ""
-																		)
-																			? "mail.juit.ac.in"
-																			: "mail.jiit.ac.in"
-																	}`}
-															</p>
+
 															<div
 																className="text-xs mt-2"
 																style={{ color: "var(--label-color)" }}

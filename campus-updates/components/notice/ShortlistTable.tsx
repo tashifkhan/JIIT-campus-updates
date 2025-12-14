@@ -11,7 +11,7 @@ import { Search } from "lucide-react";
 type Student = {
 	name: string;
 	enrollment_number: string;
-	email?: string;
+
 	venue?: string;
 };
 
@@ -47,13 +47,8 @@ export default function ShortlistTable({
 	}, [students, debouncedQuery]);
 	const exportCsv = () => {
 		const rows = [
-			["Name", "Enrollment Number", "Email", "Venue"],
-			...filtered.map((s) => [
-				s.name,
-				s.enrollment_number,
-				s.email || "",
-				s.venue || "",
-			]),
+			["Name", "Enrollment Number", "Venue"],
+			...filtered.map((s) => [s.name, s.enrollment_number, s.venue || ""]),
 		];
 		const csv = rows
 			.map((r) =>

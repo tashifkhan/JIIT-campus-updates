@@ -562,7 +562,6 @@ export default function StatsPage() {
 		rows.push([
 			"Student Name",
 			"Enrollment Number",
-			"Email",
 			"Company",
 			"Role",
 			"Package",
@@ -574,12 +573,6 @@ export default function StatsPage() {
 			rows.push([
 				student.name,
 				student.enrollment_number,
-				student.email ||
-					`${student.enrollment_number}@${
-						/[A-Za-z]/.test(student.enrollment_number || "")
-							? "mail.juit.ac.in"
-							: "mail.jiit.ac.in"
-					}`,
 				student.company,
 				student.role || "N/A",
 				v ? `₹${v.toFixed(1)} LPA` : "TBD",
@@ -691,8 +684,7 @@ export default function StatsPage() {
 					packageRange,
 				}}
 				setState={(next) => {
-					if (next.searchQuery !== undefined)
-						setSearchQuery(next.searchQuery);
+					if (next.searchQuery !== undefined) setSearchQuery(next.searchQuery);
 					if (next.selectedCompanies !== undefined)
 						setSelectedCompanies(next.selectedCompanies);
 					if (next.selectedRoles !== undefined)
