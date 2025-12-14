@@ -8,7 +8,7 @@ import ExportCsvButton from "@/components/stats/ExportCsvButton";
 import SummaryCards from "@/components/stats/SummaryCards";
 import BranchSection from "@/components/stats/BranchSection";
 import CompanySection from "@/components/stats/CompanySection";
-import PlacedStudentsSection from "@/components/stats/PlacedStudentsSection";
+// import PlacedStudentsSection from "@/components/stats/PlacedStudentsSection";
 import PlacementDistributionChart from "@/components/stats/PlacementDistributionChart";
 import PlacementTimeline from "@/components/stats/PlacementTimeline";
 import OfficialPlacements from "@/components/stats/OfficialPlacements";
@@ -775,7 +775,7 @@ export default function StatsPage() {
 			/>
 
 			{/* Placed students */}
-			<PlacedStudentsSection
+			{/*<PlacedStudentsSection
 				filteredStudents={hasActiveFilters ? filteredStudents : allStudents}
 				totalStudentsPlaced={allStudents.length}
 				filteredHighestPackage={filteredHighestPackage}
@@ -784,7 +784,7 @@ export default function StatsPage() {
 				averagePackage={averagePackage}
 				filteredUniqueCompanies={filteredUniqueCompanies}
 				uniqueCompanies={uniqueCompanies}
-			/>
+			/> */}
 		</div>
 	);
 }

@@ -20,7 +20,6 @@ export interface Placement {
   joining_date: string | null;
   students_selected: Student[];
   number_of_offers: number;
-  additional_info: string;
   saved_at?: string;
   createdAt?: string;
   _id?: string;

@@ -228,7 +228,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 				);
 			if (o.number_of_offers != null)
 				parts.push(`Number of Offers: ${o.number_of_offers}`);
-			// Note: We intentionally skip including additional_info for placement offers
+			// Note: additional_info is removed from the API response for privacy/security.
 			// so that it doesn't render in the body and doesn't trigger deadline parsing.
 
 			const formatted_message = parts.join("\n\n");

@@ -12,7 +12,7 @@ export async function GET() {
     // Sanitize data to remove sensitive fields
     const sanitizedData = data.map((offer: any) => {
       // Create a shallow copy and delete sensitive top-level fields
-      const { email_sender, email_subject, ...rest } = offer;
+      const { email_sender, email_subject, additional_info, ...rest } = offer;
       
       // Sanitize students_selected if it exists
       if (rest.students_selected && Array.isArray(rest.students_selected)) {
