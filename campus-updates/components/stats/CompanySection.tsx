@@ -164,13 +164,13 @@ export default function CompanySection({
 									</div>
 								</CardContent>
 							</Card>
-							<DialogContent className="w-full sm:w-[95vw] md:w-[98vw] lg:w-screen sm:max-w-[95vw] md:max-w-[98vw] lg:max-w-screen max-h-[90vh] sm:rounded-lg overflow-hidden">
-								<DialogHeader>
+							<DialogContent className="w-screen h-screen max-w-none max-h-none rounded-none m-0 p-0 border-none flex flex-col">
+								<DialogHeader className="p-4 border-b shrink-0">
 									<DialogTitle style={{ color: "var(--text-color)" }}>
 										{company} - Student Details
 									</DialogTitle>
 								</DialogHeader>
-								<div className="mt-4 max-h-[80vh] overflow-hidden flex flex-col">
+								<div className="p-4 overflow-hidden flex flex-col flex-1">
 									<div className="hidden sm:block flex-1 overflow-auto">
 										<Table>
 											<TableHeader>

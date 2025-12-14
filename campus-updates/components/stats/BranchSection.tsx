@@ -293,8 +293,8 @@ export default function BranchSection({
 											</CardContent>
 										</Card>
 
-										<DialogContent className="w-full sm:w-[95vw] md:w-[98vw] lg:w-screen sm:max-w-[95vw] md:max-w-[98vw] lg:max-w-screen max-h-[95vh] sm:rounded-lg overflow-hidden">
-											<DialogHeader className="pb-2 sm:pb-4">
+										<DialogContent className="w-screen h-screen max-w-none max-h-none rounded-none m-0 p-0 border-none flex flex-col">
+											<DialogHeader className="p-4 sm:p-6 pb-2 sm:pb-4 border-b shrink-0">
 												<div className="sm:hidden">
 													<DialogTitle
 														className="text-lg font-bold flex items-center gap-2"
@@ -312,7 +312,7 @@ export default function BranchSection({
 													</DialogTitle>
 												</div>
 											</DialogHeader>
-											<div className="mt-1 sm:mt-2 space-y-4 sm:space-y-6 max-h-[85vh] sm:max-h-[80vh] overflow-y-auto">
+											<div className="p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto flex-1">
 												{/* Summary tiles */}
 												<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
 													{(() => {
