@@ -777,7 +777,7 @@ export default function BranchSection({
 												})()}
 
 												{/* Student list */}
-												<div className="flex-1 overflow-hidden">
+												<div className="flex-1">
 													<div className="flex items-center justify-between mb-4">
 														<h3
 															className="text-lg font-bold flex items-center gap-2"
@@ -801,7 +801,7 @@ export default function BranchSection({
 														</Badge>
 													</div>
 
-													<div className="overflow-auto max-h-96">
+													<div className="">
 														<div className="hidden sm:block">
 															<Table>
 																<TableHeader>
