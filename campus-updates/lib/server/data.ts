@@ -32,6 +32,6 @@ export async function getPlacementOffers(filter: any = {}, limit = 1000) {
 
 export async function getOfficialPlacementData() {
   const col = await getCollection("OfficialPlacementData");
-  const doc = await col.findOne({ _id: "latest_jiit_placement_data" } as any);
+  const doc = await col.findOne({}, { sort: { scrape_timestamp: -1 } });
   return doc;
 }
