@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
-import { Filter } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Job } from "./types";
 import { categoryMapping, getCategoryColor } from "./helpers";
 
@@ -90,7 +90,11 @@ export function JobFilters({ jobs, values, onChange, derived }: Props) {
 							className="md:hidden shrink-0"
 							onClick={() => setShowFilters(!showFilters)}
 						>
-							<Filter className="h-4 w-4" />
+							<ChevronDown
+								className={`h-4 w-4 transition-transform ${
+									showFilters ? "rotate-180" : ""
+								}`}
+							/>
 						</Button>
 					</div>
 					<div
