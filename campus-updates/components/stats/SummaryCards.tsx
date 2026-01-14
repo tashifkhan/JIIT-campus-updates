@@ -2,6 +2,15 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { formatPercent, formatPackage } from "@/lib/stats";
+import {
+	TrendingUp,
+	IndianRupee,
+	Building2,
+	ScrollText,
+	Briefcase,
+	Users,
+	Target,
+} from "lucide-react";
 
 type Props = {
 	placement: { placed: number; total: number; pct: number; overallPct: number };
@@ -22,6 +31,60 @@ type Props = {
 	};
 };
 
+type StatCardProps = {
+	title: string;
+	value: React.ReactNode;
+	subValue?: React.ReactNode;
+	icon: React.ReactNode;
+	className?: string;
+	trend?: {
+		value: string;
+		isPositive?: boolean;
+		label?: string;
+	};
+};
+
+function StatCard({
+	title,
+	value,
+	subValue,
+	icon,
+	className,
+	trend,
+}: StatCardProps) {
+	return (
+		<Card
+			className={`border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] bg-card border-border group ${className}`}
+		>
+			<CardContent className="p-5">
+				<div className="flex items-start justify-between">
+					<div className="space-y-1">
+						<p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+							{title}
+						</p>
+						<div className="flex items-baseline gap-2">
+							<div className="text-2xl font-bold text-foreground">{value}</div>
+							{trend && (
+								<p className="text-xs text-muted-foreground">
+									{trend.label} {trend.value}
+								</p>
+							)}
+						</div>
+						{subValue && (
+							<div className="text-xs text-muted-foreground mt-1 font-medium">
+								{subValue}
+							</div>
+						)}
+					</div>
+					<div className="p-2 bg-primary/10 rounded-lg text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+						{icon}
+					</div>
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
 export default function SummaryCards({
 	placement,
 	packages,
@@ -29,253 +92,123 @@ export default function SummaryCards({
 	offers,
 }: Props) {
 	return (
-		<div className="grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-6 text-center">
+		<div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
 			{/* Placement Rate */}
-			<Card
-				className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
-				style={{
-					backgroundColor: "var(--card-bg)",
-					borderColor: "var(--border-color)",
-					color: "var(--text-color)",
-				}}
-			>
-				<CardContent className="p-4 sm:p-6">
-					<div className="flex items-center justify-between">
-						<div className="flex-1 min-w-0">
-							<p
-								className="text-xs sm:text-sm font-medium mb-1 truncate"
-								style={{ color: "var(--label-color)" }}
-							>
-								Placement Rate
-							</p>
-							<p
-								className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight"
-								style={{ color: "var(--text-color)" }}
-							>
-								{placement.placed}
-								<span
-									className="text-base sm:text-xl font-medium ml-1"
-									style={{ color: "var(--label-color)" }}
-								>
-									/ {placement.total}
-								</span>
-							</p>
-							<p
-								className="text-xs truncate font-semibold"
-								style={{ color: "var(--success-dark)" }}
-							>
-								{formatPercent(placement.pct)}
-							</p>
-							{Math.abs(placement.pct - placement.overallPct) > 0.05 && (
-								<p
-									className="text-xs truncate"
-									style={{ color: "var(--label-color)" }}
-								>
-									overall: {formatPercent(placement.overallPct)}
-								</p>
-							)}
-						</div>
+			<StatCard
+				title="Placement Rate"
+				value={
+					<span className="flex items-baseline gap-1">
+						{placement.placed}
+						<span className="text-sm font-normal text-muted-foreground">
+							/ {placement.total}
+						</span>
+					</span>
+				}
+				subValue={
+					<div className="flex flex-col gap-0.5">
+						<span className="text-success font-semibold">
+							{formatPercent(placement.pct)} placed
+						</span>
+						{Math.abs(placement.pct - placement.overallPct) > 0.05 && (
+							<span className="opacity-80">
+								Overall: {formatPercent(placement.overallPct)}
+							</span>
+						)}
 					</div>
-				</CardContent>
-			</Card>
+				}
+				icon={<Target className="h-5 w-5" />}
+			/>
 
 			{/* Average Package */}
-			<Card
-				className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
-				style={{
-					backgroundColor: "var(--card-bg)",
-					borderColor: "var(--border-color)",
-					color: "var(--text-color)",
-				}}
-			>
-				<CardContent className="p-4 sm:p-6">
-					<div className="flex items-center justify-between">
-						<div className="flex-1 min-w-0">
-							<p
-								className="text-xs sm:text-sm font-medium mb-1 truncate"
-								style={{ color: "var(--label-color)" }}
-							>
-								Average Package
-							</p>
-							<p
-								className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight"
-								style={{ color: "var(--success-dark)" }}
-							>
-								₹{packages.avg.toFixed(1)}{" "}
-								<span className="text-sm sm:text-base lg:text-lg" style={{ color: "var(--label-color)" }}>LPA</span>
-							</p>
-							{packages.avg !== packages.overallAvg && (
-								<p
-									className="text-xs truncate"
-									style={{ color: "var(--label-color)" }}
-								>
-									overall: {formatPackage(packages.overallAvg)}
-								</p>
-							)}
-						</div>
-					</div>
-				</CardContent>
-			</Card>
+			<StatCard
+				title="Average Package"
+				value={
+					<span>
+						₹{packages.avg.toFixed(1)}{" "}
+						<span className="text-base font-normal text-muted-foreground">
+							LPA
+						</span>
+					</span>
+				}
+				subValue={
+					packages.avg !== packages.overallAvg ? (
+						<span>Overall: {formatPackage(packages.overallAvg)}</span>
+					) : null
+				}
+				icon={<IndianRupee className="h-5 w-5" />}
+			/>
 
 			{/* Median Package */}
-			<Card
-				className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
-				style={{
-					backgroundColor: "var(--card-bg)",
-					borderColor: "var(--border-color)",
-					color: "var(--text-color)",
-				}}
-			>
-				<CardContent className="p-4 sm:p-6">
-					<div className="flex items-center justify-between">
-						<div className="flex-1 min-w-0">
-							<p
-								className="text-xs sm:text-sm font-medium mb-1 truncate"
-								style={{ color: "var(--label-color)" }}
-							>
-								Median Package
-							</p>
-							<p
-								className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight"
-								style={{ color: "var(--success-dark)" }}
-							>
-								₹{packages.median.toFixed(1)}{" "}
-								<span className="text-sm sm:text-base lg:text-lg" style={{ color: "var(--label-color)" }}>LPA</span>
-							</p>
-							{packages.median !== packages.overallMedian && (
-								<p
-									className="text-xs truncate"
-									style={{ color: "var(--label-color)" }}
-								>
-									overall: {formatPackage(packages.overallMedian)}
-								</p>
-							)}
-						</div>
-
-					</div>
-				</CardContent>
-			</Card>
+			<StatCard
+				title="Median Package"
+				value={
+					<span>
+						₹{packages.median.toFixed(1)}{" "}
+						<span className="text-base font-normal text-muted-foreground">
+							LPA
+						</span>
+					</span>
+				}
+				subValue={
+					packages.median !== packages.overallMedian ? (
+						<span>Overall: {formatPackage(packages.overallMedian)}</span>
+					) : null
+				}
+				icon={<TrendingUp className="h-5 w-5" />}
+			/>
 
 			{/* Highest Package */}
-			<Card
-				className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
-				style={{
-					backgroundColor: "var(--card-bg)",
-					borderColor: "var(--border-color)",
-					color: "var(--text-color)",
-				}}
-			>
-				<CardContent className="p-4 sm:p-6">
-					<div className="flex items-center justify-between">
-						<div className="flex-1 min-w-0">
-							<p
-								className="text-xs sm:text-sm font-medium mb-1 truncate"
-								style={{ color: "var(--label-color)" }}
-							>
-								Highest Package
-							</p>
-							<p
-								className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight"
-								style={{ color: "var(--success-dark)" }}
-							>
-								₹{packages.highest.toFixed(1)}{" "}
-								<span className="text-sm sm:text-base lg:text-lg" style={{ color: "var(--label-color)" }}>LPA</span>
-							</p>
-							{packages.highest !== packages.overallHighest && (
-								<p
-									className="text-xs truncate"
-									style={{ color: "var(--label-color)" }}
-								>
-									overall: {formatPackage(packages.overallHighest)}
-								</p>
-							)}
-						</div>
-
-					</div>
-				</CardContent>
-			</Card>
+			<StatCard
+				title="Highest Package"
+				value={
+					<span>
+						₹{packages.highest.toFixed(1)}{" "}
+						<span className="text-base font-normal text-muted-foreground">
+							LPA
+						</span>
+					</span>
+				}
+				subValue={
+					packages.highest !== packages.overallHighest ? (
+						<span>Overall: {formatPackage(packages.overallHighest)}</span>
+					) : null
+				}
+				icon={<Briefcase className="h-5 w-5" />}
+			/>
 
 			{/* Companies */}
-			<Card
-				className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
-				style={{
-					backgroundColor: "var(--card-bg)",
-					borderColor: "var(--border-color)",
-					color: "var(--text-color)",
-				}}
-			>
-				<CardContent className="p-4 sm:p-6">
-					<div className="flex items-center justify-between">
-						<div className="flex-1 min-w-0">
-							<p
-								className="text-xs sm:text-sm font-medium mb-1 truncate"
-								style={{ color: "var(--label-color)" }}
-							>
-								Companies
-							</p>
-							<p
-								className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight"
-								style={{ color: "var(--text-color)" }}
-							>
-								{companies.filtered}
-							</p>
-							{companies.filtered !== companies.total && (
-								<p
-									className="text-xs truncate"
-									style={{ color: "var(--label-color)" }}
-								>
-									of {companies.total} total
-								</p>
-							)}
-						</div>
-					</div>
-				</CardContent>
-			</Card>
+			<StatCard
+				title="Companies"
+				value={companies.filtered}
+				subValue={
+					companies.filtered !== companies.total ? (
+						<span>Out of {companies.total} total</span>
+					) : (
+						<span>Total visiting</span>
+					)
+				}
+				icon={<Building2 className="h-5 w-5" />}
+			/>
 
 			{/* Total Offers */}
 			{offers && (
-				<Card
-					className="border card-theme hover:shadow-lg transition-all duration-300 hover:scale-[1.02] group"
-					style={{
-						backgroundColor: "var(--card-bg)",
-						borderColor: "var(--border-color)",
-						color: "var(--text-color)",
-					}}
-				>
-					<CardContent className="p-4 sm:p-6">
-						<div className="flex items-center justify-between">
-							<div className="flex-1 min-w-0">
-								<p
-									className="text-xs sm:text-sm font-medium mb-1 truncate"
-									style={{ color: "var(--label-color)" }}
-								>
-									Total Offers
-								</p>
-								<p
-									className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight"
-									style={{ color: "var(--text-color)" }}
-								>
-									{offers.filteredTotalOffers}
-								</p>
-								<p
-									className="text-xs truncate font-medium"
-									style={{ color: "var(--label-color)" }}
-								>
-									{offers.filteredUniqueStudents} unique students
-								</p>
-								{(offers.filteredTotalOffers !== offers.totalOffers || 
-								  offers.filteredUniqueStudents !== offers.totalUniqueStudents) && (
-									<p
-										className="text-xs truncate"
-										style={{ color: "var(--label-color)" }}
-									>
-										overall: {offers.totalOffers} offers ({offers.totalUniqueStudents} students)
-									</p>
-								)}
-							</div>
+				<StatCard
+					title="Total Offers"
+					value={offers.filteredTotalOffers}
+					subValue={
+						<div className="flex flex-col gap-0.5">
+							<span>{offers.filteredUniqueStudents} unique students</span>
+							{(offers.filteredTotalOffers !== offers.totalOffers ||
+								offers.filteredUniqueStudents !==
+									offers.totalUniqueStudents) && (
+								<span className="opacity-80">
+									Overall: {offers.totalOffers}
+								</span>
+							)}
 						</div>
-					</CardContent>
-				</Card>
+					}
+					icon={<ScrollText className="h-5 w-5" />}
+				/>
 			)}
 		</div>
 	);

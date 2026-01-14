@@ -1,13 +1,22 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Antic, JetBrains_Mono } from "next/font/google";
 import { PostHogProvider } from "@/components/providor";
 import { Analytics } from "@vercel/analytics/next";
 import ReactQueryProvider from "@/components/ReactQueryProvider";
 
 import Layout from "@/components/Layout";
 
-const inter = Inter({ subsets: ["latin"] });
+const antic = Antic({
+	weight: "400",
+	subsets: ["latin"],
+	variable: "--font-sans",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+	subsets: ["latin"],
+	variable: "--font-mono",
+});
 
 export const metadata: Metadata = {
 	title: {
@@ -60,7 +69,9 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<head />
-			<body className={inter.className}>
+			<body
+				className={`${antic.variable} ${jetbrainsMono.variable} font-sans bg-background text-foreground`}
+			>
 				<PostHogProvider
 					apiKey={process.env.NEXT_PUBLIC_POSTHOG_KEY}
 					options={{ api_host: "/ph" }}

@@ -162,7 +162,7 @@ export default function PolicyClient({
 									<span className="block text-sm font-semibold uppercase text-muted-foreground">
 										Placement Policy 2026
 									</span>
-									<span className="mt-1 inline-block bg-gradient-to-r from-primary/80 via-primary to-primary/80 bg-clip-text text-transparent">
+									<span className="mt-1 inline-block text-primary">
 										Jaypee Universities Placement Policy (2026 Graduating
 										Batches)
 									</span>
@@ -197,8 +197,7 @@ export default function PolicyClient({
 									line-height: 1.35;
 									letter-spacing: -0.01em;
 									padding-bottom: 0.35rem;
-									border-bottom: 2px solid
-										rgba(var(--accent-color-rgb, 99, 102, 241), 0.2);
+									border-bottom: 2px solid var(--border);
 									scroll-margin-top: 6rem;
 								}
 								.prose h3 {
@@ -207,7 +206,7 @@ export default function PolicyClient({
 									font-size: 1.25rem;
 									font-weight: 600;
 									line-height: 1.4;
-									color: var(--accent-color);
+									color: var(--primary);
 								}
 								.prose p {
 									margin-top: 0.75rem;
@@ -237,25 +236,19 @@ export default function PolicyClient({
 									border-collapse: collapse;
 									margin-top: 1.5rem;
 									margin-bottom: 1.5rem;
-									border: 1px solid var(--border-color);
+									border: 1px solid var(--border);
 								}
 								.prose thead {
 									/* stronger header background so text remains readable in dark mode */
-									background-color: rgba(
-										var(--accent-color-rgb, 99, 102, 241),
-										0.06
-									);
+									background-color: var(--secondary);
 								}
 								.prose th {
 									padding: 0.85rem 0.9rem;
 									text-align: left;
 									font-weight: 700;
-									border: 1px solid rgba(255, 255, 255, 0.04);
-									color: var(--foreground, var(--text-color));
-									background-color: rgba(
-										var(--accent-color-rgb, 99, 102, 241),
-										0.06
-									);
+									border: 1px solid var(--border);
+									color: var(--foreground);
+									background-color: var(--secondary);
 									position: sticky;
 									top: 0;
 									z-index: 30;
@@ -265,14 +258,11 @@ export default function PolicyClient({
 								}
 								.prose td {
 									padding: 0.75rem;
-									border: 1px solid var(--border-color);
+									border: 1px solid var(--border);
 									vertical-align: top;
 								}
 								.prose tr:hover {
-									background-color: rgba(
-										var(--accent-color-rgb, 99, 102, 241),
-										0.05
-									);
+									background-color: var(--muted);
 								}
 								.prose .overflow-x-auto {
 									margin-top: 1rem;
@@ -289,13 +279,11 @@ export default function PolicyClient({
 							<CardTitle className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
 								On this page
 							</CardTitle>
-							<div className="mt-3 h-1.5 w-full rounded-full bg-muted/60 overflow-hidden">
+							<div className="mt-3 h-1.5 w-full rounded-full bg-muted overflow-hidden">
 								<div
-									className="h-full rounded-full transition-[width] duration-300 ease-out"
+									className="h-full rounded-full transition-[width] duration-300 ease-out bg-primary"
 									style={{
 										width: `${Math.min(100, Math.max(0, progress))}%`,
-										background:
-											"linear-gradient(90deg, var(--accent-color) 0%, rgba(var(--accent-color-rgb, 99, 102, 241), 0.65) 100%)",
 									}}
 								/>
 							</div>
@@ -328,8 +316,8 @@ export default function PolicyClient({
 																href={`#${s.id}`}
 																className={`inline-flex items-center gap-2 rounded-md px-2 py-1 text-xs transition-colors duration-150 ${
 																	isActive
-																		? "bg-[rgba(var(--accent-color-rgb,99,102,241),0.12)] text-primary font-medium border border-[rgba(var(--accent-color-rgb,99,102,241),0.18)]"
-																		: "bg-transparent text-muted-foreground border border-[rgba(var(--border-color-rgb,210,214,220),0.06)] hover:bg-[rgba(var(--accent-color-rgb,99,102,241),0.04)]"
+																		? "bg-primary/10 text-primary font-medium border border-primary/20"
+																		: "bg-transparent text-muted-foreground border border-border hover:bg-accent hover:text-accent-foreground"
 																}`}
 																style={{
 																	paddingLeft: 8,

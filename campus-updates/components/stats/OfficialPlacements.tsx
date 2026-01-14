@@ -11,7 +11,25 @@ import {
 	CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import {
+	ChevronDown,
+	ChevronUp,
+	ExternalLink,
+	TrendingUp,
+	CheckCircle2,
+	Award,
+	BarChart3,
+	AlertCircle,
+	Clock,
+} from "lucide-react";
 
 type PackageDistribution = {
 	category: string;
@@ -74,26 +92,45 @@ export default function OfficialPlacements() {
 		};
 	};
 
+	// Helper to highlight numbers in text
+	const highlightNumbers = (text: string) => {
+		// Matches patterns like "94.25 Lacs", "178", "37 Cos", "Rs 6.00"
+		const parts = text.split(/(\d+(?:\.\d+)?\s*(?:Lacs?|Cos)?)/g);
+		return (
+			<span>
+				{parts.map((part, i) =>
+					/\d/.test(part) ? (
+						<span key={i} className="font-bold text-primary">
+							{part}
+						</span>
+					) : (
+						<span key={i}>{part}</span>
+					)
+				)}
+			</span>
+		);
+	};
+
 	return (
-		<Card
-			className="border card-theme hover:shadow-lg transition-all duration-300"
-			style={{
-				backgroundColor: "var(--card-bg)",
-				borderColor: "var(--border-color)",
-				color: "var(--text-color)",
-			}}
-		>
+		<Card className="border card-theme hover:shadow-lg transition-all duration-300 bg-card border-border text-foreground overflow-hidden">
 			<Collapsible open={isOpen} onOpenChange={setIsOpen}>
 				<CollapsibleTrigger asChild>
-					<CardHeader className="pb-3 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+					<CardHeader className="pb-3 cursor-pointer hover:bg-muted/50 transition-colors select-none">
 						<div className="flex items-center justify-between mb-2">
-							<div className="flex items-center gap-2">
-								<CardTitle
-									className="text-lg font-bold"
-									style={{ color: "var(--text-color)" }}
-								>
-									Official Placement Data
-								</CardTitle>
+							<div className="flex items-center gap-3">
+								<div className="p-2 rounded-full bg-primary/10 text-primary">
+									<TrendingUp className="w-5 h-5" />
+								</div>
+								<div>
+									<CardTitle className="text-lg font-bold text-foreground">
+										Official Placement Data
+									</CardTitle>
+									{!isOpen && !isLoading && data && (
+										<p className="text-xs text-muted-foreground mt-1">
+											Click to view detailed statistics
+										</p>
+									)}
+								</div>
 							</div>
 							<div className="flex items-center gap-2">
 								<a
@@ -101,23 +138,18 @@ export default function OfficialPlacements() {
 									target="_blank"
 									rel="noopener noreferrer"
 									onClick={(e) => e.stopPropagation()}
-									className="text-xs flex items-center gap-1 opacity-70 hover:opacity-100 transition-opacity"
-									style={{ color: "var(--accent-color)" }}
+									className="text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/5 hover:bg-primary/10 text-primary transition-colors border border-primary/10"
 								>
-									<span className="hidden sm:inline">Visit Source</span>
-									<ExternalLink className="w-3 h-3" />
+									<span className="hidden sm:inline font-medium">
+										Visit Source
+									</span>
+									<ExternalLink className="w-3.5 h-3.5" />
 								</a>
-								<div className="p-1">
+								<div className="p-2 rounded-full hover:bg-background/80 transition-opacity">
 									{isOpen ? (
-										<ChevronUp
-											className="w-5 h-5"
-											style={{ color: "var(--label-color)" }}
-										/>
+										<ChevronUp className="w-5 h-5 text-muted-foreground" />
 									) : (
-										<ChevronDown
-											className="w-5 h-5"
-											style={{ color: "var(--label-color)" }}
-										/>
+										<ChevronDown className="w-5 h-5 text-muted-foreground" />
 									)}
 								</div>
 							</div>
@@ -126,32 +158,38 @@ export default function OfficialPlacements() {
 				</CollapsibleTrigger>
 
 				<CollapsibleContent>
-					<CardContent className="pt-0">
+					<CardContent className="pt-2 pb-6">
 						{isLoading && (
-							<div className="text-sm opacity-70 text-center py-4">
-								Loading official placement data…
+							<div className="flex flex-col items-center justify-center py-8 space-y-3 opacity-70">
+								<div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+								<div className="text-sm font-medium">
+									Loading official placement data…
+								</div>
 							</div>
 						)}
 
 						{error && (
-							<div className="text-sm text-red-600 dark:text-red-400 text-center py-4">
-								Failed to load official data.
+							<div className="flex flex-col items-center justify-center py-8 text-destructive space-y-2">
+								<AlertCircle className="w-8 h-8 opacity-80" />
+								<div className="text-sm font-medium">
+									Failed to load official data.
+								</div>
 							</div>
 						)}
 
 						{data && !isLoading && !error && (
-							<div className="space-y-4">
+							<div className="space-y-6 animate-in slide-in-from-top-2 duration-300">
 								{/* Tabs for different batches */}
 								{data.batches && data.batches.length > 0 && (
 									<Tabs defaultValue={defaultBatchValue} className="w-full">
-										<TabsList className="grid w-full grid-cols-2 h-auto p-1 bg-muted/50">
+										<TabsList className="w-full h-auto p-1 bg-muted border border-border/50 rounded-xl grid grid-cols-2 mb-6">
 											{data.batches.map((batch) => {
 												const { main } = parseBatchName(batch.batch_name);
 												return (
 													<TabsTrigger
 														key={batch.batch_name}
 														value={batch.batch_name}
-														className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-md px-3 py-2.5 text-sm font-medium transition-all"
+														className="data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:font-bold rounded-lg px-3 py-2.5 text-sm transition-all text-muted-foreground hover:text-foreground"
 													>
 														{main}
 													</TabsTrigger>
@@ -161,213 +199,131 @@ export default function OfficialPlacements() {
 
 										{data.batches.map((batch) => {
 											const { extra } = parseBatchName(batch.batch_name);
+
 											return (
 												<TabsContent
 													key={batch.batch_name}
 													value={batch.batch_name}
-													className="mt-4"
+													className="space-y-6 focus-visible:outline-none"
 												>
-													<div className="space-y-3">
-														{/* Badge for extra info */}
+													{/* Batch Status Header */}
+													<div className="flex items-center justify-between flex-wrap gap-2">
 														{extra && (
-															<div className="flex items-center gap-2 flex-wrap">
-																<Badge
-																	variant="secondary"
-																	className="text-xs font-medium px-3 py-1.5 rounded-full shadow-sm"
-																	style={{
-																		backgroundColor: "var(--accent-color)",
-																		color: "white",
-																	}}
-																>
-																	{extra}
-																</Badge>
-																{batch.is_active && (
-																	<Badge
-																		variant="outline"
-																		className="text-xs font-medium px-3 py-1.5 rounded-full"
-																		style={{
-																			borderColor: "var(--accent-color)",
-																			color: "var(--accent-color)",
-																		}}
-																	>
-																		Active
-																	</Badge>
-																)}
+															<div className="text-sm font-medium text-muted-foreground px-3 py-1 bg-muted/50 rounded-full border border-border/50">
+																{extra}
 															</div>
 														)}
-
-														{/* Placement Pointers */}
-														<div
-															className="rounded-lg p-4 space-y-2"
-															style={{
-																backgroundColor: "var(--bg-color)",
-																border: "1px solid var(--border-color)",
-															}}
-														>
-															<h4
-																className="font-semibold text-sm mb-3"
-																style={{ color: "var(--text-color)" }}
+														{batch.is_active && (
+															<Badge
+																variant="outline"
+																className="text-xs font-medium px-3 py-1 rounded-full border-primary/30 text-primary bg-primary/5"
 															>
-																Placement Highlights
-															</h4>
-															<ul className="space-y-2">
-																{batch.placement_pointers.map((pointer, i) => (
-																	<li
-																		key={i}
-																		className="text-xs sm:text-sm leading-relaxed flex items-start gap-2"
-																	>
-																		<span
-																			className="inline-block w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
-																			style={{
-																				backgroundColor: "var(--accent-color)",
-																			}}
-																		/>
-																		<span
-																			style={{ color: "var(--text-color)" }}
-																		>
-																			{pointer}
-																		</span>
-																	</li>
-																))}
-															</ul>
-														</div>
+																<span className="w-1.5 h-1.5 rounded-full bg-primary mr-2 animate-pulse" />
+																Active Batch
+															</Badge>
+														)}
+													</div>
 
-														{/* Package Distribution Table */}
-														{batch.package_distribution &&
-															batch.package_distribution.length > 0 && (
+													{/* Placement Pointers Grid */}
+													<div className="space-y-3">
+														<h4 className="flex items-center gap-2 font-semibold text-sm text-foreground/90">
+															<Award className="w-4 h-4 text-primary" />
+															Placement Highlights
+														</h4>
+														<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+															{batch.placement_pointers.map((pointer, i) => (
 																<div
-																	className="rounded-lg p-4 space-y-4"
-																	style={{
-																		backgroundColor: "var(--bg-color)",
-																		border: "1px solid var(--border-color)",
-																	}}
+																	key={i}
+																	className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50 hover:bg-muted/60 transition-colors"
 																>
-																	<h4
-																		className="font-semibold text-sm"
-																		style={{ color: "var(--text-color)" }}
-																	>
-																		Package Distribution (LPA)
-																	</h4>
+																	<CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+																	<span className="text-sm leading-relaxed text-muted-foreground">
+																		{highlightNumbers(pointer)}
+																	</span>
+																</div>
+															))}
+														</div>
+													</div>
+
+													{/* Package Distribution Table */}
+													{batch.package_distribution &&
+														batch.package_distribution.length > 0 && (
+															<div className="space-y-3">
+																<h4 className="flex items-center gap-2 font-semibold text-sm text-foreground/90">
+																	<BarChart3 className="w-4 h-4 text-primary" />
+																	Package Distribution (LPA)
+																</h4>
+																<div className="rounded-xl border border-border/60 overflow-hidden shadow-sm">
 																	<div className="overflow-x-auto">
-																		<table className="w-full text-left text-xs sm:text-sm border-collapse">
-																			<thead>
-																				<tr
-																					style={{
-																						color: "var(--label-color)",
-																						borderBottom:
-																							"1px solid var(--border-color)",
-																					}}
-																				>
-																					<th className="pb-2 font-medium">
+																		<Table className="min-w-[320px]">
+																			<TableHeader className="bg-muted/30">
+																				<TableRow className="hover:bg-transparent border-border/60">
+																					<TableHead className="w-[40%] font-semibold text-foreground/80 pl-3 py-3 h-auto text-xs sm:text-sm whitespace-nowrap">
 																						Category
-																					</th>
-																					<th className="pb-2 font-medium text-right">
+																					</TableHead>
+																					<TableHead className="text-right font-semibold text-foreground/80 px-2 py-3 h-auto text-xs sm:text-sm whitespace-nowrap">
 																						Average
-																					</th>
-																					<th className="pb-2 font-medium text-right">
+																					</TableHead>
+																					<TableHead className="text-right font-semibold text-foreground/80 pl-2 pr-3 py-3 h-auto text-xs sm:text-sm whitespace-nowrap">
 																						Median
-																					</th>
-																				</tr>
-																			</thead>
-																			<tbody
-																				style={{ color: "var(--text-color)" }}
-																			>
+																					</TableHead>
+																				</TableRow>
+																			</TableHeader>
+																			<TableBody>
 																				{batch.package_distribution.map(
-																					(item, idx) => (
-																						<tr
-																							key={idx}
-																							className="group transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-																							style={{
-																								borderBottom:
-																									idx ===
-																									batch.package_distribution!
-																										.length -
-																										1
-																										? "none"
-																										: "1px solid var(--border-color-subtle, var(--border-color))",
-																							}}
-																						>
-																							<td className="py-2.5 pr-2 font-medium">
-																								{item.category}
-																							</td>
-																							<td className="py-2.5 text-right tabular-nums">
-																								₹{item.average}
-																							</td>
-																							<td className="py-2.5 text-right tabular-nums">
-																								₹{item.median}
-																							</td>
-																						</tr>
-																					)
+																					(item, idx) => {
+																						return (
+																							<TableRow
+																								key={idx}
+																								className="hover:bg-muted/40 border-border/50 transition-colors"
+																							>
+																								<TableCell className="font-medium text-foreground pl-3 pr-2 py-3 text-xs sm:text-sm whitespace-nowrap">
+																									{item.category}
+																								</TableCell>
+																								<TableCell className="text-right px-2 py-3">
+																									<div className="flex flex-col items-end gap-1">
+																										<span className="font-bold tabular-nums text-foreground text-xs sm:text-sm">
+																											₹{item.average}
+																										</span>
+																									</div>
+																								</TableCell>
+																								<TableCell className="text-right pl-2 pr-3 py-3">
+																									<div className="flex flex-col items-end gap-1">
+																										<span className="font-medium tabular-nums text-muted-foreground text-xs sm:text-sm">
+																											₹{item.median}
+																										</span>
+																									</div>
+																								</TableCell>
+																							</TableRow>
+																						);
+																					}
 																				)}
-																			</tbody>
-																		</table>
+																			</TableBody>
+																		</Table>
 																	</div>
 																</div>
-															)}
-													</div>
+															</div>
+														)}
 												</TabsContent>
 											);
 										})}
 									</Tabs>
 								)}
 
-								{/* Intro Text */}
-								{/* {data.intro_text && (
-                  <div 
-                    className="text-xs sm:text-sm italic pt-3 border-t"
-                    style={{ 
-                      color: "var(--label-color)",
-                      borderColor: "var(--border-color)"
-                    }}
-                  >
-                    {data.intro_text}
-                  </div>
-                )} */}
-
-								{/* Recruiter Logos */}
-								{/* {data.recruiter_logos && data.recruiter_logos.length > 0 && (
-                  <div 
-                    className="pt-3 border-t"
-                    style={{ borderColor: "var(--border-color)" }}
-                  >
-                    <h4 
-                      className="font-semibold text-sm mb-3"
-                      style={{ color: "var(--text-color)" }}
-                    >
-                      Key Recruiters
-                    </h4>
-                    <div className="flex flex-wrap gap-4 items-center justify-center sm:justify-start">
-                      {data.recruiter_logos.map((logo, i) => (
-                        <div
-                          key={i}
-                          className="relative w-16 h-16 sm:w-20 sm:h-20 grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 hover:scale-110"
-                          title={logo.alt}
-                        >
-                          <Image
-                            src={logo.src}
-                            alt={logo.alt}
-                            fill
-                            className="object-contain"
-                            sizes="80px"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )} */}
-
 								{/* Timestamp */}
 								{data.scrape_timestamp && (
-									<div
-										className="text-[10px] pt-2 border-t text-right"
-										style={{
-											color: "var(--label-color)",
-											borderColor: "var(--border-color)",
-											opacity: 0.7,
-										}}
-									>
-										Last updated:{" "}
-										{new Date(data.scrape_timestamp).toLocaleString()}
+									<div className="flex items-center justify-end gap-1.5 pt-4 border-t border-border/60">
+										<Clock className="w-3 h-3 text-muted-foreground/60" />
+										<span className="text-[10px] text-muted-foreground/60 font-medium">
+											Last updated:{" "}
+											{new Date(data.scrape_timestamp).toLocaleString(
+												undefined,
+												{
+													dateStyle: "medium",
+													timeStyle: "short",
+												}
+											)}
+										</span>
 									</div>
 								)}
 							</div>

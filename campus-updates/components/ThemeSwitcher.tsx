@@ -41,7 +41,7 @@ export default function ThemeSwitcher({
 			variant="ghost"
 			size="sm"
 			onClick={toggleTheme}
-			className="w-full justify-start px-3 py-2 gap-3"
+			className="w-full justify-center px-3 py-2 gap-3"
 			aria-label={`Toggle theme, currently ${label}`}
 		>
 			{isLight ? (

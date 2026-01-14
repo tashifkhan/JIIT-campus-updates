@@ -207,8 +207,8 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 		if (!active || !payload || !payload.length) return null;
 
 		return (
-			<div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3">
-				<p className="font-semibold mb-2 text-slate-900 dark:text-slate-100">
+			<div className="bg-card border border-border rounded-lg shadow-lg p-3">
+				<p className="font-semibold mb-2 text-foreground">
 					{label} {isCumulative ? "(Cumulative)" : ""}
 				</p>
 				<div className="space-y-1">
@@ -217,14 +217,14 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 							key={index}
 							className="flex items-center justify-between gap-3"
 						>
-							<span className="text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2">
+							<span className="text-sm text-muted-foreground flex items-center gap-2">
 								<div
 									className="w-2 h-2 rounded-full"
 									style={{ backgroundColor: entry.color }}
 								/>
 								{entry.name}:
 							</span>
-							<span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+							<span className="text-sm font-semibold text-foreground">
 								{entry.value} {entry.name.includes("Package") ? "LPA" : ""}
 							</span>
 						</div>
@@ -239,13 +239,11 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 			<CardHeader>
 				<CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 					<div className="flex items-center gap-2">
-						<span style={{ color: "var(--text-color)" }}>
-							Placement Timeline
-						</span>
+						<span className="text-foreground">Placement Timeline</span>
 					</div>
 
 					<div className="flex flex-wrap items-center gap-2">
-						<div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+						<div className="flex items-center bg-muted rounded-lg p-1">
 							<Button
 								variant={isCumulative ? "secondary" : "ghost"}
 								size="sm"
@@ -264,9 +262,9 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 							</Button>
 						</div>
 
-						<div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block" />
+						<div className="w-px h-6 bg-border mx-1 hidden sm:block" />
 
-						<div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+						<div className="flex items-center bg-muted rounded-lg p-1">
 							<Button
 								variant={timeFrame === "month" ? "secondary" : "ghost"}
 								size="sm"
@@ -285,9 +283,9 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 							</Button>
 						</div>
 
-						<div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block" />
+						<div className="w-px h-6 bg-border mx-1 hidden sm:block" />
 
-						<div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+						<div className="flex items-center bg-muted rounded-lg p-1">
 							<Button
 								variant={view === "combined" ? "secondary" : "ghost"}
 								size="sm"
@@ -330,19 +328,19 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 							/>
 							<XAxis
 								dataKey="date"
-								tick={{ fontSize: 12, fill: "var(--label-color)" }}
+								tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
 								tickMargin={10}
 								minTickGap={30}
 							/>
 							<YAxis
 								yAxisId="left"
-								tick={{ fontSize: 12, fill: "var(--label-color)" }}
+								tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
 								tickFormatter={(value) => value.toLocaleString()}
 							/>
 							<YAxis
 								yAxisId="right"
 								orientation="right"
-								tick={{ fontSize: 12, fill: "var(--label-color)" }}
+								tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
 								unit=" LPA"
 								hide={view === "count"}
 							/>
@@ -355,7 +353,7 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 										yAxisId="left"
 										dataKey="uniqueStudents"
 										name="Unique Students"
-										fill="#3b82f6"
+										fill="var(--chart-1)"
 										radius={[4, 4, 0, 0]}
 										maxBarSize={50}
 										fillOpacity={0.8}
@@ -364,7 +362,7 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 										yAxisId="left"
 										dataKey="totalOffers"
 										name="Total Offers"
-										fill="#10b981"
+										fill="var(--chart-3)"
 										radius={[4, 4, 0, 0]}
 										maxBarSize={50}
 										fillOpacity={0.8}
@@ -379,7 +377,7 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 										type="monotone"
 										dataKey="avgPackage"
 										name="Avg Package"
-										stroke="#f59e0b"
+										stroke="var(--chart-2)"
 										strokeWidth={2}
 										dot={{ r: 3 }}
 										activeDot={{ r: 5 }}
@@ -389,7 +387,7 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 										type="monotone"
 										dataKey="medianPackage"
 										name="Median Package"
-										stroke="#ec4899"
+										stroke="var(--chart-4)"
 										strokeWidth={2}
 										strokeDasharray="5 5"
 										dot={{ r: 3 }}

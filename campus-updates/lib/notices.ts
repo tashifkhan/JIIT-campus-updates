@@ -9,6 +9,7 @@ export type Notice = {
   content?: string;
   author?: string;
   shortlisted_students?: Array<{ name: string; enrollment_number: string }>;
+  joiningDate?: string;
 };
 
 export const normalizeCategory = (cat: string): string => {

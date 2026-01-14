@@ -109,12 +109,12 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 					? typeof n.createdAt === "number"
 						? n.createdAt
 						: new Date(n.createdAt).getTime()
-					: null;
+					: undefined;
 				const updatedAt = n.updatedAt
 					? typeof n.updatedAt === "number"
 						? n.updatedAt
 						: new Date(n.updatedAt).getTime()
-					: null;
+					: undefined;
 
 				// Build matched_job object if any job info is available
 				const matchedJobId = n.matched_job_id ?? n.matched_job?.id ?? null;
@@ -144,10 +144,10 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 				return {
 					// copy scalar fields explicitly to avoid passing BSON objects
 					_id: id,
-					id: n.id ?? null,
-					title: n.title ?? null,
-					content: n.content ?? null,
-					author: n.author ?? null,
+					id: n.id ?? undefined,
+					title: n.title ?? undefined,
+					content: n.content ?? undefined,
+					author: n.author ?? undefined,
 					createdAt,
 					updatedAt,
 					category: n.category ?? null,
@@ -163,8 +163,10 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 					formatted_message: n.formatted_message ?? null,
 					location: n.location ?? null,
 					sent_to_telegram: n.sent_to_telegram ?? null,
-					updated_at: n.updated_at ?? null,
+					updated_at: n.updated_at ?? undefined,
 					shortlisted_students: n.shortlisted_students ?? null,
+					number_of_offers: null,
+					joiningDate: undefined,
 				};
 			})
 			.map((n) => ({
@@ -189,7 +191,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 				? new Date(o.saved_at).getTime()
 				: o.updated_at
 				? new Date(o.updated_at).getTime()
-				: null;
+				: undefined;
 
 			// Compute a representative role and CTC
 			const roles: Array<{
@@ -215,6 +217,9 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 			if (ctcText) parts.push(`**CTC:** ${ctcText}`);
 			if (Array.isArray(o.job_location) && o.job_location.length)
 				parts.push(`**Location:** ${o.job_location.join(", ")}`);
+			// Joining Date and Number of Offers are now displayed in the Grid Layout,
+			// so we exclude them from the markdown body to avoid redundancy.
+			/*
 			if (o.joining_date)
 				parts.push(
 					`Joining Date: ${new Date(o.joining_date).toLocaleDateString(
@@ -228,6 +233,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 				);
 			if (o.number_of_offers != null)
 				parts.push(`Number of Offers: ${o.number_of_offers}`);
+			*/
 			// Note: additional_info is removed from the API response for privacy/security.
 			// so that it doesn't render in the body and doesn't trigger deadline parsing.
 
@@ -243,9 +249,9 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 			return {
 				_id: rawId,
 				id: String(rawId),
-				title: null,
-				content: null,
-				author: null,
+				title: undefined,
+				content: undefined,
+				author: undefined,
 				createdAt,
 				updatedAt: createdAt,
 				category: "placement offer",
@@ -268,12 +274,16 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 					.filter(Boolean)
 					.join("\n"),
 				formatted_message,
-				location: Array.isArray(o.job_location)
-					? o.job_location.join(", ")
-					: null,
 				sent_to_telegram: null,
 				updated_at: o.updated_at || null,
 				shortlisted_students,
+				joiningDate: o.joining_date
+					? new Date(o.joining_date).toLocaleDateString("en-IN", {
+							year: "numeric",
+							month: "short",
+							day: "numeric",
+					  })
+					: undefined,
 			};
 		});
 
@@ -386,14 +396,8 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 				{[...Array(3)].map((_, i) => (
 					<Card key={i} className="animate-pulse card-theme">
 						<CardContent className="p-6">
-							<div
-								className="h-4 rounded w-3/4 mb-2"
-								style={{ backgroundColor: "var(--skeleton-color)" }}
-							/>
-							<div
-								className="h-3 rounded w-1/2"
-								style={{ backgroundColor: "var(--skeleton-color)" }}
-							/>
+							<div className="h-4 rounded w-3/4 mb-2 bg-muted/50" />
+							<div className="h-3 rounded w-1/2 bg-muted/50" />
 						</CardContent>
 					</Card>
 				))}
@@ -404,13 +408,10 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 	return (
 		<div className="max-w-4xl mx-auto space-y-6">
 			<div className="text-center mb-8">
-				<h1
-					className="text-2xl lg:text-3xl font-bold mb-2"
-					style={{ color: "var(--text-color)" }}
-				>
+				<h1 className="text-2xl lg:text-3xl font-bold mb-2 text-foreground">
 					Latest Updates
 				</h1>
-				<p style={{ color: "var(--label-color)" }}>
+				<p className="text-muted-foreground">
 					Stay informed about placement activities
 				</p>
 			</div>
@@ -473,24 +474,14 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 					return (
 						<Card
 							key={notice.id}
-							className="notice-card transition-all duration-300 card-theme"
-							style={{
-								backgroundColor: "var(--card-bg)",
-								borderColor: "var(--border-color)",
-								color: "var(--text-color)",
-							}}
+							className="notice-card transition-all duration-300 card-theme bg-card border-border text-foreground"
 						>
 							{/* Card header: category badge + author/date */}
 							<CardHeader className="pb-3">
 								<div className="flex items-center justify-between">
 									<Badge
 										variant="outline"
-										className="px-3 py-1"
-										style={{
-											backgroundColor: "var(--primary-color)",
-											color: "var(--accent-color)",
-											borderColor: "var(--border-color)",
-										}}
+										className="px-3 py-1 rounded-full bg-primary/10 text-primary border-primary/20"
 									>
 										<IconComponent className="w-3 h-3 mr-2" />
 										{notice.category
@@ -500,26 +491,22 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 											)
 											.join(" ")}
 									</Badge>
-								</div>
-								{(notice.createdAt || notice.author) && (
-									<div
-										className="flex items-center justify-between mt-3 text-xs"
-										style={{ color: "var(--label-color)" }}
-									>
-										<div className="flex items-center space-x-2">
-											{notice.category == "placement offer" ? (
-												<span className="font-medium">By Placement Bot </span>
-											) : (
-												notice.author && (
-													<span className="font-medium">
-														By {notice.author}
-													</span>
-												)
+									{(notice.createdAt || notice.author) && (
+										<div className="text-xs text-muted-foreground ml-auto">
+											{notice.createdAt && (
+												<span>{formatDateTime(notice.createdAt)}</span>
 											)}
 										</div>
-										{notice.createdAt && (
-											<span>{formatDateTime(notice.createdAt)}</span>
-										)}
+									)}
+								</div>
+								{notice.author && notice.category !== "placement offer" && (
+									<div className="text-xs text-muted-foreground mt-1 ml-1">
+										By {notice.author}
+									</div>
+								)}
+								{notice.category === "placement offer" && (
+									<div className="text-xs text-muted-foreground mt-1 ml-1">
+										By Placement Bot
 									</div>
 								)}
 							</CardHeader>
@@ -529,123 +516,137 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 								notice.category === "job posting" ||
 								notice.category === "placement offer" ? (
 									<div className="space-y-4">
-										{/* Job Posting / Update / Placement Offer details block */}
+										{/* Title */}
 										{parsedMessage.title && (
-											<div className="mb-4">
-												<h3
-													className="text-lg font-semibold leading-tight"
-													style={{ color: "var(--text-color)" }}
-												>
+											<div className="mb-2">
+												<h3 className="text-lg font-semibold leading-tight text-foreground">
 													{parsedMessage.title}
 												</h3>
 											</div>
 										)}
 
+										{/* Key Details Grid Container */}
 										{(parsedMessage.company ||
 											parsedMessage.role ||
-											parsedMessage.ctc) && (
-											<div
-												className="rounded-lg p-4 border mb-4"
-												style={{
-													backgroundColor: "var(--primary-color)",
-													borderColor: "var(--border-color)",
-												}}
-											>
-												{/* Top summary row includes CTC (aka package) on the right.
-													   If you’re looking for the "package breakdown" it’s stored on the
-													   notice object as `notice.package_breakdown` (markdown-style list)
-													   but is not rendered here by default. */}
-												<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+											parsedMessage.ctc ||
+											parsedMessage.deadline ||
+											notice.joiningDate ||
+											(notice.category === "placement offer" &&
+												notice.number_of_offers)) && (
+											<div className="rounded-xl border p-4 bg-primary/5 border-primary/20">
+												<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 													{parsedMessage.company && (
-														<div className="flex items-center">
-															<BuildingIcon
-																className="w-4 h-4 mr-2"
-																style={{ color: "var(--accent-color)" }}
-															/>
-															<span
-																className="font-medium"
-																style={{ color: "var(--accent-color)" }}
-															>
-																{parsedMessage.company}
-															</span>
+														<div className="flex items-center gap-3">
+															<div className="p-2 rounded-lg bg-background border border-primary/10">
+																<BuildingIcon className="w-4 h-4 text-primary" />
+															</div>
+															<div>
+																<p className="text-xs text-muted-foreground font-medium">
+																	Company
+																</p>
+																<p className="font-medium text-foreground">
+																	{parsedMessage.company}
+																</p>
+															</div>
 														</div>
 													)}
+
 													{parsedMessage.role && (
-														<div className="flex items-center">
-															<Badge
-																variant="secondary"
-																style={{
-																	backgroundColor: "var(--card-bg)",
-																	color: "var(--accent-color)",
-																	borderColor: "var(--border-color)",
-																}}
-															>
-																{parsedMessage.role}
-															</Badge>
+														<div className="flex items-center gap-3">
+															<div className="p-2 rounded-lg bg-background border border-primary/10">
+																<UsersIcon className="w-4 h-4 text-primary" />
+															</div>
+															<div>
+																<p className="text-xs text-muted-foreground font-medium">
+																	Role
+																</p>
+																<div className="flex flex-wrap">
+																	<Badge
+																		variant="secondary"
+																		className="rounded-sm px-2 py-0.5 bg-transparent border-0 text-foreground p-0 h-auto font-medium"
+																	>
+																		{parsedMessage.role}
+																	</Badge>
+																</div>
+															</div>
 														</div>
 													)}
+
 													{parsedMessage.ctc &&
 														parsedMessage.ctc.toLowerCase().trim() !==
 															"none" && (
-															<div className="flex items-center">
-																<IndianRupeeIcon
-																	className="w-4 h-4 mr-2"
-																	style={{ color: "var(--accent-color)" }}
-																/>
-																<span
-																	className="font-semibold"
-																	style={{ color: "var(--text-color)" }}
-																>
-																	{parsedMessage.ctc.replace(/^₹\s?/, "")}
-																</span>
+															<div className="flex items-center gap-3">
+																<div className="p-2 rounded-lg bg-background border border-primary/10">
+																	<IndianRupeeIcon className="w-4 h-4 text-primary" />
+																</div>
+																<div>
+																	<p className="text-xs text-muted-foreground font-medium">
+																		CTC
+																	</p>
+																	<p className="font-medium text-foreground">
+																		{parsedMessage.ctc.replace(/^₹\s?/, "")}
+																	</p>
+																</div>
+															</div>
+														)}
+
+													{parsedMessage.deadline &&
+														notice.category !== "placement offer" && (
+															<div className="flex items-center gap-3">
+																<div className="p-2 rounded-lg bg-background border border-primary/10">
+																	<CalendarIcon className="w-4 h-4 text-primary" />
+																</div>
+																<div>
+																	<p className="text-xs text-muted-foreground font-medium">
+																		Deadline
+																	</p>
+																	<p className="font-medium text-foreground">
+																		{parsedMessage.deadline}
+																	</p>
+																</div>
+															</div>
+														)}
+
+													{notice.joiningDate &&
+														notice.category === "placement offer" && (
+															<div className="flex items-center gap-3">
+																<div className="p-2 rounded-lg bg-background border border-primary/10">
+																	<CalendarIcon className="w-4 h-4 text-primary" />
+																</div>
+																<div>
+																	<p className="text-xs text-muted-foreground font-medium">
+																		Joining Date
+																	</p>
+																	<p className="font-medium text-foreground">
+																		{notice.joiningDate}
+																	</p>
+																</div>
+															</div>
+														)}
+
+													{notice.category === "placement offer" &&
+														notice.number_of_offers && (
+															<div className="flex items-center gap-3">
+																<div className="p-2 rounded-lg bg-background border border-primary/10">
+																	<UsersIcon className="w-4 h-4 text-primary" />
+																</div>
+																<div>
+																	<p className="text-xs text-muted-foreground font-medium">
+																		Offers
+																	</p>
+																	<p className="font-medium text-foreground">
+																		{notice.number_of_offers}
+																	</p>
+																</div>
 															</div>
 														)}
 												</div>
 											</div>
 										)}
 
-										{parsedMessage.deadline &&
-											notice.category !== "placement offer" && (
-												<div
-													className="border rounded-lg p-3 mb-4"
-													style={{
-														backgroundColor: "var(--primary-color)",
-														borderColor: "var(--border-color)",
-													}}
-												>
-													<div className="flex items-center">
-														<CalendarIcon
-															className="w-5 h-5 mr-2"
-															style={{ color: "var(--accent-color)" }}
-														/>
-														<span
-															className="font-semibold"
-															style={{ color: "var(--text-color)" }}
-														>
-															Deadline:{" "}
-														</span>
-														<span
-															className="ml-1 font-medium"
-															style={{ color: "var(--accent-color)" }}
-														>
-															{parsedMessage.deadline}
-														</span>
-													</div>
-												</div>
-											)}
-
 										{parsedMessage.body && (
-											<div
-												className="rounded-lg border p-4"
-												style={{
-													backgroundColor: "var(--card-bg)",
-													borderColor: "var(--border-color)",
-												}}
-											>
-												<div
-													className="prose prose-sm max-w-none"
-													style={{ color: "var(--text-color)" }}
-												>
+											<div className="rounded-xl border p-4 bg-card border-border">
+												<div className="prose prose-sm max-w-none text-foreground">
 													<ReactMarkdown remarkPlugins={[remarkGfm]}>
 														{parsedMessage.body}
 													</ReactMarkdown>
@@ -655,18 +656,9 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 
 										{/* Eligibility section for job postings */}
 										{eligibilityCriteria && eligibilityCriteria.length > 0 && (
-											<div
-												className="rounded-lg border p-4"
-												style={{
-													backgroundColor: "var(--primary-color)",
-													borderColor: "var(--border-color)",
-												}}
-											>
-												<h4
-													className="font-semibold mb-3 flex items-center"
-													style={{ color: "var(--text-color)" }}
-												>
-													<UsersIcon className="w-4 h-4 mr-2" />
+											<div className="rounded-xl border p-4 bg-primary/5 border-primary/20">
+												<h4 className="font-semibold mb-3 flex items-center text-foreground">
+													<UsersIcon className="w-4 h-4 mr-2 text-primary" />
 													Eligibility Criteria
 												</h4>
 												<div className="space-y-3">
@@ -675,11 +667,8 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 															<div key={idx}>
 																{criteria.type === "courses" && (
 																	<div>
-																		<span
-																			className="text-sm font-medium"
-																			style={{ color: "var(--accent-color)" }}
-																		>
-																			Eligible Branches:
+																		<span className="text-sm font-medium text-muted-foreground">
+																			Eligible Branches
 																		</span>
 																		<div className="flex flex-wrap gap-1 mt-1">
 																			{Array.isArray(criteria.value) ? (
@@ -687,15 +676,8 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 																					(course: string, i: number) => (
 																						<Badge
 																							key={i}
-																							variant="outline"
-																							className="text-xs"
-																							style={{
-																								backgroundColor:
-																									"var(--card-bg)",
-																								borderColor:
-																									"var(--border-color)",
-																								color: "var(--text-color)",
-																							}}
+																							variant="secondary"
+																							className="text-xs bg-background border border-primary/10 text-foreground"
 																						>
 																							{course.trim()}
 																						</Badge>
@@ -703,13 +685,8 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 																				)
 																			) : (
 																				<Badge
-																					variant="outline"
-																					className="text-xs"
-																					style={{
-																						backgroundColor: "var(--card-bg)",
-																						borderColor: "var(--border-color)",
-																						color: "var(--text-color)",
-																					}}
+																					variant="secondary"
+																					className="text-xs bg-background border border-primary/10 text-foreground"
 																				>
 																					{String(criteria.value).trim()}
 																				</Badge>
@@ -719,15 +696,10 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 																)}
 																{criteria.type === "marks" && (
 																	<div className="flex items-center text-sm">
-																		<span
-																			className="font-medium mr-2"
-																			style={{ color: "var(--accent-color)" }}
-																		>
-																			{criteria.level.replace("_", " ")}:
+																		<span className="font-medium mr-2 text-muted-foreground">
+																			{criteria.level.replace("_", " ")}
 																		</span>
-																		<span
-																			style={{ color: "var(--text-color)" }}
-																		>
+																		<span className="font-semibold text-foreground">
 																			{criteria.value}{" "}
 																			{criteria.unit.replace("CGPA", "")}
 																		</span>
@@ -735,11 +707,9 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 																)}
 																{(criteria.type === "requirement" ||
 																	criteria.type === "general") && (
-																	<div
-																		className="text-sm"
-																		style={{ color: "var(--text-color)" }}
-																	>
-																		• {criteria.value}
+																	<div className="text-sm text-foreground flex items-start">
+																		<span className="mr-2">•</span>
+																		<span>{criteria.value}</span>
 																	</div>
 																)}
 															</div>
@@ -751,18 +721,9 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 
 										{/* Hiring process steps (numbered chips) */}
 										{hiringSteps.length > 0 && (
-											<div
-												className="rounded-lg border p-4"
-												style={{
-													backgroundColor: "var(--primary-color)",
-													borderColor: "var(--border-color)",
-												}}
-											>
-												<h4
-													className="font-semibold mb-3 flex items-center"
-													style={{ color: "var(--text-color)" }}
-												>
-													<CalendarIcon className="w-4 h-4 mr-2" />
+											<div className="rounded-xl border p-4 bg-primary/5 border-primary/20">
+												<h4 className="font-semibold mb-3 flex items-center text-foreground">
+													<CalendarIcon className="w-4 h-4 mr-2 text-primary" />
 													Hiring Process
 												</h4>
 												<div className="space-y-2">
@@ -771,18 +732,10 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 															key={idx}
 															className="flex items-center text-sm"
 														>
-															<div
-																className="w-6 h-6 rounded-full text-xs font-semibold flex items-center justify-center mr-3 flex-shrink-0"
-																style={{
-																	backgroundColor: "var(--accent-color)",
-																	color: "var(--bg-color)",
-																}}
-															>
+															<div className="w-6 h-6 rounded-full text-xs font-semibold flex items-center justify-center mr-3 flex-shrink-0 bg-primary text-primary-foreground">
 																{idx + 1}
 															</div>
-															<span style={{ color: "var(--text-color)" }}>
-																{step}
-															</span>
+															<span className="text-foreground">{step}</span>
 														</div>
 													))}
 												</div>
@@ -805,13 +758,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 										{(parsedMessage.company ||
 											parsedMessage.role ||
 											parsedMessage.ctc) && (
-											<div
-												className="rounded-lg p-4 border"
-												style={{
-													backgroundColor: "var(--primary-color)",
-													borderColor: "var(--border-color)",
-												}}
-											>
+											<div className="rounded-xl p-4 border bg-primary/5 border-primary/20">
 												{/* Shortlisting header shows CTC (package) if present.
 												   Any detailed package breakdown, when needed, can be
 												   rendered using `notice.package_breakdown`. */}
@@ -820,11 +767,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 														{parsedMessage.company && (
 															<Badge
 																variant="secondary"
-																style={{
-																	backgroundColor: "var(--card-bg)",
-																	color: "var(--accent-color)",
-																	borderColor: "var(--border-color)",
-																}}
+																className="bg-card text-primary border-border"
 															>
 																<BuildingIcon className="w-3 h-3 mr-1" />
 																{parsedMessage.company}
@@ -833,11 +776,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 														{parsedMessage.role && (
 															<Badge
 																variant="secondary"
-																style={{
-																	backgroundColor: "var(--card-bg)",
-																	color: "var(--accent-color)",
-																	borderColor: "var(--border-color)",
-																}}
+																className="bg-card text-primary border-border"
 															>
 																{parsedMessage.role}
 															</Badge>
@@ -848,12 +787,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 															"none" && (
 															<Badge
 																variant="outline"
-																className="font-medium"
-																style={{
-																	backgroundColor: "var(--primary-color)",
-																	color: "var(--accent-color)",
-																	borderColor: "var(--border-color)",
-																}}
+																className="font-medium bg-primary/10 text-primary border-border"
 															>
 																<IndianRupeeIcon className="w-3 h-3 mr-1" />
 																{parsedMessage.ctc.replace(/^₹\s?/, "")}
@@ -876,13 +810,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 												</h3>
 											</div>
 										)}
-										<div
-											className="rounded-lg p-4 border"
-											style={{
-												backgroundColor: "var(--primary-color)",
-												borderColor: "var(--border-color)",
-											}}
-										>
+										<div className="rounded-lg p-4 border bg-primary/10 border-border">
 											<div
 												className="prose prose-sm max-w-none"
 												style={{ color: "var(--text-color)" }}
@@ -901,13 +829,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 										className="border-t pt-4"
 										style={{ borderColor: "var(--border-color)" }}
 									>
-										<div
-											className="rounded-lg p-4 border"
-											style={{
-												backgroundColor: "var(--primary-color)",
-												borderColor: "var(--border-color)",
-											}}
-										>
+										<div className="rounded-xl p-4 border bg-primary/5 border-primary/20">
 											<ShortlistTable
 												students={students as any}
 												expanded={expandedNotice === notice.id}
@@ -928,11 +850,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 										style={{ borderColor: "var(--border-color)" }}
 									>
 										<div
-											className="rounded-lg p-4 border cursor-pointer hover:shadow-md transition-all duration-200 group"
-											style={{
-												backgroundColor: "var(--primary-color)",
-												borderColor: "var(--border-color)",
-											}}
+											className="rounded-xl p-4 border cursor-pointer transition-all duration-200 group bg-primary/5 border-primary/20 hover:bg-primary/10 hover:shadow-sm"
 											onClick={() => {
 												const jobId = notice.matched_job?.id;
 												if (jobId) {
@@ -962,21 +880,14 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 										>
 											<div className="flex items-start justify-between">
 												<div className="flex items-start flex-1">
-													<BellIcon
-														className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0"
-														style={{ color: "var(--accent-color)" }}
-													/>
+													<div className="p-2 mr-3 rounded-lg bg-background border border-primary/10">
+														<BellIcon className="w-5 h-5 text-primary" />
+													</div>
 													<div className="flex-1">
-														<h4
-															className="font-medium mb-1"
-															style={{ color: "var(--text-color)" }}
-														>
+														<h4 className="font-medium mb-1 text-foreground">
 															Related Job Posting
 														</h4>
-														<p
-															className="text-sm"
-															style={{ color: "var(--text-color)" }}
-														>
+														<p className="text-sm text-foreground">
 															<span className="font-medium">
 																{notice.matched_job.company}
 															</span>{" "}
@@ -985,31 +896,21 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 														{isPending &&
 														pendingJobId === notice.matched_job?.id ? (
 															<div className="flex items-center text-xs mt-1">
-																<div
-																	className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin mr-2"
-																	style={{
-																		borderColor: "var(--border-color)",
-																		borderTopColor: "transparent",
-																	}}
-																/>
-																<span style={{ color: "var(--label-color)" }}>
+																<div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin mr-2 border-border" />
+																<span className="text-muted-foreground">
 																	Loading…
 																</span>
 															</div>
 														) : (
-															<p
-																className="text-xs mt-1 group-hover:text-accent-color transition-colors"
-																style={{ color: "var(--label-color)" }}
-															>
+															<p className="text-xs mt-1 group-hover:text-primary transition-colors text-muted-foreground">
 																Click to view full job details
 															</p>
 														)}
 													</div>
 												</div>
-												<ArrowRightIcon
-													className="w-4 h-4 flex-shrink-0 ml-2 group-hover:translate-x-1 transition-transform"
-													style={{ color: "var(--accent-color)" }}
-												/>
+												<div className="bg-background rounded-full p-2 border border-primary/10 group-hover:bg-primary group-hover:text-white transition-colors">
+													<ArrowRightIcon className="w-4 h-4" />
+												</div>
 											</div>
 										</div>
 									</div>
@@ -1022,7 +923,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 				{currentNotices.length === 0 && !loading && (
 					<Card className="text-center py-12 card-theme">
 						<CardContent>
-							<p style={{ color: "var(--label-color)" }}>
+							<p className="text-muted-foreground">
 								No updates found matching your criteria.
 							</p>
 						</CardContent>

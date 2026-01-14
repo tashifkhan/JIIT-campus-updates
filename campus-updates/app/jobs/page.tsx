@@ -79,16 +79,22 @@ export default function JobsPage() {
 					role="main"
 					className="min-h-screen flex items-center justify-center font-sans"
 				>
-					<div className="p-8 md:p-10 rounded-[14px] border border-black/10 dark:border-white/10 shadow-[0_2px_24px_rgba(0,0,0,0.06)] bg-white dark:bg-slate-900">
-						<h1 className="m-0 mb-2 text-2xl md:text-3xl">
+					<div className="p-8 md:p-10 rounded-[14px] border border-border shadow-lg bg-card text-card-foreground">
+						<h1 className="m-0 mb-2 text-2xl md:text-3xl font-bold">
 							Service unavailable Permanently
 						</h1>
-						<p className="m-0 mb-1 text-base opacity-80">
+						<p className="m-0 mb-1 text-base text-muted-foreground">
 							This site will not be accessible.
 						</p>
-						<p className="m-0 text-sm opacity-70">
+						<p className="m-0 text-sm text-muted-foreground/80">
 							As per the instructions of the{" "}
-							<span onClick={handleSecretClick}>JIIT</span> Administration.
+							<span
+								onClick={handleSecretClick}
+								className="cursor-pointer hover:text-primary transition-colors"
+							>
+								JIIT
+							</span>{" "}
+							Administration.
 						</p>
 					</div>
 				</main>
@@ -249,21 +255,15 @@ function JobsPageContent() {
 		return (
 			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 				{[...Array(6)].map((_, i) => (
-					<Card key={i} className="animate-pulse card-theme">
+					<Card
+						key={i}
+						className="animate-pulse card-theme border-border bg-card"
+					>
 						{/* skeleton block */}
 						<div className="p-5 space-y-3">
-							<div
-								className="h-6 rounded w-3/4"
-								style={{ backgroundColor: "var(--primary-color)" }}
-							/>
-							<div
-								className="h-4 rounded w-1/2"
-								style={{ backgroundColor: "var(--primary-color)" }}
-							/>
-							<div
-								className="h-3 rounded w-full"
-								style={{ backgroundColor: "var(--primary-color)" }}
-							/>
+							<div className="h-6 rounded w-3/4 bg-muted" />
+							<div className="h-4 rounded w-1/2 bg-muted" />
+							<div className="h-3 rounded w-full bg-muted" />
 						</div>
 					</Card>
 				))}
@@ -274,13 +274,10 @@ function JobsPageContent() {
 	return (
 		<div className="max-w-7xl mx-auto">
 			<div className="text-center mb-8">
-				<h1
-					className="text-2xl lg:text-3xl font-bold mb-2"
-					style={{ color: "var(--text-color)" }}
-				>
+				<h1 className="text-2xl lg:text-3xl font-bold mb-2 text-foreground">
 					Job Opportunities
 				</h1>
-				<p style={{ color: "var(--label-color)" }}>
+				<p className="text-muted-foreground">
 					Explore campus placement opportunities
 				</p>
 			</div>
@@ -303,8 +300,7 @@ function JobsPageContent() {
 					setQuery,
 					setSelectedCategories: (u) =>
 						setSelectedCategories((prev) => u(prev)),
-					setSelectedLocations: (u) =>
-						setSelectedLocations((prev) => u(prev)),
+					setSelectedLocations: (u) => setSelectedLocations((prev) => u(prev)),
 					setSelectedGenders: (u) => setSelectedGenders((prev) => u(prev)),
 					setSelectedCourses: (u) => setSelectedCourses((prev) => u(prev)),
 					setMinPackageLpa,

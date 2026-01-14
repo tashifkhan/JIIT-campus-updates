@@ -78,19 +78,10 @@ export default function FiltersSheet({
 		<div className="fixed bottom-24 md:bottom-6 right-6 z-50">
 			<Sheet open={open} onOpenChange={onOpenChange}>
 				<SheetTrigger asChild>
-					<Button
-						className="rounded-2xl w-14 h-14 shadow-lg relative"
-						style={{ backgroundColor: "var(--accent-color)", color: "white" }}
-					>
+					<Button className="rounded-2xl w-14 h-14 shadow-lg relative bg-primary text-primary-foreground hover:bg-primary/90">
 						<Filter className="w-6 h-6" />
 						{hasActiveFilters && (
-							<Badge
-								className="absolute -top-2 -right-2 rounded-full w-6 h-6 p-0 flex items-center justify-center text-xs"
-								style={{
-									backgroundColor: "var(--error-color)",
-									color: "white",
-								}}
-							>
+							<Badge className="absolute -top-2 -right-2 rounded-full w-6 h-6 p-0 flex items-center justify-center text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90">
 								!
 							</Badge>
 						)}

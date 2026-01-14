@@ -75,13 +75,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 			style={{ backgroundColor: "var(--bg-color)" }}
 		>
 			{/* Mobile Header */}
-			<div
-				className="lg:hidden border-b border-theme"
-				style={{
-					backgroundColor: "var(--card-bg)",
-					borderColor: "var(--border-color)",
-				}}
-			>
+			<div className="lg:hidden border-b border-border bg-card">
 				<div className="flex items-center justify-between px-4 py-3">
 					<div className="flex items-center gap-3">
 						<div className="w-12 h-12 relative rounded-full overflow-hidden flex-shrink-0">
@@ -92,10 +86,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 								style={{ objectFit: "cover" }}
 							/>
 						</div>
-						<h1
-							className="text-lg font-semibold"
-							style={{ color: "var(--text-color)" }}
-						>
+						<h1 className="text-lg font-semibold text-foreground">
 							Placement Updates
 						</h1>
 					</div>
@@ -103,8 +94,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 						<ThemeSwitcher compact />
 						<Link href="/policy" className="pr-2">
 							<div
-								className="p-2 rounded-full transition-colors hover:bg-[var(--primary-color)] hover:text-[var(--accent-color)]"
-								style={{ color: "var(--text-color)" }}
+								className="p-2 rounded-full transition-colors hover:bg-primary hover:text-accent-foreground text-foreground"
 								aria-label="Policy"
 							>
 								<BookOpenIcon className="w-4 h-5" />
@@ -115,38 +105,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 							href="https://t.me/SupersetNotificationBot"
 							target="_blank"
 							rel="noopener noreferrer"
-							className="px-3 py-1 rounded-2xl text-sm font-medium hover-theme"
-							style={{
-								backgroundColor: "var(--accent-color)",
-								color: "var(--card-bg)",
-							}}
+							className="px-3 py-1 rounded-2xl text-sm font-medium hover-theme bg-accent text-card"
 						>
 							<BellIcon className="w-5 h-5" />
 						</Link>
-
-						{/* <button
-							onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-							className="p-2 rounded-md hover-theme"
-							style={{ color: "var(--label-color)" }}
-						>
-							{mobileMenuOpen ? (
-								<XIcon className="w-5 h-5" />
-							) : (
-								<MenuIcon className="w-5 h-5" />
-							)}
-						</button> */}
 					</div>
 				</div>
 
 				{/* Mobile Menu */}
 				{mobileMenuOpen && (
-					<div
-						className="border-t border-theme"
-						style={{
-							backgroundColor: "var(--card-bg)",
-							borderColor: "var(--border-color)",
-						}}
-					>
+					<div className="border-t border-border bg-card">
 						<nav className="px-4 py-2 space-y-1">
 							{navigation
 								.filter((item) => item.href !== "/policy")
@@ -161,20 +129,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 											className={cn(
 												"flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors border",
 												isActive
-													? "border-theme"
-													: "border-transparent hover-theme"
+													? "border-theme bg-primary text-accent-foreground border-accent"
+													: "border-transparent hover-theme text-foreground hover:bg-accent"
 											)}
-											style={{
-												color: isActive
-													? "var(--accent-color)"
-													: "var(--text-color)",
-												backgroundColor: isActive
-													? "var(--primary-color)"
-													: "transparent",
-												borderColor: isActive
-													? "var(--accent-color)"
-													: "transparent",
-											}}
 										>
 											<Icon className="w-4 h-4 mr-3" />
 											{item.name}
@@ -189,17 +146,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 			<div className="lg:flex lg:h-full">
 				{/* Desktop Sidebar */}
 				<div className="hidden lg:flex lg:flex-shrink-0 lg:h-full">
-					<div
-						className="flex flex-col w-64 border-r border-theme h-full overflow-hidden"
-						style={{
-							backgroundColor: "var(--card-bg)",
-							borderColor: "var(--border-color)",
-						}}
-					>
-						<div
-							className="px-6 py-6 border-b border-theme text-center"
-							style={{ borderColor: "var(--border-color)" }}
-						>
+					<div className="flex flex-col w-64 border-r border-border bg-card h-full overflow-hidden">
+						<div className="px-6 py-6 border-b border-border text-center">
 							<div className="w-20 h-20 mx-auto relative rounded-full overflow-hidden">
 								<Image
 									src="/logo.png"
@@ -208,27 +156,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 									style={{ objectFit: "cover" }}
 								/>
 							</div>
-							<h1
-								className="text-xl font-bold mt-3"
-								style={{ color: "var(--text-color)" }}
-							>
+							<h1 className="text-xl font-bold mt-3 text-foreground">
 								Placement Updates
 							</h1>
-							<p
-								className="text-sm mt-1"
-								style={{ color: "var(--label-color)" }}
-							>
+							<p className="text-sm mt-1 text-muted-foreground">
 								Placement Portal
 							</p>
 							<Link
 								href="https://t.me/SupersetNotificationBot"
 								target="_blank"
 								rel="noopener noreferrer"
-								className="inline-block mt-3 px-3 py-1 rounded-md text-sm font-medium hover-theme"
-								style={{
-									backgroundColor: "var(--accent-color)",
-									color: "var(--card-bg)",
-								}}
+								className="inline-block mt-3 px-3 py-1 rounded-md text-sm font-medium hover-theme bg-accent text-accent-foreground"
 							>
 								Get notifications
 							</Link>
@@ -245,20 +183,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 										className={cn(
 											"flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors border",
 											isActive
-												? "border-theme"
-												: "border-transparent hover-theme"
+												? "border-theme bg-primary text-primary-foreground border-accent"
+												: "border-transparent hover-theme text-foreground"
 										)}
-										style={{
-											color: isActive
-												? "var(--accent-color)"
-												: "var(--text-color)",
-											backgroundColor: isActive
-												? "var(--primary-color)"
-												: "transparent",
-											borderColor: isActive
-												? "var(--accent-color)"
-												: "transparent",
-										}}
 									>
 										<Icon className="w-5 h-5 mr-3" />
 										{item.name}
@@ -272,19 +199,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 									onClick={() => setToolsOpen(!toolsOpen)}
 									className={cn(
 										"w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors border hover-theme",
-										toolsOpen ? "border-theme" : "border-transparent"
+										toolsOpen
+											? "border-theme bg-primary text-primary-foreground border-accent"
+											: "border-transparent text-foreground"
 									)}
-									style={{
-										color: toolsOpen
-											? "var(--accent-color)"
-											: "var(--text-color)",
-										backgroundColor: toolsOpen
-											? "var(--primary-color)"
-											: "transparent",
-										borderColor: toolsOpen
-											? "var(--accent-color)"
-											: "transparent",
-									}}
 								>
 									<WrenchIcon className="w-5 h-5 mr-3" />
 									Tools
@@ -294,22 +212,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 							{/* Tools popup panel inside sidebar (desktop only) */}
 							{toolsOpen && (
 								<div className="mt-3">
-									<div
-										className="rounded-lg border p-3"
-										style={{
-											backgroundColor: "var(--card-bg)",
-											borderColor: "var(--border-color)",
-										}}
-									>
-										{/* <div className="flex items-center justify-between mb-2">
-											<button
-												onClick={() => setToolsOpen(false)}
-												className="p-1 rounded hover-theme"
-												style={{ color: "var(--label-color)" }}
-											>
-												<XIcon className="w-4 h-4" />
-											</button>
-										</div> */}
+									<div className="rounded-lg border p-3 bg-card border-border">
 										<div className="space-y-1">
 											{tools.map((t) => {
 												const ToolIcon = t.icon;
@@ -319,8 +222,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 														href={t.href}
 														target="_blank"
 														rel="noopener noreferrer"
-														className="flex items-center px-3 py-2 rounded hover-theme text-sm"
-														style={{ color: "var(--text-color)" }}
+														className="flex items-center px-3 py-2 rounded hover-theme text-sm text-foreground"
 													>
 														{ToolIcon && <ToolIcon className="w-4 h-4 mr-3" />}
 														<span className="truncate">{t.name}</span>
@@ -333,10 +235,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 							)}
 						</nav>
 						{/* Bottom area for desktop: theme switcher */}
-						<div
-							className="px-4 py-4 border-t border-theme mt-auto"
-							style={{ borderColor: "var(--border-color)" }}
-						>
+						<div className="px-4 py-4 border-t border-border mt-auto">
 							<ThemeSwitcher />
 						</div>
 					</div>

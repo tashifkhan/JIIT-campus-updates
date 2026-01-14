@@ -67,22 +67,13 @@ export default function CompanySection({
 		: companyEntries.slice(0, COMPANIES_LIMIT);
 
 	return (
-		<Card className="card-theme">
+		<Card className="card-theme bg-card border-border">
 			<CardHeader>
-				<CardTitle
-					className="flex items-center justify-between"
-					style={{ color: "var(--text-color)" }}
-				>
+				<CardTitle className="flex items-center justify-between text-foreground">
 					<div className="flex items-center gap-2">
 						Company-wise Placements
 						{hasActiveFilters && (
-							<Badge
-								className="rounded-full"
-								style={{
-									backgroundColor: "var(--accent-color)",
-									color: "white",
-								}}
-							>
+							<Badge className="rounded-full bg-primary text-primary-foreground">
 								{filteredUniqueCompanies}
 							</Badge>
 						)}
@@ -101,11 +92,7 @@ export default function CompanySection({
 							}}
 						>
 							<Card
-								className="border card-theme cursor-pointer hover:shadow-lg transition-all duration-300 active:scale-[0.98]"
-								style={{
-									backgroundColor: "var(--primary-color)",
-									borderColor: "var(--border-color)",
-								}}
+								className="border card-theme cursor-pointer hover:shadow-lg transition-all duration-300 active:scale-[0.98] bg-card border-border"
 								onClick={() => {
 									setSelectedCompany(company);
 									setIsModalOpen(true);
@@ -115,8 +102,7 @@ export default function CompanySection({
 									<div className="flex items-center justify-between mb-3">
 										<div className="flex items-center gap-3">
 											<h3
-												className="font-bold text-lg leading-tight line-clamp-1"
-												style={{ color: "var(--text-color)" }}
+												className="font-bold text-lg leading-tight line-clamp-1 text-foreground"
 												title={company}
 											>
 												{company}
@@ -124,38 +110,23 @@ export default function CompanySection({
 										</div>
 									</div>
 
-									<div
-										className="grid grid-cols-2 gap-4 pt-2 border-t"
-										style={{ borderColor: "var(--border-color)" }}
-									>
+									<div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
 										<div>
-											<p
-												className="text-xs"
-												style={{ color: "var(--label-color)" }}
-											>
+											<p className="text-xs text-muted-foreground">
 												Students Placed
 											</p>
 											<div className="flex items-center gap-1.5 mt-0.5">
 												<Users className="w-3.5 h-3.5 text-muted-foreground" />
-												<span
-													className="font-bold"
-													style={{ color: "var(--text-color)" }}
-												>
+												<span className="font-bold text-foreground">
 													{stats.studentsCount}
 												</span>
 											</div>
 										</div>
 										<div className="text-right">
-											<p
-												className="text-xs"
-												style={{ color: "var(--label-color)" }}
-											>
+											<p className="text-xs text-muted-foreground">
 												Avg Package
 											</p>
-											<p
-												className="font-bold"
-												style={{ color: "var(--success-dark)" }}
-											>
+											<p className="font-bold text-success">
 												{formatPackage(
 													stats.avgPackage || getCompanyFallbackPackage(company)
 												)}
@@ -164,9 +135,9 @@ export default function CompanySection({
 									</div>
 								</CardContent>
 							</Card>
-							<DialogContent className="w-screen h-screen max-w-none max-h-none rounded-none m-0 p-0 border-none flex flex-col">
-								<DialogHeader className="p-4 border-b shrink-0">
-									<DialogTitle style={{ color: "var(--text-color)" }}>
+							<DialogContent className="w-screen h-screen max-w-none max-h-none rounded-none m-0 p-0 border-none flex flex-col bg-background">
+								<DialogHeader className="p-4 border-b border-border shrink-0">
+									<DialogTitle className="text-foreground">
 										{company} - Student Details
 									</DialogTitle>
 								</DialogHeader>
@@ -175,41 +146,44 @@ export default function CompanySection({
 										<Table>
 											<TableHeader>
 												<TableRow>
-													<TableHead style={{ color: "var(--text-color)" }}>
+													<TableHead className="text-foreground">
 														Name
 													</TableHead>
-													<TableHead style={{ color: "var(--text-color)" }}>
+													<TableHead className="text-foreground">
 														Enrollment
 													</TableHead>
 
-													<TableHead style={{ color: "var(--text-color)" }}>
+													<TableHead className="text-foreground">
 														Role
 													</TableHead>
-													<TableHead style={{ color: "var(--text-color)" }}>
+													<TableHead className="text-foreground">
 														Package
 													</TableHead>
-													<TableHead style={{ color: "var(--text-color)" }}>
+													<TableHead className="text-foreground">
 														Location
 													</TableHead>
-													<TableHead style={{ color: "var(--text-color)" }}>
+													<TableHead className="text-foreground">
 														Joining Date
 													</TableHead>
 												</TableRow>
 											</TableHeader>
 											<TableBody>
 												{getCompanyStudents(company).map((student, idx) => (
-													<TableRow key={idx}>
-														<TableCell style={{ color: "var(--text-color)" }}>
+													<TableRow
+														key={idx}
+														className="hover:bg-muted/50 border-border"
+													>
+														<TableCell className="text-foreground">
 															{student.name}
 														</TableCell>
-														<TableCell style={{ color: "var(--label-color)" }}>
+														<TableCell className="text-muted-foreground">
 															{student.enrollment_number}
 														</TableCell>
 
-														<TableCell style={{ color: "var(--label-color)" }}>
+														<TableCell className="text-muted-foreground">
 															{student.role || "N/A"}
 														</TableCell>
-														<TableCell style={{ color: "var(--success-dark)" }}>
+														<TableCell className="text-success">
 															{(() => {
 																const placement = placements.find(
 																	(p) => p.company === company
@@ -230,10 +204,10 @@ export default function CompanySection({
 																	: "TBD";
 															})()}
 														</TableCell>
-														<TableCell style={{ color: "var(--label-color)" }}>
+														<TableCell className="text-muted-foreground">
 															{student.job_location?.join(", ") || "N/A"}
 														</TableCell>
-														<TableCell style={{ color: "var(--label-color)" }}>
+														<TableCell className="text-muted-foreground">
 															{formatDate(student.joining_date)}
 														</TableCell>
 													</TableRow>
@@ -261,59 +235,37 @@ export default function CompanySection({
 											return (
 												<div
 													key={idx}
-													className="border rounded-lg p-3 card-theme"
-													style={{
-														backgroundColor: "var(--primary-color)",
-														borderColor: "var(--border-color)",
-													}}
+													className="border rounded-lg p-3 card-theme bg-card border-border"
 												>
 													<div className="flex items-start justify-between">
 														<div className="flex-1">
-															<p
-																className="font-semibold"
-																style={{ color: "var(--text-color)" }}
-															>
+															<p className="font-semibold text-foreground">
 																{student.name}
 															</p>
-															<p
-																className="text-xs"
-																style={{ color: "var(--label-color)" }}
-															>
+															<p className="text-xs text-muted-foreground">
 																{student.enrollment_number}
 															</p>
 
-															<div
-																className="text-xs mt-2"
-																style={{ color: "var(--label-color)" }}
-															>
-																<strong style={{ color: "var(--label-color)" }}>
+															<div className="text-xs mt-2 text-muted-foreground">
+																<strong className="text-muted-foreground">
 																	Role:{" "}
 																</strong>
 																{student.role || "N/A"}
 															</div>
-															<div
-																className="text-xs mt-1"
-																style={{ color: "var(--label-color)" }}
-															>
-																<strong style={{ color: "var(--label-color)" }}>
+															<div className="text-xs mt-1 text-muted-foreground">
+																<strong className="text-muted-foreground">
 																	Location:{" "}
 																</strong>
 																{student.job_location?.join(", ") || "N/A"}
 															</div>
 														</div>
 														<div className="ml-4 text-right">
-															<p
-																className="font-semibold text-sm"
-																style={{ color: "var(--success-dark)" }}
-															>
+															<p className="font-semibold text-sm text-success">
 																{packageValue
 																	? formatPackage(packageValue)
 																	: "TBD"}
 															</p>
-															<p
-																className="text-xs mt-1"
-																style={{ color: "var(--label-color)" }}
-															>
+															<p className="text-xs mt-1 text-muted-foreground">
 																{student.joining_date
 																	? formatDate(student.joining_date)
 																	: "TBD"}
@@ -335,11 +287,7 @@ export default function CompanySection({
 						<Button
 							variant="outline"
 							onClick={() => setShowAllCompanies(!showAllCompanies)}
-							style={{
-								borderColor: "var(--border-color)",
-								color: "var(--text-color)",
-							}}
-							className="hover-theme"
+							className="hover-theme border-border text-foreground hover:bg-muted"
 						>
 							{showAllCompanies ? (
 								<>

@@ -35,14 +35,9 @@ export default function JobCard({ job, onQuickView }: Props) {
 
 	return (
 		<Card
-			className="hover:shadow-xl transition-all duration-300 border card-theme cursor-pointer"
-			style={{
-				backgroundColor: "var(--card-bg)",
-				borderColor: "var(--border-color)",
-				color: "var(--text-color)",
-				opacity: isPending ? 0.7 : 1,
-				pointerEvents: isPending ? "none" : "auto",
-			}}
+			className={`hover:shadow-[0_0_30px_rgba(var(--primary),0.15)] hover:border-primary/50 transition-all duration-300 border card-theme cursor-pointer bg-card border-border text-foreground ${
+				isPending ? "opacity-70 pointer-events-none" : ""
+			}`}
 			role="button"
 			tabIndex={0}
 			onClick={() => {
@@ -69,26 +64,12 @@ export default function JobCard({ job, onQuickView }: Props) {
 			<CardHeader className="pb-4">
 				<div className="flex items-start justify-between mb-3">
 					<div className="flex-1">
-						<CardTitle
-							className="text-lg font-bold mb-2 leading-tight"
-							style={{ color: "var(--text-color)" }}
-						>
+						<CardTitle className="text-lg font-bold mb-2 leading-tight text-foreground">
 							{job.job_profile}
 						</CardTitle>
-						<div
-							className="flex items-center mb-3"
-							style={{ color: "var(--label-color)" }}
-						>
-							<BuildingIcon
-								className="w-4 h-4 mr-2"
-								style={{ color: "var(--accent-color)" }}
-							/>
-							<span
-								className="font-semibold"
-								style={{ color: "var(--accent-color)" }}
-							>
-								{job.company}
-							</span>
+						<div className="flex items-center mb-3 text-muted-foreground">
+							<BuildingIcon className="w-4 h-4 mr-2 text-primary" />
+							<span className="font-semibold text-primary">{job.company}</span>
 						</div>
 					</div>
 					<div className="text-right">
@@ -100,27 +81,15 @@ export default function JobCard({ job, onQuickView }: Props) {
 							{categoryMapping[job.placement_category_code] ||
 								job.placement_category}
 						</Badge>
-						<div
-							className="text-xs mt-1"
-							style={{ color: "var(--label-color)" }}
-						>
+						<div className="text-xs mt-1 text-muted-foreground">
 							{formatDateTime(job.createdAt)}
 						</div>
 					</div>
 				</div>
 
 				{job.eligibility_courses?.length ? (
-					<div
-						className="border rounded-lg p-3"
-						style={{
-							backgroundColor: "var(--primary-color)",
-							borderColor: "var(--border-color)",
-						}}
-					>
-						<div
-							className="text-xs font-medium mb-2"
-							style={{ color: "var(--accent-color)" }}
-						>
+					<div className="border rounded-lg p-3">
+						<div className="text-xs font-medium mb-2 text-primary">
 							Eligible Branches
 						</div>
 						<div className="flex flex-wrap gap-1">
@@ -128,12 +97,7 @@ export default function JobCard({ job, onQuickView }: Props) {
 								<Badge
 									key={idx}
 									variant="secondary"
-									className="text-[10px] border"
-									style={{
-										backgroundColor: "var(--card-bg)",
-										borderColor: "var(--border-color)",
-										color: "var(--accent-color)",
-									}}
+									className="text-[10px] border text-primary bg-card border-border"
 								>
 									{course}
 								</Badge>
@@ -141,11 +105,7 @@ export default function JobCard({ job, onQuickView }: Props) {
 							{job.eligibility_courses.length > 3 && (
 								<Badge
 									variant="outline"
-									className="text-[10px]"
-									style={{
-										borderColor: "var(--border-color)",
-										color: "var(--text-color)",
-									}}
+									className="text-[10px] border-border text-foreground"
 								>
 									+{job.eligibility_courses.length - 3} more
 								</Badge>
@@ -157,55 +117,21 @@ export default function JobCard({ job, onQuickView }: Props) {
 
 			<CardContent className="space-y-3 md:space-y-4 pt-0">
 				<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-					<div
-						className="border rounded-lg p-3"
-						style={{
-							backgroundColor: "var(--primary-color)",
-							borderColor: "var(--border-color)",
-						}}
-					>
+					<div className="border rounded-lg p-3 bg-muted/50 border-border">
 						<div className="flex items-center">
-							<IndianRupeeIcon
-								className="w-4 h-4 mr-2"
-								style={{ color: "var(--accent-color)" }}
-							/>
-							<span
-								className="text-sm font-medium"
-								style={{ color: "var(--accent-color)" }}
-							>
-								Package
-							</span>
+							<IndianRupeeIcon className="w-4 h-4 mr-2 text-primary" />
+							<span className="text-sm font-medium text-primary">Package</span>
 						</div>
-						<span
-							className="text-lg font-bold block"
-							style={{ color: "var(--text-color)" }}
-						>
+						<span className="text-lg font-bold block text-foreground">
 							{formatPackage(job)}
 						</span>
 					</div>
-					<div
-						className="border rounded-lg p-3"
-						style={{
-							backgroundColor: "var(--primary-color)",
-							borderColor: "var(--border-color)",
-						}}
-					>
+					<div className="border rounded-lg p-3 bg-muted/50 border-border">
 						<div className="flex items-center">
-							<MapPinIcon
-								className="w-4 h-4 mr-2"
-								style={{ color: "var(--accent-color)" }}
-							/>
-							<span
-								className="text-sm font-medium"
-								style={{ color: "var(--accent-color)" }}
-							>
-								Location
-							</span>
+							<MapPinIcon className="w-4 h-4 mr-2 text-primary" />
+							<span className="text-sm font-medium text-primary">Location</span>
 						</div>
-						<span
-							className="text-sm font-semibold block mt-1"
-							style={{ color: "var(--text-color)" }}
-						>
+						<span className="text-sm font-semibold block mt-1 text-foreground">
 							{job.location}
 						</span>
 					</div>
@@ -217,84 +143,37 @@ export default function JobCard({ job, onQuickView }: Props) {
 							(mark) => mark.level.toLowerCase() === "ug"
 						);
 						return ugMark ? (
-							<div
-								className="border rounded-lg p-3"
-								style={{
-									backgroundColor: "var(--primary-color)",
-									borderColor: "var(--border-color)",
-								}}
-							>
+							<div className="border rounded-lg p-3 bg-muted/50 border-border">
 								<div className="flex items-center">
-									<UsersIcon
-										className="w-4 h-4 mr-2"
-										style={{ color: "var(--accent-color)" }}
-									/>
-									<span
-										className="text-sm font-medium"
-										style={{ color: "var(--accent-color)" }}
-									>
+									<UsersIcon className="w-4 h-4 mr-2 text-primary" />
+									<span className="text-sm font-medium text-primary">
 										Min CGPA
 									</span>
 								</div>
-								<span
-									className="text-lg font-bold block"
-									style={{ color: "var(--text-color)" }}
-								>
+								<span className="text-lg font-bold block text-foreground">
 									{ugMark.criteria.toFixed(1)}/10
 								</span>
 							</div>
 						) : (
-							<div
-								className="border rounded-lg p-3"
-								style={{
-									backgroundColor: "var(--primary-color)",
-									borderColor: "var(--border-color)",
-								}}
-							>
+							<div className="border rounded-lg p-3 bg-primary/10 border-border">
 								<div className="flex items-center">
-									<UsersIcon
-										className="w-4 h-4 mr-2"
-										style={{ color: "var(--label-color)" }}
-									/>
-									<span
-										className="text-sm font-medium"
-										style={{ color: "var(--label-color)" }}
-									>
+									<UsersIcon className="w-4 h-4 mr-2 text-muted-foreground" />
+									<span className="text-sm font-medium text-muted-foreground">
 										CGPA
 									</span>
 								</div>
-								<span
-									className="text-sm block"
-									style={{ color: "var(--label-color)" }}
-								>
+								<span className="text-sm block text-muted-foreground">
 									Not specified
 								</span>
 							</div>
 						);
 					})()}
-					<div
-						className="border rounded-lg p-3"
-						style={{
-							backgroundColor: "var(--primary-color)",
-							borderColor: "var(--border-color)",
-						}}
-					>
+					<div className="border rounded-lg p-3 bg-muted/50 border-border">
 						<div className="flex items-center">
-							<ClockIcon
-								className="w-4 h-4 mr-2"
-								style={{ color: "var(--accent-color)" }}
-							/>
-							<span
-								className="text-sm font-medium"
-								style={{ color: "var(--accent-color)" }}
-							>
-								Deadline
-							</span>
+							<ClockIcon className="w-4 h-4 mr-2 text-primary" />
+							<span className="text-sm font-medium text-primary">Deadline</span>
 						</div>
-						<span
-							className="text-sm font-semibold block mt-1"
-							style={{ color: "var(--text-color)" }}
-						>
+						<span className="text-sm font-semibold block mt-1 text-foreground">
 							{job.deadline ? formatDate(job.deadline) : "No deadline"}
 						</span>
 					</div>
@@ -304,12 +183,7 @@ export default function JobCard({ job, onQuickView }: Props) {
 					<Button
 						variant="outline"
 						size="sm"
-						className="flex-1 font-medium border hover-theme"
-						style={{
-							backgroundColor: "var(--primary-color)",
-							borderColor: "var(--accent-color)",
-							color: "var(--accent-color)",
-						}}
+						className="flex-1 font-medium border hover-theme bg-primary/10 border-primary text-primary"
 						onClick={(e) => {
 							e.stopPropagation();
 							if (
@@ -330,11 +204,7 @@ export default function JobCard({ job, onQuickView }: Props) {
 					<Button
 						variant="default"
 						size="sm"
-						className="flex-1 font-medium"
-						style={{
-							backgroundColor: "var(--accent-color)",
-							color: "var(--bg-color)",
-						}}
+						className="flex-1 font-medium bg-primary text-primary-foreground"
 						disabled={isPending}
 						onClick={(e) => {
 							e.stopPropagation();

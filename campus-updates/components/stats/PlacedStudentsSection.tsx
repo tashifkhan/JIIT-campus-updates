@@ -12,13 +12,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-	Calendar,
-	ChevronDown,
-	Eye,
-	EyeOff,
-	MapPin,
-} from "lucide-react";
+import { Calendar, ChevronDown, Eye, EyeOff, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StudentWithPlacement, formatDate, formatPackage } from "@/lib/stats";
 
@@ -113,15 +107,18 @@ export default function PlacedStudentsSection({
 	};
 
 	return (
-		<Card className="card-theme">
+		<Card className="card-theme bg-card border-border">
 			<CardHeader className="pb-6">
 				<div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
-					<CardTitle className="flex items-center gap-3 text-xl">
+					<CardTitle className="flex items-center gap-3 text-xl text-foreground">
 						<div>
 							<h2 className="text-xl font-bold">Placed Students</h2>
 						</div>
 						{filteredStudents.length !== totalStudentsPlaced && (
-							<Badge variant="secondary" className="ml-auto lg:ml-0">
+							<Badge
+								variant="secondary"
+								className="ml-auto lg:ml-0 bg-secondary text-secondary-foreground hover:bg-secondary/80"
+							>
 								{filteredStudents.length} filtered
 							</Badge>
 						)}
@@ -235,35 +232,21 @@ export default function PlacedStudentsSection({
 				{showStudentList ? (
 					<div className="space-y-4">
 						{showStudentList && filteredStudents.length > 0 && (
-							<div
-								className="flex items-center justify-between mb-4 pb-3 border-b"
-								style={{ borderColor: "var(--border-color)" }}
-							>
+							<div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
 								<div className="flex items-center space-x-2">
-									<span
-										className="text-sm font-medium"
-										style={{ color: "var(--text-color)" }}
-									>
+									<span className="text-sm font-medium text-foreground">
 										Currently sorted by:
 									</span>
 									<Badge
 										variant="outline"
-										className="px-3 py-1"
-										style={{
-											backgroundColor: "var(--accent-color)",
-											borderColor: "var(--accent-color)",
-											color: "white",
-										}}
+										className="px-3 py-1 bg-primary text-primary-foreground border-primary"
 									>
 										{sortKey.charAt(0).toUpperCase() +
 											sortKey.slice(1).replace("_", " ")}{" "}
 										{sortDir === "asc" ? "↑" : "↓"}
 									</Badge>
 								</div>
-								<span
-									className="text-sm font-medium"
-									style={{ color: "var(--text-color)" }}
-								>
+								<span className="text-sm font-medium text-foreground">
 									{filteredStudents.length} students
 								</span>
 							</div>
@@ -273,53 +256,35 @@ export default function PlacedStudentsSection({
 							sortStudentsList(filteredStudents).map((student, idx) => (
 								<Card
 									key={`${student.enrollment_number}-${idx}`}
-									className="border card-theme"
-									style={{
-										backgroundColor: "var(--primary-color)",
-										borderColor: "var(--border-color)",
-									}}
+									className="border card-theme bg-card border-border"
 								>
 									<CardContent className="p-3 sm:p-4">
 										<div className="flex flex-col space-y-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4 sm:space-y-0">
 											<div className="order-1">
-												<h3
-													className="font-semibold text-sm sm:text-base"
-													style={{ color: "var(--text-color)" }}
-												>
+												<h3 className="font-semibold text-sm sm:text-base text-foreground">
 													{student.name}
 												</h3>
-												<p
-													className="text-xs sm:text-sm"
-													style={{ color: "var(--label-color)" }}
-												>
+												<p className="text-xs sm:text-sm text-muted-foreground">
 													{student.enrollment_number}
 												</p>
 												{student.role && (
 													<Badge
 														variant="secondary"
-														className="mt-1 text-xs"
-														style={{
-															backgroundColor: "var(--card-bg)",
-															color: "var(--accent-color)",
-															borderColor: "var(--border-color)",
-														}}
+														className="mt-1 text-xs bg-muted text-foreground border border-border"
 													>
 														{student.role}
 													</Badge>
 												)}
 											</div>
 											<div className="order-2">
-												<p
-													className="font-medium text-sm sm:text-base"
-													style={{ color: "var(--text-color)" }}
-												>
+												<p className="font-medium text-sm sm:text-base text-foreground">
 													{student.company}
 												</p>
 												<div className="text-xs sm:text-sm space-y-1">
 													{student.roles?.map((role, roleIndex) => (
 														<p
 															key={roleIndex}
-															style={{ color: "var(--label-color)" }}
+															className="text-muted-foreground"
 														>
 															{role.role}
 														</p>
@@ -327,10 +292,7 @@ export default function PlacedStudentsSection({
 												</div>
 												{student.job_location &&
 													student.job_location.length > 0 && (
-														<div
-															className="flex items-center text-xs mt-1"
-															style={{ color: "var(--label-color)" }}
-														>
+														<div className="flex items-center text-xs mt-1 text-muted-foreground">
 															<MapPin className="w-3 h-3 mr-1" />
 															{student.job_location.join(", ")}
 														</div>
@@ -338,18 +300,12 @@ export default function PlacedStudentsSection({
 											</div>
 											<div className="order-3 flex justify-between items-start sm:block sm:text-left">
 												<div className="space-y-1">
-													<p
-														className="font-semibold text-sm"
-														style={{ color: "var(--success-dark)" }}
-													>
+													<p className="font-semibold text-sm text-success">
 														{formatPackage(getStudentPackage(student))}
 													</p>
 												</div>
 												{student.joining_date && (
-													<div
-														className="flex items-center text-xs mt-1"
-														style={{ color: "var(--label-color)" }}
-													>
+													<div className="flex items-center text-xs mt-1 text-muted-foreground">
 														<Calendar className="w-3 h-3 mr-1" />
 														{formatDate(student.joining_date)}
 													</div>

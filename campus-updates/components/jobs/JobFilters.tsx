@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { ChevronDown } from "lucide-react";
 import { Job } from "./types";
-import { categoryMapping, getCategoryColor } from "./helpers";
+import { categoryMapping, getCategoryClass } from "./helpers";
 
 type Props = {
 	jobs: Job[];
@@ -124,8 +124,9 @@ export function JobFilters({ jobs, values, onChange, derived }: Props) {
 										}}
 									>
 										<span
-											className="inline-flex items-center px-2 py-0.5 border rounded"
-											style={getCategoryColor(code)}
+											className={`inline-flex items-center px-2 py-0.5 border rounded ${getCategoryClass(
+												code
+											)}`}
 										>
 											{categoryMapping[code] || code}
 										</span>
@@ -219,15 +220,9 @@ export function JobFilters({ jobs, values, onChange, derived }: Props) {
 					} md:grid`}
 				>
 					<div className="space-y-2">
-						<div
-							className="text-sm flex items-center justify-between"
-							style={{ color: "var(--label-color)" }}
-						>
+						<div className="text-sm flex items-center justify-between text-muted-foreground">
 							<span>Minimum package (LPA)</span>
-							<span
-								className="font-medium"
-								style={{ color: "var(--text-color)" }}
-							>
+							<span className="font-medium text-foreground">
 								{values.minPackageLpa}+
 							</span>
 						</div>
@@ -241,15 +236,9 @@ export function JobFilters({ jobs, values, onChange, derived }: Props) {
 					</div>
 
 					<div className="space-y-2">
-						<div
-							className="text-sm flex items-center justify-between"
-							style={{ color: "var(--label-color)" }}
-						>
+						<div className="text-sm flex items-center justify-between text-muted-foreground">
 							<span>CGPA Range</span>
-							<span
-								className="font-medium"
-								style={{ color: "var(--text-color)" }}
-							>
+							<span className="font-medium text-foreground">
 								{values.cgpaRange[0].toFixed(1)} -{" "}
 								{values.cgpaRange[1].toFixed(1)}
 							</span>
@@ -301,7 +290,7 @@ export function JobFilters({ jobs, values, onChange, derived }: Props) {
 					</div>
 
 					<div className="space-y-2">
-						<div className="text-sm" style={{ color: "var(--label-color)" }}>
+						<div className="text-sm text-muted-foreground">
 							Quick CGPA Filters
 						</div>
 						<div className="flex gap-1 flex-wrap">
@@ -315,23 +304,9 @@ export function JobFilters({ jobs, values, onChange, derived }: Props) {
 								}}
 								className={`text-xs h-7 px-2 ${
 									values.cgpaRange[0] === 6.0 && values.cgpaRange[1] === 8.0
-										? "border-theme"
-										: "hover-theme"
+										? "border-primary bg-primary/10 text-primary"
+										: "hover-theme text-foreground border-border"
 								}`}
-								style={{
-									backgroundColor:
-										values.cgpaRange[0] === 6.0 && values.cgpaRange[1] === 8.0
-											? "var(--primary-color)"
-											: "transparent",
-									color:
-										values.cgpaRange[0] === 6.0 && values.cgpaRange[1] === 8.0
-											? "var(--accent-color)"
-											: "var(--text-color)",
-									borderColor:
-										values.cgpaRange[0] === 6.0 && values.cgpaRange[1] === 8.0
-											? "var(--accent-color)"
-											: "var(--border-color)",
-								}}
 							>
 								6.0-8.0
 							</Button>
@@ -345,23 +320,9 @@ export function JobFilters({ jobs, values, onChange, derived }: Props) {
 								}}
 								className={`text-xs h-7 px-2 ${
 									values.cgpaRange[0] === 7.0 && values.cgpaRange[1] === 9.0
-										? "border-theme"
-										: "hover-theme"
+										? "border-primary bg-primary/10 text-primary"
+										: "hover-theme text-foreground border-border"
 								}`}
-								style={{
-									backgroundColor:
-										values.cgpaRange[0] === 7.0 && values.cgpaRange[1] === 9.0
-											? "var(--primary-color)"
-											: "transparent",
-									color:
-										values.cgpaRange[0] === 7.0 && values.cgpaRange[1] === 9.0
-											? "var(--accent-color)"
-											: "var(--text-color)",
-									borderColor:
-										values.cgpaRange[0] === 7.0 && values.cgpaRange[1] === 9.0
-											? "var(--accent-color)"
-											: "var(--border-color)",
-								}}
 							>
 								7.0-9.0
 							</Button>
@@ -375,23 +336,9 @@ export function JobFilters({ jobs, values, onChange, derived }: Props) {
 								}}
 								className={`text-xs h-7 px-2 ${
 									values.cgpaRange[0] === 0 && values.cgpaRange[1] === 10
-										? "border-theme"
-										: "hover-theme"
+										? "border-primary bg-primary/10 text-primary"
+										: "hover-theme text-foreground border-border"
 								}`}
-								style={{
-									backgroundColor:
-										values.cgpaRange[0] === 0 && values.cgpaRange[1] === 10
-											? "var(--primary-color)"
-											: "transparent",
-									color:
-										values.cgpaRange[0] === 0 && values.cgpaRange[1] === 10
-											? "var(--accent-color)"
-											: "var(--text-color)",
-									borderColor:
-										values.cgpaRange[0] === 0 && values.cgpaRange[1] === 10
-											? "var(--accent-color)"
-											: "var(--border-color)",
-								}}
 							>
 								All
 							</Button>
@@ -406,8 +353,7 @@ export function JobFilters({ jobs, values, onChange, derived }: Props) {
 						/>
 						<label
 							htmlFor="openOnly"
-							className="text-sm cursor-pointer"
-							style={{ color: "var(--text-color)" }}
+							className="text-sm cursor-pointer text-foreground"
 						>
 							Show only open postings (deadline in future)
 						</label>

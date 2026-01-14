@@ -27,15 +27,16 @@ type Props = {
 };
 
 // Color palette for branches - vibrant and distinguishable colors (excluded: JUIT, Other, MTech)
+// Color palette for branches - vibrant and distinguishable colors (excluded: JUIT, Other, MTech)
 const BRANCH_COLORS: Record<string, string> = {
-	CSE: "#3b82f6", // blue
-	ECE: "#f59e0b", // amber
-	IT: "#10b981", // emerald
-	"Intg. MTech": "#ec4899", // pink
-	Biotech: "#14b8a6", // teal
+	CSE: "var(--chart-1)", // blue
+	ECE: "var(--chart-2)", // amber
+	IT: "var(--chart-3)", // emerald
+	"Intg. MTech": "var(--chart-4)", // pink
+	Biotech: "var(--chart-5)", // teal
 };
 
-const DEFAULT_COLOR = "#94a3b8"; // slate-400
+const DEFAULT_COLOR = "var(--muted-foreground)"; // slate-400
 
 // Default branches to select (case-insensitive)
 const DEFAULT_SELECTED = ["CSE", "IT", "ECE"];
@@ -227,8 +228,8 @@ export default function PlacementDistributionChart({
 		if (!active || !payload || !payload.length) return null;
 
 		return (
-			<div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3">
-				<p className="font-semibold mb-2 text-slate-900 dark:text-slate-100">
+			<div className="bg-card border border-border rounded-lg shadow-lg p-3">
+				<p className="font-semibold mb-2 text-foreground">
 					Package Range: ₹{label} LPA
 				</p>
 				<div className="space-y-1">
@@ -244,11 +245,11 @@ export default function PlacementDistributionChart({
 										className="w-3 h-3 rounded-full"
 										style={{ backgroundColor: entry.color }}
 									/>
-									<span className="text-sm text-slate-700 dark:text-slate-300">
+									<span className="text-sm text-muted-foreground">
 										{entry.name}
 									</span>
 								</div>
-								<span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+								<span className="text-sm font-semibold text-foreground">
 									{entry.value}
 								</span>
 							</div>
@@ -392,7 +393,7 @@ export default function PlacementDistributionChart({
 										className="rounded-lg border-2 p-3 sm:p-4"
 										style={{
 											borderColor: color,
-											backgroundColor: `${color}05`,
+											backgroundColor: `color-mix(in srgb, ${color} 5%, transparent)`,
 										}}
 									>
 										<div className="flex items-center justify-between mb-3">
@@ -736,7 +737,8 @@ export default function PlacementDistributionChart({
 							className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 rounded-lg border-2 border-dashed shadow-sm gap-2"
 							style={{
 								borderColor: "var(--text-color)",
-								backgroundColor: "var(--accent-color)15",
+								backgroundColor:
+									"color-mix(in srgb, var(--accent-color) 15%, transparent)",
 							}}
 						>
 							<div className="flex items-center gap-2 sm:gap-3">
@@ -796,7 +798,7 @@ export default function PlacementDistributionChart({
 											className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg border"
 											style={{
 												borderColor: color,
-												backgroundColor: `${color}10`,
+												backgroundColor: `color-mix(in srgb, ${color} 10%, transparent)`,
 											}}
 										>
 											<div className="flex items-center gap-1.5 sm:gap-2 min-w-0">

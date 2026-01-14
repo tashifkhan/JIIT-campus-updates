@@ -24,6 +24,10 @@ import {
 	Calendar,
 	ChevronUp,
 	ChevronDown,
+	IndianRupee,
+	Trophy,
+	Target,
+	TrendingUp,
 } from "lucide-react";
 import type { Placement, StudentWithPlacement } from "@/lib/stats";
 import { formatDate, formatPackage, formatPercent } from "@/lib/stats";
@@ -49,6 +53,107 @@ type Props = {
 	placements: Placement[];
 };
 
+// Reusable card component for individual branch stats
+function BranchCard({
+	branch,
+	stats,
+	totalForBranch,
+	uniqueCount,
+	pct,
+	onClick,
+}: {
+	branch: string;
+	stats: any;
+	totalForBranch: number;
+	uniqueCount: number;
+	pct: number | null;
+	onClick: () => void;
+}) {
+	return (
+		<Card
+			className="border card-theme cursor-pointer hover:shadow-lg shadow-sm transition-all duration-300 active:scale-[0.98] bg-card border-border/60 group h-full"
+			onClick={onClick}
+		>
+			<CardContent className="p-5 flex flex-col h-full justify-between gap-4">
+				<div>
+					<div className="flex items-start justify-between mb-2">
+						<div className="space-y-1">
+							<h3 className="font-bold text-lg text-foreground flex items-center gap-2">
+								{branch}
+							</h3>
+							<div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+								<Users className="w-3.5 h-3.5" />
+								<span>
+									{uniqueCount}
+									{stats.count !== uniqueCount && (
+										<span className="opacity-75"> ({stats.count} offers)</span>
+									)}
+									{totalForBranch ? (
+										<>
+											{" "}
+											<span className="opacity-50">/</span> {totalForBranch}
+										</>
+									) : null}
+								</span>
+							</div>
+						</div>
+						<div className="flex flex-col items-end">
+							<span className="text-xs font-bold px-2 py-1 rounded-full bg-primary/10 text-primary">
+								{pct ? formatPercent(pct) : "N/A"}
+							</span>
+						</div>
+					</div>
+
+					<div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-border/50">
+						<div>
+							<div className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">
+								<IndianRupee className="w-3 h-3" /> Average
+							</div>
+							<div className="flex items-baseline gap-1">
+								<span className="text-xl font-bold text-foreground">
+									{formatPackage(stats.avgPackage).replace(" LPA", "")}
+								</span>
+								<span className="text-xs font-medium text-muted-foreground">
+									LPA
+								</span>
+							</div>
+						</div>
+						<div>
+							<div className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">
+								<TrendingUp className="w-3 h-3" /> Median
+							</div>
+							<div className="flex items-baseline gap-1">
+								<span className="text-xl font-bold text-foreground">
+									{formatPackage(stats.median).replace(" LPA", "")}
+								</span>
+								<span className="text-xs font-medium text-muted-foreground">
+									LPA
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div className="pt-3 border-t border-border/50 flex items-center justify-between">
+					<div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+						<Trophy className="w-3.5 h-3.5 text-yellow-500/80" />
+						<span className="font-medium">Highest:</span>
+						<span className="text-foreground font-bold">
+							{formatPackage(stats.highest)}
+						</span>
+					</div>
+					<Badge
+						variant="outline"
+						className="text-[10px] h-5 border-0 bg-primary/10 text-primary hover:bg-primary/20 pointer-events-none group-hover:pointer-events-auto transition-colors"
+					>
+						Details &rarr;
+					</Badge>
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
 export default function BranchSection({
 	BRANCHES_LIMIT,
 	branchStats,
@@ -63,21 +168,15 @@ export default function BranchSection({
 	const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
 
 	return (
-		<Card className="card-theme">
+		<Card className="card-theme bg-card border-border">
 			<CardHeader>
-				<CardTitle
-					className="flex items-center justify-between"
-					style={{ color: "var(--text-color)" }}
-				>
+				<CardTitle className="flex items-center justify-between text-foreground">
 					<div className="flex items-center gap-2">Branch-wise Placements</div>
 				</CardTitle>
 			</CardHeader>
 			<CardContent>
 				{Object.keys(branchStats).length === 0 ? (
-					<div
-						className="text-center py-6"
-						style={{ color: "var(--label-color)" }}
-					>
+					<div className="text-center py-6 text-muted-foreground">
 						No branch data for current filters.
 					</div>
 				) : (
@@ -91,920 +190,495 @@ export default function BranchSection({
 									? branchEntries
 									: branchEntries.slice(0, BRANCHES_LIMIT);
 
-								return branchesToShow.map(([branch, stats]) => (
-									<Dialog
-										key={branch}
-										open={isBranchModalOpen && selectedBranch === branch}
-										onOpenChange={(open) => {
-											setIsBranchModalOpen(open);
-											if (!open) setSelectedBranch(null);
-										}}
-									>
-										<Card
-											className="border card-theme cursor-pointer hover:shadow-lg transition-all duration-300 active:scale-[0.98]"
-											style={{
-												backgroundColor: "var(--primary-color)",
-												borderColor: "var(--border-color)",
-											}}
-											onClick={() => {
-												setSelectedBranch(branch);
-												setIsBranchModalOpen(true);
+								return branchesToShow.map(([branch, stats]) => {
+									const totalForBranch = branchTotalCounts[branch] || 0;
+									const uniqueCount = (stats as any).uniqueCount || stats.count;
+									const pct =
+										totalForBranch > 0
+											? (uniqueCount / totalForBranch) * 100
+											: null;
+
+									return (
+										<Dialog
+											key={branch}
+											open={isBranchModalOpen && selectedBranch === branch}
+											onOpenChange={(open) => {
+												setIsBranchModalOpen(open);
+												if (!open) setSelectedBranch(null);
 											}}
 										>
-											<CardContent className="p-4">
-												<div className="sm:hidden">
-													<div className="flex items-center justify-between mb-3">
-														<div className="flex items-center gap-3">
+											<BranchCard
+												branch={branch}
+												stats={stats}
+												totalForBranch={totalForBranch}
+												uniqueCount={uniqueCount}
+												pct={pct}
+												onClick={() => {
+													setSelectedBranch(branch);
+													setIsBranchModalOpen(true);
+												}}
+											/>
+
+											<DialogContent className="w-screen h-screen max-w-none max-h-none rounded-none m-0 p-0 border-none flex flex-col bg-background">
+												<DialogHeader className="p-4 sm:p-6 pb-2 sm:pb-4 border-b border-border shrink-0">
+													<div className="sm:hidden">
+														<DialogTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
+															{branch} Details
+														</DialogTitle>
+													</div>
+													<div className="hidden sm:block">
+														<DialogTitle className="text-xl sm:text-2xl font-bold flex items-center gap-3 text-foreground">
+															{branch} - Detailed Analytics
+														</DialogTitle>
+													</div>
+												</DialogHeader>
+												<div className="p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto flex-1">
+													{/* Summary tiles */}
+													<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+														<div className="border rounded-xl p-4 sm:p-5 card-theme bg-card border-border flex flex-col justify-between">
 															<div>
-																<h3
-																	className="font-bold text-base leading-tight"
-																	style={{ color: "var(--text-color)" }}
-																>
-																	{branch}
-																</h3>
-																{(() => {
-																	const totalForBranch =
-																		branchTotalCounts[branch] || 0;
-																	const uniqueCount =
-																		(stats as any).uniqueCount || stats.count;
-																	const pct =
-																		totalForBranch > 0
-																			? (uniqueCount / totalForBranch) * 100
-																			: null;
-																	return (
-																		<p
-																			className="text-xs"
-																			style={{ color: "var(--label-color)" }}
-																		>
-																			{uniqueCount} placed
-																			{stats.count !== uniqueCount && (
-																				<> ({stats.count} offers)</>
-																			)}
-																			{totalForBranch ? (
-																				<>
-																					{" "}
-																					of {totalForBranch} •{" "}
-																					{formatPercent(pct)}
-																				</>
-																			) : null}
-																		</p>
-																	);
-																})()}
-															</div>
-														</div>
-														<div className="text-right">
-															<div
-																className="text-lg font-bold"
-																style={{ color: "var(--success-dark)" }}
-															>
-																{formatPackage((stats as any).avgPackage)}
-															</div>
-															<p
-																className="text-xs"
-																style={{ color: "var(--label-color)" }}
-															>
-																Average
-															</p>
-														</div>
-													</div>
-
-													<div className="grid grid-cols-2 gap-2">
-														<div
-															className="text-center p-2 rounded bg-opacity-50"
-															style={{ backgroundColor: "var(--card-bg)" }}
-														>
-															<div
-																className="text-sm font-bold"
-																style={{ color: "var(--success-dark)" }}
-															>
-																{formatPackage((stats as any).median)}
-															</div>
-															<p
-																className="text-xs"
-																style={{ color: "var(--label-color)" }}
-															>
-																Median
-															</p>
-														</div>
-														<div
-															className="text-center p-2 rounded bg-opacity-50"
-															style={{ backgroundColor: "var(--card-bg)" }}
-														>
-															<div
-																className="text-sm font-bold"
-																style={{ color: "var(--success-dark)" }}
-															>
-																{formatPackage((stats as any).highest)}
-															</div>
-															<p
-																className="text-xs"
-																style={{ color: "var(--label-color)" }}
-															>
-																Highest
-															</p>
-														</div>
-													</div>
-												</div>
-
-												<div className="hidden sm:block">
-													<div className="flex items-center justify-between mb-3">
-														<div className="flex items-center gap-3">
-															<div>
-																<h3
-																	className="font-bold text-lg"
-																	style={{ color: "var(--text-color)" }}
-																>
-																	{branch}
-																</h3>
-																{(() => {
-																	const totalForBranch =
-																		branchTotalCounts[branch] || 0;
-																	const uniqueCount =
-																		(stats as any).uniqueCount || stats.count;
-																	const pct =
-																		totalForBranch > 0
-																			? (uniqueCount / totalForBranch) * 100
-																			: null;
-																	return (
-																		<p
-																			className="text-xs"
-																			style={{ color: "var(--label-color)" }}
-																		>
-																			{uniqueCount} placed
-																			{stats.count !== uniqueCount && (
-																				<> ({stats.count} offers)</>
-																			)}
-																			{totalForBranch ? (
-																				<>
-																					{" "}
-																					of {totalForBranch} •{" "}
-																					{formatPercent(pct)}
-																				</>
-																			) : null}
-																		</p>
-																	);
-																})()}
-															</div>
-														</div>
-														<div className="text-right">
-															<Badge
-																variant="secondary"
-																className="px-2 py-1 text-xs font-semibold"
-																style={{
-																	backgroundColor: "var(--accent-color)",
-																	color: "white",
-																}}
-															>
-																Avg: {formatPackage((stats as any).avgPackage)}
-															</Badge>
-														</div>
-													</div>
-													<div className="space-y-2">
-														<div className="flex justify-between items-center">
-															<span
-																className="text-sm"
-																style={{ color: "var(--label-color)" }}
-															>
-																Median:
-															</span>
-															<span
-																className="font-bold text-sm"
-																style={{ color: "var(--success-dark)" }}
-															>
-																{formatPackage((stats as any).median)}
-															</span>
-														</div>
-														<div className="flex justify-between items-center">
-															<span
-																className="text-sm"
-																style={{ color: "var(--label-color)" }}
-															>
-																Highest:
-															</span>
-															<span
-																className="font-bold text-sm"
-																style={{ color: "var(--success-dark)" }}
-															>
-																{formatPackage((stats as any).highest)}
-															</span>
-														</div>
-													</div>
-												</div>
-											</CardContent>
-										</Card>
-
-										<DialogContent className="w-screen h-screen max-w-none max-h-none rounded-none m-0 p-0 border-none flex flex-col">
-											<DialogHeader className="p-4 sm:p-6 pb-2 sm:pb-4 border-b shrink-0">
-												<div className="sm:hidden">
-													<DialogTitle
-														className="text-lg font-bold flex items-center gap-2"
-														style={{ color: "var(--text-color)" }}
-													>
-														{branch} Details
-													</DialogTitle>
-												</div>
-												<div className="hidden sm:block">
-													<DialogTitle
-														className="text-xl sm:text-2xl font-bold flex items-center gap-3"
-														style={{ color: "var(--text-color)" }}
-													>
-														{branch} - Detailed Analytics
-													</DialogTitle>
-												</div>
-											</DialogHeader>
-											<div className="p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto flex-1">
-												{/* Summary tiles */}
-												<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-													{(() => {
-														const totalForBranch =
-															branchTotalCounts[branch] || 0;
-														const uniqueCount =
-															(stats as any).uniqueCount || stats.count;
-														const pct =
-															totalForBranch > 0
-																? (uniqueCount / totalForBranch) * 100
-																: null;
-														return (
-															<div
-																className="border rounded-lg p-2 sm:p-4 text-center card-theme"
-																style={{
-																	backgroundColor: "var(--primary-color)",
-																	borderColor: "var(--border-color)",
-																}}
-															>
-																<div
-																	className="text-lg sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2"
-																	style={{ color: "var(--text-color)" }}
-																>
+																<p className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1.5 uppercase tracking-wide">
+																	<Target className="w-3.5 h-3.5" /> Placement
+																	Rate
+																</p>
+																<div className="mt-2 text-lg sm:text-2xl lg:text-3xl font-bold text-foreground">
 																	{uniqueCount}
 																	{totalForBranch ? (
-																		<span
-																			className="text-base sm:text-xl font-medium ml-1"
-																			style={{ color: "var(--label-color)" }}
-																		>
+																		<span className="text-base sm:text-xl font-medium ml-1 text-muted-foreground">
 																			/ {totalForBranch}
 																		</span>
 																	) : null}
 																</div>
-																<p
-																	className="text-xs sm:text-sm font-medium"
-																	style={{ color: "var(--label-color)" }}
-																>
-																	{totalForBranch
-																		? "Placed / Total"
-																		: "Students"}
-																	{totalForBranch ? (
-																		<span
-																			className="block font-semibold"
-																			style={{ color: "var(--success-dark)" }}
-																		>
-																			{formatPercent(pct)}
-																		</span>
-																	) : null}
-																</p>
 															</div>
-														);
-													})()}
-													<div
-														className="border rounded-lg p-2 sm:p-4 text-center card-theme"
-														style={{
-															backgroundColor: "var(--primary-color)",
-															borderColor: "var(--border-color)",
-														}}
-													>
-														<div
-															className="text-lg sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2"
-															style={{ color: "var(--success-dark)" }}
-														>
-															{formatPackage((stats as any).avgPackage)}
+															{totalForBranch ? (
+																<div className="mt-2 text-sm font-bold text-primary bg-primary/10 w-fit px-2 py-0.5 rounded-full">
+																	{formatPercent(pct)} Placed
+																</div>
+															) : null}
 														</div>
-														<p
-															className="text-xs sm:text-sm font-medium"
-															style={{ color: "var(--label-color)" }}
-														>
-															Average
-														</p>
-													</div>
-													<div
-														className="border rounded-lg p-2 sm:p-4 text-center card-theme"
-														style={{
-															backgroundColor: "var(--primary-color)",
-															borderColor: "var(--border-color)",
-														}}
-													>
-														<div
-															className="text-lg sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2"
-															style={{ color: "var(--success-dark)" }}
-														>
-															{formatPackage((stats as any).median)}
+
+														<div className="border rounded-xl p-4 sm:p-5 card-theme bg-card border-border flex flex-col justify-between">
+															<p className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1.5 uppercase tracking-wide">
+																<IndianRupee className="w-3.5 h-3.5" /> Average
+															</p>
+															<div className="text-lg sm:text-2xl lg:text-3xl font-bold text-foreground">
+																{formatPackage((stats as any).avgPackage)}
+															</div>
 														</div>
-														<p
-															className="text-xs sm:text-sm font-medium"
-															style={{ color: "var(--label-color)" }}
-														>
-															Median
-														</p>
-													</div>
-													<div
-														className="border rounded-lg p-2 sm:p-4 text-center card-theme"
-														style={{
-															backgroundColor: "var(--primary-color)",
-															borderColor: "var(--border-color)",
-														}}
-													>
-														<div
-															className="text-lg sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2"
-															style={{ color: "var(--success-dark)" }}
-														>
-															{formatPackage((stats as any).highest)}
+
+														<div className="border rounded-xl p-4 sm:p-5 card-theme bg-card border-border flex flex-col justify-between">
+															<p className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1.5 uppercase tracking-wide">
+																<TrendingUp className="w-3.5 h-3.5" /> Median
+															</p>
+															<div className="text-lg sm:text-2xl lg:text-3xl font-bold text-foreground">
+																{formatPackage((stats as any).median)}
+															</div>
 														</div>
-														<p
-															className="text-xs sm:text-sm font-medium"
-															style={{ color: "var(--label-color)" }}
-														>
-															Highest
-														</p>
+
+														<div className="border rounded-xl p-4 sm:p-5 card-theme bg-card border-border flex flex-col justify-between">
+															<p className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1.5 uppercase tracking-wide">
+																<Trophy className="w-3.5 h-3.5" /> Highest
+															</p>
+															<div className="text-lg sm:text-2xl lg:text-3xl font-bold text-foreground">
+																{formatPackage((stats as any).highest)}
+															</div>
+														</div>
 													</div>
-												</div>
-												{/* Branch Specializations (batches or sub-branches) */}
-												{(() => {
-													const toNum = (enr?: string) => {
-														if (!enr) return NaN;
-														const d = (enr.match(/\d+/g) || []).join("");
-														return d ? Number(d) : NaN;
-													};
-													const students = getBranchStudents(branch);
-													const ranges = (enrollmentRanges as any)?.[branch];
-													if (!ranges || typeof ranges !== "object")
-														return null;
 
-													type SubStat = {
-														label: string;
-														placed: number;
-														totalOffers?: number;
-														total?: number | null;
-														pct?: number | null;
-														avg?: number;
-														median?: number;
-													};
+													{/* Branch Specializations (batches or sub-branches) */}
+													{(() => {
+														const toNum = (enr?: string) => {
+															if (!enr) return NaN;
+															const d = (enr.match(/\d+/g) || []).join("");
+															return d ? Number(d) : NaN;
+														};
+														const students = getBranchStudents(branch);
+														const ranges = (enrollmentRanges as any)?.[branch];
+														if (!ranges || typeof ranges !== "object")
+															return null;
 
-													const computeStatsFor = (
-														filterFn: (n: number) => boolean
-													): {
-														placed: number;
-														totalOffers: number;
-														avg: number;
-														median: number;
-													} => {
-														const filtered = students.filter((s) => {
-															const n = toNum(s.enrollment_number);
-															return Number.isFinite(n) && filterFn(n);
-														});
+														type SubStat = {
+															label: string;
+															placed: number;
+															totalOffers?: number;
+															total?: number | null;
+															pct?: number | null;
+															avg?: number;
+															median?: number;
+														};
 
-														const totalOffers = filtered.length; // Total count including multiple offers
+														const computeStatsFor = (
+															filterFn: (n: number) => boolean
+														): {
+															placed: number;
+															totalOffers: number;
+															avg: number;
+															median: number;
+														} => {
+															const filtered = students.filter((s) => {
+																const n = toNum(s.enrollment_number);
+																return Number.isFinite(n) && filterFn(n);
+															});
 
-														// Track highest package per unique student
-														const studentMaxPackages: Map<string, number> =
-															new Map();
-														const uniqueEnrollments = new Set<string>();
+															const totalOffers = filtered.length;
 
-														filtered.forEach((s) => {
-															if (s.enrollment_number) {
-																uniqueEnrollments.add(s.enrollment_number);
-																const plc =
-																	s.placement ||
-																	(placements.find(
-																		(p) => p.company === s.company
-																	) as Placement);
-																const pkg = plc ? pkgFrom(s, plc) : null;
-																if (pkg != null && pkg > 0) {
-																	const currentMax =
-																		studentMaxPackages.get(
-																			s.enrollment_number
-																		) || 0;
-																	if (pkg > currentMax) {
-																		studentMaxPackages.set(
-																			s.enrollment_number,
-																			pkg
-																		);
+															const studentMaxPackages: Map<string, number> =
+																new Map();
+															const uniqueEnrollments = new Set<string>();
+
+															filtered.forEach((s) => {
+																if (s.enrollment_number) {
+																	uniqueEnrollments.add(s.enrollment_number);
+																	const plc =
+																		s.placement ||
+																		(placements.find(
+																			(p) => p.company === s.company
+																		) as Placement);
+																	const pkg = plc ? pkgFrom(s, plc) : null;
+																	if (pkg != null && pkg > 0) {
+																		const currentMax =
+																			studentMaxPackages.get(
+																				s.enrollment_number
+																			) || 0;
+																		if (pkg > currentMax) {
+																			studentMaxPackages.set(
+																				s.enrollment_number,
+																				pkg
+																			);
+																		}
 																	}
 																}
-															}
-														});
+															});
 
-														// Get all max packages for unique students
-														const pkgs: number[] = [];
-														studentMaxPackages.forEach((pkg) => pkgs.push(pkg));
+															const pkgs: number[] = [];
+															studentMaxPackages.forEach((pkg) =>
+																pkgs.push(pkg)
+															);
 
-														const placed = uniqueEnrollments.size; // Use unique count
-														const avg = pkgs.length
-															? pkgs.reduce((a, c) => a + c, 0) / pkgs.length
-															: 0;
-														const sorted = [...pkgs].sort((a, b) => a - b);
-														const median = sorted.length
-															? sorted.length % 2
-																? sorted[(sorted.length - 1) >> 1]
-																: (sorted[sorted.length / 2 - 1] +
-																		sorted[sorted.length / 2]) /
-																  2
-															: 0;
-														return { placed, totalOffers, avg, median };
-													};
+															const placed = uniqueEnrollments.size;
+															const avg = pkgs.length
+																? pkgs.reduce((a, c) => a + c, 0) / pkgs.length
+																: 0;
+															const sorted = [...pkgs].sort((a, b) => a - b);
+															const median = sorted.length
+																? sorted.length % 2
+																	? sorted[(sorted.length - 1) >> 1]
+																	: (sorted[sorted.length / 2 - 1] +
+																			sorted[sorted.length / 2]) /
+																	  2
+																: 0;
+															return { placed, totalOffers, avg, median };
+														};
 
-													const subs: SubStat[] = [];
-													if (branch === "Intg. MTech") {
-														Object.entries(ranges).forEach(
-															([subBranch, entry]: any) => {
-																if (
-																	entry &&
-																	typeof entry.start === "number" &&
-																	typeof entry.end === "number"
-																) {
-																	const { placed, totalOffers, avg, median } =
-																		computeStatsFor(
-																			(n) => n >= entry.start && n < entry.end
-																		);
-																	const total: number | null =
-																		studentCounts?.["Intg. MTech"] &&
-																		typeof studentCounts["Intg. MTech"][
-																			subBranch
-																		] === "number"
-																			? (studentCounts["Intg. MTech"][
-																					subBranch
-																			  ] as number)
-																			: null;
-																	const pct =
-																		total && total > 0
-																			? (placed / total) * 100
-																			: null;
-																	subs.push({
-																		label: `Intg. MTech - ${subBranch}`,
-																		placed,
-																		totalOffers,
-																		total,
-																		pct,
-																		avg,
-																		median,
-																	});
+														const subs: SubStat[] = [];
+														if (branch === "Intg. MTech") {
+															Object.entries(ranges).forEach(
+																([subBranch, entry]: any) => {
+																	if (
+																		entry &&
+																		typeof entry.start === "number" &&
+																		typeof entry.end === "number"
+																	) {
+																		const { placed, totalOffers, avg, median } =
+																			computeStatsFor(
+																				(n) => n >= entry.start && n < entry.end
+																			);
+																		const total: number | null =
+																			studentCounts?.["Intg. MTech"] &&
+																			typeof studentCounts["Intg. MTech"][
+																				subBranch
+																			] === "number"
+																				? (studentCounts["Intg. MTech"][
+																						subBranch
+																				  ] as number)
+																				: null;
+																		const pct =
+																			total && total > 0
+																				? (placed / total) * 100
+																				: null;
+																		subs.push({
+																			label: `Intg. MTech - ${subBranch}`,
+																			placed,
+																			totalOffers,
+																			total,
+																			pct,
+																			avg,
+																			median,
+																		});
+																	}
 																}
-															}
-														);
-													} else {
-														Object.entries(ranges).forEach(
-															([batchKey, entry]: any) => {
-																if (
-																	entry &&
-																	typeof entry.start === "number" &&
-																	typeof entry.end === "number"
-																) {
-																	const { placed, totalOffers, avg, median } =
-																		computeStatsFor(
-																			(n) => n >= entry.start && n < entry.end
-																		);
-																	const total: number | null =
-																		studentCounts?.[branch] &&
-																		typeof studentCounts[branch][batchKey] ===
-																			"number"
-																			? (studentCounts[branch][
-																					batchKey
-																			  ] as number)
-																			: null;
-																	const pct =
-																		total && total > 0
-																			? (placed / total) * 100
-																			: null;
-																	subs.push({
-																		label: `${branch} - ${batchKey}`,
-																		placed,
-																		totalOffers,
-																		total,
-																		pct,
-																		avg,
-																		median,
-																	});
+															);
+														} else {
+															Object.entries(ranges).forEach(
+																([batchKey, entry]: any) => {
+																	if (
+																		entry &&
+																		typeof entry.start === "number" &&
+																		typeof entry.end === "number"
+																	) {
+																		const { placed, totalOffers, avg, median } =
+																			computeStatsFor(
+																				(n) => n >= entry.start && n < entry.end
+																			);
+																		const total: number | null =
+																			studentCounts?.[branch] &&
+																			typeof studentCounts[branch][batchKey] ===
+																				"number"
+																				? (studentCounts[branch][
+																						batchKey
+																				  ] as number)
+																				: null;
+																		const pct =
+																			total && total > 0
+																				? (placed / total) * 100
+																				: null;
+																		subs.push({
+																			label: `${branch} - ${batchKey}`,
+																			placed,
+																			totalOffers,
+																			total,
+																			pct,
+																			avg,
+																			median,
+																		});
+																	}
 																}
-															}
-														);
-													}
+															);
+														}
 
-													// Don't show subsections if there's only one (it's redundant)
-													if (!subs.length || subs.length === 1) return null;
+														if (!subs.length || subs.length === 1) return null;
 
-													const pctBarColor = (pct?: number | null) => {
-														if (pct == null) return "var(--accent-color)";
-														if (pct >= 60) return "var(--success-dark)";
-														if (pct >= 40) return "var(--accent-color)";
-														return "#6b7280"; // neutral
-													};
+														return (
+															<div className="mt-2 sm:mt-6">
+																<h4 className="text-sm sm:text-base font-semibold mb-2 sm:mb-3 flex items-center gap-2 text-foreground">
+																	Branch Specializations
+																</h4>
 
-													return (
-														<div className="mt-2 sm:mt-6">
-															<h4
-																className="text-sm sm:text-base font-semibold mb-2 sm:mb-3 flex items-center gap-2"
-																style={{ color: "var(--text-color)" }}
-															>
-																Branch Specializations
-															</h4>
-
-															{/* Single row, dynamic columns, horizontal scroll if needed */}
-															<div className="overflow-x-auto">
-																<div className="grid grid-flow-col auto-cols-[minmax(260px,1fr)] gap-3 sm:gap-4 min-w-max">
-																	{subs
-																		.sort(
-																			(a, b) => (b.total ?? 0) - (a.total ?? 0)
-																		)
-																		.map((sc, idx) => (
-																			<div
-																				key={idx}
-																				className="border rounded-xl p-3 sm:p-4 card-theme group transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
-																				style={{
-																					backgroundColor:
-																						"var(--primary-color)",
-																					borderColor: "var(--border-color)",
-																				}}
-																			>
-																				<div className="flex items-start justify-between gap-3">
-																					<div className="min-w-0">
-																						<h5
-																							className="font-semibold text-base sm:text-lg truncate"
-																							style={{
-																								color: "var(--text-color)",
-																							}}
-																						>
-																							{sc.label}
-																						</h5>
-																						{sc.pct != null ? (
+																<div className="overflow-x-auto">
+																	<div className="grid grid-flow-col auto-cols-[minmax(260px,1fr)] gap-3 sm:gap-4 min-w-max">
+																		{subs
+																			.sort(
+																				(a, b) =>
+																					(b.total ?? 0) - (a.total ?? 0)
+																			)
+																			.map((sc, idx) => (
+																				<div
+																					key={idx}
+																					className="border rounded-xl p-4 card-theme group transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-card border-border"
+																				>
+																					<div className="flex items-start justify-between gap-3 mb-3">
+																						<div className="min-w-0">
+																							<h5 className="font-semibold text-base truncate text-foreground">
+																								{sc.label}
+																							</h5>
 																							<div className="mt-2">
-																								<div
-																									className="h-2 rounded-full overflow-hidden"
-																									style={{
-																										backgroundColor:
-																											"var(--card-bg)",
-																									}}
-																									aria-hidden
-																								>
+																								<div className="h-1.5 rounded-full overflow-hidden bg-muted w-full min-w-[120px]">
 																									<div
-																										className="h-full rounded-full transition-all"
+																										className={`h-full rounded-full transition-all bg-primary`}
 																										style={{
 																											width: `${Math.min(
 																												100,
 																												Math.max(0, sc.pct || 0)
 																											)}%`,
-																											backgroundColor:
-																												pctBarColor(sc.pct),
 																										}}
 																									/>
 																								</div>
-																								<div className="mt-1 text-[11px] sm:text-xs font-medium">
-																									<span
-																										style={{
-																											color:
-																												"var(--label-color)",
-																										}}
-																									>
-																										Placement rate:
-																									</span>{" "}
-																									<span
-																										className="font-semibold"
-																										style={{
-																											color:
-																												"var(--text-color)",
-																										}}
-																									>
+																								<div className="mt-1.5 flex items-center justify-between text-xs">
+																									<span className="text-muted-foreground">
+																										{sc.placed} /{" "}
+																										{sc.total || "?"}
+																									</span>
+																									<span className="font-bold text-foreground">
 																										{formatPercent(sc.pct)}
 																									</span>
 																								</div>
 																							</div>
-																						) : (
-																							<p
-																								className="text-[11px] sm:text-xs mt-1"
-																								style={{
-																									color: "var(--label-color)",
-																								}}
-																							>
-																								Placed: {sc.placed}
-																							</p>
-																						)}
-																					</div>
-																					{sc.total ? (
-																						<div className="flex flex-col items-end gap-1">
-																							<Badge
-																								className="px-2 py-1 text-xs sm:text-sm font-semibold shadow-sm"
-																								style={{
-																									backgroundColor:
-																										"var(--accent-color)",
-																									color: "white",
-																								}}
-																							>
-																								<span className="font-semibold">
-																									{sc.placed}
-																								</span>
-																								<span className="ml-1 text-[8px] sm:text-xs font-medium opacity-90">
-																									/ {sc.total}
-																								</span>
-																							</Badge>
-																							{sc.totalOffers &&
-																								sc.totalOffers !==
-																									sc.placed && (
-																									<span
-																										className="text-[9px] sm:text-[10px] font-medium opacity-75"
-																										style={{
-																											color:
-																												"var(--label-color)",
-																										}}
-																									>
-																										{sc.totalOffers} offers
-																									</span>
-																								)}
 																						</div>
-																					) : null}
-																				</div>
+																					</div>
 
-																				<div className="grid grid-cols-2 gap-2 mt-3 sm:mt-4">
-																					<div
-																						className="rounded-lg p-2"
-																						style={{
-																							backgroundColor: "var(--card-bg)",
-																						}}
-																					>
-																						<p
-																							className="text-[11px] sm:text-xs"
-																							style={{
-																								color: "var(--label-color)",
-																							}}
-																						>
-																							Average
-																						</p>
-																						<p
-																							className="text-sm sm:text-base font-semibold"
-																							style={{
-																								color: "var(--success-dark)",
-																							}}
-																						>
-																							{formatPackage(sc.avg || 0)}
-																						</p>
-																					</div>
-																					<div
-																						className="rounded-lg p-2"
-																						style={{
-																							backgroundColor: "var(--card-bg)",
-																						}}
-																					>
-																						<p
-																							className="text-[11px] sm:text-xs"
-																							style={{
-																								color: "var(--label-color)",
-																							}}
-																						>
-																							Median
-																						</p>
-																						<p
-																							className="text-sm sm:text-base font-semibold"
-																							style={{
-																								color: "var(--success-dark)",
-																							}}
-																						>
-																							{formatPackage(sc.median || 0)}
-																						</p>
+																					<div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/50">
+																						<div>
+																							<p className="text-[10px] uppercase text-muted-foreground font-medium">
+																								Average
+																							</p>
+																							<p className="text-sm font-bold text-foreground">
+																								{formatPackage(sc.avg || 0)}
+																							</p>
+																						</div>
+																						<div className="text-right">
+																							<p className="text-[10px] uppercase text-muted-foreground font-medium">
+																								Median
+																							</p>
+																							<p className="text-sm font-bold text-foreground">
+																								{formatPackage(sc.median || 0)}
+																							</p>
+																						</div>
 																					</div>
 																				</div>
-																			</div>
-																		))}
+																			))}
+																	</div>
 																</div>
 															</div>
-														</div>
-													);
-												})()}
+														);
+													})()}
 
-												{/* Student list */}
-												<div className="flex-1">
-													<div className="flex items-center justify-between mb-4">
-														<h3
-															className="text-lg font-bold flex items-center gap-2"
-															style={{ color: "var(--text-color)" }}
-														>
-															<Users
-																className="w-5 h-5"
-																style={{ color: "var(--accent-color)" }}
-															/>
-															Student Details
-														</h3>
-														<Badge
-															variant="outline"
-															className="text-sm"
-															style={{
-																borderColor: "var(--border-color)",
-																color: "var(--text-color)",
-															}}
-														>
-															{getBranchStudents(branch).length} offers
-														</Badge>
-													</div>
-
-													<div className="">
-														<div className="hidden sm:block">
-															<Table>
-																<TableHeader>
-																	<TableRow>
-																		<TableHead
-																			style={{ color: "var(--text-color)" }}
-																		>
-																			Name
-																		</TableHead>
-																		<TableHead
-																			style={{ color: "var(--text-color)" }}
-																		>
-																			Enrollment
-																		</TableHead>
-
-																		<TableHead
-																			style={{ color: "var(--text-color)" }}
-																		>
-																			Company
-																		</TableHead>
-																		<TableHead
-																			style={{ color: "var(--text-color)" }}
-																		>
-																			Role
-																		</TableHead>
-																		<TableHead
-																			style={{ color: "var(--text-color)" }}
-																		>
-																			Package
-																		</TableHead>
-																		<TableHead
-																			style={{ color: "var(--text-color)" }}
-																		>
-																			Joining Date
-																		</TableHead>
-																	</TableRow>
-																</TableHeader>
-																<TableBody>
-																	{getBranchStudents(branch).map(
-																		(student, idx) => (
-																			<TableRow key={idx}>
-																				<TableCell
-																					style={{ color: "var(--text-color)" }}
-																				>
-																					{student.name}
-																				</TableCell>
-																				<TableCell
-																					style={{
-																						color: "var(--label-color)",
-																					}}
-																				>
-																					{student.enrollment_number}
-																				</TableCell>
-
-																				<TableCell
-																					style={{
-																						color: "var(--label-color)",
-																					}}
-																				>
-																					{student.company}
-																				</TableCell>
-																				<TableCell
-																					style={{
-																						color: "var(--label-color)",
-																					}}
-																				>
-																					{student.role || "N/A"}
-																				</TableCell>
-																				<TableCell
-																					style={{
-																						color: "var(--success-dark)",
-																					}}
-																				>
-																					{(() => {
-																						const plc =
-																							student.placement ||
-																							(placements.find(
-																								(p) =>
-																									p.company === student.company
-																							) as Placement);
-																						const pkg = plc
-																							? plc.roles && plc.roles.length
-																								? pkgFrom(student, plc)
-																								: null
-																							: null;
-																						return pkg
-																							? formatPackage(pkg)
-																							: "TBD";
-																					})()}
-																				</TableCell>
-																				<TableCell
-																					style={{
-																						color: "var(--label-color)",
-																					}}
-																				>
-																					{formatDate(student.joining_date)}
-																				</TableCell>
-																			</TableRow>
-																		)
-																	)}
-																</TableBody>
-															</Table>
+													{/* Student list */}
+													<div className="flex-1">
+														<div className="flex items-center justify-between mb-4">
+															<h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
+																<Users className="w-5 h-5 text-primary" />
+																Student Details
+															</h3>
+															<Badge
+																variant="outline"
+																className="text-sm border-border text-foreground"
+															>
+																{getBranchStudents(branch).length} offers
+															</Badge>
 														</div>
 
-														{/* Mobile list */}
-														<div className="space-y-3 sm:hidden">
-															{getBranchStudents(branch).map((student, idx) => (
-																<div
-																	key={idx}
-																	className="border rounded-xl p-4 card-theme"
-																	style={{
-																		backgroundColor: "var(--primary-color)",
-																		borderColor: "var(--border-color)",
-																	}}
-																>
-																	<div className="flex items-start justify-between mb-3">
-																		<div className="flex-1">
-																			<h4
-																				className="font-bold text-base"
-																				style={{ color: "var(--text-color)" }}
-																			>
-																				{student.name}
-																			</h4>
-																			<p
-																				className="text-sm font-mono"
-																				style={{ color: "var(--label-color)" }}
-																			>
-																				{student.enrollment_number}
-																			</p>
-																		</div>
-																		<div className="text-right">
-																			<div
-																				className="text-lg font-bold"
-																				style={{ color: "var(--success-dark)" }}
-																			>
-																				{(() => {
-																					const plc =
-																						student.placement ||
-																						(placements.find(
-																							(p) =>
-																								p.company === student.company
-																						) as Placement);
-																					const pkg = plc
-																						? plc.roles && plc.roles.length
-																							? pkgFrom(student, plc)
-																							: null
-																						: null;
-																					return pkg
-																						? formatPackage(pkg)
-																						: "TBD";
-																				})()}
-																			</div>
-																		</div>
-																	</div>
-																	<div className="space-y-2">
-																		<div className="flex items-center gap-2">
-																			<Building
-																				className="w-4 h-4"
-																				style={{ color: "var(--accent-color)" }}
-																			/>
-																			<span
-																				className="font-semibold text-sm"
-																				style={{ color: "var(--text-color)" }}
-																			>
-																				{student.company}
-																			</span>
-																		</div>
-																		<div className="flex items-center gap-2">
-																			<span
-																				className="text-sm"
-																				style={{ color: "var(--label-color)" }}
-																			>
-																				{student.role || "N/A"}
-																			</span>
-																		</div>
-																		{student.joining_date && (
-																			<div className="flex items-center gap-2">
-																				<Calendar
-																					className="w-4 h-4"
-																					style={{
-																						color: "var(--accent-color)",
-																					}}
-																				/>
-																				<span
-																					className="text-sm"
-																					style={{
-																						color: "var(--label-color)",
-																					}}
-																				>
-																					{formatDate(student.joining_date)}
-																				</span>
-																			</div>
+														<div className="">
+															<div className="hidden sm:block">
+																<Table>
+																	<TableHeader>
+																		<TableRow>
+																			<TableHead className="text-foreground">
+																				Name
+																			</TableHead>
+																			<TableHead className="text-foreground">
+																				Enrollment
+																			</TableHead>
+
+																			<TableHead className="text-foreground">
+																				Company
+																			</TableHead>
+																			<TableHead className="text-foreground">
+																				Role
+																			</TableHead>
+																			<TableHead className="text-foreground">
+																				Package
+																			</TableHead>
+																			<TableHead className="text-foreground">
+																				Joining Date
+																			</TableHead>
+																		</TableRow>
+																	</TableHeader>
+																	<TableBody>
+																		{getBranchStudents(branch).map(
+																			(student, idx) => (
+																				<TableRow key={idx}>
+																					<TableCell className="font-medium text-foreground">
+																						{student.name}
+																					</TableCell>
+																					<TableCell className="text-muted-foreground font-mono text-xs">
+																						{student.enrollment_number}
+																					</TableCell>
+
+																					<TableCell className="text-foreground">
+																						{student.company}
+																					</TableCell>
+																					<TableCell className="text-muted-foreground">
+																						{student.role || "-"}
+																					</TableCell>
+																					<TableCell className="text-green-600 font-bold">
+																						{(() => {
+																							const plc =
+																								student.placement ||
+																								(placements.find(
+																									(p) =>
+																										p.company ===
+																										student.company
+																								) as Placement);
+																							const pkg = plc
+																								? plc.roles && plc.roles.length
+																									? pkgFrom(student, plc)
+																									: null
+																								: null;
+																							return pkg
+																								? formatPackage(pkg)
+																								: "TBD";
+																						})()}
+																					</TableCell>
+																					<TableCell className="text-muted-foreground">
+																						{formatDate(student.joining_date)}
+																					</TableCell>
+																				</TableRow>
+																			)
 																		)}
-																	</div>
-																</div>
-															))}
+																	</TableBody>
+																</Table>
+															</div>
+
+															{/* Mobile list */}
+															<div className="space-y-3 sm:hidden">
+																{getBranchStudents(branch).map(
+																	(student, idx) => (
+																		<div
+																			key={idx}
+																			className="border rounded-xl p-4 card-theme bg-card border-border"
+																		>
+																			<div className="flex items-start justify-between mb-3">
+																				<div className="flex-1">
+																					<h4 className="font-bold text-base text-foreground">
+																						{student.name}
+																					</h4>
+																					<p className="text-sm font-mono text-muted-foreground">
+																						{student.enrollment_number}
+																					</p>
+																				</div>
+																				<div className="text-right">
+																					<div className="text-lg font-bold text-green-600">
+																						{(() => {
+																							const plc =
+																								student.placement ||
+																								(placements.find(
+																									(p) =>
+																										p.company ===
+																										student.company
+																								) as Placement);
+																							const pkg = plc
+																								? plc.roles && plc.roles.length
+																									? pkgFrom(student, plc)
+																									: null
+																								: null;
+																							return pkg
+																								? formatPackage(pkg)
+																								: "TBD";
+																						})()}
+																					</div>
+																				</div>
+																			</div>
+																			<div className="space-y-2 text-sm">
+																				<div className="flex items-center gap-2">
+																					<Building className="w-4 h-4 text-primary" />
+																					<span className="font-semibold text-foreground">
+																						{student.company}
+																					</span>
+																				</div>
+																				<div className="flex items-center gap-2 text-muted-foreground">
+																					<BriefcaseIcon className="w-4 h-4" />
+																					<span>{student.role || "N/A"}</span>
+																				</div>
+																				{student.joining_date && (
+																					<div className="flex items-center gap-2 text-muted-foreground">
+																						<Calendar className="w-4 h-4" />
+																						<span>
+																							{formatDate(student.joining_date)}
+																						</span>
+																					</div>
+																				)}
+																			</div>
+																		</div>
+																	)
+																)}
+															</div>
 														</div>
 													</div>
 												</div>
-											</div>
-										</DialogContent>
-									</Dialog>
-								));
+											</DialogContent>
+										</Dialog>
+									);
+								});
 							})()}
 						</div>
 
@@ -1013,11 +687,7 @@ export default function BranchSection({
 								<Button
 									variant="outline"
 									onClick={() => setShowAllBranches(!showAllBranches)}
-									style={{
-										borderColor: "var(--border-color)",
-										color: "var(--text-color)",
-									}}
-									className="hover-theme"
+									className="hover-theme gap-2 border-border text-foreground hover:bg-muted"
 								>
 									{showAllBranches ? (
 										<>
@@ -1040,7 +710,6 @@ export default function BranchSection({
 	);
 
 	function pkgFrom(student: StudentWithPlacement, plc: Placement) {
-		// lazy load to avoid circular dep: paste minimal logic
 		if (student.package != null) return student.package;
 		const exact = plc.roles.find((r) => r.role === student.role);
 		if (exact && exact.package != null) return exact.package;
@@ -1050,4 +719,22 @@ export default function BranchSection({
 			return Math.max(...viable.map((r) => r.package as number));
 		return null;
 	}
+}
+
+function BriefcaseIcon({ className }: { className?: string }) {
+	return (
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="2"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			className={className}
+		>
+			<rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
+			<path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+		</svg>
+	);
 }

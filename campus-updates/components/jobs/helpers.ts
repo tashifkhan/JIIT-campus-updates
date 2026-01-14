@@ -46,24 +46,27 @@ export const formatPackage = (job: Job) => {
   return `₹${amount.toLocaleString()}`;
 };
 
-export const getCategoryColor = (code: number) => {
-  const baseStyle = {
-    borderColor: "var(--border-color)",
-    backgroundColor: "var(--primary-color)",
-  } as React.CSSProperties;
-
+export const getCategoryClass = (code: number) => {
+  const base = "border-border bg-secondary text-foreground";
   switch (code) {
     case 1:
-      return { ...baseStyle, color: "#dc2626" };
+      return `${base} text-destructive border-destructive`;
     case 2:
-      return { ...baseStyle, color: "#d97706" };
+      return `${base} text-warning border-warning`; // Ensure warning class exists or use text-amber-500
     case 3:
-      return { ...baseStyle, color: "#059669" };
+      return `${base} text-success border-success`;
     case 4:
-      return { ...baseStyle, color: "#2563eb" };
+      return `${base} text-primary border-primary`;
     default:
-      return { ...baseStyle, color: "var(--text-color)" };
+      return base;
   }
+};
+
+export const getCategoryColor = (code: number) => {
+    // Deprecated: keeping for temporary backward compatibility if needed, 
+    // but ideally we switch all consumers to getCategoryClass
+    // Returning empty object or minimal valid style to prevent crash during migration
+    return {}; 
 };
 
 export const handleShareUrl = async (title: string, text: string, url: string) => {
