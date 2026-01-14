@@ -27,8 +27,13 @@ async function fetchJob(id: string) {
 	return json.data as Job;
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-	const job = await fetchJob(params.id);
+export async function generateMetadata({
+	params,
+}: {
+	params: Promise<{ id: string }>;
+}) {
+	const { id } = await params;
+	const job = await fetchJob(id);
 	const title = job
 		? `${job.company} ${job.job_profile}`
 		: "JIIT Placement Updates";
@@ -46,8 +51,13 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
 	};
 }
 
-export default async function JobPage({ params }: { params: { id: string } }) {
-	const job = await fetchJob(params.id);
+export default async function JobPage({
+	params,
+}: {
+	params: Promise<{ id: string }>;
+}) {
+	const { id } = await params;
+	const job = await fetchJob(id);
 
 	if (!job) {
 		return (

@@ -25,13 +25,13 @@ type Props = {
 type TimeFrame = "month" | "day";
 type MetricView = "count" | "package" | "combined";
 
+// Exclude these branches
+const EXCLUDED_BRANCHES = new Set(["JUIT", "Other", "MTech"]);
+
 export default function PlacementTimeline({ placements, getBranch }: Props) {
 	const [timeFrame, setTimeFrame] = useState<TimeFrame>("month");
 	const [view, setView] = useState<MetricView>("combined");
 	const [isCumulative, setIsCumulative] = useState(true);
-
-	// Exclude these branches
-	const EXCLUDED_BRANCHES = new Set(["JUIT", "Other", "MTech"]);
 
 	// Process data into time buckets
 	const chartData = useMemo(() => {

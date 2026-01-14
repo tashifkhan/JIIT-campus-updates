@@ -320,7 +320,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 			if (bTime == null) return -1; // b goes after a
 			return bTime - aTime; // newer first
 		});
-	}, [rawNotices, rawOffers]);
+	}, [rawNotices, rawOffers, hideShortPlacements]);
 
 	const loading = isLoading || isLoadingOffers;
 	// Filters

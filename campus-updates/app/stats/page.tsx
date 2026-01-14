@@ -40,7 +40,10 @@ export default function StatsPage() {
 		},
 	});
 
-	const placements: Placement[] = Array.isArray(data) ? (data as any) : [];
+	const placements: Placement[] = useMemo(
+		() => (Array.isArray(data) ? (data as any) : []),
+		[data]
+	);
 
 	// Filters
 	// Secret unlock state (supports ?shh and hidden click unlock)
@@ -91,38 +94,19 @@ export default function StatsPage() {
 		});
 	};
 
-	// If locked, show the service-unavailable / hidden page
-	if (!unlocked) {
-		return (
-			<>
-				<main
-					role="main"
-					className="min-h-screen flex items-center justify-center font-sans"
-				>
-					<div className="p-8 md:p-10 rounded-[14px] border border-black/10 dark:border-white/10 shadow-[0_2px_24px_rgba(0,0,0,0.06)] bg-white dark:bg-slate-900">
-						<h1 className="m-0 mb-2 text-2xl md:text-3xl">
-							Service unavailable Permanently
-						</h1>
-						<p className="m-0 mb-1 text-base opacity-80">
-							This site will not be accessible.
-						</p>
-						<p className="m-0 text-sm opacity-70">
-							As per the instructions of the{" "}
-							<span onClick={handleSecretClick}>JIIT</span> Administration.
-						</p>
-					</div>
-				</main>
-			</>
-		);
-	}
-
-	// Filters
+	// Filters - must be before any conditional returns (React hooks rules)
 	const [showFilters, setShowFilters] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
 	const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
 	const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
 	const [packageRange, setPackageRange] = useState<[number, number]>([0, 100]);
+
+	// Exclude these branches from all calculations and displays
+	const EXCLUDED_BRANCHES = useMemo(
+		() => new Set(["JUIT", "Other", "MTech"]),
+		[]
+	);
 
 	// Filter options
 	const availableCompanies = useMemo(
@@ -168,16 +152,13 @@ export default function StatsPage() {
 		[placements]
 	);
 
-	// Exclude these branches from all calculations and displays
-	const EXCLUDED_BRANCHES = new Set(["JUIT", "Other", "MTech"]);
-
 	// Filter out excluded branches from all students
 	const includedStudents = useMemo(
 		() =>
 			allStudents.filter(
 				(s) => !EXCLUDED_BRANCHES.has(getBranch(s.enrollment_number))
 			),
-		[allStudents]
+		[allStudents, EXCLUDED_BRANCHES]
 	);
 
 	const hasActiveFilters =
@@ -468,11 +449,13 @@ export default function StatsPage() {
 				? pkgs.reduce((a, c) => a + c, 0) / pkgs.length
 				: 0;
 			acc[b].highest = pkgs.length ? Math.max(...pkgs) : 0;
-			const s = [...pkgs].sort((a, c) => a - c);
-			acc[b].median = s.length
-				? s.length % 2
-					? s[(s.length - 1) >> 1]
-					: (s[s.length / 2 - 1] + s[s.length / 2]) / 2
+			const sortedPkgs = [...pkgs].sort((a, c) => a - c);
+			acc[b].median = sortedPkgs.length
+				? sortedPkgs.length % 2
+					? sortedPkgs[(sortedPkgs.length - 1) >> 1]
+					: (sortedPkgs[sortedPkgs.length / 2 - 1] +
+							sortedPkgs[sortedPkgs.length / 2]) /
+					  2
 				: 0;
 		});
 		return acc;
@@ -496,9 +479,11 @@ export default function StatsPage() {
 					totals[branch] = counts;
 				}
 			});
-		} catch {}
+		} catch {
+			/* ignore */
+		}
 		return totals;
-	}, []);
+	}, [EXCLUDED_BRANCHES]);
 	const branchesWithTotals = useMemo(
 		() => new Set(Object.keys(branchTotalCounts)),
 		[branchTotalCounts]
@@ -522,7 +507,7 @@ export default function StatsPage() {
 			});
 		});
 		return uniqueEnrollments.size;
-	}, [placements, branchesWithTotals]);
+	}, [placements, branchesWithTotals, EXCLUDED_BRANCHES]);
 
 	const filteredPlacedInCountedBranches = useMemo(() => {
 		const uniqueEnrollments = new Set<string>();
@@ -590,6 +575,46 @@ export default function StatsPage() {
 		link.click();
 	};
 
+	const sourceCompanyStats = hasActiveFilters
+		? filteredCompanyStats
+		: companyStats;
+	const companyEntries = Object.entries(sourceCompanyStats).sort(([a], [b]) =>
+		a.localeCompare(b)
+	);
+
+	const clearFilters = () => {
+		setSearchQuery("");
+		setSelectedCompanies([]);
+		setSelectedRoles([]);
+		setSelectedLocations([]);
+		setPackageRange([0, 100]);
+	};
+
+	// If locked, show the service-unavailable / hidden page
+	if (!unlocked) {
+		return (
+			<>
+				<main
+					role="main"
+					className="min-h-screen flex items-center justify-center font-sans"
+				>
+					<div className="p-8 md:p-10 rounded-[14px] border border-black/10 dark:border-white/10 shadow-[0_2px_24px_rgba(0,0,0,0.06)] bg-white dark:bg-slate-900">
+						<h1 className="m-0 mb-2 text-2xl md:text-3xl">
+							Service unavailable Permanently
+						</h1>
+						<p className="m-0 mb-1 text-base opacity-80">
+							This site will not be accessible.
+						</p>
+						<p className="m-0 text-sm opacity-70">
+							As per the instructions of the{" "}
+							<span onClick={handleSecretClick}>JIIT</span> Administration.
+						</p>
+					</div>
+				</main>
+			</>
+		);
+	}
+
 	if (loading) {
 		return (
 			<div className="max-w-7xl mx-auto space-y-8">
@@ -612,21 +637,6 @@ export default function StatsPage() {
 			</div>
 		);
 	}
-
-	const sourceCompanyStats = hasActiveFilters
-		? filteredCompanyStats
-		: companyStats;
-	const companyEntries = Object.entries(sourceCompanyStats).sort(([a], [b]) =>
-		a.localeCompare(b)
-	);
-
-	const clearFilters = () => {
-		setSearchQuery("");
-		setSelectedCompanies([]);
-		setSelectedRoles([]);
-		setSelectedLocations([]);
-		setPackageRange([0, 100]);
-	};
 
 	return (
 		<div className="max-w-7xl mx-auto space-y-8">
