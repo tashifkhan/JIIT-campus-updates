@@ -6,7 +6,7 @@ if (!uri) {
 }
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // Allow global type augmentation for MongoDB client caching
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 

@@ -58,13 +58,13 @@ const getBranchColor = (branch: string): string => {
 	return matchingKey ? BRANCH_COLORS[matchingKey] : DEFAULT_COLOR;
 };
 
+// Excluded branches from all displays
+const EXCLUDED_BRANCHES = new Set(["JUIT", "Other", "MTech"]);
+
 export default function PlacementDistributionChart({
 	students,
 	getBranch,
 }: Props) {
-	// Exclude these branches from all displays
-	const EXCLUDED_BRANCHES = new Set(["JUIT", "Other", "MTech"]);
-
 	// Get all unique branches from students (excluding JUIT, Other, MTech)
 	const availableBranches = useMemo(() => {
 		const branches = new Set<string>();
