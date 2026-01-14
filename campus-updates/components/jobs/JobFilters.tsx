@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
+import { Filter } from "lucide-react";
 import { Job } from "./types";
 import { categoryMapping, getCategoryColor } from "./helpers";
 
@@ -53,6 +54,7 @@ type Props = {
 };
 
 export function JobFilters({ jobs, values, onChange, derived }: Props) {
+	const [showFilters, setShowFilters] = useState(false);
 	const unique = <T,>(arr: T[]) => Array.from(new Set(arr));
 	const allLocations = useMemo(
 		() => unique(jobs.map((j) => j.location).filter(Boolean)).sort(),
@@ -76,14 +78,26 @@ export function JobFilters({ jobs, values, onChange, derived }: Props) {
 		<Card className="mb-6">
 			<CardContent className="p-4 lg:p-6 space-y-4">
 				<div className="flex flex-col md:flex-row gap-3 md:items-center">
-					<div className="flex-1">
+					<div className="flex-1 flex gap-2">
 						<Input
 							placeholder="Search by role, company or location"
 							value={values.query}
 							onChange={(e) => onChange.setQuery(e.target.value)}
 						/>
+						<Button
+							variant="outline"
+							size="icon"
+							className="md:hidden shrink-0"
+							onClick={() => setShowFilters(!showFilters)}
+						>
+							<Filter className="h-4 w-4" />
+						</Button>
 					</div>
-					<div className="flex gap-2 flex-wrap">
+					<div
+						className={`gap-2 flex-wrap ${
+							showFilters ? "flex" : "hidden"
+						} md:flex`}
+					>
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button variant="outline" className="whitespace-nowrap">
@@ -195,7 +209,11 @@ export function JobFilters({ jobs, values, onChange, derived }: Props) {
 					</div>
 				</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-5 gap-4 md:items-end">
+				<div
+					className={`grid grid-cols-1 md:grid-cols-5 gap-4 md:items-end ${
+						showFilters ? "grid" : "hidden"
+					} md:grid`}
+				>
 					<div className="space-y-2">
 						<div
 							className="text-sm flex items-center justify-between"
