@@ -3,8 +3,8 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "next dev",
-		"build": "NEXT_FONT_GOOGLE_OPTIMIZED=false next build",
+		"dev": "next dev --webpack",
+		"build": "NEXT_FONT_GOOGLE_OPTIMIZED=false next build --webpack",
 		"start": "next start",
 		"lint": "next lint"
 	},
