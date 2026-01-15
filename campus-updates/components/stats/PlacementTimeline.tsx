@@ -134,7 +134,7 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 			let runningTotalOffers = 0;
 			const runningStudentMaxPackages = new Map<string, number>();
 
-			return sortedGroups.map((g) => {
+			const result = sortedGroups.map((g) => {
 				// Update running totals
 				g.uniqueEnrollments.forEach((s) => runningUniqueStudents.add(s));
 				runningTotalOffers += g.totalOffers;
@@ -173,10 +173,11 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 					medianPackage: Number(medianPkg.toFixed(2)),
 				};
 			});
+			return result;
 		}
 
 		// Non-cumulative (Individual)
-		return sortedGroups.map((g) => {
+		const result = sortedGroups.map((g) => {
 			const currentPackages = Array.from(g.studentMaxPackages.values());
 
 			const avgPkg = currentPackages.length
@@ -201,6 +202,7 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 				medianPackage: Number(medianPkg.toFixed(2)),
 			};
 		});
+		return result;
 	}, [placements, timeFrame, getBranch, isCumulative]);
 
 	const CustomTooltip = ({ active, payload, label }: any) => {
@@ -212,23 +214,29 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 					{label} {isCumulative ? "(Cumulative)" : ""}
 				</p>
 				<div className="space-y-1">
-					{payload.map((entry: any, index: number) => (
-						<div
-							key={index}
-							className="flex items-center justify-between gap-3"
-						>
-							<span className="text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2">
-								<div
-									className="w-2 h-2 rounded-full"
-									style={{ backgroundColor: entry.color }}
-								/>
-								{entry.name}:
-							</span>
-							<span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-								{entry.value} {entry.name.includes("Package") ? "LPA" : ""}
-							</span>
-						</div>
-					))}
+					{payload.map((entry: any, index: number) => {
+						// Map entry names to chart color classes
+						let colorClass = "bg-gray-500";
+						if (entry.name === "Unique Students") colorClass = "bg-chart-1";
+						else if (entry.name === "Total Offers") colorClass = "bg-chart-2";
+						else if (entry.name === "Avg Package") colorClass = "bg-chart-3";
+						else if (entry.name === "Median Package") colorClass = "bg-chart-4";
+
+						return (
+							<div
+								key={index}
+								className="flex items-center justify-between gap-3"
+							>
+								<span className="text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2">
+									<div className={`w-2 h-2 rounded-full ${colorClass}`} />
+									{entry.name}:
+								</span>
+								<span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+									{entry.value} {entry.name.includes("Package") ? "LPA" : ""}
+								</span>
+							</div>
+						);
+					})}
 				</div>
 			</div>
 		);
@@ -321,7 +329,7 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 					<ResponsiveContainer width="100%" height="100%">
 						<ComposedChart
 							data={chartData}
-							margin={{ top: 20, right: 20, bottom: 20, left: 0 }}
+							margin={{ top: 20, right: 30, bottom: 20, left: 20 }}
 						>
 							<CartesianGrid
 								strokeDasharray="3 3"
@@ -330,72 +338,65 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 							/>
 							<XAxis
 								dataKey="date"
-								tick={{ fontSize: 12, fill: "var(--label-color)" }}
+								tick={{ fontSize: 12, fill: "#888" }}
 								tickMargin={10}
-								minTickGap={30}
 							/>
 							<YAxis
 								yAxisId="left"
-								tick={{ fontSize: 12, fill: "var(--label-color)" }}
+								tick={{ fontSize: 12, fill: "#888" }}
 								tickFormatter={(value) => value.toLocaleString()}
+								domain={[0, "auto"]}
 							/>
 							<YAxis
 								yAxisId="right"
 								orientation="right"
-								tick={{ fontSize: 12, fill: "var(--label-color)" }}
+								tick={{ fontSize: 12, fill: "#888" }}
 								unit=" LPA"
 								hide={view === "count"}
+								domain={[0, "auto"]}
 							/>
 							<Tooltip content={<CustomTooltip />} />
 							<Legend wrapperStyle={{ paddingTop: "20px" }} />
 
-							{(view === "combined" || view === "count") && (
-								<>
-									<Bar
-										yAxisId="left"
-										dataKey="uniqueStudents"
-										name="Unique Students"
-										fill="#3b82f6"
-										radius={[4, 4, 0, 0]}
-										maxBarSize={50}
-										fillOpacity={0.8}
-									/>
-									<Bar
-										yAxisId="left"
-										dataKey="totalOffers"
-										name="Total Offers"
-										fill="#10b981"
-										radius={[4, 4, 0, 0]}
-										maxBarSize={50}
-										fillOpacity={0.8}
-									/>
-								</>
-							)}
-
-							{(view === "combined" || view === "package") && (
-								<>
-									<Line
-										yAxisId="right"
-										type="monotone"
-										dataKey="avgPackage"
-										name="Avg Package"
-										stroke="#f59e0b"
-										strokeWidth={2}
-										dot={{ r: 3 }}
-										activeDot={{ r: 5 }}
-									/>
-									<Line
-										yAxisId="right"
-										type="monotone"
-										dataKey="medianPackage"
-										name="Median Package"
-										stroke="#ec4899"
-										strokeWidth={2}
-										strokeDasharray="5 5"
-										dot={{ r: 3 }}
-									/>
-								</>
-							)}
+							<Bar
+								yAxisId="left"
+								dataKey="uniqueStudents"
+								name="Unique Students"
+								fill="#3b82f6"
+								radius={[4, 4, 0, 0]}
+								maxBarSize={50}
+								hide={view === "package"}
+							/>
+							<Bar
+								yAxisId="left"
+								dataKey="totalOffers"
+								name="Total Offers"
+								fill="#10b981"
+								radius={[4, 4, 0, 0]}
+								maxBarSize={50}
+								hide={view === "package"}
+							/>
+							<Line
+								yAxisId="right"
+								type="monotone"
+								dataKey="avgPackage"
+								name="Avg Package"
+								stroke="#f59e0b"
+								strokeWidth={2}
+								dot={{ r: 3, fill: "#f59e0b" }}
+								hide={view === "count"}
+							/>
+							<Line
+								yAxisId="right"
+								type="monotone"
+								dataKey="medianPackage"
+								name="Median Package"
+								stroke="#ec4899"
+								strokeWidth={2}
+								strokeDasharray="5 5"
+								dot={{ r: 3, fill: "#ec4899" }}
+								hide={view === "count"}
+							/>
 						</ComposedChart>
 					</ResponsiveContainer>
 				</div>
