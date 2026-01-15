@@ -262,10 +262,7 @@ export default function PlacementDistributionChart({
 	return (
 		<Card className="card-theme">
 			<CardHeader>
-				<CardTitle
-					className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4"
-					style={{ color: "var(--text-color)" }}
-				>
+				<CardTitle className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4 text-foreground">
 					<div className="flex items-center gap-2">
 						<span className="text-base sm:text-lg lg:text-xl">
 							Placement Distribution Across Packages
@@ -275,22 +272,14 @@ export default function PlacementDistributionChart({
 					<div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
 						<div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm">
 							<div className="flex items-center gap-1.5 sm:gap-2">
-								<span style={{ color: "var(--label-color)" }}>offers:</span>
-								<span
-									className="font-semibold"
-									style={{ color: "var(--text-color)" }}
-								>
+								<span className="text-muted-foreground">offers:</span>
+								<span className="font-semibold text-foreground">
 									{stats.total}
 								</span>
 							</div>
 							<div className="flex items-center gap-1.5 sm:gap-2">
-								<span style={{ color: "var(--label-color)" }}>
-									Avg Package:
-								</span>
-								<span
-									className="font-semibold"
-									style={{ color: "var(--text-color)" }}
-								>
+								<span className="text-muted-foreground">Avg Package:</span>
+								<span className="font-semibold text-foreground">
 									₹{stats.avgPackage.toFixed(1)} LPA
 								</span>
 							</div>
@@ -302,7 +291,7 @@ export default function PlacementDistributionChart({
 								onChange={handleBranchChange}
 							/>
 
-							<div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+							<div className="flex items-center bg-muted rounded-lg p-1">
 								<Button
 									variant={chartType === "area" ? "secondary" : "ghost"}
 									size="sm"
@@ -321,9 +310,9 @@ export default function PlacementDistributionChart({
 								</Button>
 							</div>
 
-							<div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block" />
+							<div className="w-px h-6 bg-border mx-1 hidden sm:block" />
 
-							<div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+							<div className="flex items-center bg-muted rounded-lg p-1">
 								<Button
 									variant={!showBranchSpecific ? "secondary" : "ghost"}
 									size="sm"
@@ -350,19 +339,13 @@ export default function PlacementDistributionChart({
 
 				{/* Chart */}
 				{selectedBranches.size === 0 ? (
-					<div
-						className="text-center py-8 sm:py-12"
-						style={{ color: "var(--label-color)" }}
-					>
+					<div className="text-center py-8 sm:py-12 text-muted-foreground">
 						<p className="text-sm sm:text-base lg:text-lg px-4">
 							Select at least one branch to view the distribution
 						</p>
 					</div>
 				) : chartData.length === 0 ? (
-					<div
-						className="text-center py-8 sm:py-12"
-						style={{ color: "var(--label-color)" }}
-					>
+					<div className="text-center py-8 sm:py-12 text-muted-foreground">
 						<p className="text-sm sm:text-base lg:text-lg">
 							No placement data available
 						</p>
@@ -402,21 +385,15 @@ export default function PlacementDistributionChart({
 													className="w-3 h-3 rounded-full"
 													style={{ backgroundColor: color }}
 												/>
-												<h3
-													className="font-semibold text-sm sm:text-base"
-													style={{ color: "var(--text-color)" }}
-												>
+												<h3 className="font-semibold text-sm sm:text-base text-foreground">
 													{branch}
 												</h3>
 											</div>
 											<div className="text-right text-xs sm:text-sm">
-												<span style={{ color: "var(--label-color)" }}>
+												<span className="text-muted-foreground">
 													{branchStudents.length} offers
 												</span>
-												<span
-													className="ml-2 font-semibold"
-													style={{ color: "var(--text-color)" }}
-												>
+												<span className="ml-2 font-semibold text-foreground">
 													₹{avgPkg.toFixed(1)} LPA
 												</span>
 											</div>
@@ -749,24 +726,15 @@ export default function PlacementDistributionChart({
 										borderColor: "var(--accent-color)",
 									}}
 								/>
-								<span
-									className="font-bold text-sm sm:text-base"
-									style={{ color: "var(--text-color)" }}
-								>
+								<span className="font-bold text-sm sm:text-base text-foreground">
 									Overall (All offers)
 								</span>
 							</div>
 							<div className="text-left sm:text-right pl-5 sm:pl-0">
-								<div
-									className="text-xs sm:text-sm"
-									style={{ color: "var(--label-color)" }}
-								>
+								<div className="text-xs sm:text-sm text-muted-foreground">
 									{stats.overallTotal} offers
 								</div>
-								<div
-									className="text-base sm:text-lg font-bold"
-									style={{ color: "var(--text-color)" }}
-								>
+								<div className="text-base sm:text-lg font-bold text-foreground">
 									₹{stats.overallAvg.toFixed(1)} LPA
 								</div>
 							</div>
@@ -806,24 +774,15 @@ export default function PlacementDistributionChart({
 													className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0"
 													style={{ backgroundColor: color }}
 												/>
-												<span
-													className="font-medium text-xs sm:text-sm truncate"
-													style={{ color: "var(--text-color)" }}
-												>
+												<span className="font-medium text-xs sm:text-sm truncate text-foreground">
 													{branch}
 												</span>
 											</div>
 											<div className="text-right flex-shrink-0 ml-2">
-												<div
-													className="text-[10px] sm:text-xs"
-													style={{ color: "var(--label-color)" }}
-												>
+												<div className="text-[10px] sm:text-xs text-muted-foreground">
 													{branchStudents.length}
 												</div>
-												<div
-													className="text-xs sm:text-sm font-semibold whitespace-nowrap"
-													style={{ color: "var(--text-color)" }}
-												>
+												<div className="text-xs sm:text-sm font-semibold whitespace-nowrap text-foreground">
 													₹{avgPkg.toFixed(1)}
 												</div>
 											</div>

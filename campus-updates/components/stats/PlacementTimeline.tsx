@@ -347,53 +347,48 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 							<Tooltip content={<CustomTooltip />} />
 							<Legend wrapperStyle={{ paddingTop: "20px" }} />
 
-							{(view === "combined" || view === "count") && (
-								<>
-									<Bar
-										yAxisId="left"
-										dataKey="uniqueStudents"
-										name="Unique Students"
-										fill="var(--chart-1)"
-										radius={[4, 4, 0, 0]}
-										maxBarSize={50}
-										fillOpacity={0.8}
-									/>
-									<Bar
-										yAxisId="left"
-										dataKey="totalOffers"
-										name="Total Offers"
-										fill="var(--chart-3)"
-										radius={[4, 4, 0, 0]}
-										maxBarSize={50}
-										fillOpacity={0.8}
-									/>
-								</>
-							)}
-
-							{(view === "combined" || view === "package") && (
-								<>
-									<Line
-										yAxisId="right"
-										type="monotone"
-										dataKey="avgPackage"
-										name="Avg Package"
-										stroke="var(--chart-2)"
-										strokeWidth={2}
-										dot={{ r: 3 }}
-										activeDot={{ r: 5 }}
-									/>
-									<Line
-										yAxisId="right"
-										type="monotone"
-										dataKey="medianPackage"
-										name="Median Package"
-										stroke="var(--chart-4)"
-										strokeWidth={2}
-										strokeDasharray="5 5"
-										dot={{ r: 3 }}
-									/>
-								</>
-							)}
+							<Bar
+								yAxisId="left"
+								dataKey="uniqueStudents"
+								name="Unique Students"
+								fill="var(--chart-1)"
+								radius={[4, 4, 0, 0]}
+								maxBarSize={50}
+								fillOpacity={0.8}
+								hide={view === "package"}
+							/>
+							<Bar
+								yAxisId="left"
+								dataKey="totalOffers"
+								name="Total Offers"
+								fill="var(--chart-2)"
+								radius={[4, 4, 0, 0]}
+								maxBarSize={50}
+								fillOpacity={0.8}
+								hide={view === "package"}
+							/>
+							<Line
+								yAxisId="right"
+								type="monotone"
+								dataKey="avgPackage"
+								name="Avg Package"
+								stroke="var(--chart-2)"
+								strokeWidth={2}
+								dot={{ r: 3, fill: "#f59e0b" }}
+								activeDot={{ r: 5 }}
+								hide={view === "count"}
+							/>
+							<Line
+								yAxisId="right"
+								type="monotone"
+								dataKey="medianPackage"
+								name="Median Package"
+								stroke="var(--chart-1)"
+								strokeWidth={2}
+								strokeDasharray="5 5"
+								dot={{ r: 3, fill: "#ec4899" }}
+								hide={view === "count"}
+							/>
 						</ComposedChart>
 					</ResponsiveContainer>
 				</div>
