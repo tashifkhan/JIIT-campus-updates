@@ -92,7 +92,14 @@
   body {
     background-color: var(--bg-color);
     color: var(--text-color);
-    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Prevent window scrolling on desktop - the layout uses fixed height containers */
+  @media (min-width: 1024px) {
+    html, body {
+      overflow: hidden;
+      height: 100%;
+    }
   }
 }
 
