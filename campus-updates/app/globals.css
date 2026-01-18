@@ -115,6 +115,14 @@
     color: var(--foreground);
     transition: background-color 0.3s ease, color 0.3s ease;
   }
+  
+  /* Prevent window scrolling on desktop - the layout uses fixed height containers */
+  @media (min-width: 1024px) {
+    html, body {
+      overflow: hidden;
+      height: 100%;
+    }
+  }
 }
 
 @layer utilities {

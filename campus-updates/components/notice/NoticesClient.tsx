@@ -127,7 +127,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 									: String(matchedJobId),
 							company: n.job_company ?? n.matched_job?.company ?? null,
 							job_profile: n.job_role ?? n.matched_job?.job_profile ?? null,
-					  }
+						}
 					: null;
 
 				// Formatting fix for trailing brackets in the CTC text/breakdown
@@ -188,10 +188,10 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 			const createdAt = o.createdAt
 				? new Date(o.createdAt).getTime()
 				: o.saved_at
-				? new Date(o.saved_at).getTime()
-				: o.updated_at
-				? new Date(o.updated_at).getTime()
-				: undefined;
+					? new Date(o.saved_at).getTime()
+					: o.updated_at
+						? new Date(o.updated_at).getTime()
+						: undefined;
 
 			// Compute a representative role and CTC
 			const roles: Array<{
@@ -206,7 +206,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 			// `bestPackage` picks the max package across roles (if any), fallback to the first student's package
 			const bestPackage = packages.length
 				? Math.max(...packages)
-				: o.students_selected?.[0]?.package ?? null;
+				: (o.students_selected?.[0]?.package ?? null);
 			const ctcText = bestPackage != null ? `${bestPackage} LPA` : "";
 
 			// Build a markdown-ish formatted message compatible with existing parser
@@ -243,7 +243,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 				? o.students_selected.map((s: any) => ({
 						name: s.name,
 						enrollment_number: s.enrollment_number ?? s.enroll ?? null,
-				  }))
+					}))
 				: null;
 
 			return {
@@ -269,7 +269,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 					.map((r) =>
 						r?.package_details
 							? `- ${r.role || "Role"}: ${r.package_details}`
-							: ""
+							: "",
 					)
 					.filter(Boolean)
 					.join("\n"),
@@ -282,14 +282,14 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 							year: "numeric",
 							month: "short",
 							day: "numeric",
-					  })
+						})
 					: undefined,
 			};
 		});
 
 		// Combine and filter out bot-like short placement announcements
 		const combined = [...normalizedNotices, ...normalizedOffers].filter(
-			(n) => !isPlacementBotPost(n)
+			(n) => !isPlacementBotPost(n),
 		);
 
 		// Additional filtering for short placement announcements if requested
@@ -319,7 +319,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 
 					// Keep detailed offers, hide short announcements
 					return (!isShortAnnouncement || isDetailedOffer) && !zeroPlacedOffer;
-			  })
+				})
 			: combined;
 
 		return finalFiltered.sort((a, b) => {
@@ -343,7 +343,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 
 	const allCategories = useMemo(
 		() => Array.from(new Set(notices.map((n) => n.category))).sort(),
-		[notices]
+		[notices],
 	);
 
 	// Apply UI filters (search text, category chips, and "Only shortlisted")
@@ -386,8 +386,19 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 	}, [query, selectedCategories, onlyShortlisted, itemsPerPage]);
 
 	// Scroll to top when page changes
+	// On desktop (lg+), the scrollable container is the <main> element, not window
 	useEffect(() => {
-		window.scrollTo({ top: 0, behavior: "smooth" });
+		// Try to find the main scrollable container (used on desktop)
+		const mainScrollContainer = document.querySelector(
+			"main.lg\\:overflow-auto",
+		);
+		if (mainScrollContainer && window.innerWidth >= 1024) {
+			// Desktop: scroll the main container
+			mainScrollContainer.scrollTo({ top: 0, behavior: "smooth" });
+		} else {
+			// Mobile: scroll the window
+			window.scrollTo({ top: 0, behavior: "smooth" });
+		}
 	}, [currentPage]);
 
 	if (loading) {
@@ -449,16 +460,16 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 							? parseShortlistFromText(notice.formatted_message)
 							: [];
 					const students = (notice.shortlisted_students ?? []).concat(
-						parsed as any
+						parsed as any,
 					);
 					const hasShortlistedStudents = students.length > 0;
 
 					const parsedMessage = parseFormattedMessage(
 						notice.formatted_message,
-						notice.category
+						notice.category,
 					);
 					const eligibilityCriteria = formatEligibility(
-						parsedMessage.eligibility
+						parsedMessage.eligibility,
 					);
 					const hiringSteps = (
 						formatHiringProcess(parsedMessage.hiringProcess) || []
@@ -487,7 +498,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 										{notice.category
 											.split(" ")
 											.map(
-												(w: string) => w.charAt(0).toUpperCase() + w.slice(1)
+												(w: string) => w.charAt(0).toUpperCase() + w.slice(1),
 											)
 											.join(" ")}
 									</Badge>
@@ -681,7 +692,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 																						>
 																							{course.trim()}
 																						</Badge>
-																					)
+																					),
 																				)
 																			) : (
 																				<Badge
@@ -713,7 +724,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 																	</div>
 																)}
 															</div>
-														)
+														),
 													)}
 												</div>
 											</div>
@@ -835,7 +846,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 												expanded={expandedNotice === notice.id}
 												onToggle={() =>
 													setExpandedNotice((prev) =>
-														prev === notice.id ? null : notice.id
+														prev === notice.id ? null : notice.id,
 													)
 												}
 											/>
@@ -983,7 +994,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 										pages.push(
 											<PaginationItem key={`ellipsis-${prevPage}`}>
 												<PaginationEllipsis />
-											</PaginationItem>
+											</PaginationItem>,
 										);
 									}
 
@@ -997,7 +1008,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 											>
 												{page}
 											</PaginationLink>
-										</PaginationItem>
+										</PaginationItem>,
 									);
 								}
 
