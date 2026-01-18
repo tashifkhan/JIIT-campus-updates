@@ -274,9 +274,9 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 			return {
 				_id: rawId,
 				id: String(rawId),
-				title: null,
-				content: null,
-				author: null,
+				title: undefined,
+				content: undefined,
+				author: undefined,
 				createdAt,
 				updatedAt: createdAt,
 				category: "placement offer",
@@ -301,9 +301,9 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 				formatted_message,
 				location: Array.isArray(o.job_location)
 					? o.job_location.join(", ")
-					: null,
-				sent_to_telegram: null,
-				updated_at: o.updated_at || null,
+					: undefined,
+				sent_to_telegram: undefined,
+				updated_at: o.updated_at || undefined,
 				shortlisted_students,
 				// Date fields for sorting
 				saved_at: o.saved_at ?? o.time_sent ?? undefined,
