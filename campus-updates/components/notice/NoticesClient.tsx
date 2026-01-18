@@ -5,6 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import ResourceModal from "@/components/admin/ResourceModal";
 import {
 	CalendarIcon,
 	BuildingIcon,
@@ -67,8 +69,31 @@ type Props = {
 export default function NoticesClient({ hideShortPlacements = false }: Props) {
 	const router = useRouter();
 	const [isPending, startTransition] = useTransition();
+	// Admin State
 	const [pendingJobId, setPendingJobId] = useState<string | null>(null);
+	const [isAdmin, setIsAdmin] = useState(false);
 	const [expandedNotice, setExpandedNotice] = useState<string | null>(null);
+	const [editModalOpen, setEditModalOpen] = useState(false);
+	const [editingItem, setEditingItem] = useState<any>(null);
+	useEffect(() => {
+		// Check if admin
+		fetch("/api/admin/check-auth")
+			.then((res) => res.json())
+			.then((data) => {
+				if (data.authenticated) setIsAdmin(true);
+			})
+			.catch((err) => console.error("Auth check failed", err));
+	}, []);
+
+	const handleEditNotice = (notice: any) => {
+		setEditingItem(notice);
+		setEditModalOpen(true);
+	};
+
+	const handleSuccess = () => {
+		// Refresh data
+		window.location.reload();
+	};
 
 	const { data: rawNotices, isLoading } = useQuery<any[]>({
 		queryKey: ["notices"],
@@ -105,16 +130,19 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 					typeof n._id.toString === "function"
 						? n._id.toString()
 						: n._id;
-				const createdAt = n.createdAt
-					? typeof n.createdAt === "number"
-						? n.createdAt
-						: new Date(n.createdAt).getTime()
-					: null;
+
+				// Prefer saved_at (time_sent) over createdAt for correct ordering
+				const effectiveDate = n.saved_at || n.createdAt;
+				const createdAt = effectiveDate
+					? typeof effectiveDate === "number"
+						? effectiveDate
+						: new Date(effectiveDate).getTime()
+					: undefined;
 				const updatedAt = n.updatedAt
 					? typeof n.updatedAt === "number"
 						? n.updatedAt
 						: new Date(n.updatedAt).getTime()
-					: null;
+					: undefined;
 
 				// Build matched_job object if any job info is available
 				const matchedJobId = n.matched_job_id ?? n.matched_job?.id ?? null;
@@ -144,13 +172,13 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 				return {
 					// copy scalar fields explicitly to avoid passing BSON objects
 					_id: id,
-					id: n.id ?? null,
-					title: n.title ?? null,
-					content: n.content ?? null,
-					author: n.author ?? null,
+					id: n.id ?? undefined, // Fallback to Mongo ID if 'id' field is missing
+					title: n.title ?? undefined,
+					content: n.content ?? undefined,
+					author: n.author ?? undefined,
 					createdAt,
 					updatedAt,
-					category: n.category ?? null,
+					category: n.category ?? undefined, // Fix category null to undefined
 					matched_job,
 					matched_job_id: n.matched_job_id ?? null,
 					job_company: n.job_company ?? null,
@@ -160,11 +188,16 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 					// "package_breakdown" is a markdown-ish multi-line string summarizing components
 					// like Base/Fix/Bonus etc. It’s displayed by consumers that choose to render it.
 					package_breakdown: n.package_breakdown ?? null,
-					formatted_message: n.formatted_message ?? null,
+					formatted_message: n.formatted_message ?? undefined, // Ensure string | undefined
 					location: n.location ?? null,
 					sent_to_telegram: n.sent_to_telegram ?? null,
 					updated_at: n.updated_at ?? null,
 					shortlisted_students: n.shortlisted_students ?? null,
+					number_of_offers: null,
+					joiningDate: undefined,
+					// Date extracted from *On:* in formatted_message or existing saved_at/time_sent
+					saved_at: n.saved_at ?? n.time_sent ?? undefined,
+					time_sent: n.time_sent ?? n.saved_at ?? undefined,
 				};
 			})
 			.map((n) => ({
@@ -182,14 +215,12 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 				typeof o._id.toString === "function"
 					? o._id.toString()
 					: o._id || o.id;
-			// Prefer createdAt, then saved_at, then updated_at; otherwise leave null so it sorts last
-			const createdAt = o.createdAt
-				? new Date(o.createdAt).getTime()
-				: o.saved_at
-					? new Date(o.saved_at).getTime()
-					: o.updated_at
-						? new Date(o.updated_at).getTime()
-						: null;
+
+			// Prefer saved_at (time_sent) -> createdAt -> updated_at
+			const effectiveDate = o.saved_at || o.createdAt || o.updated_at;
+			const createdAt = effectiveDate
+				? new Date(effectiveDate).getTime()
+				: undefined;
 
 			// Compute a representative role and CTC
 			const roles: Array<{
@@ -274,6 +305,9 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 				sent_to_telegram: null,
 				updated_at: o.updated_at || null,
 				shortlisted_students,
+				// Date fields for sorting
+				saved_at: o.saved_at ?? o.time_sent ?? undefined,
+				time_sent: o.time_sent ?? o.saved_at ?? undefined,
 			};
 		});
 
@@ -313,12 +347,25 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 			: combined;
 
 		return finalFiltered.sort((a, b) => {
-			const aTime = a.createdAt ?? null;
-			const bTime = b.createdAt ?? null;
-			if (aTime == null && bTime == null) return 0;
-			if (aTime == null) return 1; // a goes after b
-			if (bTime == null) return -1; // b goes after a
-			return bTime - aTime; // newer first
+			const aTime = a.saved_at
+				? new Date(a.saved_at).getTime()
+				: typeof a.createdAt === "number"
+					? a.createdAt
+					: a.createdAt
+						? new Date(a.createdAt).getTime()
+						: 0;
+			const bTime = b.saved_at
+				? new Date(b.saved_at).getTime()
+				: typeof b.createdAt === "number"
+					? b.createdAt
+					: b.createdAt
+						? new Date(b.createdAt).getTime()
+						: 0;
+
+			if (!aTime && !bTime) return 0;
+			if (!aTime) return 1;
+			if (!bTime) return -1;
+			return bTime - aTime;
 		});
 	}, [rawNotices, rawOffers, hideShortPlacements]);
 
@@ -511,6 +558,35 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 											)
 											.join(" ")}
 									</Badge>
+									<div className="flex items-center gap-2">
+										{isAdmin && (
+											<Button
+												variant="ghost"
+												size="icon"
+												className="h-6 w-6"
+												onClick={(e) => {
+													e.stopPropagation();
+													handleEditNotice(notice);
+												}}
+											>
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													width="14"
+													height="14"
+													viewBox="0 0 24 24"
+													fill="none"
+													stroke="currentColor"
+													strokeWidth="2"
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													className="lucide lucide-pencil"
+												>
+													<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+													<path d="m15 5 4 4" />
+												</svg>
+											</Button>
+										)}
+									</div>
 								</div>
 								{(notice.createdAt || notice.author) && (
 									<div
@@ -1130,6 +1206,18 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 					</Pagination>
 				</div>
 			)}
+			<ResourceModal
+				isOpen={editModalOpen}
+				onClose={() => setEditModalOpen(false)}
+				mode="update"
+				resourceType={
+					editingItem?.category === "placement offer"
+						? "placement-offers"
+						: "notices"
+				}
+				initialData={editingItem}
+				onSuccess={handleSuccess}
+			/>
 		</div>
 	);
 }

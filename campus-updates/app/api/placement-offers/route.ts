@@ -23,8 +23,10 @@ export async function GET() {
       }
       return rest;
     });
-
-    return NextResponse.json({ ok: true, data: sanitizedData }, { headers: { "cache-control": "no-store" } });
+    return NextResponse.json(
+      { ok: true, data: sanitizedData },
+      { headers: { "cache-control": "no-store" } }
+    );
   } catch (err: any) {
     return NextResponse.json({ ok: false, error: String(err) }, { status: 500, headers: { "cache-control": "no-store" } });
   }
