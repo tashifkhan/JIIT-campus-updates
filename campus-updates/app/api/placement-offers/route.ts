@@ -14,6 +14,10 @@ export async function GET() {
       // Create a shallow copy and delete sensitive top-level fields
       const { email_sender, email_subject, additional_info, ...rest } = offer;
       
+      if (rest.time_sent) {
+        rest.saved_at = rest.time_sent;
+      }
+      
       // Sanitize students_selected if it exists
       if (rest.students_selected && Array.isArray(rest.students_selected)) {
         rest.students_selected = rest.students_selected.map((student: any) => {
