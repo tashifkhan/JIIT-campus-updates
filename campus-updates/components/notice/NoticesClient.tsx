@@ -347,24 +347,22 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 			: combined;
 
 		return finalFiltered.sort((a, b) => {
-			const aTime = a.saved_at
-				? new Date(a.saved_at).getTime()
-				: typeof a.createdAt === "number"
-					? a.createdAt
-					: a.createdAt
-						? new Date(a.createdAt).getTime()
-						: 0;
-			const bTime = b.saved_at
-				? new Date(b.saved_at).getTime()
-				: typeof b.createdAt === "number"
-					? b.createdAt
-					: b.createdAt
-						? new Date(b.createdAt).getTime()
-						: 0;
+			const getTime = (isoStr?: string | number | Date) => {
+				if (!isoStr) return 0;
+				if (typeof isoStr === "number") return isoStr;
+				return new Date(isoStr).getTime();
+			};
+
+			// Priority: saved_at > createdAt > updatedAt
+			const aTime =
+				getTime(a.saved_at) || getTime(a.createdAt) || getTime(a.updatedAt);
+			const bTime =
+				getTime(b.saved_at) || getTime(b.createdAt) || getTime(b.updatedAt);
 
 			if (!aTime && !bTime) return 0;
 			if (!aTime) return 1;
 			if (!bTime) return -1;
+			// Descending order (newest first)
 			return bTime - aTime;
 		});
 	}, [rawNotices, rawOffers, hideShortPlacements]);
