@@ -116,6 +116,16 @@ export async function getPolicy(slug: string) {
 	return doc as unknown as Policy | null;
 }
 
+export async function getPolicies() {
+	const col = await getCollection("Policies");
+	// Return only necessary fields for the list/picker
+	const docs = await col
+		.find({}, { projection: { content: 0, toc: 0 } })
+		.sort({ createdAt: -1 })
+		.toArray();
+	return docs as unknown as Partial<Policy>[];
+}
+
 export async function createPolicy(policy: Policy) {
 	const col = await getCollection("Policies");
 	// ensure timestamps
