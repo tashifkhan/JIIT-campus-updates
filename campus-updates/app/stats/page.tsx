@@ -42,7 +42,7 @@ export default function StatsPage() {
 
 	const placements: Placement[] = useMemo(
 		() => (Array.isArray(data) ? (data as any) : []),
-		[data]
+		[data],
 	);
 
 	// Filters
@@ -105,24 +105,24 @@ export default function StatsPage() {
 	// Exclude these branches from all calculations and displays
 	const EXCLUDED_BRANCHES = useMemo(
 		() => new Set(["JUIT", "Other", "MTech"]),
-		[]
+		[],
 	);
 
 	// Filter options
 	const availableCompanies = useMemo(
 		() => Array.from(new Set(placements.map((p) => p.company))).sort(),
-		[placements]
+		[placements],
 	);
 	const availableRoles = useMemo(
 		() =>
 			Array.from(
 				new Set(
 					placements.flatMap(
-						(p) => p.roles?.map((r) => r.role).filter(Boolean) || []
-					)
-				)
+						(p) => p.roles?.map((r) => r.role).filter(Boolean) || [],
+					),
+				),
 			).sort(),
-		[placements]
+		[placements],
 	);
 	const availableLocations = useMemo(
 		() =>
@@ -130,10 +130,10 @@ export default function StatsPage() {
 				new Set(
 					placements
 						.flatMap((p) => p.job_location || [])
-						.filter(Boolean) as string[]
-				)
+						.filter(Boolean) as string[],
+				),
 			).sort(),
-		[placements]
+		[placements],
 	);
 
 	// Flattened students (+ placement context)
@@ -147,18 +147,18 @@ export default function StatsPage() {
 					joining_date: placement.joining_date || undefined,
 					job_location: placement.job_location,
 					placement,
-				}))
+				})),
 			),
-		[placements]
+		[placements],
 	);
 
 	// Filter out excluded branches from all students
 	const includedStudents = useMemo(
 		() =>
 			allStudents.filter(
-				(s) => !EXCLUDED_BRANCHES.has(getBranch(s.enrollment_number))
+				(s) => !EXCLUDED_BRANCHES.has(getBranch(s.enrollment_number)),
 			),
-		[allStudents, EXCLUDED_BRANCHES]
+		[allStudents, EXCLUDED_BRANCHES],
 	);
 
 	const hasActiveFilters =
@@ -231,7 +231,7 @@ export default function StatsPage() {
 
 	const uniqueCompanies = useMemo(
 		() => new Set(allStudents.map((s) => s.company)).size,
-		[allStudents]
+		[allStudents],
 	);
 
 	const allPackages = useMemo(() => {
@@ -314,7 +314,7 @@ export default function StatsPage() {
 	})();
 	const filteredUniqueCompanies = useMemo(
 		() => new Set(filteredStudents.map((s) => s.company)).size,
-		[filteredStudents]
+		[filteredStudents],
 	);
 
 	// Company stats (using ALL students including JUIT, Other, MTech)
@@ -455,7 +455,7 @@ export default function StatsPage() {
 					? sortedPkgs[(sortedPkgs.length - 1) >> 1]
 					: (sortedPkgs[sortedPkgs.length / 2 - 1] +
 							sortedPkgs[sortedPkgs.length / 2]) /
-					  2
+						2
 				: 0;
 		});
 		return acc;
@@ -472,7 +472,7 @@ export default function StatsPage() {
 				if (counts && typeof counts === "object") {
 					const sum = Object.values(counts).reduce(
 						(a: number, c: any) => a + Number(c || 0),
-						0
+						0,
 					);
 					totals[branch] = sum;
 				} else if (typeof counts === "number") {
@@ -486,11 +486,11 @@ export default function StatsPage() {
 	}, [EXCLUDED_BRANCHES]);
 	const branchesWithTotals = useMemo(
 		() => new Set(Object.keys(branchTotalCounts)),
-		[branchTotalCounts]
+		[branchTotalCounts],
 	);
 	const overallTotalStudentsExclJUIT = useMemo(
 		() => Object.values(branchTotalCounts).reduce((a, c) => a + c, 0),
-		[branchTotalCounts]
+		[branchTotalCounts],
 	);
 	const totalPlacedInCountedBranches = useMemo(() => {
 		const uniqueEnrollments = new Set<string>();
@@ -538,7 +538,7 @@ export default function StatsPage() {
 	const getBranchStudents = (branchName: string) => {
 		const base = hasActiveFilters ? filteredStudents : includedStudents;
 		return sortStudentsList(
-			base.filter((s) => getBranch(s.enrollment_number) === branchName)
+			base.filter((s) => getBranch(s.enrollment_number) === branchName),
 		);
 	};
 
@@ -551,7 +551,6 @@ export default function StatsPage() {
 			"Role",
 			"Package",
 			"Job Location",
-			"Joining Date",
 		]);
 		filteredStudents.forEach((student) => {
 			const v = getStudentPackage(student, student.placement);
@@ -562,7 +561,6 @@ export default function StatsPage() {
 				student.role || "N/A",
 				v ? `₹${v.toFixed(1)} LPA` : "TBD",
 				student.job_location?.join(", ") || "N/A",
-				student.joining_date || "TBD",
 			]);
 		});
 		const csv = rows.map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
@@ -579,7 +577,7 @@ export default function StatsPage() {
 		? filteredCompanyStats
 		: companyStats;
 	const companyEntries = Object.entries(sourceCompanyStats).sort(([a], [b]) =>
-		a.localeCompare(b)
+		a.localeCompare(b),
 	);
 
 	const clearFilters = () => {
@@ -795,7 +793,7 @@ export default function StatsPage() {
 
 // Build branch ranges index from JSON
 function buildBranchRangesFromJson(
-	json: any
+	json: any,
 ): Array<{ branch: string; start: number; end: number }> {
 	const ranges: Array<{ branch: string; start: number; end: number }> = [];
 	if (!json || typeof json !== "object") return ranges;

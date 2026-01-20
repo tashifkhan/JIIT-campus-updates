@@ -166,6 +166,22 @@ export default function BranchSection({
 	const [showAllBranches, setShowAllBranches] = useState(false);
 	const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
 	const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
+	const [sortConfig, setSortConfig] = useState<{
+		key: string;
+		direction: "asc" | "desc";
+	} | null>(null);
+
+	const handleSort = (key: string) => {
+		let direction: "asc" | "desc" = "asc";
+		if (
+			sortConfig &&
+			sortConfig.key === key &&
+			sortConfig.direction === "asc"
+		) {
+			direction = "desc";
+		}
+		setSortConfig({ key, direction });
+	};
 
 	return (
 		<Card className="card-theme bg-card border-border">
@@ -184,7 +200,7 @@ export default function BranchSection({
 						<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 							{(() => {
 								const branchEntries = Object.entries(branchStats).sort(
-									(a, b) => b[1].count - a[1].count
+									(a, b) => b[1].count - a[1].count,
 								);
 								const branchesToShow = showAllBranches
 									? branchEntries
@@ -308,7 +324,7 @@ export default function BranchSection({
 														};
 
 														const computeStatsFor = (
-															filterFn: (n: number) => boolean
+															filterFn: (n: number) => boolean,
 														): {
 															placed: number;
 															totalOffers: number;
@@ -332,18 +348,18 @@ export default function BranchSection({
 																	const plc =
 																		s.placement ||
 																		(placements.find(
-																			(p) => p.company === s.company
+																			(p) => p.company === s.company,
 																		) as Placement);
 																	const pkg = plc ? pkgFrom(s, plc) : null;
 																	if (pkg != null && pkg > 0) {
 																		const currentMax =
 																			studentMaxPackages.get(
-																				s.enrollment_number
+																				s.enrollment_number,
 																			) || 0;
 																		if (pkg > currentMax) {
 																			studentMaxPackages.set(
 																				s.enrollment_number,
-																				pkg
+																				pkg,
 																			);
 																		}
 																	}
@@ -352,7 +368,7 @@ export default function BranchSection({
 
 															const pkgs: number[] = [];
 															studentMaxPackages.forEach((pkg) =>
-																pkgs.push(pkg)
+																pkgs.push(pkg),
 															);
 
 															const placed = uniqueEnrollments.size;
@@ -365,7 +381,7 @@ export default function BranchSection({
 																	? sorted[(sorted.length - 1) >> 1]
 																	: (sorted[sorted.length / 2 - 1] +
 																			sorted[sorted.length / 2]) /
-																	  2
+																		2
 																: 0;
 															return { placed, totalOffers, avg, median };
 														};
@@ -381,7 +397,8 @@ export default function BranchSection({
 																	) {
 																		const { placed, totalOffers, avg, median } =
 																			computeStatsFor(
-																				(n) => n >= entry.start && n < entry.end
+																				(n) =>
+																					n >= entry.start && n < entry.end,
 																			);
 																		const total: number | null =
 																			studentCounts?.["Intg. MTech"] &&
@@ -390,7 +407,7 @@ export default function BranchSection({
 																			] === "number"
 																				? (studentCounts["Intg. MTech"][
 																						subBranch
-																				  ] as number)
+																					] as number)
 																				: null;
 																		const pct =
 																			total && total > 0
@@ -406,7 +423,7 @@ export default function BranchSection({
 																			median,
 																		});
 																	}
-																}
+																},
 															);
 														} else {
 															Object.entries(ranges).forEach(
@@ -418,7 +435,8 @@ export default function BranchSection({
 																	) {
 																		const { placed, totalOffers, avg, median } =
 																			computeStatsFor(
-																				(n) => n >= entry.start && n < entry.end
+																				(n) =>
+																					n >= entry.start && n < entry.end,
 																			);
 																		const total: number | null =
 																			studentCounts?.[branch] &&
@@ -426,7 +444,7 @@ export default function BranchSection({
 																				"number"
 																				? (studentCounts[branch][
 																						batchKey
-																				  ] as number)
+																					] as number)
 																				: null;
 																		const pct =
 																			total && total > 0
@@ -442,7 +460,7 @@ export default function BranchSection({
 																			median,
 																		});
 																	}
-																}
+																},
 															);
 														}
 
@@ -459,7 +477,7 @@ export default function BranchSection({
 																		{subs
 																			.sort(
 																				(a, b) =>
-																					(b.total ?? 0) - (a.total ?? 0)
+																					(b.total ?? 0) - (a.total ?? 0),
 																			)
 																			.map((sc, idx) => (
 																				<div
@@ -478,7 +496,10 @@ export default function BranchSection({
 																										style={{
 																											width: `${Math.min(
 																												100,
-																												Math.max(0, sc.pct || 0)
+																												Math.max(
+																													0,
+																													sc.pct || 0,
+																												),
 																											)}%`,
 																										}}
 																									/>
@@ -542,69 +563,165 @@ export default function BranchSection({
 																<Table>
 																	<TableHeader>
 																		<TableRow>
-																			<TableHead className="text-foreground">
+																			<TableHead
+																				className="text-foreground cursor-pointer hover:bg-muted/50"
+																				onClick={() => handleSort("name")}
+																			>
 																				Name
+																				{sortConfig?.key === "name" && (
+																					<span className="ml-1">
+																						{sortConfig.direction === "asc"
+																							? "↑"
+																							: "↓"}
+																					</span>
+																				)}
 																			</TableHead>
-																			<TableHead className="text-foreground">
+																			<TableHead
+																				className="text-foreground cursor-pointer hover:bg-muted/50"
+																				onClick={() =>
+																					handleSort("enrollment_number")
+																				}
+																			>
 																				Enrollment
+																				{sortConfig?.key ===
+																					"enrollment_number" && (
+																					<span className="ml-1">
+																						{sortConfig.direction === "asc"
+																							? "↑"
+																							: "↓"}
+																					</span>
+																				)}
 																			</TableHead>
 
-																			<TableHead className="text-foreground">
+																			<TableHead
+																				className="text-foreground cursor-pointer hover:bg-muted/50"
+																				onClick={() => handleSort("company")}
+																			>
 																				Company
+																				{sortConfig?.key === "company" && (
+																					<span className="ml-1">
+																						{sortConfig.direction === "asc"
+																							? "↑"
+																							: "↓"}
+																					</span>
+																				)}
 																			</TableHead>
-																			<TableHead className="text-foreground">
+																			<TableHead
+																				className="text-foreground cursor-pointer hover:bg-muted/50"
+																				onClick={() => handleSort("role")}
+																			>
 																				Role
+																				{sortConfig?.key === "role" && (
+																					<span className="ml-1">
+																						{sortConfig.direction === "asc"
+																							? "↑"
+																							: "↓"}
+																					</span>
+																				)}
 																			</TableHead>
-																			<TableHead className="text-foreground">
+																			<TableHead
+																				className="text-foreground cursor-pointer hover:bg-muted/50"
+																				onClick={() => handleSort("package")}
+																			>
 																				Package
-																			</TableHead>
-																			<TableHead className="text-foreground">
-																				Joining Date
+																				{sortConfig?.key === "package" && (
+																					<span className="ml-1">
+																						{sortConfig.direction === "asc"
+																							? "↑"
+																							: "↓"}
+																					</span>
+																				)}
 																			</TableHead>
 																		</TableRow>
 																	</TableHeader>
 																	<TableBody>
-																		{getBranchStudents(branch).map(
-																			(student, idx) => (
-																				<TableRow key={idx}>
-																					<TableCell className="font-medium text-foreground">
-																						{student.name}
-																					</TableCell>
-																					<TableCell className="text-muted-foreground font-mono text-xs">
-																						{student.enrollment_number}
-																					</TableCell>
+																		{(() => {
+																			let displayedStudents =
+																				getBranchStudents(branch);
 
-																					<TableCell className="text-foreground">
-																						{student.company}
-																					</TableCell>
-																					<TableCell className="text-muted-foreground">
-																						{student.role || "-"}
-																					</TableCell>
-																					<TableCell className="text-green-600 font-bold">
-																						{(() => {
-																							const plc =
-																								student.placement ||
-																								(placements.find(
-																									(p) =>
-																										p.company ===
-																										student.company
-																								) as Placement);
-																							const pkg = plc
-																								? plc.roles && plc.roles.length
-																									? pkgFrom(student, plc)
-																									: null
-																								: null;
-																							return pkg
-																								? formatPackage(pkg)
-																								: "TBD";
-																						})()}
-																					</TableCell>
-																					<TableCell className="text-muted-foreground">
-																						{formatDate(student.joining_date)}
-																					</TableCell>
-																				</TableRow>
-																			)
-																		)}
+																			if (sortConfig) {
+																				displayedStudents = [
+																					...displayedStudents,
+																				].sort((a, b) => {
+																					if (sortConfig.key === "package") {
+																						const plcA =
+																							a.placement ||
+																							(placements.find(
+																								(p) => p.company === a.company,
+																							) as Placement);
+																						const pkgA = plcA
+																							? pkgFrom(a, plcA)
+																							: 0;
+
+																						const plcB =
+																							b.placement ||
+																							(placements.find(
+																								(p) => p.company === b.company,
+																							) as Placement);
+																						const pkgB = plcB
+																							? pkgFrom(b, plcB)
+																							: 0;
+
+																						return sortConfig.direction ===
+																							"asc"
+																							? (pkgA || 0) - (pkgB || 0)
+																							: (pkgB || 0) - (pkgA || 0);
+																					}
+
+																					const valA =
+																						(a as any)[sortConfig.key] || "";
+																					const valB =
+																						(b as any)[sortConfig.key] || "";
+																					return sortConfig.direction === "asc"
+																						? String(valA).localeCompare(
+																								String(valB),
+																							)
+																						: String(valB).localeCompare(
+																								String(valA),
+																							);
+																				});
+																			}
+
+																			return displayedStudents.map(
+																				(student, idx) => (
+																					<TableRow key={idx}>
+																						<TableCell className="font-medium text-foreground">
+																							{student.name}
+																						</TableCell>
+																						<TableCell className="text-muted-foreground font-mono text-xs">
+																							{student.enrollment_number}
+																						</TableCell>
+
+																						<TableCell className="text-foreground">
+																							{student.company}
+																						</TableCell>
+																						<TableCell className="text-muted-foreground">
+																							{student.role || "-"}
+																						</TableCell>
+																						<TableCell className="text-green-600 font-bold">
+																							{(() => {
+																								const plc =
+																									student.placement ||
+																									(placements.find(
+																										(p) =>
+																											p.company ===
+																											student.company,
+																									) as Placement);
+																								const pkg = plc
+																									? plc.roles &&
+																										plc.roles.length
+																										? pkgFrom(student, plc)
+																										: null
+																									: null;
+																								return pkg
+																									? formatPackage(pkg)
+																									: "TBD";
+																							})()}
+																						</TableCell>
+																					</TableRow>
+																				),
+																			);
+																		})()}
 																	</TableBody>
 																</Table>
 															</div>
@@ -634,7 +751,7 @@ export default function BranchSection({
 																								(placements.find(
 																									(p) =>
 																										p.company ===
-																										student.company
+																										student.company,
 																								) as Placement);
 																							const pkg = plc
 																								? plc.roles && plc.roles.length
@@ -659,17 +776,10 @@ export default function BranchSection({
 																					<BriefcaseIcon className="w-4 h-4" />
 																					<span>{student.role || "N/A"}</span>
 																				</div>
-																				{student.joining_date && (
-																					<div className="flex items-center gap-2 text-muted-foreground">
-																						<Calendar className="w-4 h-4" />
-																						<span>
-																							{formatDate(student.joining_date)}
-																						</span>
-																					</div>
-																				)}
+																				{/* Joined date removed for mobile as well */}
 																			</div>
 																		</div>
-																	)
+																	),
 																)}
 															</div>
 														</div>

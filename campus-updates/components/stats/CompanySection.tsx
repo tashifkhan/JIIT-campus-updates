@@ -62,6 +62,22 @@ export default function CompanySection({
 	const [showAllCompanies, setShowAllCompanies] = useState(false);
 	const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [sortConfig, setSortConfig] = useState<{
+		key: string;
+		direction: "asc" | "desc";
+	} | null>(null);
+
+	const handleSort = (key: string) => {
+		let direction: "asc" | "desc" = "asc";
+		if (
+			sortConfig &&
+			sortConfig.key === key &&
+			sortConfig.direction === "asc"
+		) {
+			direction = "desc";
+		}
+		setSortConfig({ key, direction });
+	};
 	const companiesToRender = showAllCompanies
 		? companyEntries
 		: companyEntries.slice(0, COMPANIES_LIMIT);
@@ -128,7 +144,8 @@ export default function CompanySection({
 											</p>
 											<p className="font-bold text-success">
 												{formatPackage(
-													stats.avgPackage || getCompanyFallbackPackage(company)
+													stats.avgPackage ||
+														getCompanyFallbackPackage(company),
 												)}
 											</p>
 										</div>
@@ -146,72 +163,151 @@ export default function CompanySection({
 										<Table>
 											<TableHeader>
 												<TableRow>
-													<TableHead className="text-foreground">
+													<TableHead
+														className="text-foreground cursor-pointer hover:bg-muted/50"
+														onClick={() => handleSort("name")}
+													>
 														Name
+														{sortConfig?.key === "name" && (
+															<span className="ml-1">
+																{sortConfig.direction === "asc" ? "↑" : "↓"}
+															</span>
+														)}
 													</TableHead>
-													<TableHead className="text-foreground">
+													<TableHead
+														className="text-foreground cursor-pointer hover:bg-muted/50"
+														onClick={() => handleSort("enrollment_number")}
+													>
 														Enrollment
+														{sortConfig?.key === "enrollment_number" && (
+															<span className="ml-1">
+																{sortConfig.direction === "asc" ? "↑" : "↓"}
+															</span>
+														)}
 													</TableHead>
 
-													<TableHead className="text-foreground">
+													<TableHead
+														className="text-foreground cursor-pointer hover:bg-muted/50"
+														onClick={() => handleSort("role")}
+													>
 														Role
+														{sortConfig?.key === "role" && (
+															<span className="ml-1">
+																{sortConfig.direction === "asc" ? "↑" : "↓"}
+															</span>
+														)}
 													</TableHead>
-													<TableHead className="text-foreground">
+													<TableHead
+														className="text-foreground cursor-pointer hover:bg-muted/50"
+														onClick={() => handleSort("package")}
+													>
 														Package
+														{sortConfig?.key === "package" && (
+															<span className="ml-1">
+																{sortConfig.direction === "asc" ? "↑" : "↓"}
+															</span>
+														)}
 													</TableHead>
-													<TableHead className="text-foreground">
+													<TableHead
+														className="text-foreground cursor-pointer hover:bg-muted/50"
+														onClick={() => handleSort("job_location")}
+													>
 														Location
-													</TableHead>
-													<TableHead className="text-foreground">
-														Joining Date
+														{sortConfig?.key === "job_location" && (
+															<span className="ml-1">
+																{sortConfig.direction === "asc" ? "↑" : "↓"}
+															</span>
+														)}
 													</TableHead>
 												</TableRow>
 											</TableHeader>
 											<TableBody>
-												{getCompanyStudents(company).map((student, idx) => (
-													<TableRow
-														key={idx}
-														className="hover:bg-muted/50 border-border"
-													>
-														<TableCell className="text-foreground">
-															{student.name}
-														</TableCell>
-														<TableCell className="text-muted-foreground">
-															{student.enrollment_number}
-														</TableCell>
+												{(() => {
+													let displayedStudents = getCompanyStudents(company);
+													if (sortConfig) {
+														displayedStudents = [...displayedStudents].sort(
+															(a, b) => {
+																if (sortConfig.key === "package") {
+																	const placement = placements.find(
+																		(p) => p.company === company,
+																	);
+																	const pkgA = placement
+																		? (a.package ??
+																			placement.roles.find(
+																				(r) => r.role === a.role,
+																			)?.package ??
+																			Math.max(
+																				...placement.roles
+																					.filter((r) => r.package != null)
+																					.map((r) => r.package as number),
+																			))
+																		: a.package;
+																	const pkgB = placement
+																		? (b.package ??
+																			placement.roles.find(
+																				(r) => r.role === b.role,
+																			)?.package ??
+																			Math.max(
+																				...placement.roles
+																					.filter((r) => r.package != null)
+																					.map((r) => r.package as number),
+																			))
+																		: b.package;
+																	return sortConfig.direction === "asc"
+																		? (pkgA || 0) - (pkgB || 0)
+																		: (pkgB || 0) - (pkgA || 0);
+																}
+																const valA = (a as any)[sortConfig.key] || "";
+																const valB = (b as any)[sortConfig.key] || "";
+																return sortConfig.direction === "asc"
+																	? String(valA).localeCompare(String(valB))
+																	: String(valB).localeCompare(String(valA));
+															},
+														);
+													}
 
-														<TableCell className="text-muted-foreground">
-															{student.role || "N/A"}
-														</TableCell>
-														<TableCell className="text-success">
-															{(() => {
-																const placement = placements.find(
-																	(p) => p.company === company
-																);
-																const packageValue = placement
-																	? student.package ??
-																	  placement.roles.find(
-																			(r) => r.role === student.role
-																	  )?.package ??
-																	  Math.max(
-																			...placement.roles
-																				.filter((r) => r.package != null)
-																				.map((r) => r.package as number)
-																	  )
-																	: student.package;
-																return packageValue
-																	? formatPackage(packageValue)
-																	: "TBD";
-															})()}
-														</TableCell>
-														<TableCell className="text-muted-foreground">
-															{student.job_location?.join(", ") || "N/A"}
-														</TableCell>
-														<TableCell className="text-muted-foreground">
-															{formatDate(student.joining_date)}
-														</TableCell>
-													</TableRow>
-												))}
+													return displayedStudents.map((student, idx) => (
+														<TableRow
+															key={idx}
+															className="hover:bg-muted/50 border-border"
+														>
+															<TableCell className="text-foreground">
+																{student.name}
+															</TableCell>
+															<TableCell className="text-muted-foreground">
+																{student.enrollment_number}
+															</TableCell>
+
+															<TableCell className="text-muted-foreground">
+																{student.role || "N/A"}
+															</TableCell>
+															<TableCell className="text-success">
+																{(() => {
+																	const placement = placements.find(
+																		(p) => p.company === company,
+																	);
+																	const packageValue = placement
+																		? (student.package ??
+																			placement.roles.find(
+																				(r) => r.role === student.role,
+																			)?.package ??
+																			Math.max(
+																				...placement.roles
+																					.filter((r) => r.package != null)
+																					.map((r) => r.package as number),
+																			))
+																		: student.package;
+																	return packageValue
+																		? formatPackage(packageValue)
+																		: "TBD";
+																})()}
+															</TableCell>
+															<TableCell className="text-muted-foreground">
+																{student.job_location?.join(", ") || "N/A"}
+															</TableCell>
+														</TableRow>
+													));
+												})()}
 											</TableBody>
 										</Table>
 									</div>
@@ -220,17 +316,17 @@ export default function CompanySection({
 									<div className="space-y-3 sm:hidden flex-1 overflow-auto">
 										{getCompanyStudents(company).map((student, idx) => {
 											const placement = placements.find(
-												(p) => p.company === company
+												(p) => p.company === company,
 											);
 											const packageValue = placement
-												? student.package ??
-												  placement.roles.find((r) => r.role === student.role)
+												? (student.package ??
+													placement.roles.find((r) => r.role === student.role)
 														?.package ??
-												  Math.max(
+													Math.max(
 														...placement.roles
 															.filter((r) => r.package != null)
-															.map((r) => r.package as number)
-												  )
+															.map((r) => r.package as number),
+													))
 												: student.package;
 											return (
 												<div
@@ -263,11 +359,6 @@ export default function CompanySection({
 															<p className="font-semibold text-sm text-success">
 																{packageValue
 																	? formatPackage(packageValue)
-																	: "TBD"}
-															</p>
-															<p className="text-xs mt-1 text-muted-foreground">
-																{student.joining_date
-																	? formatDate(student.joining_date)
 																	: "TBD"}
 															</p>
 														</div>

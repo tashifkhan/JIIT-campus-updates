@@ -27,6 +27,22 @@ export default function ShortlistTable({
 	onToggle,
 }: Props) {
 	const [query, setQuery] = useState("");
+	const [sortConfig, setSortConfig] = useState<{
+		key: "name" | "enrollment_number";
+		direction: "asc" | "desc";
+	} | null>(null);
+
+	const handleSort = (key: "name" | "enrollment_number") => {
+		let direction: "asc" | "desc" = "asc";
+		if (
+			sortConfig &&
+			sortConfig.key === key &&
+			sortConfig.direction === "asc"
+		) {
+			direction = "desc";
+		}
+		setSortConfig({ key, direction });
+	};
 
 	// simple debounced value to avoid filtering on every keystroke
 	const [debouncedQuery, setDebouncedQuery] = useState(query);
@@ -37,14 +53,27 @@ export default function ShortlistTable({
 
 	// filter by name or enrollment number (case-insensitive)
 	const filtered = useMemo(() => {
-		if (!debouncedQuery) return students;
-		const q = debouncedQuery.toLowerCase();
-		return students.filter(
-			(s) =>
-				(s.name || "").toLowerCase().includes(q) ||
-				(s.enrollment_number || "").toLowerCase().includes(q)
-		);
-	}, [students, debouncedQuery]);
+		let result = students;
+		if (debouncedQuery) {
+			const q = debouncedQuery.toLowerCase();
+			result = students.filter(
+				(s) =>
+					(s.name || "").toLowerCase().includes(q) ||
+					(s.enrollment_number || "").toLowerCase().includes(q),
+			);
+		}
+
+		if (sortConfig) {
+			result = [...result].sort((a, b) => {
+				const valA = a[sortConfig.key] || "";
+				const valB = b[sortConfig.key] || "";
+				return sortConfig.direction === "asc"
+					? String(valA).localeCompare(String(valB))
+					: String(valB).localeCompare(String(valA));
+			});
+		}
+		return result;
+	}, [students, debouncedQuery, sortConfig]);
 	const exportCsv = () => {
 		const rows = [
 			["Name", "Enrollment Number", "Venue"],
@@ -52,7 +81,7 @@ export default function ShortlistTable({
 		];
 		const csv = rows
 			.map((r) =>
-				r.map((c) => '"' + String(c).replace(/"/g, '""') + '"').join(",")
+				r.map((c) => '"' + String(c).replace(/"/g, '""') + '"').join(","),
 			)
 			.join("\n");
 		const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -124,11 +153,27 @@ export default function ShortlistTable({
 							<table className="w-full text-sm">
 								<thead className="sticky top-0 border-b bg-muted/50 border-border">
 									<tr>
-										<th className="text-left py-3 px-4 font-semibold text-primary">
+										<th
+											className="text-left py-3 px-4 font-semibold text-primary cursor-pointer hover:bg-muted/80 transition-colors"
+											onClick={() => handleSort("name")}
+										>
 											Name
+											{sortConfig?.key === "name" && (
+												<span className="ml-1 inline-block">
+													{sortConfig.direction === "asc" ? "↑" : "↓"}
+												</span>
+											)}
 										</th>
-										<th className="text-left py-3 px-4 font-semibold text-primary">
+										<th
+											className="text-left py-3 px-4 font-semibold text-primary cursor-pointer hover:bg-muted/80 transition-colors"
+											onClick={() => handleSort("enrollment_number")}
+										>
 											Enrollment
+											{sortConfig?.key === "enrollment_number" && (
+												<span className="ml-1 inline-block">
+													{sortConfig.direction === "asc" ? "↑" : "↓"}
+												</span>
+											)}
 										</th>
 									</tr>
 								</thead>
