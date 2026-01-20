@@ -1,6 +1,7 @@
 import GithubSlugger from "github-slugger";
 
 export interface Policy {
+	_id?: string;
 	slug: string;
 	title: string;
 	description: string;

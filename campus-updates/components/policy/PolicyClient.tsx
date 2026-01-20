@@ -11,6 +11,13 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import { Policy } from "@/lib/policy";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 
 interface PolicyClientProps {
 	initialSlug?: string;
@@ -34,12 +41,31 @@ export default function PolicyClient({
 			sub: Array<{ id: string; title: string }>;
 		}>
 	>([]);
+	const [policies, setPolicies] = useState<Policy[]>([]);
+	const [currentSlug, setCurrentSlug] = useState(initialSlug);
+
+	useEffect(() => {
+		const fetchPolicies = async () => {
+			try {
+				const res = await fetch("/api/policies");
+				if (res.ok) {
+					const data = await res.json();
+					if (data.ok && data.policies) {
+						setPolicies(data.policies);
+					}
+				}
+			} catch (error) {
+				console.error("Error fetching policies list:", error);
+			}
+		};
+		fetchPolicies();
+	}, []);
 
 	useEffect(() => {
 		const fetchPolicy = async () => {
 			try {
 				setLoading(true);
-				const res = await fetch(`/api/policies/${initialSlug}`);
+				const res = await fetch(`/api/policies/${currentSlug}`);
 				if (!res.ok) {
 					throw new Error("Failed to fetch policy");
 				}
@@ -58,7 +84,7 @@ export default function PolicyClient({
 		};
 
 		fetchPolicy();
-	}, [initialSlug]);
+	}, [currentSlug]);
 
 	// Generate TOC from DOM to ensure IDs match exactly what rehype-slug generated
 	useEffect(() => {
@@ -167,6 +193,20 @@ export default function PolicyClient({
 						Back to Home
 					</Button>
 				</Link>
+				<div className="w-[300px]">
+					<Select value={currentSlug} onValueChange={setCurrentSlug}>
+						<SelectTrigger>
+							<SelectValue placeholder="Select Policy" />
+						</SelectTrigger>
+						<SelectContent>
+							{policies.map((p) => (
+								<SelectItem key={p._id} value={p.slug}>
+									{p.badge || p.title}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
 			</div>
 
 			<div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

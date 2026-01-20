@@ -132,7 +132,7 @@ export async function createPolicy(policy: Policy) {
 	if (!policy.createdAt) policy.createdAt = new Date().toISOString();
 	if (!policy.updatedAt) policy.updatedAt = new Date().toISOString();
 
-	const result = await col.insertOne(policy);
+	const result = await col.insertOne(policy as any);
 	return result;
 }
 
