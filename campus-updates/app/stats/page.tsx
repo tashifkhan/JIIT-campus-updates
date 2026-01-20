@@ -635,17 +635,6 @@ export default function StatsPage() {
 
 	return (
 		<div className="max-w-7xl mx-auto space-y-8">
-			<div className="text-center mb-8">
-				<div className="text-center sm:text-left">
-					<h1 className="text-2xl text-center lg:text-3xl font-bold mb-2 text-foreground">
-						Placement Statistics
-					</h1>
-					<p className="text-center text-muted-foreground">
-						Campus placement data and analytics
-					</p>
-				</div>
-			</div>
-
 			{/* Official placement data banner */}
 			<OfficialPlacements />
 			{/* End official placement data banner */}

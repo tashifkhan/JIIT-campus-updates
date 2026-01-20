@@ -134,7 +134,7 @@ function JobsPageContent() {
 	useEffect(() => {
 		if (jobsResp) {
 			const sorted = [...jobsResp].sort(
-				(a: Job, b: Job) => (b.createdAt || 0) - (a.createdAt || 0)
+				(a: Job, b: Job) => (b.createdAt || 0) - (a.createdAt || 0),
 			);
 			const seen = new Set<string>();
 			const deduped: Job[] = [];
@@ -158,16 +158,16 @@ function JobsPageContent() {
 	const maxPackageLpa = useMemo(
 		() =>
 			Math.ceil(
-				jobs.reduce((max, j) => Math.max(max, j.package || 0), 0) / 100000
+				jobs.reduce((max, j) => Math.max(max, j.package || 0), 0) / 100000,
 			) || 0,
-		[jobs]
+		[jobs],
 	);
 	const maxCgpa = useMemo(() => {
 		const cgpaValues = jobs.flatMap(
 			(j) =>
 				j.eligibility_marks
 					.filter((mark) => mark.level.toLowerCase() === "ug")
-					.map((mark) => mark.criteria) // UG is already in CGPA out of 10
+					.map((mark) => mark.criteria), // UG is already in CGPA out of 10
 		);
 		return Math.ceil(Math.max(...cgpaValues, 0) * 10) / 10 || 10; // Round to 1 decimal, default to 10
 	}, [jobs]);
@@ -213,7 +213,7 @@ function JobsPageContent() {
 			// CGPA filter
 			if (cgpaRange[0] > 0 || cgpaRange[1] < 10) {
 				const ugMarks = job.eligibility_marks.filter(
-					(mark) => mark.level.toLowerCase() === "ug"
+					(mark) => mark.level.toLowerCase() === "ug",
 				);
 				if (ugMarks.length > 0) {
 					const jobMinCgpa = Math.min(...ugMarks.map((mark) => mark.criteria)); // UG is already in CGPA
@@ -273,15 +273,6 @@ function JobsPageContent() {
 
 	return (
 		<div className="max-w-7xl mx-auto">
-			<div className="text-center mb-8">
-				<h1 className="text-2xl lg:text-3xl font-bold mb-2 text-foreground">
-					Job Opportunities
-				</h1>
-				<p className="text-muted-foreground">
-					Explore campus placement opportunities
-				</p>
-			</div>
-
 			<JobFilters
 				jobs={jobs}
 				values={{

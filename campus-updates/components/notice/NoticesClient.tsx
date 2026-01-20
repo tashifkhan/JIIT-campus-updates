@@ -256,25 +256,6 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 			if (ctcText) parts.push(`**CTC:** ${ctcText}`);
 			if (Array.isArray(o.job_location) && o.job_location.length)
 				parts.push(`**Location:** ${o.job_location.join(", ")}`);
-			// Joining Date and Number of Offers are now displayed in the Grid Layout,
-			// so we exclude them from the markdown body to avoid redundancy.
-			/*
-			if (o.joining_date)
-				parts.push(
-					`Joining Date: ${new Date(o.joining_date).toLocaleDateString(
-						"en-IN",
-						{
-							year: "numeric",
-							month: "short",
-							day: "numeric",
-						}
-					)}`
-				);
-			if (o.number_of_offers != null)
-				parts.push(`Number of Offers: ${o.number_of_offers}`);
-			*/
-			// Note: additional_info is removed from the API response for privacy/security.
-			// so that it doesn't render in the body and doesn't trigger deadline parsing.
 
 			const formatted_message = parts.join("\n\n");
 
@@ -467,15 +448,6 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 
 	return (
 		<div className="max-w-4xl mx-auto space-y-6">
-			<div className="text-center mb-8">
-				<h1 className="text-2xl lg:text-3xl font-bold mb-2 text-foreground">
-					Latest Updates
-				</h1>
-				<p className="text-muted-foreground">
-					Stay informed about placement activities
-				</p>
-			</div>
-
 			<Card className="mb-4 card-theme">
 				<CardContent className="p-4 lg:p-6 space-y-3">
 					<NoticesFilters

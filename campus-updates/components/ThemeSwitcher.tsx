@@ -24,13 +24,21 @@ export default function ThemeSwitcher({
 				variant="ghost"
 				size="sm"
 				onClick={toggleTheme}
-				className="w-9 h-9 p-0"
+				className="w-9 h-9 p-0 hover:bg-transparent"
 				aria-label={`Toggle theme, currently ${label}`}
 			>
 				{isLight ? (
-					<MoonIcon className="w-4 h-4" />
+					<img
+						src="/icons/night-mode.png"
+						alt="Dark mode"
+						className="w-5 h-5 object-contain"
+					/>
 				) : (
-					<SunIcon className="w-4 h-4" />
+					<img
+						src="/icons/light-mode.png"
+						alt="Light mode"
+						className="w-5 h-5 object-contain"
+					/>
 				)}
 			</Button>
 		);
@@ -41,13 +49,21 @@ export default function ThemeSwitcher({
 			variant="ghost"
 			size="sm"
 			onClick={toggleTheme}
-			className="w-full justify-center px-3 py-2 gap-3"
+			className="w-full justify-center px-3 py-2 gap-3 hover:bg-accent/50"
 			aria-label={`Toggle theme, currently ${label}`}
 		>
 			{isLight ? (
-				<SunIcon className="w-5 h-5" />
+				<img
+					src="/icons/night-mode.png"
+					alt="Dark mode"
+					className="w-5 h-5 object-contain dark:invert"
+				/>
 			) : (
-				<MoonIcon className="w-5 h-5" />
+				<img
+					src="/icons/light-mode.png"
+					alt="Light mode"
+					className="w-5 h-5 object-contain dark:invert"
+				/>
 			)}
 			<span className="text-sm font-medium">{label}</span>
 		</Button>
