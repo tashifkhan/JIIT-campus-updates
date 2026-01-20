@@ -25,7 +25,8 @@ import {
 	formatDate,
 	formatPackage,
 } from "@/lib/stats";
-import { Users } from "lucide-react";
+import { Users, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 type CompanyStats = Record<
 	string,
@@ -78,6 +79,16 @@ export default function CompanySection({
 		}
 		setSortConfig({ key, direction });
 	};
+	const [query, setQuery] = useState("");
+
+	// Reset query when modal closes or changes company
+	const handleOpenChange = (open: boolean) => {
+		setIsModalOpen(open);
+		if (!open) {
+			setSelectedCompany(null);
+			setQuery("");
+		}
+	};
 	const companiesToRender = showAllCompanies
 		? companyEntries
 		: companyEntries.slice(0, COMPANIES_LIMIT);
@@ -102,16 +113,14 @@ export default function CompanySection({
 						<Dialog
 							key={company}
 							open={isModalOpen && selectedCompany === company}
-							onOpenChange={(open) => {
-								setIsModalOpen(open);
-								if (!open) setSelectedCompany(null);
-							}}
+							onOpenChange={handleOpenChange}
 						>
 							<Card
 								className="border card-theme cursor-pointer hover:shadow-lg transition-all duration-300 active:scale-[0.98] bg-card border-border"
 								onClick={() => {
 									setSelectedCompany(company);
 									setIsModalOpen(true);
+									setQuery("");
 								}}
 							>
 								<CardContent className="p-4">
@@ -158,216 +167,243 @@ export default function CompanySection({
 										{company} - Student Details
 									</DialogTitle>
 								</DialogHeader>
-								<div className="p-4 overflow-hidden flex flex-col flex-1">
-									<div className="hidden sm:block flex-1 overflow-auto">
-										<Table>
-											<TableHeader>
-												<TableRow>
-													<TableHead
-														className="text-foreground cursor-pointer hover:bg-muted/50"
-														onClick={() => handleSort("name")}
-													>
-														Name
-														{sortConfig?.key === "name" && (
-															<span className="ml-1">
-																{sortConfig.direction === "asc" ? "↑" : "↓"}
-															</span>
-														)}
-													</TableHead>
-													<TableHead
-														className="text-foreground cursor-pointer hover:bg-muted/50"
-														onClick={() => handleSort("enrollment_number")}
-													>
-														Enrollment
-														{sortConfig?.key === "enrollment_number" && (
-															<span className="ml-1">
-																{sortConfig.direction === "asc" ? "↑" : "↓"}
-															</span>
-														)}
-													</TableHead>
+								{(() => {
+									let displayedStudents = getCompanyStudents(company);
 
-													<TableHead
-														className="text-foreground cursor-pointer hover:bg-muted/50"
-														onClick={() => handleSort("role")}
-													>
-														Role
-														{sortConfig?.key === "role" && (
-															<span className="ml-1">
-																{sortConfig.direction === "asc" ? "↑" : "↓"}
-															</span>
-														)}
-													</TableHead>
-													<TableHead
-														className="text-foreground cursor-pointer hover:bg-muted/50"
-														onClick={() => handleSort("package")}
-													>
-														Package
-														{sortConfig?.key === "package" && (
-															<span className="ml-1">
-																{sortConfig.direction === "asc" ? "↑" : "↓"}
-															</span>
-														)}
-													</TableHead>
-													<TableHead
-														className="text-foreground cursor-pointer hover:bg-muted/50"
-														onClick={() => handleSort("job_location")}
-													>
-														Location
-														{sortConfig?.key === "job_location" && (
-															<span className="ml-1">
-																{sortConfig.direction === "asc" ? "↑" : "↓"}
-															</span>
-														)}
-													</TableHead>
-												</TableRow>
-											</TableHeader>
-											<TableBody>
-												{(() => {
-													let displayedStudents = getCompanyStudents(company);
-													if (sortConfig) {
-														displayedStudents = [...displayedStudents].sort(
-															(a, b) => {
-																if (sortConfig.key === "package") {
-																	const placement = placements.find(
-																		(p) => p.company === company,
-																	);
-																	const pkgA = placement
-																		? (a.package ??
-																			placement.roles.find(
-																				(r) => r.role === a.role,
-																			)?.package ??
-																			Math.max(
-																				...placement.roles
-																					.filter((r) => r.package != null)
-																					.map((r) => r.package as number),
-																			))
-																		: a.package;
-																	const pkgB = placement
-																		? (b.package ??
-																			placement.roles.find(
-																				(r) => r.role === b.role,
-																			)?.package ??
-																			Math.max(
-																				...placement.roles
-																					.filter((r) => r.package != null)
-																					.map((r) => r.package as number),
-																			))
-																		: b.package;
-																	return sortConfig.direction === "asc"
-																		? (pkgA || 0) - (pkgB || 0)
-																		: (pkgB || 0) - (pkgA || 0);
-																}
-																const valA = (a as any)[sortConfig.key] || "";
-																const valB = (b as any)[sortConfig.key] || "";
-																return sortConfig.direction === "asc"
-																	? String(valA).localeCompare(String(valB))
-																	: String(valB).localeCompare(String(valA));
-															},
-														);
-													}
+									if (query) {
+										const q = query.toLowerCase();
+										displayedStudents = displayedStudents.filter(
+											(s) =>
+												s.name.toLowerCase().includes(q) ||
+												(s.enrollment_number || "").toLowerCase().includes(q) ||
+												(s.role || "").toLowerCase().includes(q) ||
+												(s.job_location || [])
+													.join(" ")
+													.toLowerCase()
+													.includes(q),
+										);
+									}
 
-													return displayedStudents.map((student, idx) => (
-														<TableRow
-															key={idx}
-															className="hover:bg-muted/50 border-border"
-														>
-															<TableCell className="text-foreground">
-																{student.name}
-															</TableCell>
-															<TableCell className="text-muted-foreground">
-																{student.enrollment_number}
-															</TableCell>
+									if (sortConfig) {
+										displayedStudents = [...displayedStudents].sort((a, b) => {
+											if (sortConfig.key === "package") {
+												const placement = placements.find(
+													(p) => p.company === company,
+												);
+												const pkgA = placement
+													? (a.package ??
+														placement.roles.find((r) => r.role === a.role)
+															?.package ??
+														Math.max(
+															...placement.roles
+																.filter((r) => r.package != null)
+																.map((r) => r.package as number),
+														))
+													: a.package;
+												const pkgB = placement
+													? (b.package ??
+														placement.roles.find((r) => r.role === b.role)
+															?.package ??
+														Math.max(
+															...placement.roles
+																.filter((r) => r.package != null)
+																.map((r) => r.package as number),
+														))
+													: b.package;
+												return sortConfig.direction === "asc"
+													? (pkgA || 0) - (pkgB || 0)
+													: (pkgB || 0) - (pkgA || 0);
+											}
+											const valA = (a as any)[sortConfig.key] || "";
+											const valB = (b as any)[sortConfig.key] || "";
+											return sortConfig.direction === "asc"
+												? String(valA).localeCompare(String(valB))
+												: String(valB).localeCompare(String(valA));
+										});
+									}
 
-															<TableCell className="text-muted-foreground">
-																{student.role || "N/A"}
-															</TableCell>
-															<TableCell className="text-success">
-																{(() => {
-																	const placement = placements.find(
-																		(p) => p.company === company,
-																	);
-																	const packageValue = placement
-																		? (student.package ??
-																			placement.roles.find(
-																				(r) => r.role === student.role,
-																			)?.package ??
-																			Math.max(
-																				...placement.roles
-																					.filter((r) => r.package != null)
-																					.map((r) => r.package as number),
-																			))
-																		: student.package;
-																	return packageValue
-																		? formatPackage(packageValue)
-																		: "TBD";
-																})()}
-															</TableCell>
-															<TableCell className="text-muted-foreground">
-																{student.job_location?.join(", ") || "N/A"}
-															</TableCell>
-														</TableRow>
-													));
-												})()}
-											</TableBody>
-										</Table>
-									</div>
-
-									{/* Mobile */}
-									<div className="space-y-3 sm:hidden flex-1 overflow-auto">
-										{getCompanyStudents(company).map((student, idx) => {
-											const placement = placements.find(
-												(p) => p.company === company,
-											);
-											const packageValue = placement
-												? (student.package ??
-													placement.roles.find((r) => r.role === student.role)
-														?.package ??
-													Math.max(
-														...placement.roles
-															.filter((r) => r.package != null)
-															.map((r) => r.package as number),
-													))
-												: student.package;
-											return (
-												<div
-													key={idx}
-													className="border rounded-lg p-3 card-theme bg-card border-border"
-												>
-													<div className="flex items-start justify-between">
-														<div className="flex-1">
-															<p className="font-semibold text-foreground">
-																{student.name}
-															</p>
-															<p className="text-xs text-muted-foreground">
-																{student.enrollment_number}
-															</p>
-
-															<div className="text-xs mt-2 text-muted-foreground">
-																<strong className="text-muted-foreground">
-																	Role:{" "}
-																</strong>
-																{student.role || "N/A"}
-															</div>
-															<div className="text-xs mt-1 text-muted-foreground">
-																<strong className="text-muted-foreground">
-																	Location:{" "}
-																</strong>
-																{student.job_location?.join(", ") || "N/A"}
-															</div>
-														</div>
-														<div className="ml-4 text-right">
-															<p className="font-semibold text-sm text-success">
-																{packageValue
-																	? formatPackage(packageValue)
-																	: "TBD"}
-															</p>
-														</div>
+									return (
+										<div className="p-4 overflow-hidden flex flex-col flex-1">
+											<div className="mb-4">
+												<div className="relative">
+													<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+														<Search className="h-4 w-4 text-muted-foreground" />
 													</div>
+													<Input
+														placeholder="Search by name, role, location..."
+														value={query}
+														onChange={(e) => setQuery(e.target.value)}
+														className="pl-10"
+													/>
 												</div>
-											);
-										})}
-									</div>
-								</div>
+											</div>
+											<div className="hidden sm:block flex-1 overflow-auto">
+												<Table>
+													<TableHeader>
+														<TableRow>
+															<TableHead
+																className="text-foreground cursor-pointer hover:bg-muted/50"
+																onClick={() => handleSort("name")}
+															>
+																Name
+																{sortConfig?.key === "name" && (
+																	<span className="ml-1">
+																		{sortConfig.direction === "asc" ? "↑" : "↓"}
+																	</span>
+																)}
+															</TableHead>
+															<TableHead
+																className="text-foreground cursor-pointer hover:bg-muted/50"
+																onClick={() => handleSort("enrollment_number")}
+															>
+																Enrollment
+																{sortConfig?.key === "enrollment_number" && (
+																	<span className="ml-1">
+																		{sortConfig.direction === "asc" ? "↑" : "↓"}
+																	</span>
+																)}
+															</TableHead>
+
+															<TableHead
+																className="text-foreground cursor-pointer hover:bg-muted/50"
+																onClick={() => handleSort("role")}
+															>
+																Role
+																{sortConfig?.key === "role" && (
+																	<span className="ml-1">
+																		{sortConfig.direction === "asc" ? "↑" : "↓"}
+																	</span>
+																)}
+															</TableHead>
+															<TableHead
+																className="text-foreground cursor-pointer hover:bg-muted/50"
+																onClick={() => handleSort("package")}
+															>
+																Package
+																{sortConfig?.key === "package" && (
+																	<span className="ml-1">
+																		{sortConfig.direction === "asc" ? "↑" : "↓"}
+																	</span>
+																)}
+															</TableHead>
+															<TableHead
+																className="text-foreground cursor-pointer hover:bg-muted/50"
+																onClick={() => handleSort("job_location")}
+															>
+																Location
+																{sortConfig?.key === "job_location" && (
+																	<span className="ml-1">
+																		{sortConfig.direction === "asc" ? "↑" : "↓"}
+																	</span>
+																)}
+															</TableHead>
+														</TableRow>
+													</TableHeader>
+													<TableBody>
+														{displayedStudents.map((student, idx) => (
+															<TableRow
+																key={idx}
+																className="hover:bg-muted/50 border-border"
+															>
+																<TableCell className="text-foreground">
+																	{student.name}
+																</TableCell>
+																<TableCell className="text-muted-foreground">
+																	{student.enrollment_number}
+																</TableCell>
+
+																<TableCell className="text-muted-foreground">
+																	{student.role || "N/A"}
+																</TableCell>
+																<TableCell className="text-success">
+																	{(() => {
+																		const placement = placements.find(
+																			(p) => p.company === company,
+																		);
+																		const packageValue = placement
+																			? (student.package ??
+																				placement.roles.find(
+																					(r) => r.role === student.role,
+																				)?.package ??
+																				Math.max(
+																					...placement.roles
+																						.filter((r) => r.package != null)
+																						.map((r) => r.package as number),
+																				))
+																			: student.package;
+																		return packageValue
+																			? formatPackage(packageValue)
+																			: "TBD";
+																	})()}
+																</TableCell>
+																<TableCell className="text-muted-foreground">
+																	{student.job_location?.join(", ") || "N/A"}
+																</TableCell>
+															</TableRow>
+														))}
+													</TableBody>
+												</Table>
+											</div>
+
+											{/* Mobile */}
+											<div className="space-y-3 sm:hidden flex-1 overflow-auto">
+												{displayedStudents.map((student, idx) => {
+													const placement = placements.find(
+														(p) => p.company === company,
+													);
+													const packageValue = placement
+														? (student.package ??
+															placement.roles.find(
+																(r) => r.role === student.role,
+															)?.package ??
+															Math.max(
+																...placement.roles
+																	.filter((r) => r.package != null)
+																	.map((r) => r.package as number),
+															))
+														: student.package;
+													return (
+														<div
+															key={idx}
+															className="border rounded-lg p-3 card-theme bg-card border-border"
+														>
+															<div className="flex items-start justify-between">
+																<div className="flex-1">
+																	<p className="font-semibold text-foreground">
+																		{student.name}
+																	</p>
+																	<p className="text-xs text-muted-foreground">
+																		{student.enrollment_number}
+																	</p>
+
+																	<div className="text-xs mt-2 text-muted-foreground">
+																		<strong className="text-muted-foreground">
+																			Role:{" "}
+																		</strong>
+																		{student.role || "N/A"}
+																	</div>
+																	<div className="text-xs mt-1 text-muted-foreground">
+																		<strong className="text-muted-foreground">
+																			Location:{" "}
+																		</strong>
+																		{student.job_location?.join(", ") || "N/A"}
+																	</div>
+																</div>
+																<div className="ml-4 text-right">
+																	<p className="font-semibold text-sm text-success">
+																		{packageValue
+																			? formatPackage(packageValue)
+																			: "TBD"}
+																	</p>
+																</div>
+															</div>
+														</div>
+													);
+												})}
+											</div>
+										</div>
+									);
+								})()}
 							</DialogContent>
 						</Dialog>
 					))}

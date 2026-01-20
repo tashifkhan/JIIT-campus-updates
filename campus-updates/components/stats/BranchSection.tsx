@@ -28,7 +28,9 @@ import {
 	Trophy,
 	Target,
 	TrendingUp,
+	Search,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import type { Placement, StudentWithPlacement } from "@/lib/stats";
 import { formatDate, formatPackage, formatPercent } from "@/lib/stats";
 
@@ -171,6 +173,8 @@ export default function BranchSection({
 		direction: "asc" | "desc";
 	} | null>(null);
 
+	const [query, setQuery] = useState("");
+
 	const handleSort = (key: string) => {
 		let direction: "asc" | "desc" = "asc";
 		if (
@@ -181,6 +185,15 @@ export default function BranchSection({
 			direction = "desc";
 		}
 		setSortConfig({ key, direction });
+	};
+
+	// Reset query when modal closes or changes branch
+	const handleOpenChange = (open: boolean) => {
+		setIsBranchModalOpen(open);
+		if (!open) {
+			setSelectedBranch(null);
+			setQuery("");
+		}
 	};
 
 	return (
@@ -218,10 +231,7 @@ export default function BranchSection({
 										<Dialog
 											key={branch}
 											open={isBranchModalOpen && selectedBranch === branch}
-											onOpenChange={(open) => {
-												setIsBranchModalOpen(open);
-												if (!open) setSelectedBranch(null);
-											}}
+											onOpenChange={handleOpenChange}
 										>
 											<BranchCard
 												branch={branch}
@@ -232,6 +242,7 @@ export default function BranchSection({
 												onClick={() => {
 													setSelectedBranch(branch);
 													setIsBranchModalOpen(true);
+													setQuery("");
 												}}
 											/>
 
@@ -543,19 +554,29 @@ export default function BranchSection({
 														);
 													})()}
 
-													{/* Student list */}
 													<div className="flex-1">
-														<div className="flex items-center justify-between mb-4">
+														<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
 															<h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
 																<Users className="w-5 h-5 text-primary" />
 																Student Details
+																<Badge
+																	variant="outline"
+																	className="text-sm border-border text-foreground ml-2"
+																>
+																	{getBranchStudents(branch).length} offers
+																</Badge>
 															</h3>
-															<Badge
-																variant="outline"
-																className="text-sm border-border text-foreground"
-															>
-																{getBranchStudents(branch).length} offers
-															</Badge>
+															<div className="relative w-full sm:w-64">
+																<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+																	<Search className="h-4 w-4 text-muted-foreground" />
+																</div>
+																<Input
+																	placeholder="Search by name, company..."
+																	value={query}
+																	onChange={(e) => setQuery(e.target.value)}
+																	className="pl-10 h-9"
+																/>
+															</div>
 														</div>
 
 														<div className="">
@@ -639,6 +660,25 @@ export default function BranchSection({
 																			let displayedStudents =
 																				getBranchStudents(branch);
 
+																			if (query) {
+																				const q = query.toLowerCase();
+																				displayedStudents =
+																					displayedStudents.filter(
+																						(s) =>
+																							s.name
+																								.toLowerCase()
+																								.includes(q) ||
+																							(s.enrollment_number || "")
+																								.toLowerCase()
+																								.includes(q) ||
+																							s.company
+																								.toLowerCase()
+																								.includes(q) ||
+																							(s.role || "")
+																								.toLowerCase()
+																								.includes(q),
+																					);
+																			}
 																			if (sortConfig) {
 																				displayedStudents = [
 																					...displayedStudents,
@@ -728,59 +768,79 @@ export default function BranchSection({
 
 															{/* Mobile list */}
 															<div className="space-y-3 sm:hidden">
-																{getBranchStudents(branch).map(
-																	(student, idx) => (
-																		<div
-																			key={idx}
-																			className="border rounded-xl p-4 card-theme bg-card border-border"
-																		>
-																			<div className="flex items-start justify-between mb-3">
-																				<div className="flex-1">
-																					<h4 className="font-bold text-base text-foreground">
-																						{student.name}
-																					</h4>
-																					<p className="text-sm font-mono text-muted-foreground">
-																						{student.enrollment_number}
-																					</p>
-																				</div>
-																				<div className="text-right">
-																					<div className="text-lg font-bold text-green-600">
-																						{(() => {
-																							const plc =
-																								student.placement ||
-																								(placements.find(
-																									(p) =>
-																										p.company ===
-																										student.company,
-																								) as Placement);
-																							const pkg = plc
-																								? plc.roles && plc.roles.length
-																									? pkgFrom(student, plc)
-																									: null
-																								: null;
-																							return pkg
-																								? formatPackage(pkg)
-																								: "TBD";
-																						})()}
+																{(() => {
+																	let displayedStudents =
+																		getBranchStudents(branch);
+																	if (query) {
+																		const q = query.toLowerCase();
+																		displayedStudents =
+																			displayedStudents.filter(
+																				(s) =>
+																					s.name.toLowerCase().includes(q) ||
+																					(s.enrollment_number || "")
+																						.toLowerCase()
+																						.includes(q) ||
+																					s.company.toLowerCase().includes(q) ||
+																					(s.role || "")
+																						.toLowerCase()
+																						.includes(q),
+																			);
+																	}
+																	return displayedStudents.map(
+																		(student, idx) => (
+																			<div
+																				key={idx}
+																				className="border rounded-xl p-4 card-theme bg-card border-border"
+																			>
+																				<div className="flex items-start justify-between mb-3">
+																					<div className="flex-1">
+																						<h4 className="font-bold text-base text-foreground">
+																							{student.name}
+																						</h4>
+																						<p className="text-sm font-mono text-muted-foreground">
+																							{student.enrollment_number}
+																						</p>
+																					</div>
+																					<div className="text-right">
+																						<div className="text-lg font-bold text-green-600">
+																							{(() => {
+																								const plc =
+																									student.placement ||
+																									(placements.find(
+																										(p) =>
+																											p.company ===
+																											student.company,
+																									) as Placement);
+																								const pkg = plc
+																									? plc.roles &&
+																										plc.roles.length
+																										? pkgFrom(student, plc)
+																										: null
+																									: null;
+																								return pkg
+																									? formatPackage(pkg)
+																									: "TBD";
+																							})()}
+																						</div>
 																					</div>
 																				</div>
-																			</div>
-																			<div className="space-y-2 text-sm">
-																				<div className="flex items-center gap-2">
-																					<Building className="w-4 h-4 text-primary" />
-																					<span className="font-semibold text-foreground">
-																						{student.company}
-																					</span>
+																				<div className="space-y-2 text-sm">
+																					<div className="flex items-center gap-2">
+																						<Building className="w-4 h-4 text-primary" />
+																						<span className="font-semibold text-foreground">
+																							{student.company}
+																						</span>
+																					</div>
+																					<div className="flex items-center gap-2 text-muted-foreground">
+																						<BriefcaseIcon className="w-4 h-4" />
+																						<span>{student.role || "N/A"}</span>
+																					</div>
+																					{/* Joined date removed for mobile as well */}
 																				</div>
-																				<div className="flex items-center gap-2 text-muted-foreground">
-																					<BriefcaseIcon className="w-4 h-4" />
-																					<span>{student.role || "N/A"}</span>
-																				</div>
-																				{/* Joined date removed for mobile as well */}
 																			</div>
-																		</div>
-																	),
-																)}
+																		),
+																	);
+																})()}
 															</div>
 														</div>
 													</div>
