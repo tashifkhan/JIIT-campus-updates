@@ -16,6 +16,9 @@ import {
 	IndianRupeeIcon,
 	BellIcon,
 	ArrowRightIcon,
+	TrophyIcon,
+	TimerIcon,
+	VideoIcon,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -46,6 +49,10 @@ const categoryIcons: Record<string, any> = {
 	shortlisting: TrendingUpIcon,
 	update: CalendarIcon,
 	"placement offer": IndianRupeeIcon,
+	"internship noc": UsersIcon,
+	hackathon: TrophyIcon,
+	reminder: TimerIcon,
+	webinar: VideoIcon,
 };
 
 type Props = {
@@ -177,7 +184,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 					id: n.id ?? id, // Fallback to Mongo ID if 'id' field is missing
 					title: n.title ?? undefined,
 					content: n.content ?? undefined,
-					author: n.author ?? undefined,
+					author: n.author ? n.author.replace(/\s*<.*?>/g, "") : undefined,
 					createdAt,
 					updatedAt,
 					category: n.category ?? null,
@@ -207,7 +214,8 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 				category: (n.category || "")
 					.toLowerCase()
 					.trim()
-					.replace(/^\[?shortlist(ing)?\]?$/, "shortlisting"),
+					.replace(/^\[?shortlist(ing)?\]?$/, "shortlisting")
+					.replace("internship_noc", "internship noc"),
 			}));
 
 		const normalizedOffers = (rawOffers || []).map((o) => {
@@ -394,7 +402,9 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 				return false;
 			if (onlyShortlisted) {
 				const isShortlistCategory =
-					n.category === "shortlisting" || n.category === "placement offer";
+					n.category === "shortlisting" ||
+					n.category === "placement offer" ||
+					n.category === "internship noc";
 				const parsedCount = isShortlistCategory
 					? parseShortlistFromText(n.formatted_message).length
 					: 0;
@@ -493,7 +503,8 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 				{currentNotices.map((notice) => {
 					const IconComponent = categoryIcons[notice.category] ?? BellIcon;
 					const parsed =
-						notice.category === "shortlisting" &&
+						(notice.category === "shortlisting" ||
+							notice.category === "internship noc") &&
 						(!notice.shortlisted_students ||
 							notice.shortlisted_students.length === 0)
 							? parseShortlistFromText(notice.formatted_message)
@@ -532,7 +543,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 									<div className="flex items-center gap-2">
 										<Badge
 											variant="outline"
-											className="px-3 py-1 rounded-full bg-primary/10 text-primary border-primary/20"
+											className="px-3 py-1 rounded-full bg-background text-primary border-primary/20"
 										>
 											<IconComponent className="w-3 h-3 mr-2" />
 											{notice.category
@@ -593,7 +604,10 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 							<CardContent className="pt-0">
 								{notice.category === "update" ||
 								notice.category === "job posting" ||
-								notice.category === "placement offer" ? (
+								notice.category === "placement offer" ||
+								notice.category === "hackathon" ||
+								notice.category === "reminder" ||
+								notice.category === "webinar" ? (
 									<div className="space-y-4">
 										{/* Title */}
 										{parsedMessage.title && (
@@ -821,7 +835,8 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 											</div>
 										)}
 									</div>
-								) : notice.category === "shortlisting" ? (
+								) : notice.category === "shortlisting" ||
+								  notice.category === "internship noc" ? (
 									<div className="space-y-4">
 										{/* Shortlisting: compact header with company/role/ctc */}
 										{parsedMessage.title && (
