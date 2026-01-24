@@ -12,10 +12,9 @@ import {
 	HomeIcon,
 	TrendingUpIcon,
 	CalendarIcon,
-	BellIcon,
+	// BellIcon, // Removed as we use png now
 	MenuIcon,
 	XIcon,
-	WrenchIcon,
 	MessageSquareIcon,
 	CoffeeIcon,
 	WifiIcon,
@@ -25,49 +24,20 @@ import FloatingNav from "./FloatingNav";
 import FloatingActionMenu from "./FloatingActionMenu";
 
 const navigation = [
-	{ name: "Updates", href: "/", icon: HomeIcon },
-	{ name: "Policy", href: "/policy", icon: BookOpenIcon },
-	{ name: "Jobs", href: "/jobs", icon: BriefcaseIcon },
-	{ name: "Stats", href: "/stats", icon: TrendingUpIcon },
+	{ name: "Updates", href: "/", icon: "/icons/home.png" },
+	{ name: "Policy", href: "/policy", icon: "/icons/book.png" },
+	{ name: "Jobs", href: "/jobs", icon: "/icons/briefcase.png" },
+	{ name: "Stats", href: "/stats", icon: "/icons/diagram.png" },
 	// { name: "Campus", href: "/campus", icon: CalendarIcon },
 ];
 
-const tools = [
-	// {
-	//  name: "Placement Updates PWA",
-	//  href: "https://jiit-placement-updates.tashif.codes",
-	// },
-	{
-		name: "Placement Bot",
-		href: "https://t.me/SupersetNotificationBot",
-		icon: MessageSquareIcon,
-	},
-	{
-		name: "Timetable",
-		href: "https://jiit-timetable.tashif.codes",
-		icon: CalendarIcon,
-	},
-	{
-		name: "Mess Menu",
-		href: "https://jiit-timetable.tashif.codes/mess-menu",
-		icon: CoffeeIcon,
-	},
-	{
-		name: "Wifi Auto Login",
-		href: "https://sophos-autologin.tashif.codes",
-		icon: WifiIcon,
-	},
-	{
-		name: "JPortal",
-		href: "https://jportal.tashif.codes",
-		icon: BookOpenIcon,
-	},
-];
+/* Tools removed */
 
 export default function Layout({ children }: { children: React.ReactNode }) {
 	const pathname = usePathname();
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-	const [toolsOpen, setToolsOpen] = useState(false);
+
+	// const [toolsOpen, setToolsOpen] = useState(false);
 
 	return (
 		<div
@@ -97,7 +67,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 								className="p-2 rounded-full transition-colors hover:bg-primary hover:text-accent-foreground text-foreground"
 								aria-label="Policy"
 							>
-								<BookOpenIcon className="w-4 h-5" />
+								<img
+									src="/icons/book.png"
+									alt="Policy"
+									className="w-4 h-5 object-contain dark:invert"
+								/>
 							</div>
 						</Link>
 
@@ -107,7 +81,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 							rel="noopener noreferrer"
 							className="px-3 py-1 rounded-2xl text-sm font-medium hover-theme bg-accent text-card"
 						>
-							<BellIcon className="w-5 h-5" />
+							<img
+								src="/icons/bell.png"
+								alt="Notifications"
+								className="w-5 h-5 object-contain dark:invert"
+							/>
 						</Link>
 					</div>
 				</div>
@@ -119,7 +97,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 							{navigation
 								.filter((item) => item.href !== "/policy")
 								.map((item) => {
-									const Icon = item.icon;
 									const isActive = pathname === item.href;
 									return (
 										<Link
@@ -130,10 +107,24 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 												"flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors border",
 												isActive
 													? "border-theme bg-primary text-accent-foreground border-accent"
-													: "border-transparent hover-theme text-foreground hover:bg-accent"
+													: "border-transparent hover-theme text-foreground hover:bg-accent",
 											)}
 										>
-											<Icon className="w-4 h-4 mr-3" />
+											{typeof item.icon === "string" ? (
+												<img
+													src={item.icon}
+													alt={item.name}
+													className={cn(
+														"w-4 h-4 mr-3 object-contain dark:invert",
+														isActive ? "invert-0 dark:invert-0" : "",
+													)}
+												/>
+											) : (
+												(() => {
+													const Icon = item.icon as any;
+													return <Icon className="w-4 h-4 mr-3" />;
+												})()
+											)}
 											{item.name}
 										</Link>
 									);
@@ -174,7 +165,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
 						<nav className="flex-1 px-4 py-6 space-y-2 overflow-auto min-h-0">
 							{navigation.map((item) => {
-								const Icon = item.icon;
 								const isActive = pathname === item.href;
 								return (
 									<Link
@@ -184,55 +174,29 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 											"flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors border",
 											isActive
 												? "border-theme bg-primary text-primary-foreground border-accent"
-												: "border-transparent hover-theme text-foreground"
+												: "border-transparent hover-theme text-foreground",
 										)}
 									>
-										<Icon className="w-5 h-5 mr-3" />
+										{typeof item.icon === "string" ? (
+											<img
+												src={item.icon}
+												alt={item.name}
+												className={cn(
+													"w-5 h-5 mr-3 object-contain dark:invert",
+
+													isActive ? "invert-0 dark:invert-0" : "",
+												)}
+											/>
+										) : (
+											(() => {
+												const Icon = item.icon as any;
+												return <Icon className="w-5 h-5 mr-3" />;
+											})()
+										)}
 										{item.name}
 									</Link>
 								);
 							})}
-
-							{/* Tools button (desktop) */}
-							<div className="">
-								<button
-									onClick={() => setToolsOpen(!toolsOpen)}
-									className={cn(
-										"w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors border hover-theme",
-										toolsOpen
-											? "border-theme bg-primary text-primary-foreground border-accent"
-											: "border-transparent text-foreground"
-									)}
-								>
-									<WrenchIcon className="w-5 h-5 mr-3" />
-									Tools
-								</button>
-							</div>
-
-							{/* Tools popup panel inside sidebar (desktop only) */}
-							{toolsOpen && (
-								<div className="mt-3">
-									<div className="rounded-lg border p-3 bg-card border-border">
-										<div className="space-y-1">
-											{tools.map((t) => {
-												const ToolIcon = t.icon;
-												return (
-													<Link
-														key={t.href}
-														href={t.href}
-														target="_blank"
-														rel="noopener noreferrer"
-														className="flex items-center px-3 py-2 rounded hover-theme text-sm text-foreground"
-													>
-														{ToolIcon && <ToolIcon className="w-4 h-4 mr-3" />}
-														<span className="truncate">{t.name}</span>
-													</Link>
-												);
-											})}
-										</div>
-									</div>
-								</div>
-							)}
 						</nav>
 						{/* Bottom area for desktop: theme switcher */}
 						<div className="px-4 py-4 border-t border-border mt-auto">
@@ -251,42 +215,29 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
 			{/* Mobile Floating Navigation (uses theme variables from ThemeProvider) */}
 			<FloatingNav
-				items={[
-					...navigation
-						.filter((item) => item.href !== "/policy")
-						.map((n, idx) => {
-							const Icon = n.icon as any;
-							return {
-								id: idx,
-								href: n.href,
-								icon: <Icon className="w-5 h-5 mb-1" />,
-								label: n.name,
-							};
-						}),
-					{
-						id: 999,
-						icon: <WrenchIcon className="w-5 h-5 mb-1" />,
-						label: "Tools",
-						onClick: () => setToolsOpen(!toolsOpen),
-					},
-				]}
+				items={navigation.map((n, idx) => {
+					return {
+						id: idx,
+						href: n.href,
+						icon:
+							typeof n.icon === "string" ? (
+								<img
+									src={n.icon}
+									alt={n.name}
+									className="w-5 h-5 mb-1 object-contain dark:invert"
+								/>
+							) : (
+								(() => {
+									const Icon = n.icon as any;
+									return <Icon className="w-5 h-5 mb-1" />;
+								})()
+							),
+						label: n.name,
+					};
+				})}
 			/>
 
-			{/* Mobile Tools Menu (Centered Popup) */}
-			<div className="lg:hidden">
-				<FloatingActionMenu
-					isOpen={toolsOpen}
-					onClose={() => setToolsOpen(false)}
-					options={tools.map((t) => {
-						const Icon = t.icon;
-						return {
-							label: t.name,
-							onClick: () => window.open(t.href, "_blank"),
-							Icon: Icon ? <Icon className="w-5 h-5" /> : undefined,
-						};
-					})}
-				/>
-			</div>
+			{/* Mobile Tools Menu (Removed) */}
 
 			{/* Bottom padding for mobile nav to avoid content overlap */}
 			<div className="lg:hidden h-24"></div>

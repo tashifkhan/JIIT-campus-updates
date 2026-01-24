@@ -24,20 +24,20 @@ export default function ThemeSwitcher({
 				variant="ghost"
 				size="sm"
 				onClick={toggleTheme}
-				className="w-9 h-9 p-0 hover:bg-transparent"
+				className="w-9 h-9 p-0 hover:bg-transparent rounded-full"
 				aria-label={`Toggle theme, currently ${label}`}
 			>
 				{isLight ? (
 					<img
 						src="/icons/night-mode.png"
 						alt="Dark mode"
-						className="w-5 h-5 object-contain"
+						className="w-5 h-5 object-contain dark:invert"
 					/>
 				) : (
 					<img
 						src="/icons/light-mode.png"
 						alt="Light mode"
-						className="w-5 h-5 object-contain"
+						className="w-5 h-5 object-contain dark:invert"
 					/>
 				)}
 			</Button>
