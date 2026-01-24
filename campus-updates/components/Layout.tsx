@@ -48,18 +48,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 					</div>
 					<div className="flex items-center gap-2">
 						<ThemeSwitcher compact />
-						<Link href="/policy" className="pr-2">
-							<div
-								className="p-2 rounded-full transition-colors hover:bg-primary hover:text-accent-foreground text-foreground"
-								aria-label="Policy"
-							>
-								<img
-									src="/icons/book.png"
-									alt="Policy"
-									className="w-4 h-5 object-contain dark:invert"
-								/>
-							</div>
-						</Link>
 
 						<Link
 							href="https://t.me/SupersetNotificationBot"
