@@ -126,7 +126,7 @@ export default function CampusPage() {
 						Campus Events Coming Soon!
 					</h2>
 					<p className="mb-4" style={{ color: "var(--label-color)" }}>
-						We&apos;re working on bringing you the latest updates about campus
+						We&apos;re working on bringing you the latest news about campus
 						events, workshops, seminars, and activities from all student
 						societies.
 					</p>
@@ -271,7 +271,7 @@ export default function CampusPage() {
 								style={{ color: "var(--accent-color)" }}
 							/>
 							<p className="font-medium" style={{ color: "var(--text-color)" }}>
-								Society Updates
+								Society News
 							</p>
 							<p
 								className="text-xs mt-1"

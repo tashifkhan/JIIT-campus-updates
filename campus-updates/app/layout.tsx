@@ -20,17 +20,17 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
 	title: {
-		default: "JIIT Placement Updates",
-		template: "%s - JIIT Placement Updates",
+		default: "JIIT Placements",
+		template: "%s - JIIT Placements",
 	},
-	description: "Campus placement and updates portal",
-	applicationName: "JIIT Placement Updates",
+	description: "Campus placement portal",
+	applicationName: "JIIT Placements",
 	metadataBase: new URL("https://jiit-placement-updates.tashif.codes"),
 	openGraph: {
-		title: "JIIT Placement Updates",
-		description: "Campus placement and updates portal",
+		title: "JIIT Placements",
+		description: "Campus placement portal",
 		url: "https://jiit-placement-updates.tashif.codes",
-		siteName: "JIIT Placement Updates",
+		siteName: "JIIT Placements",
 		images: [
 			{
 				url: "https://jiit-placement-updates.tashif.codes/logo.png",
@@ -41,8 +41,8 @@ export const metadata: Metadata = {
 		type: "website",
 	},
 	twitter: {
-		title: "JIIT Placement Updates",
-		description: "Campus placement and updates portal",
+		title: "JIIT Placements",
+		description: "Campus placement portal",
 		card: "summary_large_image",
 		site: "",
 	},
@@ -87,7 +87,7 @@ export default function RootLayout({
 							__html: JSON.stringify({
 								"@context": "https://schema.org",
 								"@type": "WebSite",
-								name: "JIIT Placement Updates",
+								name: "JIIT Placements",
 								url: "https://jiit-placement-updates.tashif.codes",
 								potentialAction: {
 									"@type": "SearchAction",

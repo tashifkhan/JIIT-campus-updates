@@ -364,10 +364,9 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 	// Filters
 	const [query, setQuery] = useState("");
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-	const [onlyShortlisted, setOnlyShortlisted] = useState(false);
 	// Pagination
 	const [currentPage, setCurrentPage] = useState(1);
-	const [itemsPerPage, setItemsPerPage] = useState(20);
+	const itemsPerPage = 20;
 
 	const allCategories = useMemo(
 		() => Array.from(new Set(notices.map((n) => n.category))).sort(),
@@ -381,17 +380,6 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 		return notices.filter((n) => {
 			if (selectedCategories.length && !selectedCategories.includes(n.category))
 				return false;
-			if (onlyShortlisted) {
-				const isShortlistCategory =
-					n.category === "shortlisting" ||
-					n.category === "placement offer" ||
-					n.category === "internship noc";
-				const parsedCount = isShortlistCategory
-					? parseShortlistFromText(n.formatted_message).length
-					: 0;
-				const providedCount = n.shortlisted_students?.length ?? 0;
-				if (providedCount + parsedCount === 0) return false;
-			}
 			if (q) {
 				const hay = `${n.formatted_message} ${n.matched_job?.company ?? ""} ${
 					n.matched_job?.job_profile ?? ""
@@ -400,7 +388,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 			}
 			return true;
 		});
-	}, [notices, query, selectedCategories, onlyShortlisted]);
+	}, [notices, query, selectedCategories]);
 
 	// Pagination
 	const totalPages = Math.ceil(filteredNotices.length / itemsPerPage);
@@ -413,7 +401,7 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 
 	useEffect(() => {
 		setCurrentPage(1);
-	}, [query, selectedCategories, onlyShortlisted, itemsPerPage]);
+	}, [query, selectedCategories]);
 
 	// Scroll to top when page changes
 	// On desktop (lg+), the scrollable container is the <main> element, not window
@@ -456,10 +444,6 @@ export default function NoticesClient({ hideShortPlacements = false }: Props) {
 						allCategories={allCategories}
 						selectedCategories={selectedCategories}
 						setSelectedCategories={setSelectedCategories}
-						onlyShortlisted={onlyShortlisted}
-						setOnlyShortlisted={setOnlyShortlisted}
-						itemsPerPage={itemsPerPage}
-						setItemsPerPage={setItemsPerPage}
 						resultsCount={filteredNotices.length}
 					/>
 				</CardContent>

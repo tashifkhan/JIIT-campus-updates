@@ -20,14 +20,14 @@ export default function PWAInstallPrompt() {
 
 		window.addEventListener(
 			"beforeinstallprompt",
-			handleBeforeInstallPrompt as any
+			handleBeforeInstallPrompt as any,
 		);
 		window.addEventListener("appinstalled", handleAppInstalled as any);
 
 		return () => {
 			window.removeEventListener(
 				"beforeinstallprompt",
-				handleBeforeInstallPrompt as any
+				handleBeforeInstallPrompt as any,
 			);
 			window.removeEventListener("appinstalled", handleAppInstalled as any);
 		};
@@ -41,7 +41,7 @@ export default function PWAInstallPrompt() {
 				<div className="flex-1">
 					<div className="font-semibold text-foreground">Install app</div>
 					<div className="text-sm text-muted-foreground">
-						Add JIIT Placement Updates to your device
+						Add JIIT Placements to your device
 					</div>
 				</div>
 				<div className="flex gap-2">
