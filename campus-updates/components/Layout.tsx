@@ -6,22 +6,8 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import ThemeSwitcher from "./ThemeSwitcher";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-	BriefcaseIcon,
-	HomeIcon,
-	TrendingUpIcon,
-	CalendarIcon,
-	// BellIcon, // Removed as we use png now
-	MenuIcon,
-	XIcon,
-	MessageSquareIcon,
-	CoffeeIcon,
-	WifiIcon,
-	BookOpenIcon,
-} from "lucide-react";
+
 import FloatingNav from "./FloatingNav";
-import FloatingActionMenu from "./FloatingActionMenu";
 
 const navigation = [
 	{ name: "Updates", href: "/", icon: "/icons/home.png" },
