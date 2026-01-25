@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Input } from "@/components/ui/input";
+import { ListFilter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -34,7 +35,7 @@ export default function NoticesFilters({
 		<div>
 			{/* Filters */}
 			<div className="mb-4">
-				<div className="flex flex-col md:flex-row gap-3 md:items-center">
+				<div className="flex flex-row gap-3 items-center">
 					<div className="flex-1">
 						<Input
 							placeholder="Search company, role or details"
@@ -45,8 +46,12 @@ export default function NoticesFilters({
 					<div className="flex gap-2 flex-wrap">
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
-								<Button variant="outline" className="whitespace-nowrap">
-									Categories
+								<Button
+									variant="outline"
+									className="whitespace-nowrap px-3 md:px-4"
+								>
+									<ListFilter className="h-4 w-4 md:mr-2" />
+									<span className="hidden md:inline">Categories</span>
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent className="w-56 max-h-72 overflow-auto">
@@ -73,7 +78,10 @@ export default function NoticesFilters({
 							</DropdownMenuContent>
 						</DropdownMenu>
 
-						<Badge variant="secondary" className="self-center">
+						<Badge
+							variant="secondary"
+							className="self-center hidden md:inline-flex"
+						>
 							{resultsCount} results
 						</Badge>
 					</div>
