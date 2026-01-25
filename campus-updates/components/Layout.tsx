@@ -9,7 +9,7 @@ import ThemeSwitcher from "./ThemeSwitcher";
 
 import { Bell, ArrowRight } from "lucide-react";
 
-import FloatingNav from "./FloatingNav";
+import { MenuBar } from "./animated-menu-bar";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
 	const pathname = usePathname();
@@ -192,7 +192,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 			</div>
 
 			{/* Mobile Floating Navigation */}
-			<FloatingNav
+			<MenuBar
+				className="lg:hidden"
 				items={navigation.map((n, idx) => ({
 					id: idx,
 					href: n.href,
@@ -200,7 +201,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 						<img
 							src={n.icon}
 							alt={n.name}
-							className="w-5 h-5 mb-1 object-contain dark:invert"
+							className="w-5 h-5 object-contain dark:invert"
 						/>
 					),
 					label: n.name,
