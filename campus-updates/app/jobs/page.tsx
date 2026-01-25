@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { Job } from "@/components/jobs/types";
 import JobFilters from "@/components/jobs/JobFilters";
 import JobCard from "@/components/jobs/JobCard";
-import QuickViewDialog from "@/components/jobs/QuickViewDialog";
 import { categoryMapping, formatDateTime } from "@/components/jobs/helpers";
 
 // Job type moved to components/jobs/types
@@ -107,7 +106,6 @@ export default function JobsPage() {
 
 function JobsPageContent() {
 	const [jobs, setJobs] = useState<Job[]>([]);
-	const [selectedJobModal, setSelectedJobModal] = useState<Job | null>(null);
 	const [loading, setLoading] = useState(true);
 	// Filters state
 	const [query, setQuery] = useState("");
@@ -310,18 +308,9 @@ function JobsPageContent() {
 
 			<div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
 				{filteredJobs.map((job) => (
-					<JobCard
-						key={job.id}
-						job={job}
-						onQuickView={(j) => setSelectedJobModal(j)}
-					/>
+					<JobCard key={job.id} job={job} />
 				))}
 			</div>
-			<QuickViewDialog
-				job={selectedJobModal}
-				open={!!selectedJobModal}
-				onOpenChange={(open) => !open && setSelectedJobModal(null)}
-			/>
 		</div>
 	);
 }
