@@ -3,8 +3,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
-import FiltersSheet from "@/components/stats/FiltersSheet";
-import ExportCsvButton from "@/components/stats/ExportCsvButton";
 import SummaryCards from "@/components/stats/SummaryCards";
 import BranchSection from "@/components/stats/BranchSection";
 import CompanySection from "@/components/stats/CompanySection";
@@ -12,6 +10,7 @@ import CompanySection from "@/components/stats/CompanySection";
 import PlacementDistributionChart from "@/components/stats/PlacementDistributionChart";
 import PlacementTimeline from "@/components/stats/PlacementTimeline";
 import OfficialPlacements from "@/components/stats/OfficialPlacements";
+import ExpandingSearch from "@/components/stats/ExpandingSearch";
 import enrollmentRanges from "./enrollmemt_range.json";
 import studentCounts from "./student_count.json";
 import {
@@ -95,45 +94,12 @@ export default function StatsPage() {
 	};
 
 	// Filters - must be before any conditional returns (React hooks rules)
-	const [showFilters, setShowFilters] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
-	const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
-	const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-	const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
-	const [packageRange, setPackageRange] = useState<[number, number]>([0, 100]);
 
 	// Exclude these branches from all calculations and displays
 	const EXCLUDED_BRANCHES = useMemo(
 		() => new Set(["JUIT", "Other", "MTech"]),
 		[],
-	);
-
-	// Filter options
-	const availableCompanies = useMemo(
-		() => Array.from(new Set(placements.map((p) => p.company))).sort(),
-		[placements],
-	);
-	const availableRoles = useMemo(
-		() =>
-			Array.from(
-				new Set(
-					placements.flatMap(
-						(p) => p.roles?.map((r) => r.role).filter(Boolean) || [],
-					),
-				),
-			).sort(),
-		[placements],
-	);
-	const availableLocations = useMemo(
-		() =>
-			Array.from(
-				new Set(
-					placements
-						.flatMap((p) => p.job_location || [])
-						.filter(Boolean) as string[],
-				),
-			).sort(),
-		[placements],
 	);
 
 	// Flattened students (+ placement context)
@@ -161,18 +127,10 @@ export default function StatsPage() {
 		[allStudents, EXCLUDED_BRANCHES],
 	);
 
-	const hasActiveFilters =
-		searchQuery !== "" ||
-		selectedCompanies.length > 0 ||
-		selectedRoles.length > 0 ||
-		selectedLocations.length > 0 ||
-		packageRange[0] !== 0 ||
-		packageRange[1] !== 100;
+	const hasActiveFilters = searchQuery !== "";
 
 	const filteredStudents: StudentWithPlacement[] = useMemo(() => {
 		return includedStudents.filter((student) => {
-			const plc = student.placement;
-
 			// search
 			if (searchQuery) {
 				const q = searchQuery.toLowerCase();
@@ -183,36 +141,9 @@ export default function StatsPage() {
 					(student.company || "").toLowerCase().includes(q);
 				if (!ok) return false;
 			}
-
-			if (
-				selectedCompanies.length &&
-				!selectedCompanies.includes(student.company)
-			)
-				return false;
-
-			if (selectedRoles.length && !selectedRoles.includes(student.role))
-				return false;
-
-			if (
-				selectedLocations.length &&
-				!selectedLocations.some((loc) => (plc.job_location || []).includes(loc))
-			)
-				return false;
-
-			const pkg = getStudentPackage(student, plc);
-			if (pkg != null) {
-				if (pkg < packageRange[0] || pkg > packageRange[1]) return false;
-			}
 			return true;
 		});
-	}, [
-		includedStudents,
-		searchQuery,
-		selectedCompanies,
-		selectedRoles,
-		selectedLocations,
-		packageRange,
-	]);
+	}, [includedStudents, searchQuery]);
 
 	// Overall stats (excluding JUIT, Other, MTech)
 	// Track unique students (by enrollment number) and total offers
@@ -542,51 +473,12 @@ export default function StatsPage() {
 		);
 	};
 
-	const exportToCSV = () => {
-		const rows: string[][] = [];
-		rows.push([
-			"Student Name",
-			"Enrollment Number",
-			"Company",
-			"Role",
-			"Package",
-			"Job Location",
-		]);
-		filteredStudents.forEach((student) => {
-			const v = getStudentPackage(student, student.placement);
-			rows.push([
-				student.name,
-				student.enrollment_number,
-				student.company,
-				student.role || "N/A",
-				v ? `₹${v.toFixed(1)} LPA` : "TBD",
-				student.job_location?.join(", ") || "N/A",
-			]);
-		});
-		const csv = rows.map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
-		const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-		const link = document.createElement("a");
-		link.href = URL.createObjectURL(blob);
-		link.download = `placement_statistics_${
-			new Date().toISOString().split("T")[0]
-		}.csv`;
-		link.click();
-	};
-
 	const sourceCompanyStats = hasActiveFilters
 		? filteredCompanyStats
 		: companyStats;
 	const companyEntries = Object.entries(sourceCompanyStats).sort(([a], [b]) =>
 		a.localeCompare(b),
 	);
-
-	const clearFilters = () => {
-		setSearchQuery("");
-		setSelectedCompanies([]);
-		setSelectedRoles([]);
-		setSelectedLocations([]);
-		setPackageRange([0, 100]);
-	};
 
 	// If locked, show the service-unavailable / hidden page
 	if (!unlocked) {
@@ -651,45 +543,12 @@ export default function StatsPage() {
 				</div>
 			</div>
 
-			{/* Filters */}
-			<FiltersSheet
-				open={showFilters}
-				onOpenChange={setShowFilters}
-				hasActiveFilters={hasActiveFilters}
-				totals={{
-					students: filteredStudents.length,
-					totalStudents: totalStudentsPlaced,
-					companies: filteredUniqueCompanies,
-					totalCompanies: uniqueCompanies,
-				}}
-				options={{
-					companies: availableCompanies,
-					roles: availableRoles,
-					locations: availableLocations as string[],
-				}}
-				state={{
-					searchQuery,
-					selectedCompanies,
-					selectedRoles,
-					selectedLocations,
-					packageRange,
-				}}
-				setState={(next) => {
-					if (next.searchQuery !== undefined) setSearchQuery(next.searchQuery);
-					if (next.selectedCompanies !== undefined)
-						setSelectedCompanies(next.selectedCompanies);
-					if (next.selectedRoles !== undefined)
-						setSelectedRoles(next.selectedRoles);
-					if (next.selectedLocations !== undefined)
-						setSelectedLocations(next.selectedLocations);
-					if (next.packageRange !== undefined)
-						setPackageRange(next.packageRange);
-				}}
-				clearFilters={clearFilters}
+			{/* Filter Search */}
+			<ExpandingSearch
+				value={searchQuery}
+				onChange={setSearchQuery}
+				placeholder="Search students, companies, roles..."
 			/>
-
-			{/* Export CSV */}
-			<ExportCsvButton onClick={exportToCSV} />
 
 			{/* Summary cards */}
 			<SummaryCards
