@@ -18,7 +18,7 @@ import {
 	formatDate,
 	formatDateTime,
 	formatPackage,
-	getCategoryColor,
+	getCategoryClass,
 } from "./helpers";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
@@ -57,8 +57,9 @@ export default function JobCard({ job }: { job: Job }) {
 						</h3>
 						<Badge
 							variant="outline"
-							className="shrink-0 font-medium border-primary/20 bg-primary/5 text-primary dark:bg-primary/10"
-							style={getCategoryColor(job.placement_category_code)}
+							className={`shrink-0 font-medium ${getCategoryClass(
+								job.placement_category_code,
+							)}`}
 						>
 							{categoryMapping[job.placement_category_code] ||
 								job.placement_category}
@@ -77,7 +78,7 @@ export default function JobCard({ job }: { job: Job }) {
 							<Badge
 								key={idx}
 								variant="secondary"
-								className="px-2 py-0.5 text-[10px] font-medium bg-secondary/50 text-secondary-foreground border border-border/50 hover:bg-secondary/70 transition-colors dark:bg-secondary/20 dark:text-foreground dark:border-border/30"
+								className="px-2 py-0.5 text-[10px] font-medium bg-secondary text-secondary-foreground border-transparent hover:bg-secondary/80 transition-colors dark:bg-secondary/60 dark:text-foreground/90"
 							>
 								{course}
 							</Badge>
@@ -85,7 +86,7 @@ export default function JobCard({ job }: { job: Job }) {
 						{job.eligibility_courses.length > 3 && (
 							<Badge
 								variant="outline"
-								className="px-2 py-0.5 text-[10px] text-muted-foreground border-border/50"
+								className="px-2 py-0.5 text-[10px] text-muted-foreground border-border/50 bg-secondary/20 dark:bg-secondary/10"
 							>
 								+{job.eligibility_courses.length - 3}
 							</Badge>

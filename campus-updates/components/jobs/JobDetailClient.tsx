@@ -216,8 +216,8 @@ export default function JobDetailClient({ job }: { job: Job }) {
 					<div className="text-left sm:text-right self-start sm:self-auto flex items-center gap-2 sm:block">
 						<Badge
 							variant="outline"
-							className={`inline-flex items-center font-medium border text-sm ${getCategoryClass(
-								jobLocal.placement_category_code
+							className={`inline-flex items-center font-medium text-sm ${getCategoryClass(
+								jobLocal.placement_category_code,
 							)}`}
 						>
 							{category_mapping[jobLocal.placement_category_code] ||
@@ -385,7 +385,7 @@ export default function JobDetailClient({ job }: { job: Job }) {
 								<Badge
 									key={idx}
 									variant="secondary"
-									className="text-sm border px-3 py-1"
+									className="text-sm px-3 py-1 bg-secondary text-secondary-foreground border-transparent hover:bg-secondary/80 dark:bg-secondary/60 dark:text-foreground/90"
 								>
 									{course}
 								</Badge>
