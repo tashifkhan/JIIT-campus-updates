@@ -101,7 +101,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 						{/* Sidebar Header */}
 						<div className="px-5 py-6">
 							<div className="flex items-center gap-3 px-2">
-								<div className="relative w-8 h-8 rounded-lg overflow-hidden shadow-sm">
+								<div className="relative w-8 h-8 rounded-lg overflow-hidden">
 									<Image
 										src="/logo.png"
 										alt="JIIT Placements"

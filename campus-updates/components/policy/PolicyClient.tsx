@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,13 +11,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import { Policy } from "@/lib/policy";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface PolicyClientProps {
 	initialSlug?: string;
@@ -41,25 +35,8 @@ export default function PolicyClient({
 			sub: Array<{ id: string; title: string }>;
 		}>
 	>([]);
-	const [policies, setPolicies] = useState<Policy[]>([]);
-	const [currentSlug, setCurrentSlug] = useState(initialSlug);
 
-	useEffect(() => {
-		const fetchPolicies = async () => {
-			try {
-				const res = await fetch("/api/policies");
-				if (res.ok) {
-					const data = await res.json();
-					if (data.ok && data.policies) {
-						setPolicies(data.policies);
-					}
-				}
-			} catch (error) {
-				console.error("Error fetching policies list:", error);
-			}
-		};
-		fetchPolicies();
-	}, []);
+	const [currentSlug, setCurrentSlug] = useState(initialSlug);
 
 	useEffect(() => {
 		const fetchPolicy = async () => {
@@ -186,27 +163,27 @@ export default function PolicyClient({
 
 	return (
 		<div className="space-y-6 animate-in fade-in duration-500">
-			<div className="flex items-center justify-between">
-				<Link href="/">
-					<Button variant="outline" className="h-10 px-4">
-						<ArrowLeft className="w-4 h-4 mr-2" />
-						Back to Home
-					</Button>
-				</Link>
-				<div className="w-[300px]">
-					<Select value={currentSlug} onValueChange={setCurrentSlug}>
-						<SelectTrigger>
-							<SelectValue placeholder="Select Policy" />
-						</SelectTrigger>
-						<SelectContent>
-							{policies.map((p) => (
-								<SelectItem key={p._id} value={p.slug}>
-									{p.badge || p.title}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</div>
+			<div className="flex flex-col gap-4">
+				<Tabs
+					value={currentSlug}
+					onValueChange={setCurrentSlug}
+					className="w-full"
+				>
+					<TabsList className="w-full h-auto p-1 bg-muted border border-border/50 rounded-xl grid grid-cols-2 mb-6">
+						<TabsTrigger
+							value="placement-policy-2026"
+							className="data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:font-bold rounded-lg px-3 py-2.5 text-sm transition-all text-muted-foreground hover:text-foreground"
+						>
+							2026 Batch
+						</TabsTrigger>
+						<TabsTrigger
+							value="jaypee-universities-placement-policy-2027-graduating-batches--engineering-and-mca-2027"
+							className="data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:font-bold rounded-lg px-3 py-2.5 text-sm transition-all text-muted-foreground hover:text-foreground"
+						>
+							2027 Batch
+						</TabsTrigger>
+					</TabsList>
+				</Tabs>
 			</div>
 
 			<div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

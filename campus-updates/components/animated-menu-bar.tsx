@@ -90,7 +90,7 @@ export const MenuBar = ({ items, className }: MenuBarProps) => {
 	return (
 		<nav
 			className={cn(
-				"fixed bottom-6 left-4 z-50 flex items-center gap-2 bg-card p-2 rounded-2xl border border-border w-fit transition-all duration-300 shadow-xl backdrop-blur-sm bg-card/80",
+				"fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-card p-2 rounded-2xl border border-border w-fit transition-all duration-300 shadow-xl backdrop-blur-sm bg-card/80",
 				className,
 			)}
 		>
