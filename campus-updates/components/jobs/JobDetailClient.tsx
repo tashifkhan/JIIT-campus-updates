@@ -183,7 +183,13 @@ export default function JobDetailClient({ job }: { job: Job }) {
 				<div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
 					<Button
 						variant="ghost"
-						onClick={() => router.back()}
+						onClick={() => {
+							if (window.history.length > 2) {
+								router.back();
+							} else {
+								router.push("/jobs");
+							}
+						}}
 						className="hover:bg-accent/50 -ml-2"
 					>
 						<ArrowLeftIcon className="w-5 h-5 mr-2 text-muted-foreground" />

@@ -1,82 +1,39 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import SummaryCards from "@/components/stats/SummaryCards";
 import BranchSection from "@/components/stats/BranchSection";
 import CompanySection from "@/components/stats/CompanySection";
-// import PlacedStudentsSection from "@/components/stats/PlacedStudentsSection";
 import PlacementDistributionChart from "@/components/stats/PlacementDistributionChart";
 import PlacementTimeline from "@/components/stats/PlacementTimeline";
 import OfficialPlacements from "@/components/stats/OfficialPlacements";
 import ExpandingSearch from "@/components/stats/ExpandingSearch";
-import enrollmentRanges from "./enrollmemt_range.json";
-import studentCounts from "./student_count.json";
+import { StudentWithPlacement, getStudentPackage } from "@/lib/stats";
 import {
-	Placement,
-	StudentWithPlacement,
-	getStudentPackage,
-} from "@/lib/stats";
-
-const BRANCHES_LIMIT = 3;
-const COMPANIES_LIMIT = 6;
-// Flattened index of enrollment ranges -> branch, built from JSON once
-const ENROLLMENT_BRANCH_RANGES: Array<{
-	branch: string;
-	start: number;
-	end: number;
-}> = buildBranchRangesFromJson(enrollmentRanges as any);
+	useStatsData,
+	getBranch,
+	BRANCHES_LIMIT,
+	COMPANIES_LIMIT,
+} from "@/lib/hooks/useStatsData";
 
 export default function StatsPage() {
-	const { data, isLoading: loading } = useQuery({
-		queryKey: ["placement-offers"],
-		queryFn: async () => {
-			const res = await fetch("/api/placement-offers", { cache: "no-store" });
-			const json = await res.json();
-			if (!json.ok) throw new Error(json.error || "Failed to load");
-			return json.data as Placement[];
-		},
-	});
+	const {
+		placements,
+		allStudents,
+		includedStudents,
+		branchTotalCounts,
+		loading,
+		unlocked,
+		setUnlocked,
+		EXCLUDED_BRANCHES,
+		enrollmentRanges,
+		studentCounts,
+	} = useStatsData();
 
-	const placements: Placement[] = useMemo(
-		() => (Array.isArray(data) ? (data as any) : []),
-		[data],
-	);
-
-	// Filters
-	// Secret unlock state (supports ?shh and hidden click unlock)
-	const [unlocked, setUnlocked] = useState<boolean>(() => {
-		try {
-			return typeof window !== "undefined" && !!localStorage.getItem("shh");
-		} catch {
-			return false;
-		}
-	});
+	// Filters - must be before any conditional returns (React hooks rules)
+	const [searchQuery, setSearchQuery] = useState("");
 	const [secretClicks, setSecretClicks] = useState(0);
-
-	useEffect(() => {
-		// Support unlocking via ?shh query parameter and then clean it from the URL
-		try {
-			if (typeof window === "undefined") return;
-			const params = new URLSearchParams(window.location.search);
-			if (params.has("shh")) {
-				try {
-					localStorage.setItem("shh", "1");
-				} catch {
-					/* ignore */
-				}
-				setUnlocked(true);
-				params.delete("shh");
-				const newUrl = `${window.location.pathname}${
-					params.toString() ? `?${params.toString()}` : ""
-				}${window.location.hash || ""}`;
-				window.history.replaceState({}, "", newUrl);
-			}
-		} catch {
-			// ignore
-		}
-	}, []);
 
 	const handleSecretClick = () => {
 		setSecretClicks((c) => {
@@ -92,40 +49,6 @@ export default function StatsPage() {
 			return next;
 		});
 	};
-
-	// Filters - must be before any conditional returns (React hooks rules)
-	const [searchQuery, setSearchQuery] = useState("");
-
-	// Exclude these branches from all calculations and displays
-	const EXCLUDED_BRANCHES = useMemo(
-		() => new Set(["JUIT", "Other", "MTech"]),
-		[],
-	);
-
-	// Flattened students (+ placement context)
-	const allStudents: StudentWithPlacement[] = useMemo(
-		() =>
-			placements.flatMap((placement) =>
-				placement.students_selected.map((student) => ({
-					...student,
-					company: placement.company,
-					roles: placement.roles,
-					joining_date: placement.joining_date || undefined,
-					job_location: placement.job_location,
-					placement,
-				})),
-			),
-		[placements],
-	);
-
-	// Filter out excluded branches from all students
-	const includedStudents = useMemo(
-		() =>
-			allStudents.filter(
-				(s) => !EXCLUDED_BRANCHES.has(getBranch(s.enrollment_number)),
-			),
-		[allStudents, EXCLUDED_BRANCHES],
-	);
 
 	const hasActiveFilters = searchQuery !== "";
 
@@ -392,29 +315,6 @@ export default function StatsPage() {
 		return acc;
 	}, [filteredStudents]);
 
-	// Branch totals (for denominator) - exclude JUIT, Other, MTech
-	const branchTotalCounts = useMemo(() => {
-		const totals: Record<string, number> = {};
-		try {
-			Object.entries(studentCounts as any).forEach(([branch, counts]) => {
-				// Skip excluded branches
-				if (EXCLUDED_BRANCHES.has(branch)) return;
-
-				if (counts && typeof counts === "object") {
-					const sum = Object.values(counts).reduce(
-						(a: number, c: any) => a + Number(c || 0),
-						0,
-					);
-					totals[branch] = sum;
-				} else if (typeof counts === "number") {
-					totals[branch] = counts;
-				}
-			});
-		} catch {
-			/* ignore */
-		}
-		return totals;
-	}, [EXCLUDED_BRANCHES]);
 	const branchesWithTotals = useMemo(
 		() => new Set(Object.keys(branchTotalCounts)),
 		[branchTotalCounts],
@@ -623,77 +523,6 @@ export default function StatsPage() {
 						: 0;
 				}}
 			/>
-
-			{/* Placed students */}
-			{/*<PlacedStudentsSection
-				filteredStudents={hasActiveFilters ? filteredStudents : allStudents}
-				totalStudentsPlaced={allStudents.length}
-				filteredHighestPackage={filteredHighestPackage}
-				highestPackage={highestPackage}
-				filteredAveragePackage={filteredAveragePackage}
-				averagePackage={averagePackage}
-				filteredUniqueCompanies={filteredUniqueCompanies}
-				uniqueCompanies={uniqueCompanies}
-			/> */}
 		</div>
 	);
-}
-
-// Build branch ranges index from JSON
-function buildBranchRangesFromJson(
-	json: any,
-): Array<{ branch: string; start: number; end: number }> {
-	const ranges: Array<{ branch: string; start: number; end: number }> = [];
-	if (!json || typeof json !== "object") return ranges;
-	Object.entries(json).forEach(([branch, data]) => {
-		if (branch === "Intg. MTech" && data && typeof data === "object") {
-			// Intg. MTech nested per sub-branch
-			Object.values(data as any).forEach((sub: any) => {
-				if (
-					sub &&
-					typeof sub.start === "number" &&
-					typeof sub.end === "number"
-				) {
-					ranges.push({
-						branch: "Intg. MTech",
-						start: sub.start,
-						end: sub.end,
-					});
-				}
-			});
-		} else if (data && typeof data === "object") {
-			// Regular branches with batch keys (e.g., "62", "128")
-			Object.values(data as any).forEach((entry: any) => {
-				if (
-					entry &&
-					typeof entry.start === "number" &&
-					typeof entry.end === "number"
-				) {
-					ranges.push({ branch, start: entry.start, end: entry.end });
-				}
-			});
-		}
-	});
-	// Sort by start asc for early exit
-	ranges.sort((a, b) => a.start - b.start);
-	return ranges;
-}
-
-// Branch resolver based on enrollment number falling within known ranges
-function getBranch(enrollment: string): string {
-	if (!enrollment) return "Other";
-	const hasAlpha = /[A-Za-z]/.test(enrollment);
-	const digits = (enrollment.match(/\d+/g) || []).join("");
-	// JUIT rule: alpha present or 9-digit numeric id
-	if (hasAlpha || digits.length === 9) return "JUIT";
-	// MTech rule: first two digits are 24
-	if (digits.startsWith("24")) return "MTech";
-	if (!digits) return "Other";
-	const num = Number(digits);
-	if (!Number.isFinite(num)) return "Other";
-	// Match against configured ranges (including Intg. MTech and others)
-	for (const r of ENROLLMENT_BRANCH_RANGES) {
-		if (num >= r.start && num < r.end) return r.branch;
-	}
-	return "Other";
 }
