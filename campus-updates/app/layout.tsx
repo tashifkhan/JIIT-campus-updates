@@ -19,21 +19,22 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+	manifest: "/manifest.json",
 	title: {
 		default: "JIIT Placements",
 		template: "%s - JIIT Placements",
 	},
-	description: "Campus placement portal",
+	description: "JIIT placement portal",
 	applicationName: "JIIT Placements",
-	metadataBase: new URL("https://jiit-placement-updates.tashif.codes"),
+	metadataBase: new URL("https://jiit-placement-updates.netlify.app"),
 	openGraph: {
 		title: "JIIT Placements",
-		description: "Campus placement portal",
-		url: "https://jiit-placement-updates.tashif.codes",
+		description: "JIIT placement portal",
+		url: "https://jiit-placement-updates.netlify.app",
 		siteName: "JIIT Placements",
 		images: [
 			{
-				url: "https://jiit-placement-updates.tashif.codes/logo.png",
+				url: "https://jiit-placement-updates.netlify.app/logo.png",
 				height: 800,
 				width: 1200,
 			},
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
 	},
 	twitter: {
 		title: "JIIT Placements",
-		description: "Campus placement portal",
+		description: "JIIT placement portal",
 		card: "summary_large_image",
 		site: "",
 	},
@@ -88,11 +89,11 @@ export default function RootLayout({
 								"@context": "https://schema.org",
 								"@type": "WebSite",
 								name: "JIIT Placements",
-								url: "https://jiit-placement-updates.tashif.codes",
+								url: "https://jiit-placement-updates.netlify.app",
 								potentialAction: {
 									"@type": "SearchAction",
 									target:
-										"https://jiit-placement-updates.tashif.codes/search?q={search_term_string}",
+										"https://jiit-placement-updates.netlify.app/search?q={search_term_string}",
 									"query-input": "required name=search_term_string",
 								},
 							}),

@@ -8,23 +8,17 @@ type Job = {
 	[key: string]: any;
 };
 
+import { getJobs } from "@/lib/server/data";
+
 async function fetchJob(id: string) {
-	// Build an absolute URL for server-side fetch. When NEXT_PUBLIC_BASE_URL is not set
-	// (for example during local dev or on some hosting), fall back to Vercel URL or localhost.
-	const base =
-		process.env.NEXT_PUBLIC_BASE_URL ||
-		(process.env.NEXT_PUBLIC_VERCEL_URL
-			? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-			: "http://localhost:3000");
-
-	const url = new URL(`/api/jobs/${id}`, base).toString();
-
-	const res = await fetch(url, {
-		cache: "no-store",
-	});
-	if (!res.ok) return null;
-	const json = await res.json();
-	return json.data as Job;
+	try {
+		const jobs = await getJobs({ id }, 1);
+		if (!jobs || jobs.length === 0) return null;
+		return jobs[0] as unknown as Job;
+	} catch (error) {
+		console.error("Error fetching job:", error);
+		return null;
+	}
 }
 
 export async function generateMetadata({
