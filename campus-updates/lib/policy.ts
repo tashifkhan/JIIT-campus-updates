@@ -10,6 +10,7 @@ export interface Policy {
 	published: boolean;
 	contentFormat: "markdown";
 	content: string;
+	flowchart?: string;
 	toc?: TocItem[];
 	createdAt: string;
 	updatedAt: string;

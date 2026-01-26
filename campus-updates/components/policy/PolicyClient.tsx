@@ -12,6 +12,14 @@ import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import { Policy } from "@/lib/policy";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import { FileText, Map } from "lucide-react";
 
 interface PolicyClientProps {
 	initialSlug?: string;
@@ -40,6 +48,7 @@ export default function PolicyClient({
 	>([]);
 
 	const [currentSlug, setCurrentSlug] = useState(initialSlug);
+	const [showFlowchart, setShowFlowchart] = useState(false);
 
 	useEffect(() => {
 		const fetchPolicy = async () => {
@@ -468,8 +477,50 @@ export default function PolicyClient({
 							)}
 						</CardContent>
 					</Card>
+
+					{policy && policy.flowchart && (
+						<div className="mt-4">
+							<Button
+								onClick={() => setShowFlowchart(true)}
+								className="w-full gap-2 shadow-md bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6"
+							>
+								<Map className="h-5 w-5" />
+								View Process Flowchart
+							</Button>
+						</div>
+					)}
 				</aside>
 			</div>
+
+			{policy && policy.flowchart && (
+				<>
+					<Button
+						className="lg:hidden fixed bottom-24 right-6 z-50 rounded-2xl shadow-lg h-14 w-14 p-0 bg-primary hover:bg-primary/90 text-primary-foreground border-transparent"
+						onClick={() => setShowFlowchart(true)}
+					>
+						<Map className="h-6 w-6" />
+						<span className="sr-only">View Flowchart</span>
+					</Button>
+
+					<Dialog open={showFlowchart} onOpenChange={setShowFlowchart}>
+						<DialogContent className="max-w-[95vw] w-full max-h-[95vh] overflow-y-auto p-4 sm:p-6">
+							<DialogHeader className="mb-2">
+								<DialogTitle className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+									<Map className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+									Placement Policy Process Flow
+								</DialogTitle>
+							</DialogHeader>
+							<div className="mt-2 rounded-xl overflow-hidden border border-border bg-muted/20 shadow-inner">
+								<img
+									src={policy.flowchart}
+									alt="Policy Flowchart"
+									className="w-full h-auto"
+								/>
+							</div>
+						</DialogContent>
+					</Dialog>
+				</>
+			)}
 		</div>
 	);
 }
