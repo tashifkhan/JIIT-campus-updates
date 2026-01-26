@@ -479,10 +479,10 @@ export default function PolicyClient({
 					</Card>
 
 					{policy && policy.flowchart && (
-						<div className="mt-4">
+						<div className="fixed bottom-10 right-10 z-50">
 							<Button
 								onClick={() => setShowFlowchart(true)}
-								className="w-full gap-2 shadow-md bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6"
+								className="gap-2 shadow-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 px-8 rounded-full"
 							>
 								<Map className="h-5 w-5" />
 								View Process Flowchart
