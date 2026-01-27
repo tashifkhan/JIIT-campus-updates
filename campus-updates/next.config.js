@@ -9,6 +9,18 @@ const withPWA = require("next-pwa")({
 const nextConfig = {
 	// output: 'export',
 	images: { unoptimized: true },
+	async rewrites() {
+		return [
+			{
+				source: "/ph/static/:path*",
+				destination: "https://eu-assets.i.posthog.com/static/:path*",
+			},
+			{
+				source: "/ph/:path*",
+				destination: "https://eu.i.posthog.com/:path*",
+			},
+		];
+	},
 };
 
 module.exports = withPWA(nextConfig);
