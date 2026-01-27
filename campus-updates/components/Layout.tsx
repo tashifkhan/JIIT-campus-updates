@@ -22,6 +22,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 		{ name: "Stats", href: "/stats", icon: "/icons/diagram.png" },
 	];
 
+	// Check if we are on a detail page (job details, branch stats, company stats)
+	// These pages handle their own layout/containers and have sticky headers that need to be full width
+	const isDetailPage =
+		(pathname.startsWith("/jobs/") && pathname !== "/jobs") ||
+		pathname.startsWith("/stats/branch/") ||
+		pathname.startsWith("/stats/company/");
+
 	return (
 		<div className="min-h-screen lg:min-h-0 lg:h-screen lg:overflow-hidden bg-background">
 			{/* Mobile Header */}
@@ -185,8 +192,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
 				{/* Main Content */}
 				<div className="flex-1 min-w-0 flex flex-col lg:overflow-hidden bg-background">
-					<main className="flex-1 lg:h-full lg:overflow-y-auto custom-scrollbar p-4 lg:p-8">
-						<div className="max-w-6xl mx-auto w-full">{children}</div>
+					<main
+						className={cn(
+							"flex-1 lg:h-full lg:overflow-y-auto custom-scrollbar",
+							isDetailPage ? "p-0" : "p-4 lg:p-8",
+						)}
+					>
+						<div
+							className={cn("w-full", isDetailPage ? "" : "max-w-6xl mx-auto")}
+						>
+							{children}
+						</div>
 					</main>
 				</div>
 			</div>
