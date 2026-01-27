@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -70,6 +70,18 @@ export function JobFilters({ jobs, values, onChange, derived }: Props) {
 	const allCourses = useMemo(
 		() => unique(jobs.flatMap((j) => j.eligibility_courses || [])).sort(),
 		[jobs],
+	);
+
+	const minPackageValue = useMemo(
+		() => [values.minPackageLpa],
+		[values.minPackageLpa],
+	);
+
+	const handleSliderChange = useCallback(
+		(v: number[]) => {
+			onChange.setMinPackageLpa(v[0] ?? 0);
+		},
+		[onChange],
 	);
 
 	return (
@@ -241,8 +253,8 @@ export function JobFilters({ jobs, values, onChange, derived }: Props) {
 						min={0}
 						max={Math.max(derived.maxPackageLpa, 1)}
 						step={1}
-						value={[values.minPackageLpa]}
-						onValueChange={(v) => onChange.setMinPackageLpa(v[0] ?? 0)}
+						value={minPackageValue}
+						onValueChange={handleSliderChange}
 						className="[&>.relative>.absolute]:bg-primary"
 					/>
 				</div>

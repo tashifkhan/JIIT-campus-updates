@@ -7,6 +7,14 @@ import { DownloadIcon } from "lucide-react";
 import { UsersIcon } from "lucide-react";
 
 import { Search, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type Student = {
 	name: string;
@@ -133,19 +141,53 @@ export default function ShortlistTable({
 				<>
 					<div className="px-4 pb-3">
 						<div className="mb-3">
-							<div className="flex items-center gap-3">
-								<div className="w-full">
-									<label className="sr-only">Search shortlist</label>
-									<div className="relative">
-										<Input
-											value={query}
-											onChange={(e) => setQuery(e.target.value)}
-											placeholder="Search name or enrollment number"
-											aria-label="Search students by name or enrollment number"
-											className="pl-10"
-										/>
-										<Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-									</div>
+							<div className="flex items-center gap-2">
+								<div className="w-full relative">
+									<Input
+										value={query}
+										onChange={(e) => setQuery(e.target.value)}
+										placeholder="Search name or enrollment number"
+										aria-label="Search students by name or enrollment number"
+										className="pl-10"
+									/>
+									<Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+								</div>
+								<div className="sm:hidden">
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button
+												variant="outline"
+												size="icon"
+												className="h-10 w-10"
+											>
+												<ArrowUpDown className="h-4 w-4" />
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent align="end">
+											<DropdownMenuLabel>Sort by</DropdownMenuLabel>
+											<DropdownMenuSeparator />
+											<DropdownMenuItem onClick={() => handleSort("name")}>
+												Name
+												{sortConfig?.key === "name" &&
+													(sortConfig.direction === "asc" ? (
+														<ArrowUp className="ml-auto h-4 w-4" />
+													) : (
+														<ArrowDown className="ml-auto h-4 w-4" />
+													))}
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												onClick={() => handleSort("enrollment_number")}
+											>
+												Enrollment
+												{sortConfig?.key === "enrollment_number" &&
+													(sortConfig.direction === "asc" ? (
+														<ArrowUp className="ml-auto h-4 w-4" />
+													) : (
+														<ArrowDown className="ml-auto h-4 w-4" />
+													))}
+											</DropdownMenuItem>
+										</DropdownMenuContent>
+									</DropdownMenu>
 								</div>
 							</div>
 						</div>

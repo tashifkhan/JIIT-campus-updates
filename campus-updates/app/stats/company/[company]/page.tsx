@@ -11,6 +11,14 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -295,16 +303,84 @@ export default function CompanyStatsPage({
 									{filteredList.length} results
 								</Badge>
 							</h3>
-							<div className="relative w-full sm:w-72">
-								<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-									<Search className="h-4 w-4 text-muted-foreground" />
+							<div className="flex items-center gap-2 w-full sm:w-auto">
+								<div className="relative w-full sm:w-72">
+									<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+										<Search className="h-4 w-4 text-muted-foreground" />
+									</div>
+									<Input
+										placeholder="Search name, role, location..."
+										value={query}
+										onChange={(e) => setQuery(e.target.value)}
+										className="pl-10 h-10 bg-background"
+									/>
 								</div>
-								<Input
-									placeholder="Search name, role, location..."
-									value={query}
-									onChange={(e) => setQuery(e.target.value)}
-									className="pl-10 h-10 bg-background"
-								/>
+								<div className="sm:hidden">
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button
+												variant="outline"
+												size="icon"
+												className="h-10 w-10"
+											>
+												<ArrowUpDown className="h-4 w-4" />
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent align="end" className="w-48">
+											<DropdownMenuLabel>Sort by</DropdownMenuLabel>
+											<DropdownMenuSeparator />
+											<DropdownMenuItem onClick={() => handleSort("name")}>
+												Name
+												{sortConfig?.key === "name" &&
+													(sortConfig.direction === "asc" ? (
+														<ArrowUp className="ml-auto h-4 w-4" />
+													) : (
+														<ArrowDown className="ml-auto h-4 w-4" />
+													))}
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												onClick={() => handleSort("enrollment_number")}
+											>
+												Enrollment
+												{sortConfig?.key === "enrollment_number" &&
+													(sortConfig.direction === "asc" ? (
+														<ArrowUp className="ml-auto h-4 w-4" />
+													) : (
+														<ArrowDown className="ml-auto h-4 w-4" />
+													))}
+											</DropdownMenuItem>
+											<DropdownMenuItem onClick={() => handleSort("role")}>
+												Role
+												{sortConfig?.key === "role" &&
+													(sortConfig.direction === "asc" ? (
+														<ArrowUp className="ml-auto h-4 w-4" />
+													) : (
+														<ArrowDown className="ml-auto h-4 w-4" />
+													))}
+											</DropdownMenuItem>
+											<DropdownMenuItem onClick={() => handleSort("package")}>
+												Package
+												{sortConfig?.key === "package" &&
+													(sortConfig.direction === "asc" ? (
+														<ArrowUp className="ml-auto h-4 w-4" />
+													) : (
+														<ArrowDown className="ml-auto h-4 w-4" />
+													))}
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												onClick={() => handleSort("job_location")}
+											>
+												Location
+												{sortConfig?.key === "job_location" &&
+													(sortConfig.direction === "asc" ? (
+														<ArrowUp className="ml-auto h-4 w-4" />
+													) : (
+														<ArrowDown className="ml-auto h-4 w-4" />
+													))}
+											</DropdownMenuItem>
+										</DropdownMenuContent>
+									</DropdownMenu>
+								</div>
 							</div>
 						</div>
 

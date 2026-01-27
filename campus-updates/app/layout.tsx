@@ -68,9 +68,10 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<head />
 			<body
+				suppressHydrationWarning
 				className={`${antic.variable} ${jetbrainsMono.variable} font-sans bg-background text-foreground`}
 			>
 				<PostHogProvider
