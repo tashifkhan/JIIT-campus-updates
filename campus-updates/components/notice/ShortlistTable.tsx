@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { DownloadIcon } from "lucide-react";
 import { UsersIcon } from "lucide-react";
 
-import { Search } from "lucide-react";
+import { Search, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 
 type Student = {
 	name: string;
@@ -154,26 +154,38 @@ export default function ShortlistTable({
 								<thead className="sticky top-0 border-b bg-muted/50 border-border">
 									<tr>
 										<th
-											className="text-left py-3 px-4 font-semibold text-primary cursor-pointer hover:bg-muted/80 transition-colors"
+											className="text-left py-3 px-4 font-semibold text-primary cursor-pointer hover:bg-muted/80 transition-colors group"
 											onClick={() => handleSort("name")}
 										>
-											Name
-											{sortConfig?.key === "name" && (
-												<span className="ml-1 inline-block">
-													{sortConfig.direction === "asc" ? "↑" : "↓"}
-												</span>
-											)}
+											<div className="flex items-center">
+												Name
+												{sortConfig?.key === "name" ? (
+													sortConfig.direction === "asc" ? (
+														<ArrowUp className="w-4 h-4 ml-1" />
+													) : (
+														<ArrowDown className="w-4 h-4 ml-1" />
+													)
+												) : (
+													<ArrowUpDown className="w-4 h-4 ml-1 opacity-50 group-hover:opacity-100" />
+												)}
+											</div>
 										</th>
 										<th
-											className="text-left py-3 px-4 font-semibold text-primary cursor-pointer hover:bg-muted/80 transition-colors"
+											className="text-left py-3 px-4 font-semibold text-primary cursor-pointer hover:bg-muted/80 transition-colors group"
 											onClick={() => handleSort("enrollment_number")}
 										>
-											Enrollment
-											{sortConfig?.key === "enrollment_number" && (
-												<span className="ml-1 inline-block">
-													{sortConfig.direction === "asc" ? "↑" : "↓"}
-												</span>
-											)}
+											<div className="flex items-center">
+												Enrollment
+												{sortConfig?.key === "enrollment_number" ? (
+													sortConfig.direction === "asc" ? (
+														<ArrowUp className="w-4 h-4 ml-1" />
+													) : (
+														<ArrowDown className="w-4 h-4 ml-1" />
+													)
+												) : (
+													<ArrowUpDown className="w-4 h-4 ml-1 opacity-50 group-hover:opacity-100" />
+												)}
+											</div>
 										</th>
 									</tr>
 								</thead>

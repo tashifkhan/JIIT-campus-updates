@@ -14,7 +14,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ArrowLeftIcon, Search, Users, MapPin, Building2 } from "lucide-react";
+import {
+	ArrowLeftIcon,
+	Search,
+	Users,
+	MapPin,
+	Building2,
+	ArrowUp,
+	ArrowDown,
+	ArrowUpDown,
+} from "lucide-react";
 import { Placement, formatPackage, StudentWithPlacement } from "@/lib/stats";
 import React from "react";
 
@@ -240,44 +249,89 @@ export default function CompanyStatsPage({
 								<TableHeader className="bg-muted/30">
 									<TableRow className="hover:bg-transparent">
 										<TableHead
-											className="cursor-pointer hover:text-primary transition-colors h-12"
+											className="cursor-pointer hover:text-primary transition-colors h-12 group"
 											onClick={() => handleSort("name")}
 										>
-											Name{" "}
-											{sortConfig?.key === "name" &&
-												(sortConfig.direction === "asc" ? "↑" : "↓")}
+											<div className="flex items-center">
+												Name
+												{sortConfig?.key === "name" ? (
+													sortConfig.direction === "asc" ? (
+														<ArrowUp className="ml-1 h-4 w-4" />
+													) : (
+														<ArrowDown className="ml-1 h-4 w-4" />
+													)
+												) : (
+													<ArrowUpDown className="ml-1 h-4 w-4 opacity-50 group-hover:opacity-100" />
+												)}
+											</div>
 										</TableHead>
 										<TableHead
-											className="cursor-pointer hover:text-primary transition-colors h-12"
+											className="cursor-pointer hover:text-primary transition-colors h-12 group"
 											onClick={() => handleSort("enrollment_number")}
 										>
-											Enrollment{" "}
-											{sortConfig?.key === "enrollment_number" &&
-												(sortConfig.direction === "asc" ? "↑" : "↓")}
+											<div className="flex items-center">
+												Enrollment
+												{sortConfig?.key === "enrollment_number" ? (
+													sortConfig.direction === "asc" ? (
+														<ArrowUp className="ml-1 h-4 w-4" />
+													) : (
+														<ArrowDown className="ml-1 h-4 w-4" />
+													)
+												) : (
+													<ArrowUpDown className="ml-1 h-4 w-4 opacity-50 group-hover:opacity-100" />
+												)}
+											</div>
 										</TableHead>
 										<TableHead
-											className="cursor-pointer hover:text-primary transition-colors h-12"
+											className="cursor-pointer hover:text-primary transition-colors h-12 group"
 											onClick={() => handleSort("role")}
 										>
-											Role{" "}
-											{sortConfig?.key === "role" &&
-												(sortConfig.direction === "asc" ? "↑" : "↓")}
+											<div className="flex items-center">
+												Role
+												{sortConfig?.key === "role" ? (
+													sortConfig.direction === "asc" ? (
+														<ArrowUp className="ml-1 h-4 w-4" />
+													) : (
+														<ArrowDown className="ml-1 h-4 w-4" />
+													)
+												) : (
+													<ArrowUpDown className="ml-1 h-4 w-4 opacity-50 group-hover:opacity-100" />
+												)}
+											</div>
 										</TableHead>
 										<TableHead
-											className="cursor-pointer hover:text-primary transition-colors h-12 text-right"
+											className="cursor-pointer hover:text-primary transition-colors h-12 text-right group"
 											onClick={() => handleSort("package")}
 										>
-											Package{" "}
-											{sortConfig?.key === "package" &&
-												(sortConfig.direction === "asc" ? "↑" : "↓")}
+											<div className="flex items-center justify-end">
+												Package
+												{sortConfig?.key === "package" ? (
+													sortConfig.direction === "asc" ? (
+														<ArrowUp className="ml-1 h-4 w-4" />
+													) : (
+														<ArrowDown className="ml-1 h-4 w-4" />
+													)
+												) : (
+													<ArrowUpDown className="ml-1 h-4 w-4 opacity-50 group-hover:opacity-100" />
+												)}
+											</div>
 										</TableHead>
 										<TableHead
-											className="cursor-pointer hover:text-primary transition-colors h-12"
+											className="cursor-pointer hover:text-primary transition-colors h-12 group"
 											onClick={() => handleSort("job_location")}
 										>
-											Location{" "}
-											{sortConfig?.key === "job_location" &&
-												(sortConfig.direction === "asc" ? "↑" : "↓")}
+											<div className="flex items-center">
+												Location
+												{sortConfig?.key === "job_location" ? (
+													sortConfig.direction === "asc" ? (
+														<ArrowUp className="ml-1 h-4 w-4" />
+													) : (
+														<ArrowDown className="ml-1 h-4 w-4" />
+													)
+												) : (
+													<ArrowUpDown className="ml-1 h-4 w-4 opacity-50 group-hover:opacity-100" />
+												)}
+											</div>
 										</TableHead>
 									</TableRow>
 								</TableHeader>
