@@ -40,6 +40,8 @@ const pkgFrom = (s: StudentWithPlacement, p: Placement) => {
 		: 0;
 };
 
+import { Skeleton } from "@/components/ui/skeleton";
+
 export default function CompanyStatsPage({
 	params,
 }: {
@@ -49,7 +51,70 @@ export default function CompanyStatsPage({
 	const decodedCompany = decodeURIComponent(company);
 	const router = useRouter();
 
-	const { placements, allStudents } = useStatsData();
+	const { placements, allStudents, loading } = useStatsData();
+
+	if (loading) {
+		return (
+			<div className="min-h-screen bg-background pb-12">
+				{/* Top Navigation Skeleton */}
+				<div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border/40">
+					<div className="max-w-5xl mx-auto px-4 h-16 flex items-center">
+						<Skeleton className="h-9 w-20" />
+					</div>
+				</div>
+
+				<div className="max-w-7xl mx-auto px-4 pt-8">
+					<div className="mb-8">
+						{/* Header Skeleton */}
+						<div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
+							<div className="flex-1">
+								<div className="flex items-center gap-3 mb-2">
+									<Skeleton className="w-12 h-12 rounded-xl" />
+									<Skeleton className="h-10 w-64" />
+								</div>
+								<div className="flex gap-2 mt-3">
+									<Skeleton className="h-6 w-24 rounded-full" />
+									<Skeleton className="h-6 w-32 rounded-full" />
+								</div>
+							</div>
+
+							<div className="flex gap-4">
+								<div className="border rounded-xl p-4 card-theme bg-card shadow-sm min-w-[140px] h-24">
+									<Skeleton className="h-4 w-20 mb-2" />
+									<Skeleton className="h-8 w-16" />
+								</div>
+								<div className="border rounded-xl p-4 card-theme bg-card shadow-sm min-w-[140px] h-24">
+									<Skeleton className="h-4 w-24 mb-2" />
+									<Skeleton className="h-8 w-24" />
+								</div>
+							</div>
+						</div>
+
+						{/* List Skeleton */}
+						<div className="space-y-4">
+							<div className="flex justify-between items-center">
+								<Skeleton className="h-7 w-40" />
+								<Skeleton className="h-10 w-72" />
+							</div>
+							<div className="hidden sm:block border rounded-xl overflow-hidden bg-card">
+								<div className="p-4 space-y-4">
+									{[...Array(5)].map((_, i) => (
+										<div key={i} className="flex items-center space-x-4">
+											<Skeleton className="h-4 w-1/4" />
+											<Skeleton className="h-4 w-1/4" />
+											<Skeleton className="h-4 w-1/4" />
+											<Skeleton className="h-4 w-1/4" />
+											<Skeleton className="h-4 w-1/4" />
+										</div>
+									))}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		);
+	}
 
 	// Calculate company stats
 	// We need to filter allStudents by company
