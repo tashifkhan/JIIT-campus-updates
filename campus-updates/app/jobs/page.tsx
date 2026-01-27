@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
+import { useJobData } from "@/lib/hooks/useJobData";
 import { Job } from "@/components/jobs/types";
 import JobFilters from "@/components/jobs/JobFilters";
 import JobCard from "@/components/jobs/JobCard";
@@ -119,30 +119,13 @@ function JobsPageContent() {
 	const [cgpaInputMax, setCgpaInputMax] = useState<string>("10.0");
 	const [openOnly, setOpenOnly] = useState<boolean>(false);
 
-	// Use react-query to fetch jobs
-	const { data: jobsResp, isLoading: jobsLoading } = useQuery<Job[]>({
-		queryKey: ["jobs"],
-		queryFn: async () => {
-			const res = await fetch("/api/jobs");
-			const json = await res.json();
-			return (json?.ok ? json.data : []) as Job[];
-		},
-	});
+	// Use global hook for jobs (cached)
+	const { jobs: jobsResp, loading: jobsLoading } = useJobData();
 
 	useEffect(() => {
+		// The hook already handles sorting and deduping, so we can just use the data directly
 		if (jobsResp) {
-			const sorted = [...jobsResp].sort(
-				(a: Job, b: Job) => (b.createdAt || 0) - (a.createdAt || 0),
-			);
-			const seen = new Set<string>();
-			const deduped: Job[] = [];
-			for (const j of sorted) {
-				if (!seen.has(j.id)) {
-					seen.add(j.id);
-					deduped.push(j);
-				}
-			}
-			setJobs(deduped);
+			setJobs(jobsResp);
 			setLoading(false);
 		}
 	}, [jobsResp]);
