@@ -27,6 +27,7 @@ type Props = {
 		selectedLocations: string[];
 		selectedGenders: string[];
 		selectedCourses: string[];
+		selectedMonths: number[];
 		minPackageLpa: number;
 		cgpaRange: [number, number];
 		cgpaInputMin: string;
@@ -39,6 +40,7 @@ type Props = {
 		setSelectedLocations: (updater: (prev: string[]) => string[]) => void;
 		setSelectedGenders: (updater: (prev: string[]) => string[]) => void;
 		setSelectedCourses: (updater: (prev: string[]) => string[]) => void;
+		setSelectedMonths: (updater: (prev: number[]) => number[]) => void;
 		setMinPackageLpa: (v: number) => void;
 		setCgpaRange: (v: [number, number]) => void;
 		setCgpaInputMin: (v: string) => void;
@@ -73,6 +75,12 @@ export function JobFilters({ jobs, values, onChange, derived }: Props) {
 		() => unique(jobs.flatMap((j) => j.eligibility_courses || [])).sort(),
 		[jobs]
 	);
+	const allMonths = useMemo(
+		() => unique(jobs.map((j) => j.createdAt ? new Date(j.createdAt).getMonth() : -1).filter((m) => m !== -1)).sort((a, b) => b - a),
+		[jobs]
+	);
+
+	const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 	return (
 		<Card className="mb-6">
@@ -206,6 +214,33 @@ export function JobFilters({ jobs, values, onChange, derived }: Props) {
 										}}
 									>
 										{course}
+									</DropdownMenuCheckboxItem>
+								))}
+							</DropdownMenuContent>
+						</DropdownMenu>
+
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button variant="outline" className="whitespace-nowrap">
+									Months
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent className="w-56 max-h-72 overflow-auto">
+								<DropdownMenuLabel>Select months</DropdownMenuLabel>
+								<DropdownMenuSeparator />
+								{allMonths.map((m) => (
+									<DropdownMenuCheckboxItem
+										key={m}
+										checked={values.selectedMonths.includes(m)}
+										onCheckedChange={(checked) => {
+											onChange.setSelectedMonths((prev) =>
+												checked
+													? [...prev, m]
+													: prev.filter((c) => c !== m)
+											);
+										}}
+									>
+										{monthNames[m]}
 									</DropdownMenuCheckboxItem>
 								))}
 							</DropdownMenuContent>

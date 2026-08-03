@@ -109,6 +109,7 @@ function JobsPageContent() {
 	const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
 	const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
 	const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+	const [selectedMonths, setSelectedMonths] = useState<number[]>([]);
 	const [minPackageLpa, setMinPackageLpa] = useState<number>(0);
 	const [cgpaRange, setCgpaRange] = useState<[number, number]>([0, 10]);
 	const [cgpaInputMin, setCgpaInputMin] = useState<string>("0.0");
@@ -201,6 +202,10 @@ function JobsPageContent() {
 				const courses = job.eligibility_courses || [];
 				if (!selectedCourses.some((c) => courses.includes(c))) return false;
 			}
+			if (selectedMonths.length) {
+				const jobMonth = job.createdAt ? new Date(job.createdAt).getMonth() : -1;
+				if (!selectedMonths.includes(jobMonth)) return false;
+			}
 			const lpa = (job.package || 0) / 100000;
 			if (lpa < minPackageLpa) return false;
 
@@ -226,6 +231,7 @@ function JobsPageContent() {
 		selectedLocations,
 		selectedGenders,
 		selectedCourses,
+		selectedMonths,
 		minPackageLpa,
 		cgpaRange,
 		openOnly,
@@ -238,6 +244,7 @@ function JobsPageContent() {
 		setSelectedLocations([]);
 		setSelectedGenders([]);
 		setSelectedCourses([]);
+		setSelectedMonths([]);
 		setMinPackageLpa(0);
 		setCgpaRange([0, 10]);
 		setCgpaInputMin("0.0");
@@ -293,6 +300,7 @@ function JobsPageContent() {
 					selectedLocations,
 					selectedGenders,
 					selectedCourses,
+					selectedMonths,
 					minPackageLpa,
 					cgpaRange,
 					cgpaInputMin,
@@ -307,6 +315,7 @@ function JobsPageContent() {
 						setSelectedLocations((prev) => u(prev)),
 					setSelectedGenders: (u) => setSelectedGenders((prev) => u(prev)),
 					setSelectedCourses: (u) => setSelectedCourses((prev) => u(prev)),
+					setSelectedMonths: (u) => setSelectedMonths((prev) => u(prev)),
 					setMinPackageLpa,
 					setCgpaRange,
 					setCgpaInputMin,
