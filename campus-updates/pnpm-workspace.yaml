@@ -1,0 +1,6 @@
+allowBuilds:
+  core-js: false
+  sharp: false
+  unrs-resolver: false
+minimumReleaseAgeExclude:
+  - '@tanstack/charts@0.9.0'

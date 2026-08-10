@@ -4,17 +4,18 @@ import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-	ComposedChart,
-	Line,
-	Bar,
-	XAxis,
-	YAxis,
-	CartesianGrid,
-	Tooltip,
-	Legend,
-	ResponsiveContainer,
-	Area,
-} from "recharts";
+	barY,
+	colorLegend,
+	defineChart,
+	group,
+	lineY,
+} from "@tanstack/charts";
+import { Chart } from "@tanstack/charts/react";
+import { scaleBand } from "@tanstack/charts/scales/band";
+import { scaleLinear } from "@tanstack/charts/scales/linear";
+import { scaleOrdinal } from "@tanstack/charts/scales/ordinal";
+import { scalePoint } from "@tanstack/charts/scales/point";
+import { tooltip } from "@tanstack/charts/tooltip";
 import { Placement, getStudentPackage } from "@/lib/stats";
 
 type Props = {
@@ -25,8 +26,202 @@ type Props = {
 type TimeFrame = "month" | "day";
 type MetricView = "count" | "package" | "combined";
 
+type TimelinePoint = {
+	date: string;
+	timestamp: number;
+	uniqueStudents: number;
+	totalOffers: number;
+	avgPackage: number;
+	medianPackage: number;
+};
+
+type SeriesRow = {
+	date: string;
+	series: string;
+	value: number;
+	unit: "" | "LPA";
+};
+
 // Exclude these branches
 const EXCLUDED_BRANCHES = new Set(["JUIT", "Other", "MTech"]);
+
+const COUNT_SERIES = ["Unique Students", "Total Offers"] as const;
+const PACKAGE_SERIES = ["Avg Package", "Median Package"] as const;
+
+const SERIES_COLORS: Record<string, string> = {
+	"Unique Students": "#3b82f6",
+	"Total Offers": "#10b981",
+	"Avg Package": "#f59e0b",
+	"Median Package": "#ec4899",
+};
+
+function toCountRows(points: TimelinePoint[]): SeriesRow[] {
+	return points.flatMap((p) => [
+		{
+			date: p.date,
+			series: "Unique Students",
+			value: p.uniqueStudents,
+			unit: "" as const,
+		},
+		{
+			date: p.date,
+			series: "Total Offers",
+			value: p.totalOffers,
+			unit: "" as const,
+		},
+	]);
+}
+
+function toPackageRows(points: TimelinePoint[]): SeriesRow[] {
+	return points.flatMap((p) => [
+		{
+			date: p.date,
+			series: "Avg Package",
+			value: p.avgPackage,
+			unit: "LPA" as const,
+		},
+		{
+			date: p.date,
+			series: "Median Package",
+			value: p.medianPackage,
+			unit: "LPA" as const,
+		},
+	]);
+}
+
+function buildCountDefinition(rows: SeriesRow[], isCumulative: boolean) {
+	const seriesOrder = [...COUNT_SERIES];
+	return defineChart({
+		marks: [
+			barY(rows, {
+				id: "count-bars",
+				x: "date",
+				y: "value",
+				z: "series",
+				layout: group({ padding: 0.15 }),
+				radius: 4,
+				maxThickness: 50,
+			}),
+		],
+		x: {
+			scale: () => scaleBand<string>().padding(0.2),
+			axis: {
+				tickLabels: { rotate: -30, fontSize: 11 },
+			},
+		},
+		y: {
+			scale: scaleLinear,
+			nice: true,
+			grid: true,
+			axis: {
+				label: isCumulative ? "Cumulative count" : "Count",
+				ticks: {
+					format: (value) =>
+						typeof value === "number" ? value.toLocaleString() : String(value),
+				},
+			},
+		},
+		color: {
+			scale: () =>
+				scaleOrdinal<string, string>()
+					.domain(seriesOrder)
+					.range(seriesOrder.map((s) => SERIES_COLORS[s])),
+			legend: colorLegend({ label: "Metric", placement: "bottom" }),
+		},
+		svgAnimation: true,
+		tooltip: {
+			use: tooltip,
+			formatGroup(points) {
+				const date = String(points[0]?.xValue ?? "");
+				const heading = isCumulative ? `${date} (Cumulative)` : date;
+				return [
+					heading,
+					...points.map(
+						(point) =>
+							`${point.groupLabel ?? point.datum.series}: ${Number(
+								point.yValue ?? 0
+							).toLocaleString()}`
+					),
+				].join("\n");
+			},
+		},
+	});
+}
+
+function buildPackageDefinition(rows: SeriesRow[], isCumulative: boolean) {
+	const seriesOrder = [...PACKAGE_SERIES];
+	return defineChart({
+		marks: [
+			lineY(
+				rows.filter((r) => r.series === "Avg Package"),
+				{
+					id: "avg-package",
+					x: "date",
+					y: "value",
+					z: "series",
+					stroke: SERIES_COLORS["Avg Package"],
+					strokeWidth: 2,
+					points: true,
+				}
+			),
+			lineY(
+				rows.filter((r) => r.series === "Median Package"),
+				{
+					id: "median-package",
+					x: "date",
+					y: "value",
+					z: "series",
+					stroke: SERIES_COLORS["Median Package"],
+					strokeWidth: 2,
+					strokeDasharray: "5 5",
+					points: true,
+				}
+			),
+		],
+		x: {
+			scale: () => scalePoint<string>().padding(0.2),
+			axis: {
+				tickLabels: { rotate: -30, fontSize: 11 },
+			},
+		},
+		y: {
+			scale: scaleLinear,
+			nice: true,
+			grid: true,
+			axis: {
+				label: isCumulative ? "Cumulative package (LPA)" : "Package (LPA)",
+				ticks: {
+					format: (value) =>
+						typeof value === "number" ? `${value}` : String(value),
+				},
+			},
+		},
+		color: {
+			scale: () =>
+				scaleOrdinal<string, string>()
+					.domain(seriesOrder)
+					.range(seriesOrder.map((s) => SERIES_COLORS[s])),
+			legend: colorLegend({ label: "Metric", placement: "bottom" }),
+		},
+		svgAnimation: true,
+		tooltip: {
+			use: tooltip,
+			formatGroup(points) {
+				const date = String(points[0]?.xValue ?? "");
+				const heading = isCumulative ? `${date} (Cumulative)` : date;
+				return [
+					heading,
+					...points.map((point) => {
+						const unit = point.datum.unit ? ` ${point.datum.unit}` : "";
+						return `${point.groupLabel ?? point.datum.series}: ${Number(
+							point.yValue ?? 0
+						)}${unit}`;
+					}),
+				].join("\n");
+			},
+		},
+	});
+}
 
 export default function PlacementTimeline({ placements, getBranch }: Props) {
 	const [timeFrame, setTimeFrame] = useState<TimeFrame>("month");
@@ -35,7 +230,7 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 
 	// Process data into time buckets
 	const chartData = useMemo(() => {
-		if (!placements.length) return [];
+		if (!placements.length) return [] as TimelinePoint[];
 
 		// Helper to get date object from placement
 		const getPlacementDate = (p: Placement): Date | null => {
@@ -205,42 +400,24 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 		return result;
 	}, [placements, timeFrame, getBranch, isCumulative]);
 
-	const CustomTooltip = ({ active, payload, label }: any) => {
-		if (!active || !payload || !payload.length) return null;
+	const countRows = useMemo(() => toCountRows(chartData), [chartData]);
+	const packageRows = useMemo(() => toPackageRows(chartData), [chartData]);
 
-		return (
-			<div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3">
-				<p className="font-semibold mb-2 text-slate-900 dark:text-slate-100">
-					{label} {isCumulative ? "(Cumulative)" : ""}
-				</p>
-				<div className="space-y-1">
-					{payload.map((entry: any, index: number) => {
-						// Map entry names to chart color classes
-						let colorClass = "bg-gray-500";
-						if (entry.name === "Unique Students") colorClass = "bg-chart-1";
-						else if (entry.name === "Total Offers") colorClass = "bg-chart-2";
-						else if (entry.name === "Avg Package") colorClass = "bg-chart-3";
-						else if (entry.name === "Median Package") colorClass = "bg-chart-4";
+	const countDefinition = useMemo(
+		() =>
+			countRows.length
+				? buildCountDefinition(countRows, isCumulative)
+				: null,
+		[countRows, isCumulative]
+	);
 
-						return (
-							<div
-								key={index}
-								className="flex items-center justify-between gap-3"
-							>
-								<span className="text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2">
-									<div className={`w-2 h-2 rounded-full ${colorClass}`} />
-									{entry.name}:
-								</span>
-								<span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-									{entry.value} {entry.name.includes("Package") ? "LPA" : ""}
-								</span>
-							</div>
-						);
-					})}
-				</div>
-			</div>
-		);
-	};
+	const packageDefinition = useMemo(
+		() =>
+			packageRows.length
+				? buildPackageDefinition(packageRows, isCumulative)
+				: null,
+		[packageRows, isCumulative]
+	);
 
 	return (
 		<Card className="card-theme">
@@ -325,81 +502,71 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 				</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<div className="h-[400px] w-full">
-					<ResponsiveContainer width="100%" height="100%">
-						<ComposedChart
-							data={chartData}
-							margin={{ top: 20, right: 30, bottom: 20, left: 20 }}
-						>
-							<CartesianGrid
-								strokeDasharray="3 3"
-								opacity={0.2}
-								vertical={false}
-							/>
-							<XAxis
-								dataKey="date"
-								tick={{ fontSize: 12, fill: "#888" }}
-								tickMargin={10}
-							/>
-							<YAxis
-								yAxisId="left"
-								tick={{ fontSize: 12, fill: "#888" }}
-								tickFormatter={(value) => value.toLocaleString()}
-								domain={[0, "auto"]}
-							/>
-							<YAxis
-								yAxisId="right"
-								orientation="right"
-								tick={{ fontSize: 12, fill: "#888" }}
-								unit=" LPA"
-								hide={view === "count"}
-								domain={[0, "auto"]}
-							/>
-							<Tooltip content={<CustomTooltip />} />
-							<Legend wrapperStyle={{ paddingTop: "20px" }} />
-
-							<Bar
-								yAxisId="left"
-								dataKey="uniqueStudents"
-								name="Unique Students"
-								fill="#3b82f6"
-								radius={[4, 4, 0, 0]}
-								maxBarSize={50}
-								hide={view === "package"}
-							/>
-							<Bar
-								yAxisId="left"
-								dataKey="totalOffers"
-								name="Total Offers"
-								fill="#10b981"
-								radius={[4, 4, 0, 0]}
-								maxBarSize={50}
-								hide={view === "package"}
-							/>
-							<Line
-								yAxisId="right"
-								type="monotone"
-								dataKey="avgPackage"
-								name="Avg Package"
-								stroke="#f59e0b"
-								strokeWidth={2}
-								dot={{ r: 3, fill: "#f59e0b" }}
-								hide={view === "count"}
-							/>
-							<Line
-								yAxisId="right"
-								type="monotone"
-								dataKey="medianPackage"
-								name="Median Package"
-								stroke="#ec4899"
-								strokeWidth={2}
-								strokeDasharray="5 5"
-								dot={{ r: 3, fill: "#ec4899" }}
-								hide={view === "count"}
-							/>
-						</ComposedChart>
-					</ResponsiveContainer>
-				</div>
+				{chartData.length === 0 ? (
+					<div
+						className="text-center py-12"
+						style={{ color: "var(--label-color)" }}
+					>
+						<p>No timeline data available</p>
+					</div>
+				) : view === "combined" ? (
+					<div className="space-y-6">
+						{countDefinition && (
+							<div className="h-[280px] w-full">
+								<p
+									className="mb-2 text-xs font-medium"
+									style={{ color: "var(--label-color)" }}
+								>
+									Offer counts
+								</p>
+								<Chart
+									definition={countDefinition}
+									height={250}
+									initialWidth={960}
+									ariaLabel="Placement timeline counts"
+									className="h-full w-full"
+								/>
+							</div>
+						)}
+						{packageDefinition && (
+							<div className="h-[280px] w-full">
+								<p
+									className="mb-2 text-xs font-medium"
+									style={{ color: "var(--label-color)" }}
+								>
+									Package trends (LPA)
+								</p>
+								<Chart
+									definition={packageDefinition}
+									height={250}
+									initialWidth={960}
+									ariaLabel="Placement timeline packages"
+									className="h-full w-full"
+								/>
+							</div>
+						)}
+					</div>
+				) : view === "count" && countDefinition ? (
+					<div className="h-[400px] w-full">
+						<Chart
+							definition={countDefinition}
+							height={380}
+							initialWidth={960}
+							ariaLabel="Placement timeline counts"
+							className="h-full w-full"
+						/>
+					</div>
+				) : packageDefinition ? (
+					<div className="h-[400px] w-full">
+						<Chart
+							definition={packageDefinition}
+							height={380}
+							initialWidth={960}
+							ariaLabel="Placement timeline packages"
+							className="h-full w-full"
+						/>
+					</div>
+				) : null}
 			</CardContent>
 		</Card>
 	);

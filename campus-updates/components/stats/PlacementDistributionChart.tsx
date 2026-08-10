@@ -2,21 +2,18 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
 import {
-	AreaChart,
-	Area,
-	XAxis,
-	YAxis,
-	CartesianGrid,
-	Tooltip,
-	Legend,
-	ResponsiveContainer,
-	LineChart as RechartsLineChart,
-	Line,
-} from "recharts";
+	areaY,
+	colorLegend,
+	defineChart,
+	lineY,
+} from "@tanstack/charts";
+import { Chart } from "@tanstack/charts/react";
+import { scaleLinear } from "@tanstack/charts/scales/linear";
+import { scaleOrdinal } from "@tanstack/charts/scales/ordinal";
+import { scalePoint } from "@tanstack/charts/scales/point";
+import { tooltip } from "@tanstack/charts/tooltip";
 import type { StudentWithPlacement } from "@/lib/stats";
 import { getStudentPackage } from "@/lib/stats";
 import { BranchPicker } from "./BranchPicker";
@@ -24,6 +21,12 @@ import { BranchPicker } from "./BranchPicker";
 type Props = {
 	students: StudentWithPlacement[];
 	getBranch: (enrollment: string) => string;
+};
+
+type DistRow = {
+	range: string;
+	series: string;
+	value: number;
 };
 
 // Color palette for branches - vibrant and distinguishable colors (excluded: JUIT, Other, MTech)
@@ -36,6 +39,8 @@ const BRANCH_COLORS: Record<string, string> = {
 };
 
 const DEFAULT_COLOR = "#94a3b8"; // slate-400
+const OVERALL_COLOR = "currentColor";
+const OVERALL_SERIES = "Overall (All offers)";
 
 // Default branches to select (case-insensitive)
 const DEFAULT_SELECTED = ["CSE", "IT", "ECE"];
@@ -60,6 +65,165 @@ const getBranchColor = (branch: string): string => {
 
 // Excluded branches from all displays
 const EXCLUDED_BRANCHES = new Set(["JUIT", "Other", "MTech"]);
+
+const PACKAGE_RANGES = [
+	{ label: "0-3", min: 0, max: 3 },
+	{ label: "3-4", min: 3, max: 4 },
+	{ label: "4-5", min: 4, max: 5 },
+	{ label: "5-6", min: 5, max: 6 },
+	{ label: "6-7", min: 6, max: 7 },
+	{ label: "7-8", min: 7, max: 8 },
+	{ label: "8-9", min: 8, max: 9 },
+	{ label: "9-10", min: 9, max: 10 },
+	{ label: "10-12", min: 10, max: 12 },
+	{ label: "12-15", min: 12, max: 15 },
+	{ label: "15-18", min: 15, max: 18 },
+	{ label: "18-20", min: 18, max: 20 },
+	{ label: "20-25", min: 20, max: 25 },
+	{ label: "25-30", min: 25, max: 30 },
+	{ label: "30-35", min: 30, max: 35 },
+	{ label: "35-40", min: 35, max: 40 },
+	{ label: "40-50", min: 40, max: 50 },
+	{ label: "50+", min: 50, max: Infinity },
+] as const;
+
+function buildDistributionDefinition(
+	rows: DistRow[],
+	options: {
+		seriesOrder: string[];
+		chartType: "area" | "line";
+		showLegend: boolean;
+		ariaLabel: string;
+	}
+) {
+	const { seriesOrder, chartType, showLegend } = options;
+	const colorRange = seriesOrder.map((series) =>
+		series === OVERALL_SERIES ? OVERALL_COLOR : getBranchColor(series)
+	);
+
+	const branchRows = rows.filter((r) => r.series !== OVERALL_SERIES);
+	const overallRows = rows.filter((r) => r.series === OVERALL_SERIES);
+
+	const marks =
+		chartType === "area"
+			? [
+					...(branchRows.length
+						? [
+								areaY(branchRows, {
+									id: "branches-area",
+									x: "range",
+									y: "value",
+									z: "series",
+									fillOpacity: 0.35,
+									strokeWidth: 2,
+								}),
+						  ]
+						: []),
+					...(overallRows.length
+						? [
+								areaY(overallRows, {
+									id: "overall-area",
+									x: "range",
+									y: "value",
+									z: "series",
+									fill: OVERALL_COLOR,
+									fillOpacity: 0.12,
+									stroke: OVERALL_COLOR,
+									strokeWidth: 3,
+								}),
+								lineY(overallRows, {
+									id: "overall-line",
+									x: "range",
+									y: "value",
+									z: "series",
+									stroke: OVERALL_COLOR,
+									strokeWidth: 3,
+									strokeDasharray: "5 5",
+								}),
+						  ]
+						: []),
+			  ]
+			: [
+					...(branchRows.length
+						? [
+								lineY(branchRows, {
+									id: "branches-line",
+									x: "range",
+									y: "value",
+									z: "series",
+									strokeWidth: 2,
+									points: true,
+								}),
+						  ]
+						: []),
+					...(overallRows.length
+						? [
+								lineY(overallRows, {
+									id: "overall-line",
+									x: "range",
+									y: "value",
+									z: "series",
+									stroke: OVERALL_COLOR,
+									strokeWidth: 3,
+									strokeDasharray: "5 5",
+									points: true,
+								}),
+						  ]
+						: []),
+			  ];
+
+	return defineChart({
+		marks,
+		x: {
+			scale: () => scalePoint<string>().padding(0.15),
+			axis: {
+				tickLabels: {
+					rotate: -45,
+					fontSize: 11,
+				},
+			},
+		},
+		y: {
+			scale: scaleLinear,
+			nice: true,
+			grid: true,
+			axis: {
+				label: "Offers",
+				ticks: {
+					format: (value) =>
+						typeof value === "number" ? value.toLocaleString() : String(value),
+				},
+			},
+		},
+		color: {
+			scale: () =>
+				scaleOrdinal<string, string>().domain(seriesOrder).range(colorRange),
+			...(showLegend
+				? { legend: colorLegend({ label: "Series", placement: "bottom" }) }
+				: {}),
+		},
+		svgAnimation: true,
+		tooltip: {
+			use: tooltip,
+			formatGroup(points) {
+				const range = points[0]?.xValue;
+				const heading = `Package Range: ₹${String(range ?? "")} LPA`;
+				const sorted = [...points].sort(
+					(a, b) => (Number(b.yValue) || 0) - (Number(a.yValue) || 0)
+				);
+				return [
+					heading,
+					...sorted.map(
+						(point) =>
+							`${point.groupLabel ?? point.datum.series}: ${Number(
+								point.yValue ?? 0
+							).toLocaleString()}`
+					),
+				].join("\n");
+			},
+		},
+	});
+}
 
 export default function PlacementDistributionChart({
 	students,
@@ -117,64 +281,59 @@ export default function PlacementDistributionChart({
 		setSelectedBranches(branches);
 	};
 
-	// Prepare data for the chart
-	const chartData = useMemo(() => {
-		if (selectedBranches.size === 0) return [];
+	// Wide-format counts for stats/legend, long-format for TanStack Charts
+	const { chartDataWide, longSeries } = useMemo(() => {
+		if (selectedBranches.size === 0) {
+			return { chartDataWide: [] as any[], longSeries: [] as DistRow[] };
+		}
 
-		// More granular package ranges for detailed distribution
-		const packageRanges = [
-			{ label: "0-3", min: 0, max: 3 },
-			{ label: "3-4", min: 3, max: 4 },
-			{ label: "4-5", min: 4, max: 5 },
-			{ label: "5-6", min: 5, max: 6 },
-			{ label: "6-7", min: 6, max: 7 },
-			{ label: "7-8", min: 7, max: 8 },
-			{ label: "8-9", min: 8, max: 9 },
-			{ label: "9-10", min: 9, max: 10 },
-			{ label: "10-12", min: 10, max: 12 },
-			{ label: "12-15", min: 12, max: 15 },
-			{ label: "15-18", min: 15, max: 18 },
-			{ label: "18-20", min: 18, max: 20 },
-			{ label: "20-25", min: 20, max: 25 },
-			{ label: "25-30", min: 25, max: 30 },
-			{ label: "30-35", min: 30, max: 35 },
-			{ label: "35-40", min: 35, max: 40 },
-			{ label: "40-50", min: 40, max: 50 },
-			{ label: "50+", min: 50, max: Infinity },
-		];
-
-		// Initialize data structure
-		const data = packageRanges.map((range) => {
-			const point: any = { range: range.label, Overall: 0 };
+		const wide = PACKAGE_RANGES.map((range) => {
+			const point: Record<string, string | number> = {
+				range: range.label,
+				Overall: 0,
+			};
 			selectedBranches.forEach((branch) => {
 				point[branch] = 0;
 			});
 			return point;
 		});
 
-		// Count students in each package range per branch
-		// Overall always includes ALL students regardless of selection
 		students.forEach((student) => {
 			const branch = getBranch(student.enrollment_number);
 			const pkg = getStudentPackage(student, student.placement);
 			if (pkg == null || pkg <= 0) return;
 
-			// Find the appropriate range
-			const rangeIndex = packageRanges.findIndex(
+			const rangeIndex = PACKAGE_RANGES.findIndex(
 				(r) => pkg >= r.min && pkg < r.max
 			);
-			if (rangeIndex >= 0) {
-				// Always add to Overall (all students)
-				data[rangeIndex].Overall = (data[rangeIndex].Overall || 0) + 1;
+			if (rangeIndex < 0) return;
 
-				// Only add to branch-specific if selected
-				if (selectedBranches.has(branch)) {
-					data[rangeIndex][branch] = (data[rangeIndex][branch] || 0) + 1;
-				}
+			wide[rangeIndex].Overall = (Number(wide[rangeIndex].Overall) || 0) + 1;
+
+			if (selectedBranches.has(branch)) {
+				wide[rangeIndex][branch] =
+					(Number(wide[rangeIndex][branch]) || 0) + 1;
 			}
 		});
 
-		return data;
+		const long: DistRow[] = [];
+		for (const point of wide) {
+			const range = String(point.range);
+			for (const branch of Array.from(selectedBranches).sort()) {
+				long.push({
+					range,
+					series: branch,
+					value: Number(point[branch]) || 0,
+				});
+			}
+			long.push({
+				range,
+				series: OVERALL_SERIES,
+				value: Number(point.Overall) || 0,
+			});
+		}
+
+		return { chartDataWide: wide, longSeries: long };
 	}, [students, selectedBranches, getBranch]);
 
 	// Calculate statistics
@@ -222,41 +381,36 @@ export default function PlacementDistributionChart({
 		};
 	}, [students, selectedBranches, getBranch]);
 
-	// Custom tooltip
-	const CustomTooltip = ({ active, payload, label }: any) => {
-		if (!active || !payload || !payload.length) return null;
+	const sortedBranches = useMemo(
+		() => Array.from(selectedBranches).sort(),
+		[selectedBranches]
+	);
 
-		return (
-			<div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3">
-				<p className="font-semibold mb-2 text-slate-900 dark:text-slate-100">
-					Package Range: ₹{label} LPA
-				</p>
-				<div className="space-y-1">
-					{payload
-						.sort((a: any, b: any) => b.value - a.value)
-						.map((entry: any, index: number) => (
-							<div
-								key={index}
-								className="flex items-center justify-between gap-3"
-							>
-								<div className="flex items-center gap-2">
-									<div
-										className="w-3 h-3 rounded-full"
-										style={{ backgroundColor: entry.color }}
-									/>
-									<span className="text-sm text-slate-700 dark:text-slate-300">
-										{entry.name}
-									</span>
-								</div>
-								<span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-									{entry.value}
-								</span>
-							</div>
-						))}
-				</div>
-			</div>
-		);
-	};
+	const combinedDefinition = useMemo(() => {
+		if (longSeries.length === 0 || sortedBranches.length === 0) return null;
+		return buildDistributionDefinition(longSeries, {
+			seriesOrder: [...sortedBranches, OVERALL_SERIES],
+			chartType,
+			showLegend: true,
+			ariaLabel: "Placement distribution across packages by branch",
+		});
+	}, [longSeries, sortedBranches, chartType]);
+
+	const individualDefinitions = useMemo(() => {
+		if (longSeries.length === 0) return [];
+		return sortedBranches.map((branch) => {
+			const rows = longSeries.filter((r) => r.series === branch);
+			return {
+				branch,
+				definition: buildDistributionDefinition(rows, {
+					seriesOrder: [branch],
+					chartType,
+					showLegend: false,
+					ariaLabel: `Placement distribution for ${branch}`,
+				}),
+			};
+		});
+	}, [longSeries, sortedBranches, chartType]);
 
 	return (
 		<Card className="card-theme">
@@ -345,8 +499,6 @@ export default function PlacementDistributionChart({
 				</CardTitle>
 			</CardHeader>
 			<CardContent>
-				{/* Branch selector badges */}
-
 				{/* Chart */}
 				{selectedBranches.size === 0 ? (
 					<div
@@ -357,7 +509,7 @@ export default function PlacementDistributionChart({
 							Select at least one branch to view the distribution
 						</p>
 					</div>
-				) : chartData.length === 0 ? (
+				) : chartDataWide.length === 0 ? (
 					<div
 						className="text-center py-8 sm:py-12"
 						style={{ color: "var(--label-color)" }}
@@ -369,364 +521,80 @@ export default function PlacementDistributionChart({
 				) : showBranchSpecific ? (
 					// Individual branch graphs
 					<div className="space-y-6">
-						{Array.from(selectedBranches)
-							.sort()
-							.map((branch) => {
-								const color = getBranchColor(branch);
-								const branchStudents = students.filter(
-									(s) => getBranch(s.enrollment_number) === branch
-								);
-								const branchPackages = branchStudents
-									.map((s) => getStudentPackage(s, s.placement))
-									.filter((p): p is number => p != null && p > 0);
+						{individualDefinitions.map(({ branch, definition }) => {
+							const color = getBranchColor(branch);
+							const branchStudents = students.filter(
+								(s) => getBranch(s.enrollment_number) === branch
+							);
+							const branchPackages = branchStudents
+								.map((s) => getStudentPackage(s, s.placement))
+								.filter((p): p is number => p != null && p > 0);
 
-								const avgPkg =
-									branchPackages.length > 0
-										? branchPackages.reduce((a, b) => a + b, 0) /
-										  branchPackages.length
-										: 0;
+							const avgPkg =
+								branchPackages.length > 0
+									? branchPackages.reduce((a, b) => a + b, 0) /
+									  branchPackages.length
+									: 0;
 
-								return (
-									<div
-										key={branch}
-										className="rounded-lg border-2 p-3 sm:p-4"
-										style={{
-											borderColor: color,
-											backgroundColor: `${color}05`,
-										}}
-									>
-										<div className="flex items-center justify-between mb-3">
-											<div className="flex items-center gap-2">
-												<div
-													className="w-3 h-3 rounded-full"
-													style={{ backgroundColor: color }}
-												/>
-												<h3
-													className="font-semibold text-sm sm:text-base"
-													style={{ color: "var(--text-color)" }}
-												>
-													{branch}
-												</h3>
-											</div>
-											<div className="text-right text-xs sm:text-sm">
-												<span style={{ color: "var(--label-color)" }}>
-													{branchStudents.length} offers
-												</span>
-												<span
-													className="ml-2 font-semibold"
-													style={{ color: "var(--text-color)" }}
-												>
-													₹{avgPkg.toFixed(1)} LPA
-												</span>
-											</div>
+							return (
+								<div
+									key={branch}
+									className="rounded-lg border-2 p-3 sm:p-4"
+									style={{
+										borderColor: color,
+										backgroundColor: `${color}05`,
+									}}
+								>
+									<div className="flex items-center justify-between mb-3">
+										<div className="flex items-center gap-2">
+											<div
+												className="w-3 h-3 rounded-full"
+												style={{ backgroundColor: color }}
+											/>
+											<h3
+												className="font-semibold text-sm sm:text-base"
+												style={{ color: "var(--text-color)" }}
+											>
+												{branch}
+											</h3>
 										</div>
-										<div className="w-full h-[250px] sm:h-[300px]">
-											<ResponsiveContainer width="100%" height="100%">
-												{chartType === "area" ? (
-													<AreaChart
-														data={chartData}
-														margin={{
-															top: 10,
-															right: 10,
-															left: 0,
-															bottom: 0,
-														}}
-													>
-														<defs>
-															<linearGradient
-																id={`gradient-${branch}`}
-																x1="0"
-																y1="0"
-																x2="0"
-																y2="1"
-															>
-																<stop
-																	offset="5%"
-																	stopColor={color}
-																	stopOpacity={0.8}
-																/>
-																<stop
-																	offset="95%"
-																	stopColor={color}
-																	stopOpacity={0.1}
-																/>
-															</linearGradient>
-														</defs>
-														<CartesianGrid
-															strokeDasharray="3 3"
-															className="stroke-slate-200 dark:stroke-slate-700"
-															opacity={0.3}
-														/>
-														<XAxis
-															dataKey="range"
-															className="text-[10px] sm:text-xs"
-															tick={{ fill: "var(--label-color)" }}
-															angle={-45}
-															textAnchor="end"
-															height={60}
-														/>
-														<YAxis
-															className="text-[10px] sm:text-xs"
-															tick={{ fill: "var(--label-color)" }}
-															width={35}
-														/>
-														<Tooltip content={<CustomTooltip />} />
-														<Area
-															type="monotone"
-															dataKey={branch}
-															stroke={color}
-															strokeWidth={3}
-															fill={`url(#gradient-${branch})`}
-															fillOpacity={1}
-															name={branch}
-															animationDuration={1000}
-														/>
-													</AreaChart>
-												) : (
-													<RechartsLineChart
-														data={chartData}
-														margin={{
-															top: 10,
-															right: 10,
-															left: 0,
-															bottom: 0,
-														}}
-													>
-														<CartesianGrid
-															strokeDasharray="3 3"
-															className="stroke-slate-200 dark:stroke-slate-700"
-															opacity={0.3}
-														/>
-														<XAxis
-															dataKey="range"
-															className="text-[10px] sm:text-xs"
-															tick={{ fill: "var(--label-color)" }}
-															angle={-45}
-															textAnchor="end"
-															height={60}
-														/>
-														<YAxis
-															className="text-[10px] sm:text-xs"
-															tick={{ fill: "var(--label-color)" }}
-															width={35}
-														/>
-														<Tooltip content={<CustomTooltip />} />
-														<Line
-															type="monotone"
-															dataKey={branch}
-															stroke={color}
-															strokeWidth={3}
-															dot={{ r: 4, fill: color }}
-															activeDot={{ r: 6 }}
-															name={branch}
-															animationDuration={1000}
-														/>
-													</RechartsLineChart>
-												)}
-											</ResponsiveContainer>
+										<div className="text-right text-xs sm:text-sm">
+											<span style={{ color: "var(--label-color)" }}>
+												{branchStudents.length} offers
+											</span>
+											<span
+												className="ml-2 font-semibold"
+												style={{ color: "var(--text-color)" }}
+											>
+												₹{avgPkg.toFixed(1)} LPA
+											</span>
 										</div>
 									</div>
-								);
-							})}
+									<div className="w-full h-[250px] sm:h-[300px]">
+										<Chart
+											definition={definition}
+											height={280}
+											initialWidth={640}
+											ariaLabel={`Placement distribution for ${branch}`}
+											className="h-full w-full"
+										/>
+									</div>
+								</div>
+							);
+						})}
 					</div>
-				) : (
+				) : combinedDefinition ? (
 					// Combined graph
 					<div className="w-full h-[300px] sm:h-[400px] lg:h-[500px]">
-						<ResponsiveContainer width="100%" height="100%">
-							{chartType === "area" ? (
-								<AreaChart
-									data={chartData}
-									margin={{
-										top: 10,
-										right: 10,
-										left: 0,
-										bottom: 0,
-									}}
-								>
-									<defs>
-										{Array.from(selectedBranches).map((branch) => {
-											const color = getBranchColor(branch);
-											return (
-												<linearGradient
-													key={branch}
-													id={`color-${branch}`}
-													x1="0"
-													y1="0"
-													x2="0"
-													y2="1"
-												>
-													<stop
-														offset="5%"
-														stopColor={color}
-														stopOpacity={0.8}
-													/>
-													<stop
-														offset="95%"
-														stopColor={color}
-														stopOpacity={0.1}
-													/>
-												</linearGradient>
-											);
-										})}
-										{/* Overall gradient with theme-aware styling */}
-										<linearGradient
-											id="color-Overall"
-											x1="0"
-											y1="0"
-											x2="0"
-											y2="1"
-										>
-											<stop
-												offset="5%"
-												stopColor="currentColor"
-												stopOpacity={0.4}
-											/>
-											<stop
-												offset="95%"
-												stopColor="currentColor"
-												stopOpacity={0.05}
-											/>
-										</linearGradient>
-									</defs>
-									<CartesianGrid
-										strokeDasharray="3 3"
-										className="stroke-slate-200 dark:stroke-slate-700"
-										opacity={0.3}
-									/>
-									<XAxis
-										dataKey="range"
-										className="text-[10px] sm:text-xs"
-										tick={{ fill: "var(--label-color)" }}
-										angle={-45}
-										textAnchor="end"
-										height={60}
-									/>
-									<YAxis
-										className="text-[10px] sm:text-xs"
-										tick={{ fill: "var(--label-color)" }}
-										width={35}
-									/>
-									<Tooltip content={<CustomTooltip />} />
-									<Legend
-										wrapperStyle={{
-											paddingTop: "10px",
-											fontSize: "11px",
-										}}
-										iconType="circle"
-										iconSize={8}
-									/>
-									{/* Render branch areas */}
-									{Array.from(selectedBranches)
-										.sort()
-										.map((branch) => {
-											const color = getBranchColor(branch);
-											return (
-												<Area
-													key={branch}
-													type="monotone"
-													dataKey={branch}
-													stroke={color}
-													strokeWidth={2}
-													fill={`url(#color-${branch})`}
-													fillOpacity={1}
-													name={branch}
-													animationDuration={1000}
-												/>
-											);
-										})}
-									{/* Overall line with theme-aware styling */}
-									<Area
-										type="monotone"
-										dataKey="Overall"
-										stroke="var(--text-color)"
-										strokeWidth={3}
-										strokeDasharray="5 5"
-										fill="url(#color-Overall)"
-										fillOpacity={0.8}
-										name="Overall (All offers)"
-										animationDuration={1000}
-										className="[stroke:var(--text-color)]"
-									/>
-								</AreaChart>
-							) : (
-								<RechartsLineChart
-									data={chartData}
-									margin={{
-										top: 10,
-										right: 10,
-										left: 0,
-										bottom: 0,
-									}}
-								>
-									<CartesianGrid
-										strokeDasharray="3 3"
-										className="stroke-slate-200 dark:stroke-slate-700"
-										opacity={0.3}
-									/>
-									<XAxis
-										dataKey="range"
-										className="text-[10px] sm:text-xs"
-										tick={{ fill: "var(--label-color)" }}
-										angle={-45}
-										textAnchor="end"
-										height={60}
-									/>
-									<YAxis
-										className="text-[10px] sm:text-xs"
-										tick={{ fill: "var(--label-color)" }}
-										width={35}
-									/>
-									<Tooltip content={<CustomTooltip />} />
-									<Legend
-										wrapperStyle={{
-											paddingTop: "10px",
-											fontSize: "11px",
-										}}
-										iconType="circle"
-										iconSize={8}
-									/>
-									{/* Render branch lines */}
-									{Array.from(selectedBranches)
-										.sort()
-										.map((branch) => {
-											const color = getBranchColor(branch);
-											return (
-												<Line
-													key={branch}
-													type="monotone"
-													dataKey={branch}
-													stroke={color}
-													strokeWidth={2}
-													dot={{ r: 3, fill: color }}
-													activeDot={{ r: 5 }}
-													name={branch}
-													animationDuration={1000}
-												/>
-											);
-										})}
-									{/* Overall line with theme-aware styling */}
-									<Line
-										type="monotone"
-										dataKey="Overall"
-										stroke="var(--text-color)"
-										strokeWidth={3}
-										strokeDasharray="5 5"
-										dot={{
-											r: 4,
-											fill: "var(--text-color)",
-											strokeWidth: 2,
-											stroke: "var(--accent-color)",
-										}}
-										activeDot={{ r: 6 }}
-										name="Overall (All offers)"
-										animationDuration={1000}
-										className="[stroke:var(--text-color)]"
-									/>
-								</RechartsLineChart>
-							)}
-						</ResponsiveContainer>
+						<Chart
+							definition={combinedDefinition}
+							height={460}
+							initialWidth={960}
+							ariaLabel="Placement distribution across packages by branch"
+							className="h-full w-full"
+						/>
 					</div>
-				)}
+				) : null}
 
 				{/* Legend with statistics per branch - only show in combined view */}
 				{selectedBranches.size > 0 && !showBranchSpecific && (
@@ -772,62 +640,60 @@ export default function PlacementDistributionChart({
 
 						{/* Individual branch statistics */}
 						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
-							{Array.from(selectedBranches)
-								.sort()
-								.map((branch) => {
-									const branchStudents = students.filter(
-										(s) => getBranch(s.enrollment_number) === branch
-									);
-									const branchPackages = branchStudents
-										.map((s) => getStudentPackage(s, s.placement))
-										.filter((p): p is number => p != null && p > 0);
+							{sortedBranches.map((branch) => {
+								const branchStudents = students.filter(
+									(s) => getBranch(s.enrollment_number) === branch
+								);
+								const branchPackages = branchStudents
+									.map((s) => getStudentPackage(s, s.placement))
+									.filter((p): p is number => p != null && p > 0);
 
-									const avgPkg =
-										branchPackages.length > 0
-											? branchPackages.reduce((a, b) => a + b, 0) /
-											  branchPackages.length
-											: 0;
+								const avgPkg =
+									branchPackages.length > 0
+										? branchPackages.reduce((a, b) => a + b, 0) /
+										  branchPackages.length
+										: 0;
 
-									const color = getBranchColor(branch);
+								const color = getBranchColor(branch);
 
-									return (
-										<div
-											key={branch}
-											className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg border"
-											style={{
-												borderColor: color,
-												backgroundColor: `${color}10`,
-											}}
-										>
-											<div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-												<div
-													className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0"
-													style={{ backgroundColor: color }}
-												/>
-												<span
-													className="font-medium text-xs sm:text-sm truncate"
-													style={{ color: "var(--text-color)" }}
-												>
-													{branch}
-												</span>
+								return (
+									<div
+										key={branch}
+										className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg border"
+										style={{
+											borderColor: color,
+											backgroundColor: `${color}10`,
+										}}
+									>
+										<div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+											<div
+												className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0"
+												style={{ backgroundColor: color }}
+											/>
+											<span
+												className="font-medium text-xs sm:text-sm truncate"
+												style={{ color: "var(--text-color)" }}
+											>
+												{branch}
+											</span>
+										</div>
+										<div className="text-right flex-shrink-0 ml-2">
+											<div
+												className="text-[10px] sm:text-xs"
+												style={{ color: "var(--label-color)" }}
+											>
+												{branchStudents.length}
 											</div>
-											<div className="text-right flex-shrink-0 ml-2">
-												<div
-													className="text-[10px] sm:text-xs"
-													style={{ color: "var(--label-color)" }}
-												>
-													{branchStudents.length}
-												</div>
-												<div
-													className="text-xs sm:text-sm font-semibold whitespace-nowrap"
-													style={{ color: "var(--text-color)" }}
-												>
-													₹{avgPkg.toFixed(1)}
-												</div>
+											<div
+												className="text-xs sm:text-sm font-semibold whitespace-nowrap"
+												style={{ color: "var(--text-color)" }}
+											>
+												₹{avgPkg.toFixed(1)}
 											</div>
 										</div>
-									);
-								})}
+									</div>
+								);
+							})}
 						</div>
 					</div>
 				)}
