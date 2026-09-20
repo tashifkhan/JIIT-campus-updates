@@ -1,30 +1,44 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Suspense } from "react";
+import { Antic, JetBrains_Mono } from "next/font/google";
 import { PostHogProvider } from "@/components/providor";
 import { Analytics } from "@vercel/analytics/next";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import ReactQueryProvider from "@/components/ReactQueryProvider";
+import { SecretAccessProvider } from "@/components/SecretAccessProvider";
+import DevelopmentServiceWorkerCleanup from "@/components/DevelopmentServiceWorkerCleanup";
 
 import Layout from "@/components/Layout";
 
-const inter = Inter({ subsets: ["latin"] });
+const antic = Antic({
+	weight: "400",
+	subsets: ["latin"],
+	variable: "--font-sans",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+	subsets: ["latin"],
+	variable: "--font-mono",
+});
 
 export const metadata: Metadata = {
+	manifest: "/manifest.json",
 	title: {
-		default: "JIIT Placement Updates",
-		template: "%s - JIIT Placement Updates",
+		default: "JIIT Placements",
+		template: "%s - JIIT Placements",
 	},
-	description: "Campus placement and updates portal",
-	applicationName: "JIIT Placement Updates",
-	metadataBase: new URL("https://jiit-placement-updates.tashif.codes"),
+	description: "JIIT placement portal",
+	applicationName: "JIIT Placements",
+	metadataBase: new URL("https://jiit-placement-updates.netlify.app"),
 	openGraph: {
-		title: "JIIT Placement Updates",
-		description: "Campus placement and updates portal",
-		url: "https://jiit-placement-updates.tashif.codes",
-		siteName: "JIIT Placement Updates",
+		title: "JIIT Placements",
+		description: "JIIT placement portal",
+		url: "https://jiit-placement-updates.netlify.app",
+		siteName: "JIIT Placements",
 		images: [
 			{
-				url: "https://jiit-placement-updates.tashif.codes/logo.png",
+				url: "https://jiit-placement-updates.netlify.app/logo.png",
 				height: 800,
 				width: 1200,
 			},
@@ -32,8 +46,8 @@ export const metadata: Metadata = {
 		type: "website",
 	},
 	twitter: {
-		title: "JIIT Placement Updates",
-		description: "Campus placement and updates portal",
+		title: "JIIT Placements",
+		description: "JIIT placement portal",
 		card: "summary_large_image",
 		site: "",
 	},
@@ -58,36 +72,50 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<head />
-			<body className={inter.className}>
-				<PostHogProvider
-					apiKey={process.env.NEXT_PUBLIC_POSTHOG_KEY}
-					options={{ api_host: "/ph" }}
-				>
-					<ReactQueryProvider>
-						<Layout>{children}</Layout>
-					</ReactQueryProvider>
-					<Analytics />
-					{/* JSON-LD structured data for site */}
-					<script
-						type="application/ld+json"
-						dangerouslySetInnerHTML={{
-							__html: JSON.stringify({
-								"@context": "https://schema.org",
-								"@type": "WebSite",
-								name: "JIIT Placement Updates",
-								url: "https://jiit-placement-updates.tashif.codes",
-								potentialAction: {
-									"@type": "SearchAction",
-									target:
-										"https://jiit-placement-updates.tashif.codes/search?q={search_term_string}",
-									"query-input": "required name=search_term_string",
-								},
-							}),
-						}}
-					/>
-				</PostHogProvider>
+			<body
+				suppressHydrationWarning
+				className={`${antic.variable} ${jetbrainsMono.variable} font-sans bg-background text-foreground`}
+			>
+				<DevelopmentServiceWorkerCleanup />
+				{/* NuqsAdapter uses useSearchParams, which requires a Suspense
+				    boundary during prerendering (e.g. the /404 page). */}
+				<Suspense fallback={null}>
+					<NuqsAdapter>
+						<SecretAccessProvider
+							enabled={process.env.SITE_GATE_ENABLED === "true"}
+						>
+							<PostHogProvider
+								apiKey={process.env.NEXT_PUBLIC_POSTHOG_KEY}
+								options={{ api_host: "/ph" }}
+							>
+								<ReactQueryProvider>
+									<Layout>{children}</Layout>
+								</ReactQueryProvider>
+								<Analytics />
+								{/* JSON-LD structured data for site */}
+								<script
+									type="application/ld+json"
+									dangerouslySetInnerHTML={{
+										__html: JSON.stringify({
+											"@context": "https://schema.org",
+											"@type": "WebSite",
+											name: "JIIT Placements",
+											url: "https://jiit-placement-updates.netlify.app",
+											potentialAction: {
+												"@type": "SearchAction",
+												target:
+													"https://jiit-placement-updates.netlify.app/search?q={search_term_string}",
+												"query-input": "required name=search_term_string",
+											},
+										}),
+									}}
+								/>
+							</PostHogProvider>
+						</SecretAccessProvider>
+					</NuqsAdapter>
+				</Suspense>
 			</body>
 		</html>
 	);

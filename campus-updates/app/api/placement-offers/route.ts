@@ -1,33 +1,28 @@
 import { NextResponse } from "next/server";
 import { getPlacementOffers } from "@/lib/server/data";
+import { resolvePlacementYear } from "@/lib/server/placement-years";
+import { sanitizePlacementOffer } from "@/lib/server/sanitize-offer";
 
 // Ensure this route runs on the server at request time
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  try {
-    const data = await getPlacementOffers();
-
-    // Sanitize data to remove sensitive fields
-    const sanitizedData = data.map((offer: any) => {
-      // Create a shallow copy and delete sensitive top-level fields
-      const { email_sender, email_subject, additional_info, ...rest } = offer;
-      
-      // Sanitize students_selected if it exists
-      if (rest.students_selected && Array.isArray(rest.students_selected)) {
-        rest.students_selected = rest.students_selected.map((student: any) => {
-          const { email, ...studentRest } = student;
-          return studentRest;
-        });
-      }
-      return rest;
-    });
+export async function GET(request: Request) {
+  const year = resolvePlacementYear(new URL(request.url).searchParams.get("year"));
+  if (!year) {
     return NextResponse.json(
-      { ok: true, data: sanitizedData },
-      { headers: { "cache-control": "no-store" } }
+      { ok: false, error: "Unsupported placement year" },
+      { status: 400, headers: { "cache-control": "no-store" } },
     );
+  }
+
+  try {
+    const data = await getPlacementOffers({}, 1000, year);
+    const sanitizedData = data.map(sanitizePlacementOffer);
+
+    return NextResponse.json({ ok: true, data: sanitizedData }, { headers: { "cache-control": "no-store" } });
   } catch (err: any) {
-    return NextResponse.json({ ok: false, error: String(err) }, { status: 500, headers: { "cache-control": "no-store" } });
+    console.error("Error fetching placement offers:", err);
+    return NextResponse.json({ ok: false, error: "Internal server error" }, { status: 500, headers: { "cache-control": "no-store" } });
   }
 }

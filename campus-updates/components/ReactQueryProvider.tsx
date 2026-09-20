@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { PlacementYearProvider } from "@/components/PlacementYearProvider";
 
 export default function ReactQueryProvider({
 	children,
@@ -24,7 +25,9 @@ export default function ReactQueryProvider({
 
 	return (
 		<QueryClientProvider client={queryClient}>
-			<ThemeProvider>{children}</ThemeProvider>
+			<ThemeProvider>
+				<PlacementYearProvider>{children}</PlacementYearProvider>
+			</ThemeProvider>
 		</QueryClientProvider>
 	);
 }

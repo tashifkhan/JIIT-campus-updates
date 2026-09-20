@@ -10,17 +10,25 @@ export async function GET() {
     if (!data) {
       return NextResponse.json(
         { ok: false, error: "No placement data found" },
-        { status: 404 }
+        { status: 404, headers: { "cache-control": "no-store" } },
       );
     }
-    return NextResponse.json(data);
-  } catch (err: any) {
+
+    // Return only the fields the UI consumes instead of the raw Mongo document
+    // (which leaks _id and any future scraper internals).
+    const { batches, intro_text, main_heading, recruiter_logos, scrape_timestamp } = data;
     return NextResponse.json(
       {
-        ok: false,
-        error: err?.message || "Failed to fetch official placement data",
+        ok: true,
+        data: { batches, intro_text, main_heading, recruiter_logos, scrape_timestamp },
       },
-      { status: 500 }
+      { headers: { "cache-control": "no-store" } },
+    );
+  } catch (err: any) {
+    console.error("Error fetching official placement data:", err);
+    return NextResponse.json(
+      { ok: false, error: "Internal server error" },
+      { status: 500, headers: { "cache-control": "no-store" } },
     );
   }
 }

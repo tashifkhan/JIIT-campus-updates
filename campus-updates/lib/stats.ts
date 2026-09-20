@@ -2,15 +2,18 @@
 
 export interface Role {
   role: string;
-  package: number;
+  package: number | null;
   package_details: string | null;
 }
 
 export interface Student {
   name: string;
   enrollment_number: string;
+  enrollment?: string;
   role: string;
   package: number | null;
+  offer_received_at?: string | null;
+  offerReceivedAt?: number | null;
 }
 
 export interface Placement {
@@ -21,7 +24,9 @@ export interface Placement {
   students_selected: Student[];
   number_of_offers: number;
   saved_at?: string;
-  createdAt?: string;
+  created_at?: string;
+  time_sent?: string;
+  createdAt?: string | number;
   _id?: string;
 }
 
@@ -43,17 +48,48 @@ export const formatPercent = (value?: number | null) => {
   return `${value.toFixed(1)}%`;
 };
 
-export const formatDate = (dateString?: string | null) => {
-  if (!dateString) return "TBD";
-  try {
-    return new Date(dateString).toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return "TBD";
+type DateValue = string | number | Date | null | undefined;
+
+const parseDate = (value: DateValue): Date | null => {
+  if (value == null || value === "") return null;
+
+  let normalizedValue: string | number | Date = value;
+  if (typeof value === "number" && value < 10_000_000_000) {
+    normalizedValue = value * 1000;
+  } else if (typeof value === "string" && /^\d+$/.test(value.trim())) {
+    const numericValue = Number(value);
+    normalizedValue = value.trim().length > 10 ? numericValue : numericValue * 1000;
   }
+
+  const date = new Date(normalizedValue);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+export const getStudentOfferDate = (
+  student: Student,
+  placement?: Placement,
+): Date | null => {
+  const studentDate =
+    parseDate(student.offer_received_at) ?? parseDate(student.offerReceivedAt);
+  if (studentDate || !placement) return studentDate;
+
+  return (
+    parseDate(placement.created_at) ??
+    parseDate(placement.time_sent) ??
+    parseDate(placement.saved_at) ??
+    parseDate(placement.createdAt)
+  );
+};
+
+export const formatDate = (value?: DateValue) => {
+  const date = parseDate(value);
+  if (!date) return "TBD";
+
+  return date.toLocaleDateString("en-IN", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 };
 
 // Determine student package with multiple fallbacks (student -> exact role -> best viable role)

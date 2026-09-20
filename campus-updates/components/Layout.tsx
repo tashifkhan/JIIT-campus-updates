@@ -6,177 +6,97 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import ThemeSwitcher from "./ThemeSwitcher";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-	BriefcaseIcon,
-	HomeIcon,
-	TrendingUpIcon,
-	CalendarIcon,
-	BellIcon,
-	MenuIcon,
-	XIcon,
-	WrenchIcon,
-	MessageSquareIcon,
-	CoffeeIcon,
-	WifiIcon,
-	BookOpenIcon,
-} from "lucide-react";
-import FloatingNav from "./FloatingNav";
-import FloatingActionMenu from "./FloatingActionMenu";
+import YearSelector from "./YearSelector";
 
-const navigation = [
-	{ name: "Updates", href: "/", icon: HomeIcon },
-	{ name: "Policy", href: "/policy", icon: BookOpenIcon },
-	{ name: "Jobs", href: "/jobs", icon: BriefcaseIcon },
-	{ name: "Stats", href: "/stats", icon: TrendingUpIcon },
-	// { name: "Campus", href: "/campus", icon: CalendarIcon },
-];
+import { Bell, ArrowRight } from "lucide-react";
 
-const tools = [
-	// {
-	//  name: "Placement Updates PWA",
-	//  href: "https://jiit-placement-updates.tashif.codes",
-	// },
-	{
-		name: "Placement Bot",
-		href: "https://t.me/SupersetNotificationBot",
-		icon: MessageSquareIcon,
-	},
-	{
-		name: "Timetable",
-		href: "https://jiit-timetable.tashif.codes",
-		icon: CalendarIcon,
-	},
-	{
-		name: "Mess Menu",
-		href: "https://jiit-timetable.tashif.codes/mess-menu",
-		icon: CoffeeIcon,
-	},
-	{
-		name: "Wifi Auto Login",
-		href: "https://sophos-autologin.tashif.codes",
-		icon: WifiIcon,
-	},
-	{
-		name: "JPortal",
-		href: "https://jportal.tashif.codes",
-		icon: BookOpenIcon,
-	},
-];
+import { MenuBar } from "./animated-menu-bar";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
 	const pathname = usePathname();
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-	const [toolsOpen, setToolsOpen] = useState(false);
+
+	const navigation = [
+		{ name: "Home", href: "/", icon: "/icons/home.png" },
+		{ name: "Policy", href: "/policy", icon: "/icons/book.png" },
+		{ name: "Jobs", href: "/jobs", icon: "/icons/briefcase.png" },
+		{ name: "Stats", href: "/stats", icon: "/icons/diagram.png" },
+	];
+	const isNavigationItemActive = (href: string) =>
+		pathname === href ||
+		(href !== "/" && pathname.startsWith(`${href}/`));
+
+	// Check if we are on a detail page (job details, branch stats, company stats)
+	// These pages handle their own layout/containers and have sticky headers that need to be full width
+	const isDetailPage =
+		(pathname.startsWith("/jobs/") && pathname !== "/jobs") ||
+		pathname.startsWith("/stats/branch/") ||
+		pathname.startsWith("/stats/company/");
 
 	return (
-		<div
-			className="min-h-screen lg:min-h-0 lg:h-screen lg:overflow-hidden"
-			style={{ backgroundColor: "var(--bg-color)" }}
-		>
+		<div className="min-h-screen lg:min-h-0 lg:h-screen lg:overflow-hidden bg-background">
 			{/* Mobile Header */}
-			<div
-				className="lg:hidden border-b border-theme"
-				style={{
-					backgroundColor: "var(--card-bg)",
-					borderColor: "var(--border-color)",
-				}}
-			>
+			<div className="lg:hidden border-b border-sidebar-border bg-sidebar sticky top-0 z-50">
 				<div className="flex items-center justify-between px-4 py-3">
 					<div className="flex items-center gap-3">
-						<div className="w-12 h-12 relative rounded-full overflow-hidden flex-shrink-0">
+						<div className="relative w-8 h-8 rounded-lg overflow-hidden">
 							<Image
 								src="/logo.png"
-								alt="JIIT Logo"
+								alt="JIIT Placements"
 								fill
-								style={{ objectFit: "cover" }}
+								className="object-cover"
 							/>
 						</div>
-						<h1
-							className="text-lg font-semibold"
-							style={{ color: "var(--text-color)" }}
-						>
-							Placement Updates
+						<h1 className="text-lg font-bold tracking-tight text-sidebar-foreground">
+							JIIT Placements
 						</h1>
 					</div>
-					<div className="flex items-center gap-2">
-						<ThemeSwitcher compact />
-						<Link href="/policy" className="pr-2">
-							<div
-								className="p-2 rounded-full transition-colors hover:bg-[var(--primary-color)] hover:text-[var(--accent-color)]"
-								style={{ color: "var(--text-color)" }}
-								aria-label="Policy"
-							>
-								<BookOpenIcon className="w-4 h-5" />
-							</div>
-						</Link>
 
+					<div className="flex items-center gap-2">
+						<YearSelector compact />
+						<ThemeSwitcher compact />
 						<Link
 							href="https://t.me/SupersetNotificationBot"
 							target="_blank"
 							rel="noopener noreferrer"
-							className="px-3 py-1 rounded-2xl text-sm font-medium hover-theme"
-							style={{
-								backgroundColor: "var(--accent-color)",
-								color: "var(--card-bg)",
-							}}
+							className="relative p-2 rounded-full hover:bg-sidebar-accent text-sidebar-foreground/70 transition-colors"
 						>
-							<BellIcon className="w-5 h-5" />
+							<Bell className="w-5 h-5" />
+							<span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full border-2 border-sidebar"></span>
 						</Link>
-
-						{/* <button
-							onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-							className="p-2 rounded-md hover-theme"
-							style={{ color: "var(--label-color)" }}
-						>
-							{mobileMenuOpen ? (
-								<XIcon className="w-5 h-5" />
-							) : (
-								<MenuIcon className="w-5 h-5" />
-							)}
-						</button> */}
 					</div>
 				</div>
 
 				{/* Mobile Menu */}
 				{mobileMenuOpen && (
-					<div
-						className="border-t border-theme"
-						style={{
-							backgroundColor: "var(--card-bg)",
-							borderColor: "var(--border-color)",
-						}}
-					>
-						<nav className="px-4 py-2 space-y-1">
+					<div className="border-t border-sidebar-border bg-sidebar p-2">
+						<nav className="space-y-1">
 							{navigation
 								.filter((item) => item.href !== "/policy")
 								.map((item) => {
-									const Icon = item.icon;
-									const isActive = pathname === item.href;
+									const isActive = isNavigationItemActive(item.href);
 									return (
 										<Link
 											key={item.name}
 											href={item.href}
 											onClick={() => setMobileMenuOpen(false)}
 											className={cn(
-												"flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors border",
+												"flex items-center px-4 py-3 rounded-md text-sm font-medium transition-all duration-200",
 												isActive
-													? "border-theme"
-													: "border-transparent hover-theme"
+													? "bg-sidebar-accent text-sidebar-accent-foreground"
+													: "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
 											)}
-											style={{
-												color: isActive
-													? "var(--accent-color)"
-													: "var(--text-color)",
-												backgroundColor: isActive
-													? "var(--primary-color)"
-													: "transparent",
-												borderColor: isActive
-													? "var(--accent-color)"
-													: "transparent",
-											}}
 										>
-											<Icon className="w-4 h-4 mr-3" />
+											<img
+												src={item.icon}
+												alt={item.name}
+												className={cn(
+													"w-5 h-5 mr-3 object-contain transition-opacity",
+													isActive
+														? "opacity-100 dark:invert-0"
+														: "opacity-70 dark:invert-[0.8]",
+												)}
+											/>
 											{item.name}
 										</Link>
 									);
@@ -189,207 +109,138 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 			<div className="lg:flex lg:h-full">
 				{/* Desktop Sidebar */}
 				<div className="hidden lg:flex lg:flex-shrink-0 lg:h-full">
-					<div
-						className="flex flex-col w-64 border-r border-theme h-full overflow-hidden"
-						style={{
-							backgroundColor: "var(--card-bg)",
-							borderColor: "var(--border-color)",
-						}}
-					>
-						<div
-							className="px-6 py-6 border-b border-theme text-center"
-							style={{ borderColor: "var(--border-color)" }}
-						>
-							<div className="w-20 h-20 mx-auto relative rounded-full overflow-hidden">
-								<Image
-									src="/logo.png"
-									alt="JIIT Logo"
-									fill
-									style={{ objectFit: "cover" }}
-								/>
+					<div className="flex flex-col w-64 border-r border-sidebar-border bg-sidebar text-sidebar-foreground h-full">
+						{/* Sidebar Header */}
+						<div className="px-5 py-6">
+							<div className="flex items-center px-2">
+								<div className="flex items-center gap-3">
+									<div className="relative w-8 h-8 rounded-lg overflow-hidden">
+										<Image
+											src="/logo.png"
+											alt="JIIT Placements"
+											fill
+											className="object-cover"
+										/>
+									</div>
+									<span className="font-bold tracking-tight text-lg">
+										JIIT Placements
+									</span>
+								</div>
 							</div>
-							<h1
-								className="text-xl font-bold mt-3"
-								style={{ color: "var(--text-color)" }}
-							>
-								Placement Updates
-							</h1>
-							<p
-								className="text-sm mt-1"
-								style={{ color: "var(--label-color)" }}
-							>
-								Placement Portal
-							</p>
-							<Link
-								href="https://t.me/SupersetNotificationBot"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="inline-block mt-3 px-3 py-1 rounded-md text-sm font-medium hover-theme"
-								style={{
-									backgroundColor: "var(--accent-color)",
-									color: "var(--card-bg)",
-								}}
-							>
-								Get notifications
-							</Link>
 						</div>
 
-						<nav className="flex-1 px-4 py-6 space-y-2 overflow-auto min-h-0">
+						{/* Navigation */}
+						<nav className="flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar">
+							<div className="px-4 py-2 text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider mb-1">
+								Platform
+							</div>
 							{navigation.map((item) => {
-								const Icon = item.icon;
-								const isActive = pathname === item.href;
+								const isActive = isNavigationItemActive(item.href);
 								return (
 									<Link
 										key={item.name}
 										href={item.href}
 										className={cn(
-											"flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors border",
+											"group flex items-center gap-3 rounded-md px-4 py-2.5 text-sm font-medium transition-all duration-200 ease-in-out",
 											isActive
-												? "border-theme"
-												: "border-transparent hover-theme"
+												? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+												: "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
 										)}
-										style={{
-											color: isActive
-												? "var(--accent-color)"
-												: "var(--text-color)",
-											backgroundColor: isActive
-												? "var(--primary-color)"
-												: "transparent",
-											borderColor: isActive
-												? "var(--accent-color)"
-												: "transparent",
-										}}
 									>
-										<Icon className="w-5 h-5 mr-3" />
+										<img
+											src={item.icon}
+											alt={item.name}
+											className={cn(
+												"w-5 h-5 object-contain transition-all",
+												isActive
+													? "opacity-100 scale-105"
+													: "opacity-70 grayscale group-hover:grayscale-0 group-hover:opacity-100",
+												// Inverting logic for dark mode adaptability
+												"dark:invert",
+											)}
+										/>
 										{item.name}
 									</Link>
 								);
 							})}
+						</nav>
 
-							{/* Tools button (desktop) */}
-							<div className="">
-								<button
-									onClick={() => setToolsOpen(!toolsOpen)}
-									className={cn(
-										"w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors border hover-theme",
-										toolsOpen ? "border-theme" : "border-transparent"
-									)}
-									style={{
-										color: toolsOpen
-											? "var(--accent-color)"
-											: "var(--text-color)",
-										backgroundColor: toolsOpen
-											? "var(--primary-color)"
-											: "transparent",
-										borderColor: toolsOpen
-											? "var(--accent-color)"
-											: "transparent",
-									}}
-								>
-									<WrenchIcon className="w-5 h-5 mr-3" />
-									Tools
-								</button>
+						{/* Sidebar Footer / CTA */}
+						<div className="mt-auto px-4 pb-4 pt-3">
+							<div className="h-px bg-sidebar-border" />
+
+							<Link
+								href="https://t.me/SupersetNotificationBot"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="group my-3 flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-3 shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+							>
+								<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+									<Bell className="h-4 w-4" />
+								</span>
+								<span className="min-w-0 flex-1">
+									<span className="block text-sm font-semibold leading-tight text-foreground">
+										Notifications
+									</span>
+									<span className="block text-[11px] leading-tight text-muted-foreground">
+										Instant Telegram updates
+									</span>
+								</span>
+								<ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-primary" />
+							</Link>
+
+							<div className="h-px bg-sidebar-border" />
+
+							<div className="py-3">
+								<YearSelector />
 							</div>
 
-							{/* Tools popup panel inside sidebar (desktop only) */}
-							{toolsOpen && (
-								<div className="mt-3">
-									<div
-										className="rounded-lg border p-3"
-										style={{
-											backgroundColor: "var(--card-bg)",
-											borderColor: "var(--border-color)",
-										}}
-									>
-										{/* <div className="flex items-center justify-between mb-2">
-											<button
-												onClick={() => setToolsOpen(false)}
-												className="p-1 rounded hover-theme"
-												style={{ color: "var(--label-color)" }}
-											>
-												<XIcon className="w-4 h-4" />
-											</button>
-										</div> */}
-										<div className="space-y-1">
-											{tools.map((t) => {
-												const ToolIcon = t.icon;
-												return (
-													<Link
-														key={t.href}
-														href={t.href}
-														target="_blank"
-														rel="noopener noreferrer"
-														className="flex items-center px-3 py-2 rounded hover-theme text-sm"
-														style={{ color: "var(--text-color)" }}
-													>
-														{ToolIcon && <ToolIcon className="w-4 h-4 mr-3" />}
-														<span className="truncate">{t.name}</span>
-													</Link>
-												);
-											})}
-										</div>
-									</div>
-								</div>
-							)}
-						</nav>
-						{/* Bottom area for desktop: theme switcher */}
-						<div
-							className="px-4 py-4 border-t border-theme mt-auto"
-							style={{ borderColor: "var(--border-color)" }}
-						>
-							<ThemeSwitcher />
+							<div className="h-px bg-sidebar-border" />
+
+							<div className="flex items-center gap-2 pt-2">
+								<ThemeSwitcher />
+								<span className="shrink-0 pr-1 text-[10px] font-semibold tabular-nums text-sidebar-foreground/35">
+									v2.3.0
+								</span>
+							</div>
 						</div>
 					</div>
 				</div>
 
 				{/* Main Content */}
-				<div className="flex-1 min-w-0 flex flex-col lg:overflow-hidden">
-					<main className="p-4 lg:p-8 lg:h-full lg:overflow-auto">
-						{children}
+				<div className="flex-1 min-w-0 flex flex-col lg:overflow-hidden bg-background">
+					<main
+						className={cn(
+							"flex-1 lg:h-full lg:overflow-y-auto custom-scrollbar",
+							isDetailPage ? "p-0" : "p-4 lg:p-8",
+						)}
+					>
+						<div
+							className={cn("w-full", isDetailPage ? "" : "max-w-6xl mx-auto")}
+						>
+							{children}
+						</div>
 					</main>
 				</div>
 			</div>
 
-			{/* Mobile Floating Navigation (uses theme variables from ThemeProvider) */}
-			<FloatingNav
-				items={[
-					...navigation
-						.filter((item) => item.href !== "/policy")
-						.map((n, idx) => {
-							const Icon = n.icon as any;
-							return {
-								id: idx,
-								href: n.href,
-								icon: <Icon className="w-5 h-5 mb-1" />,
-								label: n.name,
-							};
-						}),
-					{
-						id: 999,
-						icon: <WrenchIcon className="w-5 h-5 mb-1" />,
-						label: "Tools",
-						onClick: () => setToolsOpen(!toolsOpen),
-					},
-				]}
+			{/* Mobile Floating Navigation */}
+			<MenuBar
+				className="lg:hidden"
+				items={navigation.map((n, idx) => ({
+					id: idx,
+					href: n.href,
+					icon: (
+						<img
+							src={n.icon}
+							alt={n.name}
+							className="w-5 h-5 object-contain dark:invert"
+						/>
+					),
+					label: n.name,
+				}))}
 			/>
 
-			{/* Mobile Tools Menu (Centered Popup) */}
-			<div className="lg:hidden">
-				<FloatingActionMenu
-					isOpen={toolsOpen}
-					onClose={() => setToolsOpen(false)}
-					options={tools.map((t) => {
-						const Icon = t.icon;
-						return {
-							label: t.name,
-							onClick: () => window.open(t.href, "_blank"),
-							Icon: Icon ? <Icon className="w-5 h-5" /> : undefined,
-						};
-					})}
-				/>
-			</div>
-
-			{/* Bottom padding for mobile nav to avoid content overlap */}
 			<div className="lg:hidden h-24"></div>
 		</div>
 	);

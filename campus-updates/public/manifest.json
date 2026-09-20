@@ -1,7 +1,7 @@
 {
-	"name": "JIIT Placement Updates",
-	"short_name": "JIIT Updates",
-	"description": "Campus placement and updates portal",
+	"name": "JIIT Placements",
+	"short_name": "JIIT Placements",
+	"description": "Campus placement portal",
 	"start_url": "/",
 	"display": "standalone",
 	"background_color": "#ffffff",

@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,18 +13,23 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { usePlacementYear } from "@/components/PlacementYearProvider";
 import ResourceModal from "./ResourceModal";
+
 export default function AdminDashboard() {
+	const { year, setYear, years } = usePlacementYear();
 	const [activeTab, setActiveTab] = useState<"notices" | "placement-offers">(
 		"notices",
 	);
 	const [data, setData] = useState<any[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [search, setSearch] = useState("");
+
 	// Modal State
 	const [modalOpen, setModalOpen] = useState(false);
 	const [modalMode, setModalMode] = useState<"create" | "update">("create");
 	const [selectedItem, setSelectedItem] = useState<any>(null);
+
 	const [sortConfig, setSortConfig] = useState<{
 		key: string;
 		direction: "asc" | "desc";
@@ -31,11 +37,13 @@ export default function AdminDashboard() {
 		key: "saved_at",
 		direction: "desc",
 	});
+
 	// Auth State
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [authChecking, setAuthChecking] = useState(true);
 	const [password, setPassword] = useState("");
 	const [loginError, setLoginError] = useState("");
+
 	const checkAuth = async () => {
 		try {
 			const res = await fetch("/api/admin/check-auth");
@@ -49,14 +57,18 @@ export default function AdminDashboard() {
 			setAuthChecking(false);
 		}
 	};
+
 	useEffect(() => {
 		checkAuth();
 	}, []);
+
 	const fetchData = async () => {
 		setLoading(true);
 		try {
 			// Use admin endpoint which has date extraction processing
-			const res = await fetch(`/api/admin/${activeTab}`);
+			const res = await fetch(
+				`/api/admin/${activeTab}?year=${encodeURIComponent(year)}`,
+			);
 			const json = await res.json();
 			if (json.ok) {
 				setData(json.data || []);
@@ -67,11 +79,13 @@ export default function AdminDashboard() {
 			setLoading(false);
 		}
 	};
+
 	useEffect(() => {
 		if (isAuthenticated) {
 			fetchData();
 		}
-	}, [activeTab, isAuthenticated]);
+	}, [activeTab, isAuthenticated, year]);
+
 	const handleSort = (key: string) => {
 		setSortConfig((current) => ({
 			key,
@@ -79,6 +93,7 @@ export default function AdminDashboard() {
 				current.key === key && current.direction === "asc" ? "desc" : "asc",
 		}));
 	};
+
 	const filteredData = data
 		.filter((item) => {
 			const s = search.toLowerCase();
@@ -93,12 +108,14 @@ export default function AdminDashboard() {
 				item.matched_job?.company ||
 				""
 			).toLowerCase();
+
 			return title.includes(s) || content.includes(s) || company.includes(s);
 		})
 		.sort((a, b) => {
 			const { key, direction } = sortConfig;
 			let valA = a[key];
 			let valB = b[key];
+
 			// Handle nested or specific keys if needed, defaulting to direct property access
 			if (key === "title") {
 				valA =
@@ -106,16 +123,20 @@ export default function AdminDashboard() {
 				valB =
 					b.title || b.company || (b.content ? b.content.substring(0, 50) : "");
 			}
+
 			if (valA == null) valA = "";
 			if (valB == null) valB = "";
+
 			if (valA < valB) return direction === "asc" ? -1 : 1;
 			if (valA > valB) return direction === "asc" ? 1 : -1;
 			return 0;
 		});
+
 	const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setLoading(true);
 		setLoginError("");
+
 		try {
 			const res = await fetch("/api/admin/auth", {
 				method: "POST",
@@ -134,11 +155,24 @@ export default function AdminDashboard() {
 			setLoading(false);
 		}
 	};
+
+	const handleLogout = async () => {
+		try {
+			await fetch("/api/admin/auth", { method: "DELETE" });
+		} catch {
+			// Best effort; drop client state regardless.
+		}
+		setIsAuthenticated(false);
+		setData([]);
+		setPassword("");
+	};
+
 	if (authChecking) {
 		return (
 			<div className="flex justify-center py-20">Checking authorization...</div>
 		);
 	}
+
 	if (!isAuthenticated) {
 		return (
 			<div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
@@ -164,22 +198,43 @@ export default function AdminDashboard() {
 			</div>
 		);
 	}
+
 	const handleAdd = () => {
 		setModalMode("create");
 		setSelectedItem(null);
 		setModalOpen(true);
 	};
+
 	const handleEdit = (item: any) => {
 		setModalMode("update");
 		setSelectedItem(item);
 		setModalOpen(true);
 	};
+
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
 				<h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-				<Button onClick={handleAdd}>Add New</Button>
+				<div className="flex items-center gap-2">
+					<select
+						value={year}
+						onChange={(e) => setYear(e.target.value)}
+						className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+						aria-label="Placement year"
+					>
+						{years.map((y) => (
+							<option key={y.value} value={y.value}>
+								{y.label}
+							</option>
+						))}
+					</select>
+					<Button onClick={handleAdd}>Add New</Button>
+					<Button variant="outline" onClick={handleLogout}>
+						Logout
+					</Button>
+				</div>
 			</div>
+
 			<div className="flex items-center space-x-2">
 				<Input
 					placeholder="Search..."
@@ -188,6 +243,7 @@ export default function AdminDashboard() {
 					className="max-w-sm"
 				/>
 			</div>
+
 			<Tabs
 				value={activeTab}
 				onValueChange={(v) => setActiveTab(v as any)}
@@ -211,6 +267,7 @@ export default function AdminDashboard() {
 						)}
 					</TabsTrigger>
 				</TabsList>
+
 				<div className="border rounded-md mt-4">
 					<Table>
 						<TableHeader>
@@ -271,6 +328,7 @@ export default function AdminDashboard() {
 										(item.content
 											? item.content.substring(0, 50) + "..."
 											: "Untitled");
+
 									return (
 										<TableRow key={item.id || item._id}>
 											<TableCell className="font-medium">
@@ -319,6 +377,7 @@ export default function AdminDashboard() {
 					</Table>
 				</div>
 			</Tabs>
+
 			<ResourceModal
 				isOpen={modalOpen}
 				onClose={() => setModalOpen(false)}
@@ -328,6 +387,7 @@ export default function AdminDashboard() {
 				onSuccess={() => {
 					fetchData();
 				}}
+				year={year}
 			/>
 		</div>
 	);

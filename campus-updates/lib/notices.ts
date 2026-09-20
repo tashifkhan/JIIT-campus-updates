@@ -1,449 +1,546 @@
-// Shared notice types and parsing/formatting helpers
+export type NoticeSource = "notice" | "placement-offer";
+
+export type ShortlistedStudent = {
+	name: string;
+	enrollment_number: string;
+	venue?: string;
+};
+
+export type MatchedJob = {
+	id: string;
+	company: string;
+	job_profile: string;
+	location?: string | null;
+	package?: string | null;
+	package_breakdown?: string | null;
+};
+
+export type EligibilityRequirement = {
+	label: string;
+	value: string;
+};
+
 export type Notice = {
-  id: string;
-  category: string;
-  matched_job: { id: string; company: string; job_profile: string } | null;
-  extracted?: any;
-  formatted_message: string;
-  createdAt?: number;
-  content?: string;
-  author?: string;
-  shortlisted_students?: Array<{ name: string; enrollment_number: string }>;
+	id: string;
+	sourceId: string;
+	source: NoticeSource;
+	category: string;
+	matched_job: MatchedJob | null;
+	matched_job_id?: string | null;
+	formatted_message?: string | null;
+	/** `formatted_message` minus the parts rendered as dedicated card sections. */
+	body?: string | null;
+	createdAt?: number;
+	updatedAt?: number;
+	content?: string;
+	title?: string;
+	author?: string;
+	job_company?: string | null;
+	job_role?: string | null;
+	package?: string | null;
+	package_breakdown?: string | null;
+	location?: string | null;
+	deadline?: string | null;
+	eligibility_criteria?: string[] | null;
+	eligibility_requirements?: EligibilityRequirement[] | null;
+	hiring_flow?: string[] | null;
+	shortlisted_students?: ShortlistedStudent[] | null;
+	number_of_offers?: number | null;
+	joiningDate?: string;
 };
 
-export const normalizeCategory = (cat: string): string => {
-  const c = (cat || "").toLowerCase().trim();
-  if (/^\[?shortlist(ing)?\]?$/.test(c)) return "shortlisting";
-  return c;
+export type NoticeFeedResponse = {
+	ok: true;
+	data: Notice[];
+	pagination: {
+		page: number;
+		pageSize: number;
+		total: number;
+		totalPages: number;
+	};
+	facets: {
+		categories: string[];
+	};
 };
 
-export const parseFormattedMessage = (message: string, category: string) => {
-  let processedMessage = (message || "").replace(/\r/g, "");
+type Document = Record<string, any>;
 
-  processedMessage = processedMessage
-    .split("\n")
-    .filter((ln) => {
-      const t = ln.replace(/\*+/g, "").trim();
-      if (/^(?:[\s\*🔔📢⚠️🎉📰]*\bAnnouncement\b[\s\*🔔📢⚠️🎉📰]*)$/i.test(t))
-        return false;
-      return true;
-    })
-    .join("\n");
+function stringValue(value: unknown): string | null {
+	if (value == null) return null;
+	const text = String(value).trim();
+	return text || null;
+}
 
-  if (category.toLowerCase().includes("shortlisting")) {
-    processedMessage = processedMessage
-      .replace(/Congratulations to the following students:\s*/gi, "")
-      .replace(/^[A-Za-z\s]+\s*\(\d+\)\s*$/gm, "")
-      .replace(/^[A-Z][A-Za-z\s]*\s*\(\d{6,}\)\s*$/gm, "")
-      .replace(/^\(\d{6,}\)\s*$/gm, "");
-  }
+function documentId(value: unknown): string {
+	return value == null ? "" : String(value);
+}
 
-  const rawLines = processedMessage.split("\n");
-  const lines = rawLines.map((line) => line.trim());
-  let title = "";
-  let body = "";
-  let eligibility = "";
-  let hiringProcess = "";
-  let deadline = "";
-  let location = "";
-  let ctc = "";
-  let company = "";
-  let role = "";
+function stringArray(value: unknown): string[] | null {
+	if (!Array.isArray(value)) return null;
+	const values = value.map(stringValue).filter((item): item is string => Boolean(item));
+	return values.length ? values : null;
+}
 
-  const firstNonEmptyIdx = lines.findIndex((l) => l.length > 0);
-  if (firstNonEmptyIdx >= 0) {
-    title = lines[firstNonEmptyIdx]
-      .replace(/^\*\*|\*\*$/g, "")
-      .replace(/^#+\s*/, "")
-      .replace(/📢|🎉|⚠️|💼|🔔/g, "")
-      .replace(/Job Posting|Shortlisting Update|Update|Announcement/gi, "")
-      .trim();
-  }
+export function timestampValue(value: unknown): number | null {
+	if (value == null || value === "") return null;
+	if (value instanceof Date) {
+		const timestamp = value.getTime();
+		return Number.isNaN(timestamp) ? null : timestamp;
+	}
+	if (typeof value === "number") {
+		if (!Number.isFinite(value)) return null;
+		return value < 10_000_000_000 ? value * 1000 : value;
+	}
 
-  let inEligibility = false;
-  let inHiring = false;
-  const bodyLines: string[] = [];
-  const eligibilityLines: string[] = [];
-  const hiringLines: string[] = [];
+	const text = String(value).trim();
+	if (!text) return null;
+	const numeric = Number(text);
+	const onlyDigits = text.split("").every((char) => char >= "0" && char <= "9");
+	if (onlyDigits && Number.isFinite(numeric)) {
+		return text.length > 10 ? numeric : numeric * 1000;
+	}
 
-  for (let i = Math.max(0, firstNonEmptyIdx + 1); i < lines.length; i++) {
-    const rawLine = rawLines[i] || "";
-    const line = lines[i];
-    const cleanLine = line.replace(/^\*\*|\*\*$/g, "").replace(/^#+\s*/, "");
+	const timestamp = new Date(text).getTime();
+	return Number.isNaN(timestamp) ? null : timestamp;
+}
 
-    if (line.match(/\*\*Company:\*\*\s*(.+)/i)) {
-      company = line.match(/\*\*Company:\*\*\s*(.+)/i)?.[1] || "";
-      continue;
-    }
-    if (line.match(/\*\*Role:\*\*\s*(.+)/i)) {
-      role = line.match(/\*\*Role:\*\*\s*(.+)/i)?.[1] || "";
-      continue;
-    }
-    if (line.match(/\*\*CTC:\*\*\s*(.+)/i)) {
-      ctc = line.match(/\*\*CTC:\*\*\s*(.+)/i)?.[1] || "";
-      continue;
-    }
-    if (line.match(/\*\*Location:\*\*\s*(.+)/i)) {
-      location = line.match(/\*\*Location:\*\*\s*(.+)/i)?.[1] || "";
-      continue;
-    }
+export function normalizeCategory(value: string): string {
+	let category = String(value || "").toLowerCase().trim().split("_").join(" ");
+	if (category.startsWith("[") && category.endsWith("]")) {
+		category = category.slice(1, -1).trim();
+	}
+	if (category === "shortlist" || category === "shortlisting") {
+		return "shortlisting";
+	}
+	return category;
+}
 
-    if (line.match(/⚠️.*deadline/i) || line.match(/deadline/i)) {
-      deadline = line
-        .replace(/⚠️|\*\*/g, "")
-        .replace(/deadline:?\s*/i, "")
-        .trim();
-      continue;
-    }
+function normalizeStudents(value: unknown): ShortlistedStudent[] | null {
+	if (!Array.isArray(value)) return null;
+	const students = value
+		.map((student) => ({
+			name: stringValue(student?.name) || "",
+			enrollment_number:
+				stringValue(student?.enrollment_number ?? student?.enroll) || "",
+			venue: stringValue(student?.venue) || undefined,
+		}))
+		.filter((student) => student.name || student.enrollment_number);
+	return students.length ? students : null;
+}
 
-    if (line.match(/eligibility|criteria/i)) {
-      inEligibility = true;
-      inHiring = false;
-      continue;
-    }
-    if (line.match(/hiring\s*(process|flow)/i)) {
-      inHiring = true;
-      inEligibility = false;
-      continue;
-    }
-    if (line.match(/posted\s*by/i) || line.match(/on:/i)) {
-      inEligibility = false;
-      inHiring = false;
-      continue;
-    }
+function cleanPackage(value: unknown): string | null {
+	const text = stringValue(value);
+	return text?.endsWith("(") ? text.slice(0, -1).trim() : text;
+}
 
-    if (inEligibility && !line.match(/posted\s*by/i)) {
-      const cleanEligibilityLine = cleanLine.replace(/\*\*/g, "").trim();
-      eligibilityLines.push(cleanEligibilityLine);
-    } else if (inHiring && !line.match(/posted\s*by/i)) {
-      hiringLines.push(cleanLine);
-    } else if (
-      !line.match(/company:|role:|ctc:|location:|posted\s*by|on:/i) &&
-      !line.match(/📢|🎉|job posting|shortlisting update|announcement/i)
-    ) {
-      // Drop orphan bracket-only lines like ")" or "("
-      if (!/^\s*[(){}\[\]]\s*$/.test(line)) {
-        bodyLines.push(rawLine);
-      }
-    }
-  }
+function cleanPackageBreakdown(value: unknown): string | null {
+	const text = stringValue(value);
+	return text?.endsWith(")") ? text.slice(0, -1).trim() : text;
+}
 
-  body = bodyLines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
-  // Sanitize CTC text for trailing orphan "(" e.g., "4.5 LPA ("
-  if (ctc) ctc = ctc.replace(/\s*\($/, "").trim();
-  eligibility = eligibilityLines.join("\n").trim();
-  hiringProcess = hiringLines.join("\n").trim();
-
-  return {
-    title,
-    body,
-    eligibility,
-    hiringProcess,
-    deadline,
-    location,
-    ctc,
-    company,
-    role,
-  };
+/**
+ * Scraped notices never carry structured `eligibility_criteria` / `hiring_flow`
+ * / `deadline` fields — the bot only writes the rendered `formatted_message`
+ * markdown. Everything below recovers that structure so the card can render
+ * real sections instead of dumping the raw Superset `content` HTML.
+ */
+type ParsedMessage = {
+	body: string | null;
+	company: string | null;
+	role: string | null;
+	location: string | null;
+	packageText: string | null;
+	deadline: string | null;
+	eligibility: string[];
+	requirements: EligibilityRequirement[];
+	hiringFlow: string[];
 };
 
-export const formatEligibility = (eligibilityText: string) => {
-  if (!eligibilityText) return null;
-  const lines = eligibilityText
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-  const criteria: any[] = [];
-
-  const isDegreeLine = (line: string) => {
-    // Only match checks that clearly start with a degree name.
-    // We avoid generic " - " check because it catches "Xth - 70%" too.
-    return /^B\.?Tech|^M\.?Tech|^MBA|^MCA|^BBA|^BCA|^Ph\.?D/i.test(line);
-  };
-
-  const getLevelFromContext = (text: string) => {
-    const t = text.toLowerCase();
-    
-    // Check XII before X to avoid partial matches if any
-    if (
-      t.includes("12th") ||
-      t.includes("xiith") ||
-      t.includes("hsc") ||
-      t.includes("class_xii")
-    )
-      return "XIIth";
-
-    if (
-      t.includes("10th") ||
-      t.includes("xth") ||
-      t.includes("ssc") ||
-      t.includes("class_x")
-    )
-      return "Xth";
-    if (
-      t.includes("current") ||
-      t.includes("ug") ||
-      t.includes("graduation") ||
-      t.includes("degree") ||
-      t.includes("b.tech")
-    )
-      return "UG";
-    if (t.includes("pg") || t.includes("post") || t.includes("m.tech"))
-      return "PG";
-    if (t.includes("marks")) return "Marks";
-    if (t.includes("cgpa")) return "CGPA";
-    if (t.includes("percentage")) return "Percentage";
-    return text.trim().replace(/[:=-]$/, "").trim();
-  };
-
-  for (const line of lines) {
-    if (line.match(/courses?:|branches?:/i)) {
-      const coursesMatch =
-        line.match(/courses?:\s*(.+)/i) || line.match(/branches?:\s*(.+)/i);
-      if (coursesMatch) {
-        const vals = coursesMatch[1]
-          .split(",")
-          .map((c) => c.trim())
-          .filter(Boolean);
-        criteria.push({
-          type: "courses",
-          value: vals,
-        });
-      }
-      continue;
-    }
-
-    // Degree lines (e.g. "M.Tech - Biotechnology") should be general
-    if (isDegreeLine(line) && !line.match(/cgpa|marks|%/i)) {
-       criteria.push({
-        type: "general",
-        value: line,
-      });
-      continue;
-    }
-
-    // Parse Marks/CGPA using context
-    // We look for a number at the end (or near end) of the string
-    // e.g. "Xth: 70", "Xth - 70%", "Marks (10th): 70.0", "CLASS_X Marks: 70.0 CGPA or equivalent"
-    // Relaxed regex: Find the last number-like pattern, optionally followed by unit/text
-    const valueMatch = line.match(
-      /(?:[:=-]|\s+|^)\s*(\d+\.?\d*)\s*(cgpa|%|percent)?/i
-    );
-
-    // If multiple numbers, we prefer the one that looks like a score (marks logic usually implies implied context)
-    // But realistically, lines are short. Finding the *first* valid number after separator is usually safer.
-    // The previous regex `\s*(\d+\.?\d*)\s*(cgpa|%|percent)?\s*$/i` forced end of line.
-    
-    if (valueMatch) {
-      const rawValue = valueMatch[1];
-      // Infer unit: if "cgpa" or value <= 10 (heuristic), use CGPA, else %
-      let unit = valueMatch[2]
-        ? valueMatch[2].toLowerCase().includes("cgpa")
-          ? "CGPA"
-          : "%"
-        : Number(rawValue) <= 10
-        ? "CGPA"
-        : "%";
-
-      // Context is everything before the match
-      const context = line.substring(0, valueMatch.index).trim();
-
-      if (context) {
-        const level = getLevelFromContext(context);
-        criteria.push({
-          type: "marks",
-          level: level,
-          value: rawValue,
-          unit: unit,
-        });
-        continue;
-      }
-    }
-    
-    if (line.match(/no\s*backlogs?/i)) {
-      criteria.push({ type: "requirement", value: "No backlogs" });
-    } else {
-      // General fallback
-      const val = line.replace(/^[-•\d.\)]+\s*|\*\s*/, "").trim();
-      if (val && !val.match(/eligibility criteria:?/i)) {
-        criteria.push({
-          type: "general",
-          value: val,
-        });
-      }
-    }
-  }
-
-  return criteria;
+const EMPTY_PARSED: ParsedMessage = {
+	body: null,
+	company: null,
+	role: null,
+	location: null,
+	packageText: null,
+	deadline: null,
+	eligibility: [],
+	requirements: [],
+	hiringFlow: [],
 };
 
-export const formatHiringProcess = (hiringText: string) => {
-  if (!hiringText) return [];
-  const lines = hiringText
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-  const steps: string[] = [];
+/** Strip surrounding `**` emphasis and trailing colons from a markdown label. */
+function plainText(value: string): string {
+	let text = value.trim();
+	while (text.startsWith("*")) text = text.slice(1);
+	while (text.endsWith("*")) text = text.slice(0, -1);
+	return text.trim();
+}
 
-  for (const line of lines) {
-    let step = line
-      .replace(/^\d+\.?\s*/, "")
-      .replace(/^-/, "")
-      .replace(/^\*\s*/, "")
-      .trim();
-    if (step && !step.match(/^hiring|^process|^flow/i)) {
-      steps.push(step);
-    }
-  }
+/** Split `**Label:** value` into its two halves; null when not that shape. */
+function labelledValue(line: string): { label: string; value: string } | null {
+	const separator = line.indexOf(":**");
+	if (separator === -1 || !line.trimStart().startsWith("**")) return null;
+	return {
+		label: plainText(line.slice(0, separator)),
+		value: line.slice(separator + 3).trim(),
+	};
+}
 
-  return steps;
-};
+/** `CLASS_X Marks` -> `Xth`, `GRADUATION` -> `Graduation`. */
+function requirementLabel(label: string): string {
+	let text = label.split("_").join(" ").trim();
+	const lower = text.toLowerCase();
+	if (lower.endsWith(" marks")) text = text.slice(0, -" marks".length).trim();
+	const upper = text.toUpperCase();
+	if (upper === "CLASS X" || upper === "CLASS 10") return "Xth";
+	if (upper === "CLASS XII" || upper === "CLASS 12") return "XIIth";
+	return text
+		.split(" ")
+		.filter(Boolean)
+		.map((word) =>
+			word.length <= 3 && word === word.toUpperCase()
+				? word
+				: word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
+		)
+		.join(" ");
+}
 
-export const formatDateTime = (timestamp: number) => {
-  const date = new Date(timestamp);
-  const dateStr = date.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-  const timeStr = date.toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
-  return `${dateStr} at ${timeStr}`;
-};
+function isDropped(line: string): boolean {
+	const text = line.trim();
+	if (!text) return false;
+	if (text.startsWith("🔗")) return true;
+	const lower = text.toLowerCase();
+	return lower.startsWith("*posted by*") || lower.startsWith("*on:*");
+}
 
-export const parseShortlistFromText = (text: string) => {
-  if (!text) return [];
-  const results: any[] = [];
-  const seen = new Set<string>();
-  const cleaned = text.replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
+/** Header lines already surfaced by the detail grid, so drop them from the body. */
+const HEADER_LABELS = new Set([
+	"company",
+	"role",
+	"location",
+	"ctc",
+	"package",
+	"package breakdown",
+]);
 
-  const patternA = /([A-Za-z][A-Za-z.'\- ]+?)\s*\(([A-Za-z0-9]{7,})\)/g;
-  let matchA: RegExpExecArray | null;
-  while ((matchA = patternA.exec(cleaned))) {
-    const name = matchA[1].trim();
-    const enroll = matchA[2];
-    if (!seen.has(enroll)) {
-      results.push({ name, enrollment_number: enroll });
-      seen.add(enroll);
-    }
-  }
+export function parseFormattedMessage(message: string | null): ParsedMessage {
+	if (!message) return EMPTY_PARSED;
 
-  const patternB =
-    /(\d+\s+)?([A-Za-z0-9]{7,})\s+([^@\d][A-Za-z .'-]+?)(?:\s+([\w.+-]+@[\w.-]+\.[A-Za-z]{2,}))?(?:\s+(CL\d+|[A-Z]{2}\d+))(?=\s|$)/g;
-  let matchB: RegExpExecArray | null;
-  while ((matchB = patternB.exec(cleaned))) {
-    const enroll = matchB[2];
-    const name = matchB[3].trim();
-    const email = matchB[4];
-    const venue = matchB[5];
-    if (!seen.has(enroll)) {
-      results.push({ name, enrollment_number: enroll, email, venue });
-      seen.add(enroll);
-    }
-  }
+	const parsed: ParsedMessage = {
+		...EMPTY_PARSED,
+		eligibility: [],
+		requirements: [],
+		hiringFlow: [],
+	};
+	const bodyLines: string[] = [];
+	const lines = message.split("\n");
+	// "eligibility" and "hiring" sections run until the next blank line.
+	let section: "none" | "eligibility" | "hiring" = "none";
+	let coursesOpen = false;
+	let seenTitle = false;
 
-  return results;
-};
+	for (const rawLine of lines) {
+		const line = rawLine.trimEnd();
+		const trimmed = line.trim();
 
-export const extractShortlistingSections = (text: string, noticeData?: any) => {
-  const src = (text || "").replace(/\r/g, "\n");
-  const lines = src.split(/\n+/).map((l) => l.trim()).filter(Boolean);
-  const summary: string[] = [];
-  const hiringSteps: string[] = [];
-  const companyRole: { company?: string; role?: string; ctcAmount?: string } = {};
-  let ctcLines: string[] = [];
-  let inHiring = false;
-  let inCTC = false;
+		if (!trimmed) {
+			section = "none";
+			coursesOpen = false;
+			bodyLines.push("");
+			continue;
+		}
 
-  const isStudentLine = (l: string) => /\(\d{7,}\)/.test(l) || /\b\d{7,}\b/.test(l);
+		const heading = plainText(trimmed).toLowerCase();
+		if (heading === "eligibility criteria:" || heading === "eligibility:") {
+			section = "eligibility";
+			coursesOpen = false;
+			continue;
+		}
+		if (heading === "hiring flow:" || heading === "hiring process:") {
+			section = "hiring";
+			continue;
+		}
 
-  for (const l of lines.slice(0, 6)) {
-    const m1 = l.match(/Company\s*:\s*([^|]+?)(?:\s*\||$)/i);
-    if (m1) companyRole.company = m1[1].trim();
-    const m2 = l.match(/Role\s*:\s*([^|]+?)(?:\s*\||$)/i);
-    if (m2) companyRole.role = m2[1].trim();
-    const m3 = l.match(/CTC\s*:\s*([0-9.]+)\s*(LPA|lacs?)/i);
-    if (m3) companyRole.ctcAmount = `${m3[1]} ${m3[2].toUpperCase()}`;
-  }
+		if (section === "eligibility") {
+			if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+				const item = trimmed.slice(2).trim();
+				const labelled = labelledValue(item);
+				if (labelled) {
+					if (labelled.label.toLowerCase().startsWith("course")) {
+						coursesOpen = true;
+						if (labelled.value) parsed.eligibility.push(labelled.value);
+					} else {
+						coursesOpen = false;
+						parsed.requirements.push({
+							label: requirementLabel(labelled.label),
+							value: labelled.value,
+						});
+					}
+				} else {
+					coursesOpen = false;
+					const text = plainText(item);
+					if (text) parsed.eligibility.push(text);
+				}
+			} else if (coursesOpen) {
+				const text = plainText(trimmed);
+				if (text) parsed.eligibility.push(text);
+			}
+			continue;
+		}
 
-  for (const l of lines) {
-    const lower = l.toLowerCase();
-    const plain = lower.replace(/[>*_`~#:\\-]+/g, "").trim();
-    if (/^hiring process\s*:/i.test(lower)) {
-      inHiring = true;
-      inCTC = false;
-      continue;
-    }
-    if (/^(ctc|package|compensation|salary component)/i.test(l) || /^(ctc|package|compensation|salary component)/i.test(plain)) {
-      inCTC = true;
-      inHiring = false;
-      ctcLines.push(l);
-      continue;
-    }
-    if (/^posted by|^posted on|^\*posted by\*/i.test(lower)) {
-      inHiring = false;
-      inCTC = false;
-    }
+		if (section === "hiring") {
+			let text = trimmed;
+			const dot = text.indexOf(". ");
+			if (dot > 0 && text.slice(0, dot).split("").every((c) => c >= "0" && c <= "9")) {
+				text = text.slice(dot + 2);
+			} else if (text.startsWith("- ") || text.startsWith("* ")) {
+				text = text.slice(2);
+			}
+			text = plainText(text);
+			if (text) parsed.hiringFlow.push(text);
+			continue;
+		}
 
-    if (inHiring) {
-      if (!isStudentLine(l)) hiringSteps.push(l.replace(/^[-•\d.\)]+\s*/, "").trim());
-      continue;
-    }
-    if (inCTC) {
-      ctcLines.push(l);
-      continue;
-    }
-    if (!isStudentLine(l)) summary.push(l);
-  }
+		if (isDropped(trimmed)) continue;
 
-  const summaryMarkdown = summary.slice(0, 6).join("\n\n");
-  const ctcMarkdown = ctcLines.join("\n");
+		// `⚠️ **Deadline:** ...` — the emoji prefix has to come off first.
+		const deadlineMarker = trimmed.indexOf("**Deadline:**");
+		if (deadlineMarker !== -1) {
+			parsed.deadline = trimmed.slice(deadlineMarker + "**Deadline:**".length).trim();
+			continue;
+		}
 
-  if (!companyRole.ctcAmount && noticeData?.matched_job) {
-    const packageMatch = (noticeData as any).package;
-    if (packageMatch) {
-      companyRole.ctcAmount = packageMatch.includes("LPA") ? packageMatch : `${packageMatch} LPA`;
-    }
-  }
+		const labelled = labelledValue(trimmed);
+		if (labelled && HEADER_LABELS.has(labelled.label.toLowerCase())) {
+			const value = labelled.value;
+			const label = labelled.label.toLowerCase();
+			if (label === "company") parsed.company = value || null;
+			else if (label === "role") parsed.role = value || null;
+			else if (label === "location") parsed.location = value || null;
+			else if (label === "ctc" || label === "package") parsed.packageText = value || null;
+			continue;
+		}
 
-  return {
-    summaryMarkdown,
-    hiringSteps: hiringSteps.filter(Boolean),
-    ctcMarkdown,
-    ...companyRole,
-  };
-};
+		// Leading bold-only lines are the title and the `**📢 Job Posting**`
+		// badge; both are already rendered as the heading and category chip.
+		if (
+			!seenTitle &&
+			trimmed.startsWith("**") &&
+			trimmed.endsWith("**") &&
+			bodyLines.every((entry) => !entry.trim())
+		) {
+			continue;
+		}
+		seenTitle = true;
 
-// Heuristic to detect short placement-bot style posts that only announce placements
-// and should be hidden from the main feed. This covers examples like:
-// "1 student have been placed at InterviewBit." with a short formatted_message
-// and a congratulatory line. It's intentionally conservative to avoid dropping
-// legitimate, detailed placement updates.
-export const isPlacementBotPost = (notice: Partial<Notice> | { formatted_message?: string; title?: string; author?: string; content?: string }) => {
-  const n: any = notice as any;
-  const text = `${n.formatted_message || ""}\n${n.title || ""}\n${n.content || ""}`.toLowerCase();
+		bodyLines.push(line);
+	}
 
-  // Common short patterns seen in placement bot posts
-  const shortAnnouncementPatterns = [
-    /\bstudent(s)? have been placed at\b/i, // e.g. "1 student have been placed at InterviewBit."
-    /\bstudent(s)? has been placed at\b/i, // grammar variants
-    /congratulations to all selected/i,
-    /positions:\s*/i,
-    /sde intern:\s*\d+ offer/i,
-  ];
+	const body = bodyLines.join("\n").trim();
+	parsed.body = body || null;
+	// Superset repeats the same course row per intake, so collapse duplicates.
+	parsed.eligibility = Array.from(new Set(parsed.eligibility));
+	parsed.hiringFlow = Array.from(new Set(parsed.hiringFlow));
+	return parsed;
+}
 
-  // If author looks like a bot
-  const author = String(n.author || "").toLowerCase();
-  if (author && /bot|placementbot|placement-bot|placement_bot/i.test(author)) return true;
+export function normalizeNoticeDocument(document: Document): Notice {
+	const sourceId = documentId(document._id ?? document.id);
+	const category = normalizeCategory(document.category ?? document.type ?? "update");
+	const matchedJobId = documentId(
+		document.matched_job_id ?? document.matched_job?.id,
+	);
+	const matchedJob = matchedJobId
+		? {
+				id: matchedJobId,
+				company:
+					stringValue(document.job_company ?? document.matched_job?.company) || "",
+				job_profile:
+					stringValue(document.job_role ?? document.matched_job?.job_profile) || "",
+				location: stringValue(document.matched_job?.location ?? document.location),
+				package: cleanPackage(document.matched_job?.package ?? document.package),
+				package_breakdown: cleanPackageBreakdown(
+					document.matched_job?.package_breakdown ?? document.package_breakdown,
+				),
+			}
+		: null;
+	// Source timestamps must win over persistence metadata. `saved_at` is when
+	// the scraper inserted the document and may be hours or days after posting.
+	const createdAt =
+		timestampValue(document.time_sent) ??
+		timestampValue(document.createdAt) ??
+		timestampValue(document.created_at) ??
+		timestampValue(document.saved_at) ??
+		undefined;
+	const shortlistedStudents = normalizeStudents(document.shortlisted_students);
+	const parsed = parseFormattedMessage(stringValue(document.formatted_message));
+	const eligibility = stringArray(document.eligibility_criteria) ?? (
+		parsed.eligibility.length ? parsed.eligibility : null
+	);
+	const hiringFlow =
+		stringArray(document.hiring_flow) ??
+		(parsed.hiringFlow.length ? parsed.hiringFlow : null);
 
-  // If message is very short and matches announcement patterns, hide it
-  const lengthThreshold = 300; // chars; messages shorter than this and matching pattern are suspicious
-  const isShort = (text || "").trim().length > 0 && (text || "").trim().length < lengthThreshold;
+	return {
+		id: documentId(document.id) || sourceId,
+		sourceId,
+		source: "notice",
+		category,
+		matched_job: matchedJob,
+		matched_job_id: matchedJobId || null,
+		formatted_message: stringValue(document.formatted_message),
+		body: parsed.body,
+		createdAt,
+		updatedAt:
+			timestampValue(document.updatedAt ?? document.updated_at) ?? undefined,
+		content: stringValue(document.content) || undefined,
+		title: stringValue(document.title) || undefined,
+		author: stringValue(document.author)?.split("<")[0].trim() || undefined,
+		job_company: stringValue(document.job_company) ?? parsed.company,
+		job_role: stringValue(document.job_role) ?? parsed.role,
+		package: cleanPackage(document.package) ?? cleanPackage(parsed.packageText),
+		package_breakdown: cleanPackageBreakdown(document.package_breakdown),
+		location: stringValue(document.location) ?? parsed.location,
+		deadline: stringValue(document.deadline) ?? parsed.deadline,
+		eligibility_criteria: eligibility,
+		eligibility_requirements: parsed.requirements.length ? parsed.requirements : null,
+		hiring_flow: hiringFlow?.filter((step) => {
+			const normalized = step.toLowerCase();
+			return !normalized.includes("detailed jd") && !step.startsWith("🔗");
+		}),
+		shortlisted_students: shortlistedStudents,
+		number_of_offers: null,
+	};
+}
 
-  const matchesPattern = shortAnnouncementPatterns.some((re) => re.test(text));
+function joiningDate(value: unknown): string | undefined {
+	const timestamp = timestampValue(value);
+	if (timestamp == null) return undefined;
+	return new Date(timestamp).toLocaleDateString("en-IN", {
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+	});
+}
 
-  return isShort && matchesPattern;
-};
+export function normalizePlacementOfferDocument(document: Document): Notice {
+	const sourceId = documentId(document._id ?? document.id);
+	const matchedJobId = documentId(
+		document.matched_job_id ?? document.related_job_id ?? document.matched_job?.id,
+	);
+	const matchedJob = matchedJobId
+		? {
+				id: matchedJobId,
+				company:
+					stringValue(document.matched_job?.company ?? document.company) || "",
+				job_profile: stringValue(document.matched_job?.job_profile) || "",
+				location: stringValue(
+					document.matched_job?.location ?? document.job_location?.[0],
+				),
+				package: cleanPackage(document.matched_job?.package),
+				package_breakdown: cleanPackageBreakdown(
+					document.matched_job?.package_breakdown,
+				),
+			}
+		: null;
+	const roles = Array.isArray(document.roles) ? document.roles : [];
+	const primaryRole = roles.find((role) => stringValue(role?.role));
+	const role = stringValue(primaryRole?.role) || "Offer";
+	const packages = roles
+		.map((item) => (typeof item?.package === "number" ? item.package : null))
+		.filter((item): item is number => item != null);
+	const firstStudentPackage = document.students_selected?.[0]?.package;
+	const bestPackage = packages.length
+		? Math.max(...packages)
+		: typeof firstStudentPackage === "number"
+			? firstStudentPackage
+			: null;
+	const packageText = bestPackage == null ? null : `${bestPackage} LPA`;
+	const locations = stringArray(document.job_location);
+	const messageParts = [
+		"**Placement Offer**",
+		document.company ? `**Company:** ${document.company}` : null,
+		role ? `**Role:** ${role}` : null,
+		packageText ? `**CTC:** ${packageText}` : null,
+		locations?.length ? `**Location:** ${locations.join(", ")}` : null,
+	].filter((part): part is string => Boolean(part));
+	const students = normalizeStudents(document.students_selected);
+	const createdAt =
+		timestampValue(document.time_sent) ??
+		timestampValue(document.createdAt) ??
+		timestampValue(document.created_at) ??
+		timestampValue(document.saved_at) ??
+		timestampValue(document.updated_at) ??
+		undefined;
+
+	return {
+		id: sourceId,
+		sourceId,
+		source: "placement-offer",
+		category: "placement offer",
+		matched_job: matchedJob,
+		matched_job_id: matchedJobId || null,
+		formatted_message: messageParts.join("\n\n"),
+		body: null,
+		createdAt,
+		updatedAt: createdAt,
+		job_company: stringValue(document.company),
+		job_role: role,
+		package: packageText,
+		package_breakdown:
+			roles
+				.map((item) => {
+					const details = stringValue(item?.package_details);
+					return details ? `- ${stringValue(item?.role) || "Role"}: ${details}` : null;
+				})
+				.filter(Boolean)
+				.join("\n") || null,
+		location: locations?.join(", ") || null,
+		deadline: null,
+		eligibility_criteria: null,
+		hiring_flow: null,
+		shortlisted_students: students,
+		number_of_offers:
+			typeof document.number_of_offers === "number"
+				? document.number_of_offers
+				: students?.length ?? 0,
+		joiningDate: joiningDate(document.joining_date),
+	};
+}
+
+export function isPlacementBotPost(notice: Partial<Notice>): boolean {
+	const author = String(notice.author || "").toLowerCase();
+	if (author.includes("bot")) return true;
+
+	const text = `${notice.formatted_message || ""}\n${notice.title || ""}\n${
+		notice.content || ""
+	}`
+		.toLowerCase()
+		.trim();
+	if (!text || text.length >= 300) return false;
+
+	return (
+		text.includes("student have been placed at") ||
+		text.includes("students have been placed at") ||
+		text.includes("student has been placed at") ||
+		text.includes("students has been placed at") ||
+		text.includes("congratulations to all selected") ||
+		text.includes("positions:") ||
+		(text.includes("sde intern:") && text.includes(" offer"))
+	);
+}
+
+export function formatDateTime(timestamp: number): string {
+	const date = new Date(timestamp);
+	const dateText = date.toLocaleDateString("en-GB", {
+		day: "2-digit",
+		month: "2-digit",
+		year: "numeric",
+	});
+	const timeText = date.toLocaleTimeString("en-GB", {
+		hour: "2-digit",
+		minute: "2-digit",
+		hour12: true,
+	});
+	return `${dateText} at ${timeText}`;
+}

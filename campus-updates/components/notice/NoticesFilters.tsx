@@ -1,126 +1,95 @@
 "use client";
 
-import React from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useMemo } from "react";
+import { Tags } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-	DropdownMenu,
-	DropdownMenuCheckboxItem,
-	DropdownMenuContent,
-	DropdownMenuLabel,
-	DropdownMenuRadioGroup,
-	DropdownMenuRadioItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { FilterChips, type FilterChip } from "@/components/ui/filter-chips";
+import { SearchInput } from "@/components/ui/search-input";
+import { SearchableFilterDropdown } from "@/components/ui/searchable-filter-dropdown";
 
 type Props = {
 	query: string;
-	setQuery: React.Dispatch<React.SetStateAction<string>>;
+	onQueryChange: (query: string) => void;
 	allCategories: string[];
 	selectedCategories: string[];
-	setSelectedCategories: React.Dispatch<React.SetStateAction<string[]>>;
-	onlyShortlisted: boolean;
-	setOnlyShortlisted: React.Dispatch<React.SetStateAction<boolean>>;
-	itemsPerPage: number;
-	setItemsPerPage: React.Dispatch<React.SetStateAction<number>>;
+	onCategoriesChange: (categories: string[]) => void;
 	resultsCount: number;
 };
 
+function prettify(category: string): string {
+	return category
+		.split(" ")
+		.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+		.join(" ");
+}
+
 export default function NoticesFilters({
 	query,
-	setQuery,
+	onQueryChange,
 	allCategories,
 	selectedCategories,
-	setSelectedCategories,
-	onlyShortlisted,
-	setOnlyShortlisted,
-	itemsPerPage,
-	setItemsPerPage,
+	onCategoriesChange,
 	resultsCount,
 }: Props) {
+	const chips = useMemo<FilterChip[]>(() => {
+		const list: FilterChip[] = [];
+		if (query.trim()) {
+			list.push({
+				key: "query",
+				label: `“${query.trim()}”`,
+				onRemove: () => onQueryChange(""),
+			});
+		}
+		selectedCategories.forEach((cat) =>
+			list.push({
+				key: `cat-${cat}`,
+				label: prettify(cat),
+				onRemove: () =>
+					onCategoriesChange(selectedCategories.filter((c) => c !== cat)),
+			}),
+		);
+		return list;
+	}, [query, selectedCategories, onQueryChange, onCategoriesChange]);
+
+	const clearAll = () => {
+		onQueryChange("");
+		onCategoriesChange([]);
+	};
+
 	return (
-		<div>
-			{/* Filters */}
-			<div className="mb-4">
-				<div className="flex flex-col md:flex-row gap-3 md:items-center">
-					<div className="flex-1">
-						<Input
-							placeholder="Search updates or company/role"
-							value={query}
-							onChange={(e) => setQuery(e.target.value)}
-						/>
-					</div>
-					<div className="flex gap-2 flex-wrap">
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="outline" className="whitespace-nowrap">
-									Categories
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent className="w-56 max-h-72 overflow-auto">
-								<DropdownMenuLabel>Select categories</DropdownMenuLabel>
-								<DropdownMenuSeparator />
-								{allCategories.map((cat) => (
-									<DropdownMenuCheckboxItem
-										key={cat}
-										checked={selectedCategories.includes(cat)}
-										onCheckedChange={(checked) => {
-											setSelectedCategories((prev) =>
-												checked ? [...prev, cat] : prev.filter((c) => c !== cat)
-											);
-										}}
-									>
-										{cat
-											.split(" ")
-											.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-											.join(" ")}
-									</DropdownMenuCheckboxItem>
-								))}
-							</DropdownMenuContent>
-						</DropdownMenu>
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="outline" className="whitespace-nowrap">
-									{itemsPerPage} per page
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent className="w-40">
-								<DropdownMenuLabel>Items per page</DropdownMenuLabel>
-								<DropdownMenuSeparator />
-								<DropdownMenuRadioGroup
-									value={itemsPerPage.toString()}
-									onValueChange={(value) => setItemsPerPage(Number(value))}
-								>
-									{[20, 50, 75, 100].map((val) => (
-										<DropdownMenuRadioItem key={val} value={val.toString()}>
-											{val}
-										</DropdownMenuRadioItem>
-									))}
-								</DropdownMenuRadioGroup>
-							</DropdownMenuContent>
-						</DropdownMenu>
-						<div className="flex items-center gap-2">
-							<Checkbox
-								id="onlyShortlisted"
-								checked={onlyShortlisted}
-								onCheckedChange={(v) => setOnlyShortlisted(!!v)}
-							/>
-							<label
-								htmlFor="onlyShortlisted"
-								className="text-sm cursor-pointer"
-							>
-								Shortlisted students
-							</label>
-						</div>
-						<Badge variant="secondary" className="self-center">
-							{resultsCount} results
-						</Badge>
-					</div>
-				</div>
+		<div className="space-y-3">
+			<div className="flex flex-wrap items-center gap-2">
+				<SearchInput
+					placeholder="Search company, role or details"
+					value={query}
+					onValueChange={onQueryChange}
+					className="min-w-40 flex-1"
+					aria-label="Search notices"
+				/>
+
+				<SearchableFilterDropdown<string>
+					label="Categories"
+					icon={<Tags className="h-3.5 w-3.5 opacity-60" />}
+					options={allCategories.map((cat) => ({
+						value: cat,
+						label: prettify(cat),
+					}))}
+					selected={selectedCategories}
+					onChange={onCategoriesChange}
+					searchPlaceholder="Search categories..."
+					contentClassName="w-60"
+				/>
+
+				<Badge
+					variant="secondary"
+					className="ml-auto rounded-full bg-primary/15 px-3 py-1 text-sm font-semibold text-primary hover:bg-primary/20"
+				>
+					{resultsCount} results
+				</Badge>
 			</div>
+
+			<FilterChips chips={chips} onClearAll={clearAll} />
 		</div>
 	);
 }

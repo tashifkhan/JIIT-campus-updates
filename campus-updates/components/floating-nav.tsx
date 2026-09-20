@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { motion } from "framer-motion";
 import { BriefcaseIcon, HomeIcon, TrendingUpIcon, Wrench } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 type NavItem = {
 	name: string;
@@ -78,11 +79,7 @@ const FloatingNav = ({
 		<div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-lg px-2">
 			<div
 				ref={containerRef}
-				className="relative flex items-center justify-between shadow-xl rounded-full px-1 py-2 border"
-				style={{
-					backgroundColor: "var(--card-bg)",
-					borderColor: "var(--border-color)",
-				}}
+				className="relative flex items-center justify-between shadow-xl rounded-full px-1 py-2 border bg-card border-border"
 			>
 				{items.map((item, index) => {
 					const Icon = item.icon as any;
@@ -92,10 +89,10 @@ const FloatingNav = ({
 							key={item.name}
 							ref={(el) => (btnRefs.current[index] = el)}
 							onClick={() => handleClick(index, item)}
-							className="relative flex flex-col items-center justify-center flex-1 px-2 py-2 text-sm font-medium overflow-visible"
-							style={{
-								color: isActive ? "var(--accent-color)" : "var(--label-color)",
-							}}
+							className={cn(
+								"relative flex flex-col items-center justify-center flex-1 px-2 py-2 text-sm font-medium overflow-visible",
+								isActive ? "text-accent" : "text-muted-foreground"
+							)}
 							aria-label={item.name}
 							title={item.name}
 							initial={false}
@@ -105,7 +102,7 @@ const FloatingNav = ({
 							{/* lifted circular bubble behind active icon */}
 							{isActive && (
 								<motion.span
-									className="absolute -top-3 w-10 h-10 rounded-full bg-[var(--card-bg)] shadow z-10"
+									className="absolute -top-3 w-10 h-10 rounded-full bg-card shadow z-10"
 									initial={{ scale: 0.9, opacity: 0 }}
 									animate={{ scale: 1, opacity: 1 }}
 									transition={{ type: "spring", stiffness: 500, damping: 40 }}
@@ -136,11 +133,7 @@ const FloatingNav = ({
 					initial={false}
 					animate={indicatorStyle}
 					transition={{ type: "spring", stiffness: 400, damping: 30 }}
-					className="absolute top-1 bottom-1 rounded-full"
-					style={{
-						backgroundColor: "var(--accent-color)",
-						opacity: 0.12,
-					}}
+					className="absolute top-1 bottom-1 rounded-full bg-accent opacity-10"
 				/>
 			</div>
 		</div>

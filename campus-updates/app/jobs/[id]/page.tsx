@@ -1,71 +1,64 @@
-import JobDetailClient from "../../../components/jobs/JobDetailClient";
-import React from "react";
+"use client";
 
-type Job = {
-	id: string;
-	job_profile: string;
-	company: string;
-	[key: string]: any;
-};
+import { use } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowLeftIcon } from "lucide-react";
+import { useQueryState } from "nuqs";
 
-async function fetchJob(id: string) {
-	// Build an absolute URL for server-side fetch. When NEXT_PUBLIC_BASE_URL is not set
-	// (for example during local dev or on some hosting), fall back to Vercel URL or localhost.
-	const base =
-		process.env.NEXT_PUBLIC_BASE_URL ||
-		(process.env.NEXT_PUBLIC_VERCEL_URL
-			? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-			: "http://localhost:3000");
+import JobDetailClient from "@/components/jobs/JobDetailClient";
+import { usePlacementYear } from "@/components/PlacementYearProvider";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { useJobById } from "@/lib/hooks/useJobData";
+import { jobDetailQueryParams } from "@/lib/query-params";
 
-	const url = new URL(`/api/jobs/${id}`, base).toString();
-
-	const res = await fetch(url, {
-		cache: "no-store",
-	});
-	if (!res.ok) return null;
-	const json = await res.json();
-	return json.data as Job;
+function JobDetailLoading() {
+	return (
+		<div className="min-h-screen bg-background p-4 md:p-8">
+			<div className="max-w-5xl mx-auto space-y-8">
+				<div className="space-y-4">
+					<div className="h-10 w-32 bg-muted rounded-md animate-pulse" />
+					<div className="h-8 w-2/3 bg-muted rounded-md animate-pulse" />
+				</div>
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+					<div className="md:col-span-2 h-64 bg-muted rounded-xl animate-pulse" />
+					<div className="h-40 bg-muted rounded-xl animate-pulse" />
+				</div>
+			</div>
+		</div>
+	);
 }
 
-export async function generateMetadata({
+export default function JobPage({
 	params,
 }: {
 	params: Promise<{ id: string }>;
 }) {
-	const { id } = await params;
-	const job = await fetchJob(id);
-	const title = job
-		? `${job.company} ${job.job_profile}`
-		: "JIIT Placement Updates";
+	const { id } = use(params);
+	const [requestedYear] = useQueryState("year", jobDetailQueryParams.year);
+	const router = useRouter();
+	const placementYear = usePlacementYear();
+	const year = requestedYear || placementYear.year;
+	const jobQuery = useJobById(id, year);
 
-	return {
-		title,
-		openGraph: {
-			title,
-			description: "Campus placement and updates portal",
-		},
-		twitter: {
-			title,
-			description: "Campus placement and updates portal",
-		},
-	};
-}
+	if (jobQuery.isLoading) return <JobDetailLoading />;
 
-export default async function JobPage({
-	params,
-}: {
-	params: Promise<{ id: string }>;
-}) {
-	const { id } = await params;
-	const job = await fetchJob(id);
-
-	if (!job) {
+	if (!jobQuery.data) {
 		return (
-			<div className="p-4">
-				<h2 className="text-xl font-bold">Job not found</h2>
+			<div className="min-h-screen flex flex-col items-center justify-center p-4">
+				<Card className="p-8 max-w-md w-full text-center space-y-4 border-border shadow-lg">
+					<h2 className="text-2xl font-bold">Job Not Found</h2>
+					<p className="text-muted-foreground">
+						The job could not be loaded or has been removed.
+					</p>
+					<Button onClick={() => router.push("/jobs")}>
+						<ArrowLeftIcon className="w-4 h-4 mr-2" />
+						Back to Jobs
+					</Button>
+				</Card>
 			</div>
 		);
 	}
 
-	return <JobDetailClient job={job as any} />;
+	return <JobDetailClient job={jobQuery.data} />;
 }
