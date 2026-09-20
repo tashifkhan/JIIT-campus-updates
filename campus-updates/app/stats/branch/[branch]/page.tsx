@@ -81,6 +81,7 @@ export default function BranchStatsPage({
 		branchTotalCounts,
 		enrollmentRanges,
 		studentCounts,
+		year,
 		loading,
 	} = useStatsData();
 	const [query, setQuery] = useQueryState("q", statsQueryParams.q);
@@ -167,7 +168,7 @@ export default function BranchStatsPage({
 	const getBranchStudents = (branchName: string) => {
 		// Use includedStudents (filtered) or allStudents? Use included for consistency
 		return includedStudents
-			.filter((s) => getBranch(s.enrollment_number) === branchName)
+			.filter((s) => getBranch(s.enrollment_number, year) === branchName)
 			.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 	};
 

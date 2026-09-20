@@ -1,7 +1,12 @@
 import "server-only";
 
-import enrollmentRanges from "@/app/stats/enrollmemt_range.json";
-import studentCounts from "@/app/stats/student_count.json";
+import {
+	getBranchRangesForYear,
+	getBranchTotalsForYear,
+	getExcludedBranchesForYear,
+	getTotalStudentsForYear,
+	type BranchRange,
+} from "@/lib/batch-config";
 import {
 	BranchStatsData,
 	CompanyStatsData,
@@ -20,7 +25,6 @@ import {
 } from "@/lib/stats";
 import { getCollection } from "@/lib/server/data";
 
-const EXCLUDED_BRANCHES = new Set(["JUIT", "Other", "MTech"]);
 const PACKAGE_RANGES = [
 	{ label: "0-3", min: 0, max: 3 },
 	{ label: "3-4", min: 3, max: 4 },
@@ -55,7 +59,6 @@ const PLACEMENT_PROJECTION = {
 	saved_at: 1,
 } as const;
 
-type BranchRange = { branch: string; start: number; end: number };
 type MutableBranchStats = {
 	count: number;
 	enrollments: Set<string>;
@@ -118,19 +121,19 @@ function normalizePlacement(value: Record<string, unknown>): Placement {
 	};
 }
 
-function buildBranchRanges(): BranchRange[] {
-	const ranges: BranchRange[] = [];
-	for (const [branch, values] of Object.entries(enrollmentRanges)) {
-		for (const range of Object.values(values)) {
-			if (range && typeof range.start === "number" && typeof range.end === "number") {
-				ranges.push({ branch, start: range.start, end: range.end });
-			}
-		}
-	}
-	return ranges.sort((left, right) => left.start - right.start);
-}
+// Per-year branch ranges, cached by placement year. The batch config holds
+// enrollment ranges per year (202526 -> 221xxxx, 202627 -> 231xxxx, ...).
+const branchRangesCache = new Map<string, BranchRange[]>();
 
-const BRANCH_RANGES = buildBranchRanges();
+function branchRangesForYear(year?: string | null): BranchRange[] {
+	const key = String(year || "202526");
+	let cached = branchRangesCache.get(key);
+	if (!cached) {
+		cached = getBranchRangesForYear(key);
+		branchRangesCache.set(key, cached);
+	}
+	return cached;
+}
 
 function digitsOnly(value: string): string {
 	let digits = "";
@@ -147,7 +150,7 @@ function containsLetter(value: string): boolean {
 	return false;
 }
 
-export function getStatsBranch(enrollment: string): string {
+export function getStatsBranch(enrollment: string, year?: string | null): string {
 	if (!enrollment) return "Other";
 	const digits = digitsOnly(enrollment);
 	if (containsLetter(enrollment) || digits.length === 9) return "JUIT";
@@ -155,25 +158,11 @@ export function getStatsBranch(enrollment: string): string {
 	if (!digits) return "Other";
 	const number = Number(digits);
 	if (!Number.isFinite(number)) return "Other";
-	for (const range of BRANCH_RANGES) {
+	for (const range of branchRangesForYear(year)) {
 		if (number >= range.start && number < range.end) return range.branch;
 	}
 	return "Other";
 }
-
-function getBranchTotals(): Record<string, number> {
-	const totals: Record<string, number> = {};
-	for (const [branch, counts] of Object.entries(studentCounts)) {
-		if (EXCLUDED_BRANCHES.has(branch)) continue;
-		totals[branch] = Object.values(counts).reduce(
-			(sum, count) => sum + Number(count || 0),
-			0,
-		);
-	}
-	return totals;
-}
-
-const BRANCH_TOTALS = getBranchTotals();
 
 async function loadPlacements(year: string): Promise<Placement[]> {
 	const collection = await getCollection("PlacementOffers", year);
@@ -198,9 +187,13 @@ function flattenStudents(placements: Placement[]): StudentWithPlacement[] {
 	);
 }
 
-function includedStudents(students: StudentWithPlacement[]): StudentWithPlacement[] {
+function includedStudents(
+	students: StudentWithPlacement[],
+	year?: string | null,
+): StudentWithPlacement[] {
+	const excluded = getExcludedBranchesForYear(year);
 	return students.filter(
-		(student) => !EXCLUDED_BRANCHES.has(getStatsBranch(student.enrollment_number)),
+		(student) => !excluded.has(getStatsBranch(student.enrollment_number, year)),
 	);
 }
 
@@ -252,19 +245,17 @@ function uniqueStudentCount(students: StudentWithPlacement[]): number {
 export async function getStatsSummary(year: string, query: string): Promise<StatsSummary> {
 	const placements = await loadPlacements(year);
 	const allStudents = flattenStudents(placements);
-	const included = includedStudents(allStudents);
+	const included = includedStudents(allStudents, year);
 	const filtered = included.filter((student) => matchesSearch(student, query));
 	const overallPackages = packageSummary(included);
 	const filteredPackages = packageSummary(filtered);
-	const countedBranches = new Set(Object.keys(BRANCH_TOTALS));
-	const totalStudents = Object.values(BRANCH_TOTALS).reduce(
-		(sum, count) => sum + count,
-		0,
-	);
+	const branchTotals = getBranchTotalsForYear(year);
+	const countedBranches = new Set(Object.keys(branchTotals));
+	const totalStudents = getTotalStudentsForYear(year);
 	const placedInCountedBranches = (students: StudentWithPlacement[]) =>
 		new Set(
 			students
-				.filter((student) => countedBranches.has(getStatsBranch(student.enrollment_number)))
+				.filter((student) => countedBranches.has(getStatsBranch(student.enrollment_number, year)))
 				.map((student) => student.enrollment_number)
 				.filter(Boolean),
 		).size;
@@ -299,14 +290,15 @@ export async function getStatsSummary(year: string, query: string): Promise<Stat
 
 export async function getBranchStats(year: string, query: string): Promise<BranchStatsData> {
 	const placements = await loadPlacements(year);
-	const students = includedStudents(flattenStudents(placements)).filter((student) =>
+	const branchTotals = getBranchTotalsForYear(year);
+	const students = includedStudents(flattenStudents(placements), year).filter((student) =>
 		matchesSearch(student, query),
 	);
 	const mutable: Record<string, MutableBranchStats> = {};
 	const offerPackages: Record<string, number[]> = {};
 
 	for (const student of students) {
-		const branch = getStatsBranch(student.enrollment_number);
+		const branch = getStatsBranch(student.enrollment_number, year);
 		mutable[branch] ||= {
 			count: 0,
 			enrollments: new Set(),
@@ -328,7 +320,7 @@ export async function getBranchStats(year: string, query: string): Promise<Branc
 	const branches = Object.fromEntries(
 		Object.entries(mutable).map(([branch, stats]) => {
 			const packages = Array.from(stats.studentPackages.values());
-			const total = BRANCH_TOTALS[branch] || 0;
+			const total = branchTotals[branch] || 0;
 			const uniqueCount = stats.enrollments.size;
 			return [
 				branch,
@@ -392,7 +384,7 @@ export async function getCompanyStats(year: string, query: string): Promise<Comp
 	const placements = await loadPlacements(year);
 	const allStudents = flattenStudents(placements);
 	const students = query
-		? includedStudents(allStudents).filter((student) => matchesSearch(student, query))
+		? includedStudents(allStudents, year).filter((student) => matchesSearch(student, query))
 		: allStudents;
 	const companies = new Map<
 		string,
@@ -442,9 +434,10 @@ export async function getTimelineStats(
 	cumulative: boolean,
 ): Promise<StatsTimelinePoint[]> {
 	const allPlacements = await loadPlacements(year);
+	const excluded = getExcludedBranchesForYear(year);
 	const placements = query
 		? allPlacements.filter((placement) =>
-				includedStudents(flattenStudents([placement])).some((student) =>
+				includedStudents(flattenStudents([placement]), year).some((student) =>
 					matchesSearch(student, query),
 				),
 			)
@@ -460,7 +453,7 @@ export async function getTimelineStats(
 		.filter(
 			(event): event is typeof event & { date: Date } =>
 				event.date !== null &&
-				!EXCLUDED_BRANCHES.has(getStatsBranch(event.student.enrollment_number)),
+				!excluded.has(getStatsBranch(event.student.enrollment_number, year)),
 		)
 		.sort((left, right) => left.date.getTime() - right.date.getTime());
 	const groups = new Map<

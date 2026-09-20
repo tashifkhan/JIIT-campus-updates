@@ -1,25 +1,41 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePlacementYear } from "@/components/PlacementYearProvider";
-import enrollmentRanges from "@/app/stats/enrollmemt_range.json";
-import studentCounts from "@/app/stats/student_count.json";
+import {
+	getBranchRangesForYear,
+	getBranchTotalsForYear,
+	getEnrollmentRangesForYear,
+	getExcludedBranchesForYear,
+	getStudentCountsForYear,
+	getTotalStudentsForYear,
+	getBatchConfig,
+} from "@/lib/batch-config";
 import {
 	Placement,
 	StudentWithPlacement,
 	getStudentPackage,
 } from "@/lib/stats";
 
-// Flattened index of enrollment ranges -> branch
-export const ENROLLMENT_BRANCH_RANGES: Array<{
-	branch: string;
-	start: number;
-	end: number;
-}> = buildBranchRangesFromJson(enrollmentRanges as any);
+// Default-year flattened ranges (back-compat for existing imports).
+// Year-aware callers should use getBranch(enrollment, year).
+export const ENROLLMENT_BRANCH_RANGES = getBranchRangesForYear("202526");
 
 export const BRANCHES_LIMIT = 3;
 export const COMPANIES_LIMIT = 6;
-// Exclude these branches from all calculations and displays
-const EXCLUDED_BRANCHES = new Set(["JUIT", "Other", "MTech"]);
+// Default excluded branches; per-year value comes from getExcludedBranchesForYear(year).
+const DEFAULT_EXCLUDED_BRANCHES = getExcludedBranchesForYear("202526");
+
+const branchRangesCache = new Map<string, ReturnType<typeof getBranchRangesForYear>>();
+
+function rangesForYear(year?: string | null) {
+	const key = String(year || "202526");
+	let cached = branchRangesCache.get(key);
+	if (!cached) {
+		cached = getBranchRangesForYear(key);
+		branchRangesCache.set(key, cached);
+	}
+	return cached;
+}
 
 export function useStatsData() {
 	const { year } = usePlacementYear();
@@ -45,6 +61,12 @@ export function useStatsData() {
 		[data],
 	);
 
+	const enrollmentRanges = useMemo(() => getEnrollmentRangesForYear(year), [year]);
+	const studentCounts = useMemo(() => getStudentCountsForYear(year), [year]);
+	const excludedBranches = useMemo(() => getExcludedBranchesForYear(year), [year]);
+	const batchConfig = useMemo(() => getBatchConfig(year), [year]);
+	const totalStudents = useMemo(() => getTotalStudentsForYear(year), [year]);
+
 	// Flattened students (+ placement context)
 	const allStudents: StudentWithPlacement[] = useMemo(
 		() =>
@@ -64,30 +86,13 @@ export function useStatsData() {
 	const includedStudents = useMemo(
 		() =>
 			allStudents.filter(
-				(s) => !EXCLUDED_BRANCHES.has(getBranch(s.enrollment_number)),
+				(s) => !excludedBranches.has(getBranch(s.enrollment_number, year)),
 			),
-		[allStudents],
+		[allStudents, excludedBranches, year],
 	);
 
-	// Branch totals (for denominator) - exclude JUIT, Other, MTech
-	const branchTotalCounts = useMemo(() => {
-		const totals: Record<string, number> = {};
-		try {
-			Object.entries(studentCounts as any).forEach(([branch, counts]) => {
-				if (EXCLUDED_BRANCHES.has(branch)) return;
-				if (counts && typeof counts === "object") {
-					const sum = Object.values(counts).reduce(
-						(a: number, c: any) => a + Number(c || 0),
-						0,
-					);
-					totals[branch] = sum;
-				} else if (typeof counts === "number") {
-					totals[branch] = counts;
-				}
-			});
-		} catch {}
-		return totals;
-	}, []);
+	// Branch totals (for denominator) — per placement year.
+	const branchTotalCounts = useMemo(() => getBranchTotalsForYear(year), [year]);
 
 	return {
 		placements,
@@ -95,9 +100,12 @@ export function useStatsData() {
 		includedStudents,
 		branchTotalCounts,
 		loading,
-		EXCLUDED_BRANCHES,
+		EXCLUDED_BRANCHES: excludedBranches,
 		enrollmentRanges,
 		studentCounts,
+		batchConfig,
+		totalStudents,
+		year,
 	};
 }
 
@@ -138,7 +146,7 @@ export function buildBranchRangesFromJson(
 	return ranges;
 }
 
-export function getBranch(enrollment: string): string {
+export function getBranch(enrollment: string, year?: string | null): string {
 	if (!enrollment) return "Other";
 	const hasAlpha = /[A-Za-z]/.test(enrollment);
 	const digits = (enrollment.match(/\d+/g) || []).join("");
@@ -147,8 +155,12 @@ export function getBranch(enrollment: string): string {
 	if (!digits) return "Other";
 	const num = Number(digits);
 	if (!Number.isFinite(num)) return "Other";
-	for (const r of ENROLLMENT_BRANCH_RANGES) {
+	const ranges = year ? rangesForYear(year) : ENROLLMENT_BRANCH_RANGES;
+	for (const r of ranges) {
 		if (num >= r.start && num < r.end) return r.branch;
 	}
 	return "Other";
 }
+
+// Re-export for callers that want the default-year set directly.
+export { DEFAULT_EXCLUDED_BRANCHES as LEGACY_EXCLUDED_BRANCHES };
