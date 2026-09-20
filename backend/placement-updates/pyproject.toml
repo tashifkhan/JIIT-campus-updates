@@ -6,9 +6,9 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "beautifulsoup4>=4.13.4",
-    "langchain>=0.3.27",
-    "langchain-google-genai>=2.1.9",
-    "langgraph>=0.6.6",
+    "langchain>=1.4.2",
+    "langchain-google-genai>=4.4.0",
+    "langgraph>=1.2.11",
     "pydantic>=2.11.7",
     "pymongo>=4.14.1",
     "python-dotenv>=1.1.1",

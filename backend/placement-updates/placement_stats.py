@@ -9,7 +9,7 @@ from typing import List, Optional, Dict, TypedDict
 from dotenv import load_dotenv
 from pydantic import BaseModel, ValidationError
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import StateGraph, END
 from database import MongoDBManager
 
@@ -53,9 +53,10 @@ class PlacementOffer(BaseModel):
 
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
+    model="gemini-3.8-flash",
     temperature=0,
-    google_api_key=GOOGLE_API_KEY,
+    api_key=GOOGLE_API_KEY,
+    thinking_level="low",
 )
 
 prompt = ChatPromptTemplate.from_template(
@@ -323,6 +324,26 @@ def extract_json_from_response(response_content: str) -> str:
     return match.group(1).strip() if match else response_content.strip()
 
 
+def message_text(message_or_content) -> str:
+    text = getattr(message_or_content, "text", None)
+    if isinstance(text, str) and text.strip():
+        return text
+    content = getattr(message_or_content, "content", message_or_content)
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = []
+        for part in content:
+            if isinstance(part, str):
+                parts.append(part)
+            elif isinstance(part, dict) and part.get("text"):
+                if str(part.get("type") or "").lower() in {"thinking", "reasoning"}:
+                    continue
+                parts.append(str(part["text"]))
+        return "\n".join(parts)
+    return str(content)
+
+
 def robust_extract_info(state: GraphState) -> GraphState:
     print("\n--- Step 2: Robust Information Extraction ---")
     email_data = state["email"]
@@ -440,7 +461,7 @@ Body: {body}
             }
         )
 
-        json_content = extract_json_from_response(str(response.content))
+        json_content = extract_json_from_response(message_text(response))
         data = json.loads(json_content)
 
         # Check if empty response (for low-confidence emails)
