@@ -85,9 +85,41 @@ export async function getPlacementOffers(
 }
 
 export async function getOfficialPlacementData() {
-	const col = await getGlobalCollection("OfficialPlacementData");
-	const doc = await col.findOne({}, { sort: { scrape_timestamp: -1 } });
-	return doc;
+	const snapshotCol = await getGlobalCollection("OfficialPlacementData");
+	const snapshot = await snapshotCol.findOne(
+		{},
+		{ sort: { scrape_timestamp: -1 } },
+	);
+
+	const batchesCol = await getGlobalCollection("OfficialPlacementBatches");
+	const batchDocs = await batchesCol
+		.find({})
+		.sort({ batch_name: -1 })
+		.toArray();
+
+	if (batchDocs.length > 0) {
+		const batches = batchDocs.map(
+			({
+				_id: _batchId,
+				source: _source,
+				seed_version: _seedVersion,
+				provenance: _provenance,
+				updated_at: _updatedAt,
+				scrape_timestamp: _batchScrapeTimestamp,
+				...batch
+			}) => batch,
+		);
+		return {
+			scrape_timestamp: snapshot?.scrape_timestamp ?? null,
+			main_heading: snapshot?.main_heading ?? null,
+			intro_text: snapshot?.intro_text ?? null,
+			recruiter_logos: snapshot?.recruiter_logos ?? [],
+			batches,
+		};
+	}
+
+	// Fallback for environments that have not been seeded/migrated yet.
+	return snapshot;
 }
 
 /** Build a by-id query that supports both ObjectId and legacy string ids. */
