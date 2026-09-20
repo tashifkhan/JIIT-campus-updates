@@ -141,7 +141,7 @@ export default function OfficialPlacements() {
 							</div>
 							<div className="flex items-center gap-2">
 								<a
-									href="https://jiit.ac.in"
+									href="https://www.jiit.ac.in/existing-student/training-and-placement/students-placement"
 									target="_blank"
 									rel="noopener noreferrer"
 									onClick={(e) => e.stopPropagation()}
@@ -189,14 +189,14 @@ export default function OfficialPlacements() {
 								{/* Tabs for different batches */}
 								{data.batches && data.batches.length > 0 && (
 									<Tabs defaultValue={defaultBatchValue} className="w-full">
-										<TabsList className="w-full h-auto p-1 bg-muted border border-border/50 rounded-xl grid grid-cols-2 mb-6">
+										<TabsList className="w-full h-auto p-1 bg-muted border border-border/50 rounded-xl flex flex-wrap gap-1 mb-6">
 											{data.batches.map((batch) => {
 												const { main } = parseBatchName(batch.batch_name);
 												return (
 													<TabsTrigger
 														key={batch.batch_name}
 														value={batch.batch_name}
-														className="data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:font-bold rounded-lg px-3 py-2.5 text-sm transition-all text-muted-foreground hover:text-foreground"
+														className="flex-1 min-w-[4.5rem] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:font-bold rounded-lg px-3 py-2.5 text-sm transition-all text-muted-foreground hover:text-foreground"
 													>
 														{main}
 													</TabsTrigger>
