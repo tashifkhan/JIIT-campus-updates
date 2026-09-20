@@ -9,7 +9,7 @@ import json
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import StateGraph, END
 from pydantic import BaseModel
 
@@ -81,13 +81,14 @@ class NoticeFormatter:
     def __init__(
         self,
         google_api_key: Optional[str] = None,
-        model: str = "gemini-2.5-flash-lite",
+        model: str = "gemini-3.8-flash",
         temperature: float = 0,
     ):
         self.llm = ChatGoogleGenerativeAI(
             model=model,
             temperature=temperature,
-            google_api_key=google_api_key or GOOGLE_API_KEY,
+            api_key=google_api_key or GOOGLE_API_KEY,
+            thinking_level="low",
         )
         self.app = self._build_graph()
 
@@ -95,20 +96,23 @@ class NoticeFormatter:
     @staticmethod
     def _ensure_str_content(content: Any) -> str:
         """Normalize LLM message content (can be str or list of parts) to a string."""
-        if isinstance(content, str):
-            return content
-
-        if isinstance(content, list):
+        text = getattr(content, "text", None)
+        if isinstance(text, str) and text.strip():
+            return text
+        payload = getattr(content, "content", content)
+        if isinstance(payload, str):
+            return payload
+        if isinstance(payload, list):
             parts: List[str] = []
-            for p in content:
+            for p in payload:
                 if isinstance(p, str):
                     parts.append(p)
-                elif isinstance(p, dict) and "text" in p:
+                elif isinstance(p, dict) and p.get("text"):
+                    if str(p.get("type") or "").lower() in {"thinking", "reasoning"}:
+                        continue
                     parts.append(str(p["text"]))
-
             return "\n".join(parts)
-
-        return str(content)
+        return str(payload)
 
     @staticmethod
     def _format_ms_epoch_to_ist(
@@ -276,7 +280,7 @@ class NoticeFormatter:
         chain = classification_prompt | self.llm
         result = chain.invoke({"raw_text": state.get("raw_text", "")})
 
-        category = self._ensure_str_content(result.content).strip().lower()
+        category = self._ensure_str_content(result).strip().lower()
         state["category"] = category
 
         print(f"--- 2. Classified as: {category} ---")
@@ -299,7 +303,7 @@ class NoticeFormatter:
 
         extraction_chain = company_extraction_prompt | self.llm
         result = extraction_chain.invoke({"raw_text": notice_text})
-        extracted_names_str = self._ensure_str_content(result.content).strip()
+        extracted_names_str = self._ensure_str_content(result).strip()
 
         if not extracted_names_str:
             print("--- 3. No company names extracted, skipping match ---")
@@ -366,7 +370,7 @@ class NoticeFormatter:
                 "raw_text": state.get("raw_text", ""),
             }
         )
-        raw_content = self._ensure_str_content(result.content)
+        raw_content = self._ensure_str_content(result)
         cleaned_json_str = (
             raw_content.strip().replace("```json", "").replace("```", "").strip()
         )
