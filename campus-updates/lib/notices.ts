@@ -27,6 +27,8 @@ export type Notice = {
 	category: string;
 	matched_job: MatchedJob | null;
 	matched_job_id?: string | null;
+	likely_on_campus?: boolean;
+	on_campus_confidence?: number | null;
 	formatted_message?: string | null;
 	/** `formatted_message` minus the parts rendered as dedicated card sections. */
 	body?: string | null;
@@ -73,6 +75,13 @@ function stringValue(value: unknown): string | null {
 
 function documentId(value: unknown): string {
 	return value == null ? "" : String(value);
+}
+
+function confidenceValue(value: unknown): number | null {
+	if (value == null || value === "") return null;
+	const confidence = Number(value);
+	if (!Number.isFinite(confidence)) return null;
+	return Math.min(1, Math.max(0, confidence));
 }
 
 function stringArray(value: unknown): string[] | null {
@@ -388,6 +397,8 @@ export function normalizeNoticeDocument(document: Document): Notice {
 		category,
 		matched_job: matchedJob,
 		matched_job_id: matchedJobId || null,
+		likely_on_campus: document.likely_on_campus === true,
+		on_campus_confidence: confidenceValue(document.on_campus_confidence),
 		formatted_message: stringValue(document.formatted_message),
 		body: parsed.body,
 		createdAt,
