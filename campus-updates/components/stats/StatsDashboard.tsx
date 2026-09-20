@@ -22,7 +22,7 @@ import {
 } from "@/lib/hooks/useStatsDashboard";
 import { serializeStatsQuery, statsQueryParams } from "@/lib/query-params";
 
-export type StatsSection = "branches" | "companies" | "timeline";
+export type StatsSection = "branches" | "companies" | "distribution" | "timeline";
 
 type StatsDashboardProps = {
 	section: StatsSection;
@@ -66,6 +66,28 @@ function SectionSkeleton({ cards }: { cards: number }) {
 	);
 }
 
+function ChartSkeleton() {
+	return (
+		<Card className="card-theme bg-card border-border">
+			<CardContent className="p-6">
+				<div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+					<div className="h-6 w-72 rounded bg-muted animate-pulse" />
+					<div className="h-8 w-56 rounded bg-muted animate-pulse" />
+				</div>
+				<div className="h-[300px] sm:h-[400px] lg:h-[500px] rounded-xl border border-border/60 bg-muted animate-pulse" />
+				<div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+					{Array.from({ length: 3 }, (_, index) => (
+						<div
+							key={index}
+							className="h-16 rounded-lg border border-border/60 bg-muted animate-pulse"
+						/>
+					))}
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
 export default function StatsDashboard({ section }: StatsDashboardProps) {
 	const { unlocked, unlock } = useSecretAccess();
 	const [searchQuery, setSearchQuery] = useQueryState("q", statsQueryParams.q);
@@ -74,7 +96,7 @@ export default function StatsDashboard({ section }: StatsDashboardProps) {
 	const summaryQuery = useStatsSummary(query, unlocked === true);
 	const branchQuery = useBranchStats(
 		query,
-		unlocked === true && section === "branches",
+		unlocked === true && (section === "branches" || section === "distribution"),
 	);
 	const companyQuery = useCompanyStats(
 		query,
@@ -163,12 +185,15 @@ export default function StatsDashboard({ section }: StatsDashboardProps) {
 			<SummaryCards {...summary} />
 
 			<Tabs value={section} className="w-full">
-				<TabsList className="grid w-full grid-cols-3 max-w-md">
+				<TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 max-w-2xl h-auto">
 					<TabsTrigger value="branches" asChild>
 						<Link href={statsHref("/stats/branches")}>Branches</Link>
 					</TabsTrigger>
 					<TabsTrigger value="companies" asChild>
 						<Link href={statsHref("/stats/companies")}>Companies</Link>
+					</TabsTrigger>
+					<TabsTrigger value="distribution" asChild>
+						<Link href={statsHref("/stats/distribution")}>Distribution</Link>
 					</TabsTrigger>
 					<TabsTrigger value="timeline" asChild>
 						<Link href={statsHref("/stats/timeline")}>Timeline</Link>
@@ -177,18 +202,21 @@ export default function StatsDashboard({ section }: StatsDashboardProps) {
 
 				<TabsContent value="branches" className="mt-6 space-y-8">
 					{branchQuery.data ? (
-						<>
-							<BranchSection
-								limit={BRANCHES_LIMIT}
-								branches={branchQuery.data.branches}
-								buildHref={statsHref}
-							/>
-							<PlacementDistributionChart
-								data={branchQuery.data.distribution}
-							/>
-						</>
+						<BranchSection
+							limit={BRANCHES_LIMIT}
+							branches={branchQuery.data.branches}
+							buildHref={statsHref}
+						/>
 					) : (
 						<SectionSkeleton cards={BRANCHES_LIMIT} />
+					)}
+				</TabsContent>
+
+				<TabsContent value="distribution" className="mt-6">
+					{branchQuery.data ? (
+						<PlacementDistributionChart data={branchQuery.data.distribution} />
+					) : (
+						<ChartSkeleton />
 					)}
 				</TabsContent>
 
