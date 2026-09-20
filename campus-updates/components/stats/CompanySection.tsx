@@ -23,7 +23,7 @@ export default function CompanySection({
 	hasActiveFilters,
 	buildHref,
 }: Props) {
-	const [showAll, setShowAll] = useState(false);
+	const [showAll, setShowAll] = useState(true);
 	const visibleCompanies = showAll ? companies : companies.slice(0, limit);
 
 	return (
