@@ -1,24 +1,30 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import {
+	Building2,
+	CircleDot,
+	GraduationCap,
+	ListFilter,
+	MapPin,
+	Tags,
+	VenetianMask,
+} from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-	DropdownMenu,
-	DropdownMenuCheckboxItem,
-	DropdownMenuContent,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { FilterChips, type FilterChip } from "@/components/ui/filter-chips";
 import { Input } from "@/components/ui/input";
+import { SearchInput } from "@/components/ui/search-input";
+import { SearchableFilterDropdown } from "@/components/ui/searchable-filter-dropdown";
 import { Slider } from "@/components/ui/slider";
-import { ChevronDown, Search } from "lucide-react";
-import { Job } from "./types";
-import { categoryMapping, getCategoryClass } from "./helpers";
+import { Switch } from "@/components/ui/switch";
+import { JobFacets } from "@/lib/jobs";
+import { cn } from "@/lib/utils";
+import { getCategoryClass } from "./helpers";
 
 type Props = {
-	jobs: Job[];
+	facets: JobFacets;
 	values: {
 		query: string;
 		selectedCategories: number[];
@@ -45,367 +51,392 @@ type Props = {
 		clearFilters: () => void;
 	};
 	derived: {
-		maxPackageLpa: number;
-		maxCgpa: number;
 		resultsCount: number;
 	};
 };
 
-export function JobFilters({ jobs, values, onChange, derived }: Props) {
+const FULL_CGPA_RANGE: [number, number] = [0, 10];
+
+export function JobFilters({ facets, values, onChange, derived }: Props) {
 	const [showFilters, setShowFilters] = useState(false);
-	const unique = <T,>(arr: T[]) => Array.from(new Set(arr));
-	const allLocations = useMemo(
-		() => unique(jobs.map((j) => j.location).filter(Boolean)).sort(),
-		[jobs],
-	);
-	const allCategories = useMemo(
-		() =>
-			unique(jobs.map((j) => j.placement_category_code)).sort((a, b) => a - b),
-		[jobs],
-	);
-	const allGenders = useMemo(
-		() => unique(jobs.flatMap((j) => j.allowed_genders || [])).sort(),
-		[jobs],
-	);
-	const allCourses = useMemo(
-		() => unique(jobs.flatMap((j) => j.eligibility_courses || [])).sort(),
-		[jobs],
+
+	const minPackageValue = [values.minPackageLpa];
+	const handleSliderChange = (value: number[]) => {
+		onChange.setMinPackageLpa(value[0] ?? 0);
+	};
+
+	const setCgpa = (range: [number, number]) => {
+		onChange.setCgpaRange(range);
+		onChange.setCgpaInputMin(range[0].toFixed(1));
+		onChange.setCgpaInputMax(range[1].toFixed(1));
+	};
+
+	// Shared shell for the three numeric filter groups so their label rows and
+	// control rows line up on the same baselines.
+	const groupBox =
+		"flex flex-col gap-2 rounded-lg border px-3.5 py-2.5 transition-colors";
+	const groupLabel =
+		"flex h-5 items-center gap-1.5 text-[11px] font-semibold tracking-wide uppercase";
+	const groupControls = "flex h-8 items-center gap-2";
+
+	const categoryLabel = (code: number) =>
+		facets.categories.find((c) => c.code === code)?.label ?? String(code);
+
+	// Removable chips describing every active filter.
+	const chips = useMemo<FilterChip[]>(() => {
+		const list: FilterChip[] = [];
+		if (values.query.trim()) {
+			list.push({
+				key: "query",
+				label: `“${values.query.trim()}”`,
+				onRemove: () => onChange.setQuery(""),
+			});
+		}
+		values.selectedCategories.forEach((code) =>
+			list.push({
+				key: `cat-${code}`,
+				label: categoryLabel(code),
+				onRemove: () =>
+					onChange.setSelectedCategories((prev) =>
+						prev.filter((c) => c !== code),
+					),
+			}),
+		);
+		values.selectedLocations.forEach((loc) =>
+			list.push({
+				key: `loc-${loc}`,
+				label: loc,
+				onRemove: () =>
+					onChange.setSelectedLocations((prev) =>
+						prev.filter((l) => l !== loc),
+					),
+			}),
+		);
+		values.selectedGenders.forEach((g) =>
+			list.push({
+				key: `gen-${g}`,
+				label: g,
+				onRemove: () =>
+					onChange.setSelectedGenders((prev) => prev.filter((x) => x !== g)),
+			}),
+		);
+		values.selectedCourses.forEach((course) =>
+			list.push({
+				key: `course-${course}`,
+				label: course,
+				onRemove: () =>
+					onChange.setSelectedCourses((prev) =>
+						prev.filter((c) => c !== course),
+					),
+			}),
+		);
+		if (values.minPackageLpa > 0) {
+			list.push({
+				key: "pkg",
+				label: `₹${values.minPackageLpa}+ LPA`,
+				onRemove: () => onChange.setMinPackageLpa(0),
+			});
+		}
+		if (
+			values.cgpaRange[0] !== FULL_CGPA_RANGE[0] ||
+			values.cgpaRange[1] !== FULL_CGPA_RANGE[1]
+		) {
+			list.push({
+				key: "cgpa",
+				label: `CGPA ${values.cgpaRange[0].toFixed(1)}–${values.cgpaRange[1].toFixed(1)}`,
+				onRemove: () => setCgpa(FULL_CGPA_RANGE),
+			});
+		}
+		if (values.openOnly) {
+			list.push({
+				key: "open",
+				label: "Open only",
+				onRemove: () => onChange.setOpenOnly(false),
+			});
+		}
+		return list;
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [values, facets]);
+
+	// Category dropdowns: rendered beside the search bar on desktop and inside
+	// the collapsible panel on mobile.
+	const dropdowns = (
+		<>
+			<SearchableFilterDropdown<number>
+				label="Category"
+				icon={<Tags className="h-3.5 w-3.5 opacity-60" />}
+				options={facets.categories.map(({ code, label }) => ({
+					value: code,
+					label,
+					hint: (
+						<span
+							className={cn(
+								"h-2 w-2 shrink-0 rounded-full border",
+								getCategoryClass(code),
+							)}
+						/>
+					),
+				}))}
+				selected={values.selectedCategories}
+				onChange={(next) => onChange.setSelectedCategories(() => next)}
+				searchPlaceholder="Search categories..."
+				contentClassName="w-60"
+			/>
+
+			<SearchableFilterDropdown<string>
+				label="Location"
+				icon={<MapPin className="h-3.5 w-3.5 opacity-60" />}
+				options={facets.locations.map((loc) => ({
+					value: loc,
+					label: loc,
+				}))}
+				selected={values.selectedLocations}
+				onChange={(next) => onChange.setSelectedLocations(() => next)}
+				searchPlaceholder="Search locations..."
+				contentClassName="w-64"
+			/>
+
+			<SearchableFilterDropdown<string>
+				label="Gender"
+				icon={<VenetianMask className="h-3.5 w-3.5 opacity-60" />}
+				options={facets.genders.map((g) => ({ value: g, label: g }))}
+				selected={values.selectedGenders}
+				onChange={(next) => onChange.setSelectedGenders(() => next)}
+				searchPlaceholder="Search genders..."
+				contentClassName="w-52"
+			/>
+
+			<SearchableFilterDropdown<string>
+				label="Branches"
+				icon={<GraduationCap className="h-3.5 w-3.5 opacity-60" />}
+				options={facets.courses.map((course) => ({
+					value: course,
+					label: course,
+				}))}
+				selected={values.selectedCourses}
+				onChange={(next) => onChange.setSelectedCourses(() => next)}
+				searchPlaceholder="Search branches..."
+				contentClassName="w-80"
+				maxHeight={320}
+			/>
+		</>
 	);
 
-	const minPackageValue = useMemo(
-		() => [values.minPackageLpa],
-		[values.minPackageLpa],
-	);
-
-	const handleSliderChange = useCallback(
-		(v: number[]) => {
-			onChange.setMinPackageLpa(v[0] ?? 0);
-		},
-		[onChange],
+	const resetAndCount = (
+		<>
+			<Button
+				variant="ghost"
+				size="sm"
+				onClick={onChange.clearFilters}
+				disabled={chips.length === 0}
+				className="h-8 px-2 text-muted-foreground hover:text-foreground"
+			>
+				Reset
+			</Button>
+			<Badge
+				variant="secondary"
+				className="rounded-full bg-primary/15 px-3 py-1 text-sm font-semibold text-primary hover:bg-primary/20"
+			>
+				{derived.resultsCount} results
+			</Badge>
+		</>
 	);
 
 	return (
-		<div className="mb-6 space-y-4">
-			{/* Top Row: Search and Dropdowns */}
-			<div className="flex flex-col md:flex-row gap-3">
-				<div className="flex flex-1 gap-2">
-					{/* Search Bar */}
-					<div className="relative flex-1">
-						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-						<Input
-							placeholder="Search by role, company or location"
-							value={values.query}
-							onChange={(e) => onChange.setQuery(e.target.value)}
-							className="pl-9 bg-card border-border/50 focus-visible:ring-primary/20 h-10"
-						/>
-					</div>
+		<div className="mb-6 space-y-3">
+			{/* Top row: search + dropdown filters */}
+			<div className="flex flex-wrap items-center gap-2">
+				<SearchInput
+					placeholder="Search by role, company or location"
+					value={values.query}
+					onValueChange={onChange.setQuery}
+					className="min-w-[14rem] flex-1"
+					aria-label="Search jobs"
+				/>
 
-					{/* Mobile Filter Toggle */}
-					<Button
-						variant="outline"
-						size="icon"
-						className="md:hidden shrink-0"
-						onClick={() => setShowFilters(!showFilters)}
-					>
-						<ChevronDown
-							className={`h-4 w-4 transition-transform ${
-								showFilters ? "rotate-180" : ""
-							}`}
-						/>
-					</Button>
+				<div className="hidden flex-wrap items-center gap-2 md:flex">
+					{dropdowns}
+					<div className="flex items-center gap-2 pl-1">{resetAndCount}</div>
 				</div>
 
-				{/* Dropdowns */}
-				<div
-					className={`gap-2 flex-wrap ${
-						showFilters ? "flex" : "hidden"
-					} md:flex`}
+				{/* Mobile filter toggle */}
+				<Button
+					variant="outline"
+					className={cn(
+						"relative h-10 shrink-0 gap-1.5 rounded-lg border-border/60 bg-card px-3 shadow-sm md:hidden",
+						showFilters && "border-primary/60 ring-2 ring-primary/20",
+					)}
+					onClick={() => setShowFilters(!showFilters)}
+					aria-expanded={showFilters}
+					aria-label="Toggle filters"
 				>
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="outline" className="bg-card border-border/50">
-								Category <ChevronDown className="ml-2 h-3 w-3 opacity-50" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent className="w-56">
-							<DropdownMenuLabel>Select categories</DropdownMenuLabel>
-							<DropdownMenuSeparator />
-							{allCategories.map((code) => (
-								<DropdownMenuCheckboxItem
-									key={code}
-									checked={values.selectedCategories.includes(code)}
-									onCheckedChange={(checked) => {
-										onChange.setSelectedCategories((prev) =>
-											checked
-												? [...prev, code]
-												: prev.filter((c) => c !== code),
-										);
-									}}
-								>
-									<span
-										className={`inline-flex items-center px-2 py-0.5 border rounded ${getCategoryClass(
-											code,
-										)}`}
-									>
-										{categoryMapping[code] || code}
-									</span>
-								</DropdownMenuCheckboxItem>
-							))}
-						</DropdownMenuContent>
-					</DropdownMenu>
-
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="outline" className="bg-card border-border/50">
-								Location <ChevronDown className="ml-2 h-3 w-3 opacity-50" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent className="w-64 max-h-72 overflow-auto">
-							<DropdownMenuLabel>Select locations</DropdownMenuLabel>
-							<DropdownMenuSeparator />
-							{allLocations.map((loc) => (
-								<DropdownMenuCheckboxItem
-									key={loc}
-									checked={values.selectedLocations.includes(loc)}
-									onCheckedChange={(checked) => {
-										onChange.setSelectedLocations((prev) =>
-											checked ? [...prev, loc] : prev.filter((l) => l !== loc),
-										);
-									}}
-								>
-									{loc}
-								</DropdownMenuCheckboxItem>
-							))}
-						</DropdownMenuContent>
-					</DropdownMenu>
-
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="outline" className="bg-card border-border/50">
-								Gender <ChevronDown className="ml-2 h-3 w-3 opacity-50" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent className="w-56">
-							<DropdownMenuLabel>Select genders</DropdownMenuLabel>
-							<DropdownMenuSeparator />
-							{allGenders.map((g) => (
-								<DropdownMenuCheckboxItem
-									key={g}
-									checked={values.selectedGenders.includes(g)}
-									onCheckedChange={(checked) => {
-										onChange.setSelectedGenders((prev) =>
-											checked ? [...prev, g] : prev.filter((x) => x !== g),
-										);
-									}}
-								>
-									{g}
-								</DropdownMenuCheckboxItem>
-							))}
-						</DropdownMenuContent>
-					</DropdownMenu>
-
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="outline" className="bg-card border-border/50">
-								Branches <ChevronDown className="ml-2 h-3 w-3 opacity-50" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent className="w-72 max-h-80 overflow-auto">
-							<DropdownMenuLabel>Select eligible branches</DropdownMenuLabel>
-							<DropdownMenuSeparator />
-							{allCourses.map((course) => (
-								<DropdownMenuCheckboxItem
-									key={course}
-									checked={values.selectedCourses.includes(course)}
-									onCheckedChange={(checked) => {
-										onChange.setSelectedCourses((prev) =>
-											checked
-												? [...prev, course]
-												: prev.filter((c) => c !== course),
-										);
-									}}
-								>
-									{course}
-								</DropdownMenuCheckboxItem>
-							))}
-						</DropdownMenuContent>
-					</DropdownMenu>
-				</div>
-			</div>
-
-			{/* Bottom Row: Filters */}
-			<div
-				className={`flex flex-col md:flex-row gap-4 md:items-center justify-between p-4 rounded-lg border border-border/40 bg-card/30 backdrop-blur-sm ${
-					showFilters ? "flex" : "hidden"
-				} md:flex`}
-			>
-				{/* Package Slider */}
-				<div className="space-y-3 min-w-[200px]">
-					<div className="flex items-center justify-between text-sm">
-						<span className="text-primary/80 font-medium">
-							Minimum package (LPA)
-						</span>
-						<span className="font-bold text-foreground">
-							{values.minPackageLpa}+
-						</span>
-					</div>
-					<Slider
-						min={0}
-						max={Math.max(derived.maxPackageLpa, 1)}
-						step={1}
-						value={minPackageValue}
-						onValueChange={handleSliderChange}
-						className="[&>.relative>.absolute]:bg-primary"
-					/>
-				</div>
-
-				{/* CGPA Range */}
-				<div className="flex items-center gap-3">
-					<div className="text-sm font-medium text-primary/80 whitespace-nowrap">
-						CGPA Range
-					</div>
-					<Input
-						type="number"
-						min="0"
-						max="10"
-						step="0.1"
-						value={values.cgpaInputMin}
-						onChange={(e) => onChange.setCgpaInputMin(e.target.value)}
-						onBlur={(e) => {
-							const minVal = Math.max(
-								0,
-								Math.min(10, parseFloat(e.target.value) || 0),
-							);
-							onChange.setCgpaRange([
-								minVal,
-								Math.max(minVal, values.cgpaRange[1]),
-							]);
-							onChange.setCgpaInputMin(minVal.toFixed(1));
-						}}
-						className="w-20 h-9 text-sm text-center bg-card border-border/60 rounded-xl"
-					/>
-					<span className="text-muted-foreground">-</span>
-					<Input
-						type="number"
-						min="0"
-						max="10"
-						step="0.1"
-						value={values.cgpaInputMax}
-						onChange={(e) => onChange.setCgpaInputMax(e.target.value)}
-						onBlur={(e) => {
-							const maxVal = Math.max(
-								0,
-								Math.min(10, parseFloat(e.target.value) || 10),
-							);
-							onChange.setCgpaRange([
-								Math.min(values.cgpaRange[0], maxVal),
-								maxVal,
-							]);
-							onChange.setCgpaInputMax(maxVal.toFixed(1));
-						}}
-						className="w-20 h-9 text-sm text-center bg-card border-border/60 rounded-xl"
-					/>
-				</div>
-
-				{/* Quick CGPA Filters */}
-				<div className="flex flex-col gap-1.5">
-					<div className="text-xs text-primary/80 font-medium">
-						Quick CGPA Filters
-					</div>
-					<div className="flex gap-2">
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => {
-								onChange.setCgpaRange([0.0, 8.0]);
-								onChange.setCgpaInputMin("0.0");
-								onChange.setCgpaInputMax("8.0");
-							}}
-							className={`text-xs h-8 px-4 rounded-xl border-dashed ${
-								values.cgpaRange[0] === 0.0 && values.cgpaRange[1] === 8.0
-									? "border-primary text-primary bg-primary/5"
-									: "border-border/60 bg-card text-muted-foreground hover:text-foreground"
-							}`}
-						>
-							0.0 - 8.0
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => {
-								onChange.setCgpaRange([0.0, 6.0]);
-								onChange.setCgpaInputMin("0.0");
-								onChange.setCgpaInputMax("6.0");
-							}}
-							className={`text-xs h-8 px-4 rounded-xl border-dashed ${
-								values.cgpaRange[0] === 0.0 && values.cgpaRange[1] === 6.0
-									? "border-primary text-primary bg-primary/5"
-									: "border-border/60 bg-card text-muted-foreground hover:text-foreground"
-							}`}
-						>
-							0.0 - 6.0
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => {
-								onChange.setCgpaRange([0, 10]);
-								onChange.setCgpaInputMin("0.0");
-								onChange.setCgpaInputMax("10.0");
-							}}
-							className={`text-xs h-8 px-4 rounded-xl ${
-								values.cgpaRange[0] === 0 && values.cgpaRange[1] === 10
-									? "border-yellow-500 text-yellow-500 bg-yellow-500/5"
-									: "border-border/60 bg-card text-muted-foreground hover:text-foreground"
-							}`}
-						>
-							All
-						</Button>
-					</div>
-				</div>
-
-				{/* Open Only & Reset & Results */}
-				<div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 flex-1 justify-end">
-					<div className="flex items-center gap-2">
-						<div
-							className={`w-4 h-4 rounded-full border flex items-center justify-center cursor-pointer transition-colors ${
-								values.openOnly
-									? "border-primary bg-primary/20"
-									: "border-muted-foreground bg-transparent"
-							}`}
-							onClick={() => onChange.setOpenOnly(!values.openOnly)}
-						>
-							{values.openOnly && (
-								<div className="w-2 h-2 rounded-full bg-primary" />
-							)}
-						</div>
-						<span
-							className="text-sm cursor-pointer text-muted-foreground select-none"
-							onClick={() => onChange.setOpenOnly(!values.openOnly)}
-						>
-							Show only open postings
-							<br />
-							<span className="text-xs opacity-70">(deadline in future)</span>
-						</span>
-					</div>
-
-					<div className="flex items-center gap-3">
-						<Button
-							variant="ghost"
-							onClick={onChange.clearFilters}
-							className="text-muted-foreground hover:text-foreground hover:bg-transparent px-2"
-						>
-							Reset
-						</Button>
-						<Badge
-							variant="secondary"
-							className="bg-primary/20 text-primary hover:bg-primary/30 px-3 py-1 text-sm font-medium rounded-full"
-						>
-							{derived.resultsCount} results
+					<ListFilter className="h-4 w-4" />
+					<span className="text-sm font-medium">Filters</span>
+					{chips.length > 0 ? (
+						<Badge className="h-5 min-w-5 rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground hover:bg-primary">
+							{chips.length}
 						</Badge>
+					) : null}
+				</Button>
+			</div>
+
+			{/* Filter controls */}
+			<div
+				className={cn(
+					"space-y-3 rounded-xl border border-border/50 bg-card/60 p-3 shadow-sm backdrop-blur-sm md:p-4",
+					showFilters ? "block" : "hidden md:block",
+				)}
+			>
+				{/* Dropdown row (mobile only — desktop shows these next to search) */}
+				<div className="flex flex-wrap items-center gap-2 md:hidden">
+					{dropdowns}
+					<div className="ml-auto flex items-center gap-3">{resetAndCount}</div>
+				</div>
+
+				{/* Numeric filters */}
+				<div className="grid gap-3 border-t border-border/40 pt-3 md:grid-cols-[minmax(16rem,1fr)_auto_auto] md:gap-3 md:border-t-0 md:pt-0">
+					{/* Package slider */}
+					<div className={cn(groupBox, "border-border/40 bg-background/40")}>
+						<div className="flex items-center justify-between gap-3">
+							<span className={cn(groupLabel, "text-muted-foreground")}>
+								<Building2 className="h-3.5 w-3.5 text-primary/70" />
+								Minimum package
+							</span>
+							<span
+								className={cn(
+									"flex h-5 items-center rounded-md px-2 text-xs font-bold tabular-nums",
+									values.minPackageLpa > 0
+										? "bg-primary/10 text-primary"
+										: "text-muted-foreground/70",
+								)}
+							>
+								{values.minPackageLpa > 0
+									? `₹${values.minPackageLpa}+ LPA`
+									: "Any"}
+							</span>
+						</div>
+						<div className={groupControls}>
+							<Slider
+								min={0}
+								max={Math.max(facets.maxPackageLpa, 1)}
+								step={1}
+								value={minPackageValue}
+								onValueChange={handleSliderChange}
+								aria-label="Minimum package in LPA"
+								className="[&>.relative>.absolute]:bg-primary"
+							/>
+						</div>
 					</div>
+
+					{/* CGPA range */}
+					<div className={cn(groupBox, "border-border/40 bg-background/40")}>
+						<span className={cn(groupLabel, "text-muted-foreground")}>
+							<GraduationCap className="h-3.5 w-3.5 text-primary/70" />
+							CGPA range
+						</span>
+						<div className={groupControls}>
+							<div className="flex items-center rounded-lg border border-border/60 bg-background">
+								<Input
+									type="number"
+									min="0"
+									max="10"
+									step="0.1"
+									value={values.cgpaInputMin}
+									onChange={(e) => onChange.setCgpaInputMin(e.target.value)}
+									onBlur={(e) => {
+										const minVal = Math.max(
+											0,
+											Math.min(10, parseFloat(e.target.value) || 0),
+										);
+										setCgpa([minVal, Math.max(minVal, values.cgpaRange[1])]);
+									}}
+									aria-label="Minimum CGPA"
+									className="h-8 w-14 border-0 bg-transparent px-2 text-center text-sm tabular-nums shadow-none focus-visible:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+								/>
+								<span className="text-xs text-muted-foreground/60">–</span>
+								<Input
+									type="number"
+									min="0"
+									max="10"
+									step="0.1"
+									value={values.cgpaInputMax}
+									onChange={(e) => onChange.setCgpaInputMax(e.target.value)}
+									onBlur={(e) => {
+										const maxVal = Math.max(
+											0,
+											Math.min(10, parseFloat(e.target.value) || 10),
+										);
+										setCgpa([Math.min(values.cgpaRange[0], maxVal), maxVal]);
+									}}
+									aria-label="Maximum CGPA"
+									className="h-8 w-14 border-0 bg-transparent px-2 text-center text-sm tabular-nums shadow-none focus-visible:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+								/>
+							</div>
+							{/* Quick presets */}
+							<div className="flex gap-1">
+								{[
+									{ label: "≤ 8", range: [0, 8] as [number, number] },
+									{ label: "≤ 6", range: [0, 6] as [number, number] },
+								].map(({ label, range }) => {
+									const active =
+										values.cgpaRange[0] === range[0] &&
+										values.cgpaRange[1] === range[1];
+									return (
+										<button
+											key={label}
+											type="button"
+											aria-pressed={active}
+											onClick={() => setCgpa(active ? FULL_CGPA_RANGE : range)}
+											className={cn(
+												"h-8 rounded-md border px-2.5 text-xs font-medium transition-colors",
+												active
+													? "border-primary bg-primary/10 text-primary"
+													: "border-border/50 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+											)}
+										>
+											{label}
+										</button>
+									);
+								})}
+							</div>
+						</div>
+					</div>
+
+					{/* Open only */}
+					<label
+						className={cn(
+							groupBox,
+							"cursor-pointer select-none",
+							values.openOnly
+								? "border-primary/50 bg-primary/5"
+								: "border-border/40 bg-background/40 hover:border-border",
+						)}
+					>
+						<span
+							className={cn(
+								groupLabel,
+								values.openOnly ? "text-primary" : "text-muted-foreground",
+							)}
+						>
+							<CircleDot className="h-3.5 w-3.5 text-primary/70" />
+							Availability
+						</span>
+						<span className={groupControls}>
+							<Switch
+								checked={values.openOnly}
+								onCheckedChange={onChange.setOpenOnly}
+								aria-label="Show only open postings"
+							/>
+							<span className="text-sm whitespace-nowrap text-muted-foreground">
+								Open postings only
+							</span>
+						</span>
+					</label>
 				</div>
 			</div>
+
+			{/* Active filter chips */}
+			<FilterChips chips={chips} onClearAll={onChange.clearFilters} />
 		</div>
 	);
 }

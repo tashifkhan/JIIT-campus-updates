@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 import rehypeSlug from "rehype-slug";
 import { Policy } from "@/lib/policy";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -231,16 +232,14 @@ export default function PolicyClient({
 						) : policy ? (
 							<>
 								<CardHeader className="pb-4 border-b border-border/40">
-									<CardTitle>
-										<h1 className="text-3xl sm:text-4xl font-extrabold leading-tight tracking-tight">
-											<span className="block text-sm font-semibold uppercase text-muted-foreground mb-2">
-												{policy.badge}
-											</span>
-											<span className="inline-block text-foreground bg-clip-text">
-												{policy.title}
-											</span>
-										</h1>
-									</CardTitle>
+									<h1 className="text-3xl sm:text-4xl font-extrabold leading-tight tracking-tight">
+										<span className="block text-sm font-semibold uppercase text-muted-foreground mb-2">
+											{policy.badge}
+										</span>
+										<span className="inline-block text-foreground bg-clip-text">
+											{policy.title}
+										</span>
+									</h1>
 									<div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
 										<div
 											className="h-2 w-2 rounded-full bg-green-500/80 shadow-[0_0_8px_rgba(34,197,94,0.5)]"
@@ -359,7 +358,10 @@ export default function PolicyClient({
 
 									<ReactMarkdown
 										remarkPlugins={[remarkGfm]}
-										rehypePlugins={[rehypeRaw, rehypeSlug]}
+										// rehypeRaw parses embedded HTML; rehypeSanitize strips
+										// anything dangerous (policy content comes from the DB);
+										// rehypeSlug runs last so heading ids survive sanitization.
+										rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeSlug]}
 										components={{
 											table: ({ node, ...props }) => (
 												<div className="overflow-x-auto my-6">

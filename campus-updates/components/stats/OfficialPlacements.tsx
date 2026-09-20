@@ -37,11 +37,17 @@ type PackageDistribution = {
 	median: string;
 };
 
+type PlacementHighlight = {
+	title: string;
+	description: string;
+};
+
 type Batch = {
 	batch_name: string;
 	is_active: boolean;
 	placement_pointers: string[];
 	package_distribution?: PackageDistribution[];
+	highlights?: PlacementHighlight[];
 };
 
 type RecruiterLogo = {
@@ -50,12 +56,11 @@ type RecruiterLogo = {
 };
 
 type OfficialData = {
-	_id: string;
-	batches: Batch[];
-	intro_text: string;
-	main_heading: string;
-	recruiter_logos: RecruiterLogo[];
-	scrape_timestamp: string;
+	batches?: Batch[];
+	intro_text?: string;
+	main_heading?: string;
+	recruiter_logos?: RecruiterLogo[];
+	scrape_timestamp?: string;
 };
 
 export default function OfficialPlacements() {
@@ -68,7 +73,9 @@ export default function OfficialPlacements() {
 				cache: "no-store",
 			});
 			if (!res.ok) throw new Error("Failed to fetch");
-			return res.json();
+			const json = await res.json();
+			if (!json.ok) throw new Error(json.error || "Failed to fetch");
+			return json.data as OfficialData;
 		},
 		staleTime: 1000 * 60 * 30,
 	});
@@ -199,6 +206,8 @@ export default function OfficialPlacements() {
 
 										{data.batches.map((batch) => {
 											const { extra } = parseBatchName(batch.batch_name);
+											const structuredHighlights = batch.highlights || [];
+											const legacyHighlights = batch.placement_pointers || [];
 
 											return (
 												<TabsContent
@@ -224,16 +233,33 @@ export default function OfficialPlacements() {
 														)}
 													</div>
 
-													{/* Placement Pointers Grid */}
+													{/* Placement Highlights Grid */}
 													<div className="space-y-3">
 														<h4 className="flex items-center gap-2 font-semibold text-sm text-foreground/90">
 															<Award className="w-4 h-4 text-primary" />
 															Placement Highlights
 														</h4>
 														<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-															{batch.placement_pointers.map((pointer, i) => (
+															{structuredHighlights.map((highlight, i) => (
 																<div
-																	key={i}
+																	key={`${highlight.title}-${highlight.description}-${i}`}
+																	className="flex items-start gap-3 p-4 rounded-lg bg-muted/40 border border-border/50 hover:bg-muted/60 transition-colors"
+																>
+																	<CheckCircle2 className="w-4 h-4 text-primary mt-1 flex-shrink-0" />
+																	<div className="min-w-0 space-y-1">
+																		<div className="text-base font-bold text-primary tabular-nums">
+																			{highlight.title}
+																		</div>
+																		<p className="text-sm leading-relaxed text-muted-foreground">
+																			{highlight.description}
+																		</p>
+																	</div>
+																</div>
+															))}
+															{structuredHighlights.length === 0 &&
+																legacyHighlights.map((pointer, i) => (
+																<div
+																	key={`${pointer}-${i}`}
 																	className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/50 hover:bg-muted/60 transition-colors"
 																>
 																	<CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
@@ -241,7 +267,7 @@ export default function OfficialPlacements() {
 																		{highlightNumbers(pointer)}
 																	</span>
 																</div>
-															))}
+																))}
 														</div>
 													</div>
 

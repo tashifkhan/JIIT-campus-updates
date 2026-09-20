@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -24,16 +24,6 @@ interface IconButtonProps {
 }
 
 const IconButton: React.FC<IconButtonProps> = ({ item, active }) => {
-	const [hovered, setHovered] = useState(false);
-	const [showTooltip, setShowTooltip] = useState(false);
-	const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
-
-	// Calculate width based on label length (min 44px for icon, plus label)
-	const expandedWidth = Math.max(44 + item.label.length * 9 + 24, 100);
-
-	// Show text on hover or active state
-	const isExpanded = hovered || active;
-
 	const Wrapper = item.href ? Link : "button";
 	const wrapperProps = item.href
 		? { href: item.href }
@@ -44,41 +34,37 @@ const IconButton: React.FC<IconButtonProps> = ({ item, active }) => {
 		<Wrapper
 			{...wrapperProps}
 			aria-label={item.label}
+			aria-current={active ? "page" : undefined}
 			className={cn(
-				"flex items-center rounded-xl border transition-all focus:outline-none relative overflow-visible duration-300 px-3 justify-center",
+				"group flex h-11 items-center justify-center rounded-full",
+				"transition-[background-color,color,padding] duration-300 ease-out",
+				"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card",
+				"active:scale-95 motion-safe:transition-transform",
 				active
-					? "border-border bg-primary text-primary-foreground font-semibold shadow-sm"
-					: "border-transparent text-muted-foreground hover:text-foreground hover:bg-accent hover:border-border",
+					? "bg-primary text-primary-foreground font-semibold px-4 shadow-sm"
+					: "text-muted-foreground px-3.5 hover:bg-accent hover:text-accent-foreground",
 			)}
-			style={{
-				minWidth: 44,
-				minHeight: 44,
-				width: undefined, // let Tailwind handle width
-				transition: "background 0.2s, border 0.2s, color 0.2s",
-				paddingTop: 8,
-				paddingBottom: 8,
-			}}
-			onMouseEnter={() => setHovered(true)}
-			onMouseLeave={() => setHovered(false)}
-			onClick={() => {
-				if (!item.href && item.onClick) item.onClick();
-			}}
 		>
-			<span className="flex items-center justify-center w-5 h-5 pointer-events-none">
+			<span className="flex h-5 w-5 shrink-0 items-center justify-center pointer-events-none">
 				{item.icon}
 			</span>
+			{/* grid trick: animates label width from 0 without measuring */}
 			<span
 				className={cn(
-					"text-sm transition-all duration-300 whitespace-nowrap pointer-events-none ml-2",
-					isExpanded ? "opacity-100 w-auto" : "opacity-0 w-0",
+					"grid pointer-events-none transition-[grid-template-columns] duration-300 ease-out",
+					active ? "grid-cols-[1fr]" : "grid-cols-[0fr]",
 				)}
-				style={{
-					transition:
-						"opacity 0.3s, width 0.35s cubic-bezier(0.4,0,0.2,1), margin 0.3s",
-					width: isExpanded ? expandedWidth - 44 - 24 : 0,
-				}}
 			>
-				{item.label}
+				<span className="overflow-hidden">
+					<span
+						className={cn(
+							"block whitespace-nowrap pl-2 text-sm transition-opacity duration-200",
+							active ? "opacity-100" : "opacity-0",
+						)}
+					>
+						{item.label}
+					</span>
+				</span>
 			</span>
 		</Wrapper>
 	);
@@ -90,21 +76,24 @@ export const MenuBar = ({ items, className }: MenuBarProps) => {
 	return (
 		<nav
 			className={cn(
-				"fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-card p-2 rounded-2xl border border-border w-fit transition-all duration-300 shadow-xl backdrop-blur-sm bg-card/80",
+				"fixed bottom-0 inset-x-0 z-50 flex justify-center pointer-events-none",
 				className,
 			)}
+			style={{
+				paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)",
+			}}
 		>
-			{items.map((item, index) => {
-				const isActive = item.href ? pathname === item.href : false;
-				return (
-					<React.Fragment key={item.label}>
-						<IconButton item={item} active={isActive} />
-						{index < items.length - 1 && (
-							<div className="w-px h-6 bg-border mx-1" />
-						)}
-					</React.Fragment>
-				);
-			})}
+			<div className="pointer-events-auto flex max-w-[calc(100vw-1.5rem)] items-center gap-1 overflow-x-auto rounded-full border border-border bg-card/85 p-1.5 shadow-xl backdrop-blur-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+				{items.map((item) => {
+					const isActive = item.href
+						? pathname === item.href ||
+							(item.href !== "/" && pathname.startsWith(`${item.href}/`))
+						: false;
+					return (
+						<IconButton key={item.label} item={item} active={isActive} />
+					);
+				})}
+			</div>
 		</nav>
 	);
 };

@@ -1,19 +1,57 @@
-import clientPromise from "./mongodb";
+import { ObjectId } from "mongodb";
+
+import { getMongoClient } from "./mongodb";
 
 export type Job = any;
 export type Notice = any;
 export type PlacementOffer = any;
 
-const DB_NAME = process.env.MONGODB_DB || "SupersetPlacement";
+// Active placement year (compact form). Used when no year is requested.
+const DEFAULT_YEAR = process.env.DEFAULT_PLACEMENT_YEAR || "202526";
+// Optional hard override for the database name (legacy / migration use).
+const DB_NAME_OVERRIDE = process.env.MONGODB_DB;
+// Shared cross-year data such as users and official placement snapshots.
+const GLOBAL_DB_NAME = process.env.MONGODB_GLOBAL_DB || "PlacementGlobal";
 
-export async function getCollection(collectionName: string) {
-	const client = await clientPromise;
-	const db = client.db(DB_NAME);
+/** Strip non-digit characters without regex (project convention: avoid regex). */
+function digitsOnly(value: string): string {
+	let out = "";
+	for (const ch of value) {
+		if (ch >= "0" && ch <= "9") out += ch;
+	}
+	return out;
+}
+
+/**
+ * Resolve the MongoDB database name for a placement year.
+ *
+ * Mirrors the Python `database_name_for_year` helper: a compact `202526`
+ * (also accepts `2025_26`, `2025-26`) maps to the database `2025-26`.
+ * Falls back to MONGODB_DB override, then to the active year.
+ */
+export function dbNameForYear(year?: string | null): string {
+	const digits = digitsOnly(year || "");
+	if (digits.length === 6) {
+		return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+	}
+	if (DB_NAME_OVERRIDE) return DB_NAME_OVERRIDE;
+	const d = DEFAULT_YEAR;
+	return `${d.slice(0, 4)}-${d.slice(4)}`;
+}
+
+export async function getCollection(collectionName: string, year?: string | null) {
+	const client = await getMongoClient();
+	const db = client.db(dbNameForYear(year));
 	return db.collection(collectionName);
 }
 
-export async function getJobs(filter: any = {}, limit = 1000) {
-	const col = await getCollection("Jobs");
+export async function getGlobalCollection(collectionName: string) {
+	const client = await getMongoClient();
+	return client.db(GLOBAL_DB_NAME).collection(collectionName);
+}
+
+export async function getJobs(filter: any = {}, limit = 1000, year?: string | null) {
+	const col = await getCollection("Jobs", year);
 	const docs = await col
 		.find(filter)
 		.sort({ createdAt: -1 })
@@ -22,8 +60,8 @@ export async function getJobs(filter: any = {}, limit = 1000) {
 	return docs;
 }
 
-export async function getNotices(filter: any = {}, limit = 1000) {
-	const col = await getCollection("Notices");
+export async function getNotices(filter: any = {}, limit = 1000, year?: string | null) {
+	const col = await getCollection("Notices", year);
 	const docs = await col
 		.find(filter)
 		.sort({ createdAt: -1 })
@@ -32,8 +70,12 @@ export async function getNotices(filter: any = {}, limit = 1000) {
 	return docs;
 }
 
-export async function getPlacementOffers(filter: any = {}, limit = 1000) {
-	const col = await getCollection("PlacementOffers");
+export async function getPlacementOffers(
+	filter: any = {},
+	limit = 1000,
+	year?: string | null,
+) {
+	const col = await getCollection("PlacementOffers", year);
 	const docs = await col
 		.find(filter)
 		.sort({ createdAt: -1 })
@@ -41,19 +83,108 @@ export async function getPlacementOffers(filter: any = {}, limit = 1000) {
 		.toArray();
 	return docs;
 }
-
-import { ObjectId } from "mongodb";
 
 export async function getOfficialPlacementData() {
-	const col = await getCollection("OfficialPlacementData");
+	const col = await getGlobalCollection("OfficialPlacementData");
 	const doc = await col.findOne({}, { sort: { scrape_timestamp: -1 } });
 	return doc;
 }
 
+/** Build a by-id query that supports both ObjectId and legacy string ids. */
+export function idQuery(id: string): Record<string, any> {
+	if (ObjectId.isValid(id)) {
+		return { _id: new ObjectId(id) };
+	}
+	return { id };
+}
+
+export async function getNoticeById(id: string, year?: string | null) {
+	const col = await getCollection("Notices", year);
+	return col.findOne(idQuery(id));
+}
+
+export async function getPlacementOfferById(id: string, year?: string | null) {
+	const col = await getCollection("PlacementOffers", year);
+	return col.findOne(idQuery(id));
+}
+
 // --- Admin / Write Operations ---
 
-export async function createNotice(notice: Notice) {
-	const col = await getCollection("Notices");
+type StudentRecord = Record<string, any>;
+
+function studentIdentity(student: StudentRecord): string | null {
+	const enrollment = student.enrollment_number || student.enrollment;
+	if (enrollment) {
+		return `enrollment:${String(enrollment).trim().toLowerCase()}`;
+	}
+
+	const name = String(student.name || "")
+		.trim()
+		.split(/\s+/)
+		.filter(Boolean)
+		.join(" ")
+		.toLowerCase();
+	return name ? `name:${name}` : null;
+}
+
+function timestampToMilliseconds(value: unknown): number | null {
+	if (value == null || value === "") return null;
+
+	if (value instanceof Date) {
+		const timestamp = value.getTime();
+		return Number.isNaN(timestamp) ? null : timestamp;
+	}
+
+	if (typeof value === "number") {
+		return Number.isFinite(value)
+			? value < 10_000_000_000
+				? value * 1000
+				: value
+			: null;
+	}
+
+	const rawValue = String(value).trim();
+	if (!rawValue) return null;
+	const numericValue = Number(rawValue);
+	if (
+		Number.isFinite(numericValue) &&
+		rawValue.split("").every((char) => char >= "0" && char <= "9")
+	) {
+		return rawValue.length > 10 ? numericValue : numericValue * 1000;
+	}
+
+	const timestamp = new Date(rawValue).getTime();
+	return Number.isNaN(timestamp) ? null : timestamp;
+}
+
+function placementTimestamp(offer: PlacementOffer, fallback: number): number {
+	return (
+		timestampToMilliseconds(offer.created_at) ??
+		timestampToMilliseconds(offer.time_sent) ??
+		timestampToMilliseconds(offer.saved_at) ??
+		timestampToMilliseconds(offer.createdAt) ??
+		fallback
+	);
+}
+
+function stampStudentOfferDate(
+	student: StudentRecord,
+	fallbackTimestamp: number,
+): StudentRecord {
+	const timestamp =
+		timestampToMilliseconds(student.offer_received_at) ??
+		timestampToMilliseconds(student.offerReceivedAt) ??
+		fallbackTimestamp;
+
+	return {
+		...student,
+		offer_received_at: new Date(timestamp),
+		offerReceivedAt: timestamp,
+	};
+}
+
+export async function createNotice(notice: Notice, year?: string | null) {
+	const col = await getCollection("Notices", year);
 	// Ensure createdAt is set if not present
 	if (!notice.createdAt) {
 		notice.createdAt = Date.now();
@@ -62,27 +193,31 @@ export async function createNotice(notice: Notice) {
 	return result;
 }
 
-export async function updateNotice(id: string, update: Partial<Notice>) {
-	const col = await getCollection("Notices");
+export async function updateNotice(
+	id: string,
+	update: Partial<Notice>,
+	year?: string | null,
+) {
+	const col = await getCollection("Notices", year);
 	// Remove _id from update if present to avoid immutable field error
 	const { _id, ...cleanUpdate } = update;
 
-	// Try to create an ObjectId, otherwise use the string id directly (some legacy ids might be strings)
-	let query: any = {};
-	if (ObjectId.isValid(id)) {
-		query = { _id: new ObjectId(id) };
-	} else {
-		query = { id: id };
-	}
-
-	const result = await col.updateOne(query, { $set: cleanUpdate });
+	const result = await col.updateOne(idQuery(id), { $set: cleanUpdate });
 	return result;
 }
 
-export async function createPlacementOffer(offer: PlacementOffer) {
-	const col = await getCollection("PlacementOffers");
+export async function createPlacementOffer(offer: PlacementOffer, year?: string | null) {
+	const col = await getCollection("PlacementOffers", year);
+	const now = Date.now();
 	if (!offer.createdAt) {
-		offer.createdAt = Date.now();
+		offer.createdAt = now;
+	}
+	if (Array.isArray(offer.students_selected)) {
+		const offerTimestamp = placementTimestamp(offer, now);
+		offer.students_selected = offer.students_selected.map((student: StudentRecord) =>
+			stampStudentOfferDate(student, offerTimestamp),
+		);
+		offer.number_of_offers = offer.students_selected.length;
 	}
 	const result = await col.insertOne(offer);
 	return result;
@@ -91,15 +226,49 @@ export async function createPlacementOffer(offer: PlacementOffer) {
 export async function updatePlacementOffer(
 	id: string,
 	update: Partial<PlacementOffer>,
+	year?: string | null,
 ) {
-	const col = await getCollection("PlacementOffers");
+	const col = await getCollection("PlacementOffers", year);
 	const { _id, ...cleanUpdate } = update;
 
-	let query: any = {};
-	if (ObjectId.isValid(id)) {
-		query = { _id: new ObjectId(id) };
-	} else {
-		query = { id: id };
+	const query = idQuery(id);
+
+	if (Array.isArray(cleanUpdate.students_selected)) {
+		const now = Date.now();
+		const existingOffer = await col.findOne(query);
+		const existingTimestamp = placementTimestamp(existingOffer || {}, now);
+		const existingStudents = existingOffer && Array.isArray(existingOffer.students_selected)
+			? existingOffer.students_selected
+			: [];
+		const existingByIdentity = new Map<string, StudentRecord>();
+
+		for (const student of existingStudents) {
+			const identity = studentIdentity(student);
+			if (identity) {
+				existingByIdentity.set(
+					identity,
+					stampStudentOfferDate(student, existingTimestamp),
+				);
+			}
+		}
+
+		cleanUpdate.students_selected = cleanUpdate.students_selected.map(
+			(student: StudentRecord) => {
+				const identity = studentIdentity(student);
+				const existingStudent = identity
+					? existingByIdentity.get(identity)
+					: undefined;
+
+				if (!existingStudent) return stampStudentOfferDate(student, now);
+
+				return {
+					...student,
+					offer_received_at: existingStudent.offer_received_at,
+					offerReceivedAt: existingStudent.offerReceivedAt,
+				};
+			},
+		);
+		cleanUpdate.number_of_offers = cleanUpdate.students_selected.length;
 	}
 
 	const result = await col.updateOne(query, { $set: cleanUpdate });

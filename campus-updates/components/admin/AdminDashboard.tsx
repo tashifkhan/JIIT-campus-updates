@@ -13,9 +13,11 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { usePlacementYear } from "@/components/PlacementYearProvider";
 import ResourceModal from "./ResourceModal";
 
 export default function AdminDashboard() {
+	const { year, setYear, years } = usePlacementYear();
 	const [activeTab, setActiveTab] = useState<"notices" | "placement-offers">(
 		"notices",
 	);
@@ -64,7 +66,9 @@ export default function AdminDashboard() {
 		setLoading(true);
 		try {
 			// Use admin endpoint which has date extraction processing
-			const res = await fetch(`/api/admin/${activeTab}`);
+			const res = await fetch(
+				`/api/admin/${activeTab}?year=${encodeURIComponent(year)}`,
+			);
 			const json = await res.json();
 			if (json.ok) {
 				setData(json.data || []);
@@ -80,7 +84,7 @@ export default function AdminDashboard() {
 		if (isAuthenticated) {
 			fetchData();
 		}
-	}, [activeTab, isAuthenticated]);
+	}, [activeTab, isAuthenticated, year]);
 
 	const handleSort = (key: string) => {
 		setSortConfig((current) => ({
@@ -152,6 +156,17 @@ export default function AdminDashboard() {
 		}
 	};
 
+	const handleLogout = async () => {
+		try {
+			await fetch("/api/admin/auth", { method: "DELETE" });
+		} catch {
+			// Best effort; drop client state regardless.
+		}
+		setIsAuthenticated(false);
+		setData([]);
+		setPassword("");
+	};
+
 	if (authChecking) {
 		return (
 			<div className="flex justify-center py-20">Checking authorization...</div>
@@ -200,7 +215,24 @@ export default function AdminDashboard() {
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
 				<h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-				<Button onClick={handleAdd}>Add New</Button>
+				<div className="flex items-center gap-2">
+					<select
+						value={year}
+						onChange={(e) => setYear(e.target.value)}
+						className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+						aria-label="Placement year"
+					>
+						{years.map((y) => (
+							<option key={y.value} value={y.value}>
+								{y.label}
+							</option>
+						))}
+					</select>
+					<Button onClick={handleAdd}>Add New</Button>
+					<Button variant="outline" onClick={handleLogout}>
+						Logout
+					</Button>
+				</div>
 			</div>
 
 			<div className="flex items-center space-x-2">
@@ -355,6 +387,7 @@ export default function AdminDashboard() {
 				onSuccess={() => {
 					fetchData();
 				}}
+				year={year}
 			/>
 		</div>
 	);

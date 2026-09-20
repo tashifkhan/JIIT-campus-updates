@@ -1,78 +1,47 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { useState } from "react";
+import { IndianRupee, TrendingUp, Trophy, Users } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, IndianRupee, Trophy, TrendingUp } from "lucide-react";
-import type { Placement, StudentWithPlacement } from "@/lib/stats";
 import { formatPackage, formatPercent } from "@/lib/stats";
-
-type BranchStats = Record<
-	string,
-	{
-		count: number;
-		packages: number[];
-		avgPackage: number;
-		highest: number;
-		median: number;
-	}
->;
+import type { BranchStats } from "@/lib/stats-api";
 
 type Props = {
-	BRANCHES_LIMIT: number;
-	branchStats: BranchStats;
-	branchTotalCounts: Record<string, number>;
-	getBranchStudents: (branchName: string) => StudentWithPlacement[];
-	enrollmentRanges: any;
-	studentCounts: any;
-	placements: Placement[];
+	limit: number;
+	branches: Record<string, BranchStats>;
+	buildHref: (pathname: string) => string;
 };
 
-// Reusable card component for individual branch stats
-function BranchCard({
-	branch,
-	stats,
-	totalForBranch,
-	uniqueCount,
-	pct,
-}: {
-	branch: string;
-	stats: any;
-	totalForBranch: number;
-	uniqueCount: number;
-	pct: number | null;
-}) {
+function BranchCard({ branch, stats }: { branch: string; stats: BranchStats }) {
 	return (
 		<Card className="border card-theme cursor-pointer hover:shadow-lg shadow-sm transition-all duration-300 active:scale-[0.98] bg-card border-border/60 group h-full">
 			<CardContent className="p-5 flex flex-col h-full justify-between gap-4">
 				<div>
 					<div className="flex items-start justify-between mb-2">
 						<div className="space-y-1">
-							<h3 className="font-bold text-lg text-foreground flex items-center gap-2">
-								{branch}
-							</h3>
+							<h3 className="font-bold text-lg text-foreground">{branch}</h3>
 							<div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
 								<Users className="w-3.5 h-3.5" />
 								<span>
-									{uniqueCount}
-									{stats.count !== uniqueCount && (
+									{stats.uniqueCount}
+									{stats.count !== stats.uniqueCount ? (
 										<span className="opacity-75"> ({stats.count} offers)</span>
-									)}
-									{totalForBranch ? (
+									) : null}
+									{stats.total ? (
 										<>
 											{" "}
-											<span className="opacity-50">/</span> {totalForBranch}
+											<span className="opacity-50">/</span> {stats.total}
 										</>
 									) : null}
 								</span>
 							</div>
 						</div>
-						<div className="flex flex-col items-end">
-							<span className="text-xs font-bold px-2 py-1 rounded-full bg-primary/10 text-primary">
-								{pct ? formatPercent(pct) : "N/A"}
-							</span>
-						</div>
+						<span className="text-xs font-bold px-2 py-1 rounded-full bg-primary/10 text-primary">
+							{stats.pct == null ? "N/A" : formatPercent(stats.pct)}
+						</span>
 					</div>
 
 					<div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-border/50">
@@ -84,9 +53,7 @@ function BranchCard({
 								<span className="text-xl font-bold text-foreground">
 									{formatPackage(stats.avgPackage).replace(" LPA", "")}
 								</span>
-								<span className="text-xs font-medium text-muted-foreground">
-									LPA
-								</span>
+								<span className="text-xs font-medium text-muted-foreground">LPA</span>
 							</div>
 						</div>
 						<div>
@@ -97,9 +64,7 @@ function BranchCard({
 								<span className="text-xl font-bold text-foreground">
 									{formatPackage(stats.median).replace(" LPA", "")}
 								</span>
-								<span className="text-xs font-medium text-muted-foreground">
-									LPA
-								</span>
+								<span className="text-xs font-medium text-muted-foreground">LPA</span>
 							</div>
 						</div>
 					</div>
@@ -125,72 +90,48 @@ function BranchCard({
 	);
 }
 
-export default function BranchSection({
-	BRANCHES_LIMIT,
-	branchStats,
-	branchTotalCounts,
-}: Props) {
-	const [showAllBranches, setShowAllBranches] = useState(false);
+export default function BranchSection({ limit, branches, buildHref }: Props) {
+	const [showAll, setShowAll] = useState(false);
+	const entries = Object.entries(branches).sort(
+		(left, right) => right[1].count - left[1].count,
+	);
+	const visibleEntries = showAll ? entries : entries.slice(0, limit);
 
 	return (
 		<Card className="card-theme bg-card border-border">
 			<CardHeader>
-				<CardTitle className="flex items-center justify-between text-foreground">
-					<div className="flex items-center gap-2">Branch-wise Placements</div>
-				</CardTitle>
+				<CardTitle className="text-foreground">Branch-wise Placements</CardTitle>
 			</CardHeader>
 			<CardContent>
-				{Object.keys(branchStats).length === 0 ? (
+				{entries.length === 0 ? (
 					<div className="text-center py-6 text-muted-foreground">
 						No branch data for current filters.
 					</div>
 				) : (
 					<>
 						<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-							{(() => {
-								const branchEntries = Object.entries(branchStats).sort(
-									(a, b) => b[1].count - a[1].count,
-								);
-								const branchesToShow = showAllBranches
-									? branchEntries
-									: branchEntries.slice(0, BRANCHES_LIMIT);
-
-								return branchesToShow.map(([branch, stats]) => {
-									const totalForBranch = branchTotalCounts[branch] || 0;
-									const uniqueCount = (stats as any).uniqueCount || stats.count;
-									const pct =
-										totalForBranch > 0
-											? (uniqueCount / totalForBranch) * 100
-											: null;
-
-									return (
-										<Link
-											href={`/stats/branch/${encodeURIComponent(branch)}`}
-											key={branch}
-										>
-											<BranchCard
-												branch={branch}
-												stats={stats}
-												totalForBranch={totalForBranch}
-												uniqueCount={uniqueCount}
-												pct={pct}
-											/>
-										</Link>
-									);
-								});
-							})()}
+							{visibleEntries.map(([branch, stats]) => (
+								<Link
+									href={buildHref(
+										`/stats/branch/${encodeURIComponent(branch)}`,
+									)}
+									key={branch}
+								>
+									<BranchCard branch={branch} stats={stats} />
+								</Link>
+							))}
 						</div>
-
-						{Object.keys(branchStats).length > BRANCHES_LIMIT && (
+						{entries.length > limit ? (
 							<div className="mt-6 text-center">
 								<button
-									onClick={() => setShowAllBranches(!showAllBranches)}
+									type="button"
+									onClick={() => setShowAll((current) => !current)}
 									className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
 								>
-									{showAllBranches ? "Show Less" : "Show All Branches"}
+									{showAll ? "Show Less" : "Show All Branches"}
 								</button>
 							</div>
-						)}
+						) : null}
 					</>
 				)}
 			</CardContent>

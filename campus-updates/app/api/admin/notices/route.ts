@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { createNotice, getNotices } from "@/lib/server/data";
 import { isAuthenticated, unauthorizedResponse } from "@/lib/server/auth";
+import { resolvePlacementYear } from "@/lib/server/placement-years";
 import { normalizeCategory } from "@/lib/notices";
 
 export const runtime = "nodejs";
@@ -100,13 +101,21 @@ const processNotice = (notice: any) => {
   return processed;
 };
 
-export async function GET() {
+export async function GET(req: Request) {
   if (!(await isAuthenticated())) {
     return unauthorizedResponse();
   }
-  
+
+  const year = resolvePlacementYear(new URL(req.url).searchParams.get("year"));
+  if (!year) {
+    return NextResponse.json(
+      { ok: false, error: "Unsupported placement year" },
+      { status: 400, headers: { "cache-control": "no-store" } },
+    );
+  }
+
   try {
-    const data = await getNotices();
+    const data = await getNotices({}, 1000, year);
 
     const normalizedData = data
       .map(processNotice)
@@ -122,7 +131,7 @@ export async function GET() {
   } catch (err: any) {
     console.error("Error fetching notices:", err);
     return NextResponse.json(
-      { ok: false, error: String(err) },
+      { ok: false, error: "Internal server error" },
       { status: 500, headers: { "cache-control": "no-store" } }
     );
   }
@@ -132,6 +141,15 @@ export async function POST(req: Request) {
   if (!(await isAuthenticated())) {
     return unauthorizedResponse();
   }
+
+  const year = resolvePlacementYear(new URL(req.url).searchParams.get("year"));
+  if (!year) {
+    return NextResponse.json(
+      { ok: false, error: "Unsupported placement year" },
+      { status: 400 },
+    );
+  }
+
   try {
     const body = await req.json();
     if (!body) {
@@ -143,10 +161,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Notice must have at least title, content or formatted_message" }, { status: 400 });
     }
 
-    const result = await createNotice(body);
+    const result = await createNotice(body, year);
     return NextResponse.json({ ok: true, data: result });
   } catch (err: any) {
     console.error("Error creating notice:", err);
-    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "Internal server error" }, { status: 500 });
   }
 }

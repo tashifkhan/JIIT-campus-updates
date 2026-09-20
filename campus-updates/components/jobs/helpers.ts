@@ -1,11 +1,6 @@
-import { Job } from "./types";
+import { JOB_CATEGORY_LABELS, JobSummary } from "@/lib/jobs";
 
-export const categoryMapping: Record<number, string> = {
-	1: "High",
-	2: "Middle",
-	3: "> 4.6L",
-	4: "Internship",
-};
+export const categoryMapping = JOB_CATEGORY_LABELS;
 
 export const formatDate = (timestamp: number) => {
 	const date = new Date(timestamp);
@@ -31,7 +26,7 @@ export const formatDateTime = (timestamp: number) => {
 	return `${dateStr} at ${timeStr}`;
 };
 
-export const formatPackage = (job: Job) => {
+export const formatPackage = (job: Pick<JobSummary, "package" | "annum_months">) => {
 	const amount = job.package;
 	const annumMonths = job.annum_months;
 	const isMonthly =

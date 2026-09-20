@@ -1,9 +1,13 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Antic, JetBrains_Mono } from "next/font/google";
 import { PostHogProvider } from "@/components/providor";
 import { Analytics } from "@vercel/analytics/next";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import ReactQueryProvider from "@/components/ReactQueryProvider";
+import { SecretAccessProvider } from "@/components/SecretAccessProvider";
+import DevelopmentServiceWorkerCleanup from "@/components/DevelopmentServiceWorkerCleanup";
 
 import Layout from "@/components/Layout";
 
@@ -74,33 +78,44 @@ export default function RootLayout({
 				suppressHydrationWarning
 				className={`${antic.variable} ${jetbrainsMono.variable} font-sans bg-background text-foreground`}
 			>
-				<PostHogProvider
-					apiKey={process.env.NEXT_PUBLIC_POSTHOG_KEY}
-					options={{ api_host: "/ph" }}
-				>
-					<ReactQueryProvider>
-						<Layout>{children}</Layout>
-					</ReactQueryProvider>
-					<Analytics />
-					{/* JSON-LD structured data for site */}
-					<script
-						type="application/ld+json"
-						dangerouslySetInnerHTML={{
-							__html: JSON.stringify({
-								"@context": "https://schema.org",
-								"@type": "WebSite",
-								name: "JIIT Placements",
-								url: "https://jiit-placement-updates.netlify.app",
-								potentialAction: {
-									"@type": "SearchAction",
-									target:
-										"https://jiit-placement-updates.netlify.app/search?q={search_term_string}",
-									"query-input": "required name=search_term_string",
-								},
-							}),
-						}}
-					/>
-				</PostHogProvider>
+				<DevelopmentServiceWorkerCleanup />
+				{/* NuqsAdapter uses useSearchParams, which requires a Suspense
+				    boundary during prerendering (e.g. the /404 page). */}
+				<Suspense fallback={null}>
+					<NuqsAdapter>
+						<SecretAccessProvider
+							enabled={process.env.SITE_GATE_ENABLED === "true"}
+						>
+							<PostHogProvider
+								apiKey={process.env.NEXT_PUBLIC_POSTHOG_KEY}
+								options={{ api_host: "/ph" }}
+							>
+								<ReactQueryProvider>
+									<Layout>{children}</Layout>
+								</ReactQueryProvider>
+								<Analytics />
+								{/* JSON-LD structured data for site */}
+								<script
+									type="application/ld+json"
+									dangerouslySetInnerHTML={{
+										__html: JSON.stringify({
+											"@context": "https://schema.org",
+											"@type": "WebSite",
+											name: "JIIT Placements",
+											url: "https://jiit-placement-updates.netlify.app",
+											potentialAction: {
+												"@type": "SearchAction",
+												target:
+													"https://jiit-placement-updates.netlify.app/search?q={search_term_string}",
+												"query-input": "required name=search_term_string",
+											},
+										}),
+									}}
+								/>
+							</PostHogProvider>
+						</SecretAccessProvider>
+					</NuqsAdapter>
+				</Suspense>
 			</body>
 		</html>
 	);

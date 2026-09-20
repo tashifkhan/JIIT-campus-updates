@@ -14,12 +14,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Calendar, ChevronDown, Eye, EyeOff, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { StudentWithPlacement, formatDate, formatPackage } from "@/lib/stats";
+import {
+	StudentWithPlacement,
+	formatDate,
+	formatPackage,
+	getStudentOfferDate,
+} from "@/lib/stats";
 
 type SortKey =
 	| "name"
 	| "package"
 	| "company"
+	| "offer_date"
 	| "joining_date"
 	| "enrollment"
 	| "role";
@@ -46,8 +52,8 @@ export default function PlacedStudentsSection({
 	uniqueCompanies,
 }: Props) {
 	const [showStudentList, setShowStudentList] = useState(false);
-	const [sortKey, setSortKey] = useState<SortKey>("name");
-	const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+	const [sortKey, setSortKey] = useState<SortKey>("offer_date");
+	const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
 	// Helper function to get the correct package value
 	const getStudentPackage = (student: StudentWithPlacement): number => {
@@ -94,6 +100,11 @@ export default function PlacedStudentsSection({
 				);
 			if (sortKey === "role")
 				return (a.role || "").localeCompare(b.role || "") * dir;
+			if (sortKey === "offer_date") {
+				const da = getStudentOfferDate(a, a.placement)?.getTime() ?? 0;
+				const db = getStudentOfferDate(b, b.placement)?.getTime() ?? 0;
+				return (da - db) * dir;
+			}
 			if (sortKey === "joining_date") {
 				const da = a.joining_date ? new Date(a.joining_date).getTime() : 0;
 				const db = b.joining_date ? new Date(b.joining_date).getTime() : 0;
@@ -139,6 +150,7 @@ export default function PlacedStudentsSection({
 											{sortKey === "name" && "Name"}
 											{sortKey === "package" && "Package"}
 											{sortKey === "company" && "Company"}
+											{sortKey === "offer_date" && "Offer Date"}
 											{sortKey === "enrollment" && "Enrollment"}
 											{sortKey === "role" && "Role"}
 											{sortKey === "joining_date" && "Joining Date"}
@@ -167,6 +179,12 @@ export default function PlacedStudentsSection({
 											onCheckedChange={() => setSortKey("company")}
 										>
 											Company
+										</DropdownMenuCheckboxItem>
+										<DropdownMenuCheckboxItem
+											checked={sortKey === "offer_date"}
+											onCheckedChange={() => setSortKey("offer_date")}
+										>
+											Offer Date
 										</DropdownMenuCheckboxItem>
 										<DropdownMenuCheckboxItem
 											checked={sortKey === "enrollment"}
@@ -297,20 +315,27 @@ export default function PlacedStudentsSection({
 															{student.job_location.join(", ")}
 														</div>
 													)}
-											</div>
-											<div className="order-3 flex justify-between items-start sm:block sm:text-left">
-												<div className="space-y-1">
-													<p className="font-semibold text-sm text-success">
-														{formatPackage(getStudentPackage(student))}
-													</p>
+										</div>
+										<div className="order-3 flex justify-between items-start sm:block sm:text-left">
+											<div className="space-y-1">
+												<p className="font-semibold text-sm text-success">
+													{formatPackage(getStudentPackage(student))}
+												</p>
+												<div className="flex items-center text-xs text-muted-foreground">
+													<Calendar className="w-3 h-3 mr-1" />
+													Offered{" "}
+													{formatDate(
+														getStudentOfferDate(student, student.placement),
+													)}
 												</div>
-												{student.joining_date && (
-													<div className="flex items-center text-xs mt-1 text-muted-foreground">
-														<Calendar className="w-3 h-3 mr-1" />
-														{formatDate(student.joining_date)}
-													</div>
-												)}
 											</div>
+											{student.joining_date && (
+												<div className="flex items-center text-xs mt-1 text-muted-foreground">
+													<Calendar className="w-3 h-3 mr-1" />
+													Joins {formatDate(student.joining_date)}
+												</div>
+											)}
+										</div>
 										</div>
 									</CardContent>
 								</Card>

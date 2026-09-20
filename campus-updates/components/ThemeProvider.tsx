@@ -61,30 +61,35 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 			? "dark"
 			: "light";
 
-	const [systemColorMode, setSystemColorMode] = useState(getSystemColorMode());
+	// Keep the server and first client render identical. Browser preferences are
+	// applied after hydration to avoid replacing the entire shared app shell.
+	const [systemColorMode, setSystemColorMode] = useState("light");
+	const [hydrated, setHydrated] = useState(false);
 
 	// Track if user has chosen a theme (not just default)
 	const userHasChosenThemeRef = useRef(false);
 
 	// --- Theme state ---
-	const [theme, setThemeState] = useState(() => {
-		if (typeof window === "undefined") return "cream";
+	const [theme, setThemeState] = useState("cream");
+	const [radius, setRadius] = useState(12);
 
-		const saved = localStorage.getItem("theme");
-		if (saved && themes[saved as keyof typeof themes]) {
+	useEffect(() => {
+		const mode = getSystemColorMode();
+		const savedTheme = localStorage.getItem("theme");
+		const savedRadius = Number(localStorage.getItem("radius"));
+
+		setSystemColorMode(mode);
+		if (savedTheme && themes[savedTheme as keyof typeof themes]) {
 			userHasChosenThemeRef.current = true;
-			return saved;
+			setThemeState(savedTheme);
+		} else {
+			setThemeState(mode === "dark" ? "ocean" : "cream");
 		}
-		// No saved theme: use system color mode
-		return getSystemColorMode() === "dark" ? "ocean" : "cream";
-	});
-
-	const [radius, setRadius] = useState(() => {
-		if (typeof window === "undefined") return 12;
-
-		const saved = localStorage.getItem("radius");
-		return saved ? Number(saved) : 12;
-	});
+		if (Number.isFinite(savedRadius) && savedRadius > 0) {
+			setRadius(savedRadius);
+		}
+		setHydrated(true);
+	}, []);
 
 	// Patch setTheme to mark user choice
 	const setTheme = (val: string) => {
@@ -94,7 +99,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
 	// Listen for system color mode changes
 	useEffect(() => {
-		if (typeof window === "undefined") return;
+		if (!hydrated) return;
 
 		const mql = window.matchMedia("(prefers-color-scheme: dark)");
 		const handleChange = (e: MediaQueryListEvent) => {
@@ -150,7 +155,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
 		localStorage.setItem("theme", theme);
 		localStorage.setItem("radius", radius.toString());
-	}, [theme, radius]);
+	}, [hydrated, theme, radius]);
 
 	return (
 		<SystemColorModeContext.Provider value={{ systemColorMode }}>

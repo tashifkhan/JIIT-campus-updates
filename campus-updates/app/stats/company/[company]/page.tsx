@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryState } from "nuqs";
+
+import { statsQueryParams } from "@/lib/query-params";
 import { useStatsData } from "@/lib/hooks/useStatsData";
 import {
 	Table,
@@ -32,7 +35,13 @@ import {
 	ArrowDown,
 	ArrowUpDown,
 } from "lucide-react";
-import { Placement, formatPackage, StudentWithPlacement } from "@/lib/stats";
+import {
+	Placement,
+	formatDate,
+	formatPackage,
+	getStudentOfferDate,
+	StudentWithPlacement,
+} from "@/lib/stats";
 import React from "react";
 
 // Reusing helper function for calculating package
@@ -60,13 +69,18 @@ export default function CompanyStatsPage({
 	const router = useRouter();
 
 	const { placements, allStudents, loading } = useStatsData();
+	const [query, setQuery] = useQueryState("q", statsQueryParams.q);
+	const [sortConfig, setSortConfig] = useState<{
+		key: string;
+		direction: "asc" | "desc";
+	} | null>({ key: "offer_date", direction: "desc" });
 
 	if (loading) {
 		return (
 			<div className="min-h-screen bg-background pb-12">
 				{/* Top Navigation Skeleton */}
 				<div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border/40">
-					<div className="max-w-5xl mx-auto px-4 h-16 flex items-center">
+					<div className="max-w-7xl mx-auto px-4 h-16 flex items-center">
 						<Skeleton className="h-9 w-20" />
 					</div>
 				</div>
@@ -170,13 +184,6 @@ export default function CompanyStatsPage({
 		),
 	).filter((l) => l.length > 0);
 
-	// Local state for list
-	const [query, setQuery] = useState("");
-	const [sortConfig, setSortConfig] = useState<{
-		key: string;
-		direction: "asc" | "desc";
-	} | null>(null);
-
 	const handleSort = (key: string) => {
 		let direction: "asc" | "desc" = "asc";
 		if (
@@ -205,6 +212,13 @@ export default function CompanyStatsPage({
 
 		if (sortConfig) {
 			displayedStudents = [...displayedStudents].sort((a, b) => {
+				if (sortConfig.key === "offer_date") {
+					const dateA = getStudentOfferDate(a, a.placement)?.getTime() ?? 0;
+					const dateB = getStudentOfferDate(b, b.placement)?.getTime() ?? 0;
+					return sortConfig.direction === "asc"
+						? dateA - dateB
+						: dateB - dateA;
+				}
 				if (sortConfig.key === "package") {
 					const pkgA = getStudentPkg(a);
 					const pkgB = getStudentPkg(b);
@@ -226,7 +240,7 @@ export default function CompanyStatsPage({
 		<div className="min-h-screen bg-background pb-12">
 			{/* Top Navigation */}
 			<div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border/40 supports-[backdrop-filter]:bg-background/60">
-				<div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+				<div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
 					<Button
 						variant="ghost"
 						onClick={() => router.back()}
@@ -311,7 +325,7 @@ export default function CompanyStatsPage({
 									<Input
 										placeholder="Search name, role, location..."
 										value={query}
-										onChange={(e) => setQuery(e.target.value)}
+										onChange={(e) => void setQuery(e.target.value || null)}
 										className="pl-10 h-10 bg-background"
 									/>
 								</div>
@@ -361,6 +375,17 @@ export default function CompanyStatsPage({
 											<DropdownMenuItem onClick={() => handleSort("package")}>
 												Package
 												{sortConfig?.key === "package" &&
+													(sortConfig.direction === "asc" ? (
+														<ArrowUp className="ml-auto h-4 w-4" />
+													) : (
+														<ArrowDown className="ml-auto h-4 w-4" />
+													))}
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												onClick={() => handleSort("offer_date")}
+											>
+												Offer Date
+												{sortConfig?.key === "offer_date" &&
 													(sortConfig.direction === "asc" ? (
 														<ArrowUp className="ml-auto h-4 w-4" />
 													) : (
@@ -459,6 +484,23 @@ export default function CompanyStatsPage({
 										</TableHead>
 										<TableHead
 											className="cursor-pointer hover:text-primary transition-colors h-12 group"
+											onClick={() => handleSort("offer_date")}
+										>
+											<div className="flex items-center">
+												Offer Received
+												{sortConfig?.key === "offer_date" ? (
+													sortConfig.direction === "asc" ? (
+														<ArrowUp className="ml-1 h-4 w-4" />
+													) : (
+														<ArrowDown className="ml-1 h-4 w-4" />
+													)
+												) : (
+													<ArrowUpDown className="ml-1 h-4 w-4 opacity-50 group-hover:opacity-100" />
+												)}
+											</div>
+										</TableHead>
+										<TableHead
+											className="cursor-pointer hover:text-primary transition-colors h-12 group"
 											onClick={() => handleSort("job_location")}
 										>
 											<div className="flex items-center">
@@ -498,6 +540,11 @@ export default function CompanyStatsPage({
 														return pkg ? formatPackage(pkg) : "TBD";
 													})()}
 												</span>
+											</TableCell>
+											<TableCell className="text-muted-foreground py-3 whitespace-nowrap">
+												{formatDate(
+													getStudentOfferDate(student, student.placement),
+												)}
 											</TableCell>
 											<TableCell className="text-muted-foreground py-3">
 												{student.job_location?.join(", ") || "N/A"}
@@ -546,6 +593,16 @@ export default function CompanyStatsPage({
 											</span>
 											<span className="font-medium">
 												{student.job_location?.join(", ") || "N/A"}
+											</span>
+										</div>
+										<div>
+											<span className="text-xs text-muted-foreground block mb-0.5">
+												Offer Received
+											</span>
+											<span className="font-medium">
+												{formatDate(
+													getStudentOfferDate(student, student.placement),
+												)}
 											</span>
 										</div>
 									</div>

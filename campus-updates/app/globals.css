@@ -78,8 +78,8 @@
     --chart-1: oklch(0.6998 0.0896 201.8672);
     --chart-2: oklch(0.7794 0.0803 4.1330);
     --chart-3: oklch(0.6699 0.0988 356.9762);
-    --chart-4: oklch(0.4408 0.0702 217.0848);
-    --chart-5: oklch(0.2713 0.0086 255.5780);
+    --chart-4: oklch(0.7208 0.0902 217.0848);
+    --chart-5: oklch(0.7513 0.1086 305.5780);
     --sidebar: oklch(0.2303 0.0270 235.9743);
     --sidebar-foreground: oklch(0.9670 0.0029 264.5419);
     --sidebar-primary: oklch(0.6559 0.2118 354.3084);
@@ -183,9 +183,69 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
+
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Thin themed scrollbar (was referenced but never defined) */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--muted-foreground) 30%, transparent) transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: color-mix(in srgb, var(--muted-foreground) 30%, transparent);
+    border-radius: 999px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in srgb, var(--muted-foreground) 55%, transparent);
+  }
+
+  /* Staggered entrance: children fade up one after another */
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .stagger-children > * {
+    animation: fade-up 0.35s ease-out both;
+  }
+
+  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-children > *:nth-child(2) { animation-delay: 40ms; }
+  .stagger-children > *:nth-child(3) { animation-delay: 80ms; }
+  .stagger-children > *:nth-child(4) { animation-delay: 120ms; }
+  .stagger-children > *:nth-child(5) { animation-delay: 160ms; }
+  .stagger-children > *:nth-child(6) { animation-delay: 200ms; }
+  .stagger-children > *:nth-child(7) { animation-delay: 240ms; }
+  .stagger-children > *:nth-child(8) { animation-delay: 280ms; }
+  .stagger-children > *:nth-child(9) { animation-delay: 320ms; }
+  .stagger-children > *:nth-child(10) { animation-delay: 360ms; }
+  .stagger-children > *:nth-child(11) { animation-delay: 400ms; }
+  .stagger-children > *:nth-child(12) { animation-delay: 440ms; }
+  .stagger-children > *:nth-child(n+13) { animation-delay: 480ms; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stagger-children > * {
+      animation: none;
+    }
   }
   
   /* Job Description HTML Table Styling */

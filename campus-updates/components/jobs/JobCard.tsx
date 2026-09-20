@@ -12,7 +12,7 @@ import {
 	BuildingIcon,
 	Loader2Icon,
 } from "lucide-react";
-import { Job } from "./types";
+import { JobSummary } from "@/lib/jobs";
 import {
 	categoryMapping,
 	formatDate,
@@ -22,20 +22,25 @@ import {
 } from "./helpers";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
+import { serializeJobDetailQuery } from "@/lib/query-params";
 
-export default function JobCard({ job }: { job: Job }) {
+export default function JobCard({ job, year }: { job: JobSummary; year: string }) {
 	const router = useRouter();
 	const [isPending, startTransition] = useTransition();
 
 	const handleNavigate = () => {
 		startTransition(() => {
-			router.push(`/jobs/${job.id}`);
+			router.push(
+				serializeJobDetailQuery(`/jobs/${encodeURIComponent(job.id)}`, {
+					year: year === "202526" || year === "202627" ? year : null,
+				}),
+			);
 		});
 	};
 
 	return (
 		<Card
-			className={`group relative flex flex-col justify-between overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] hover:border-primary/50 dark:hover:border-primary/50 dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] cursor-pointer ${
+			className={`group relative flex flex-col justify-between overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] hover:border-primary/50 dark:hover:border-primary/50 dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
 				isPending ? "opacity-70 pointer-events-none" : ""
 			}`}
 			role="button"

@@ -17,7 +17,7 @@ export default function ExpandingSearch({
 	onChange,
 	placeholder = "Search...",
 }: Props) {
-	const [isOpen, setIsOpen] = useState(false);
+	const [isOpen, setIsOpen] = useState(Boolean(value));
 	const inputRef = useRef<HTMLInputElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
 
@@ -27,6 +27,10 @@ export default function ExpandingSearch({
 			inputRef.current.focus();
 		}
 	}, [isOpen]);
+
+	useEffect(() => {
+		if (value) setIsOpen(true);
+	}, [value]);
 
 	// Close when clicking outside
 	useEffect(() => {

@@ -1,52 +1,16 @@
 "use client";
 import NoticesClient from "@/components/notice/NoticesClient";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useSecretAccess } from "@/components/SecretAccessProvider";
 
 export default function HomePage() {
-	// Secret unlock gate using localStorage key "shh"
-	const [unlocked, setUnlocked] = useState<boolean>(() => {
-		try {
-			return typeof window !== "undefined" && !!localStorage.getItem("shh");
-		} catch {
-			return false;
-		}
-	});
+	const { unlocked, unlock } = useSecretAccess();
 	const [secretClicks, setSecretClicks] = useState(0);
-
-	useEffect(() => {
-		// Support unlocking via ?shh query parameter and then clean it from the URL
-		try {
-			if (typeof window === "undefined") return;
-			const params = new URLSearchParams(window.location.search);
-			if (params.has("shh")) {
-				try {
-					localStorage.setItem("shh", "1");
-				} catch {
-					/* ignore */
-				}
-				setUnlocked(true);
-				params.delete("shh");
-				const newUrl = `${window.location.pathname}${
-					params.toString() ? `?${params.toString()}` : ""
-				}${window.location.hash || ""}`;
-				window.history.replaceState({}, "", newUrl);
-			}
-		} catch {
-			// ignore
-		}
-	}, []);
 
 	const handleSecretClick = () => {
 		setSecretClicks((c) => {
 			const next = c + 1;
-			if (next >= 7) {
-				try {
-					localStorage.setItem("shh", "1");
-				} catch {
-					/* ignore */
-				}
-				if (typeof window !== "undefined") window.location.reload();
-			}
+			if (next >= 7) unlock();
 			return next;
 		});
 	};

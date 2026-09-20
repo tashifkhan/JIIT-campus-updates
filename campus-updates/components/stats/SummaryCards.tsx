@@ -2,15 +2,6 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { formatPercent, formatPackage } from "@/lib/stats";
-import {
-	TrendingUp,
-	IndianRupee,
-	Building2,
-	ScrollText,
-	Briefcase,
-	Users,
-	Target,
-} from "lucide-react";
 
 type Props = {
 	placement: { placed: number; total: number; pct: number; overallPct: number };
@@ -35,7 +26,6 @@ type StatCardProps = {
 	title: string;
 	value: React.ReactNode;
 	subValue?: React.ReactNode;
-	icon: React.ReactNode;
 	className?: string;
 	trend?: {
 		value: string;
@@ -48,7 +38,6 @@ function StatCard({
 	title,
 	value,
 	subValue,
-	icon,
 	className,
 	trend,
 }: StatCardProps) {
@@ -75,9 +64,6 @@ function StatCard({
 								{subValue}
 							</div>
 						)}
-					</div>
-					<div className="p-2 bg-primary/10 rounded-lg text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
-						{icon}
 					</div>
 				</div>
 			</CardContent>
@@ -116,7 +102,6 @@ export default function SummaryCards({
 						)}
 					</div>
 				}
-				icon={<Target className="h-5 w-5" />}
 			/>
 
 			{/* Average Package */}
@@ -135,7 +120,6 @@ export default function SummaryCards({
 						<span>Overall: {formatPackage(packages.overallAvg)}</span>
 					) : null
 				}
-				icon={<IndianRupee className="h-5 w-5" />}
 			/>
 
 			{/* Median Package */}
@@ -154,7 +138,6 @@ export default function SummaryCards({
 						<span>Overall: {formatPackage(packages.overallMedian)}</span>
 					) : null
 				}
-				icon={<TrendingUp className="h-5 w-5" />}
 			/>
 
 			{/* Highest Package */}
@@ -173,7 +156,6 @@ export default function SummaryCards({
 						<span>Overall: {formatPackage(packages.overallHighest)}</span>
 					) : null
 				}
-				icon={<Briefcase className="h-5 w-5" />}
 			/>
 
 			{/* Companies */}
@@ -187,7 +169,6 @@ export default function SummaryCards({
 						<span>Total visiting</span>
 					)
 				}
-				icon={<Building2 className="h-5 w-5" />}
 			/>
 
 			{/* Total Offers */}
@@ -207,7 +188,6 @@ export default function SummaryCards({
 							)}
 						</div>
 					}
-					icon={<ScrollText className="h-5 w-5" />}
 				/>
 			)}
 		</div>

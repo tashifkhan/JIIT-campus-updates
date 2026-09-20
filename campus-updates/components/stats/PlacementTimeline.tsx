@@ -1,247 +1,72 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import {
-	ComposedChart,
-	Line,
 	Bar,
+	CartesianGrid,
+	ComposedChart,
+	Legend,
+	Line,
+	ResponsiveContainer,
+	Tooltip,
 	XAxis,
 	YAxis,
-	CartesianGrid,
-	Tooltip,
-	Legend,
-	ResponsiveContainer,
-	Area,
 } from "recharts";
-import { Placement, getStudentPackage } from "@/lib/stats";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTimelineStats } from "@/lib/hooks/useStatsDashboard";
 
 type Props = {
-	placements: Placement[];
-	getBranch: (enrollment: string) => string;
+	query: string;
+	enabled: boolean;
 };
 
 type TimeFrame = "month" | "day";
 type MetricView = "count" | "package" | "combined";
 
-// Exclude these branches
-const EXCLUDED_BRANCHES = new Set(["JUIT", "Other", "MTech"]);
+function TimelineTooltip({ active, payload, label, cumulative }: any) {
+	if (!active || !payload?.length) return null;
+	return (
+		<div className="bg-card border border-border rounded-lg shadow-lg p-3">
+			<p className="font-semibold mb-2 text-foreground">
+				{label} {cumulative ? "(Cumulative)" : ""}
+			</p>
+			<div className="space-y-1">
+				{payload.map((entry: any) => (
+					<div
+						key={entry.dataKey}
+						className="flex items-center justify-between gap-3"
+					>
+						<span className="text-sm text-muted-foreground flex items-center gap-2">
+							<span
+								className="w-2 h-2 rounded-full"
+								style={{ backgroundColor: entry.color }}
+							/>
+							{entry.name}:
+						</span>
+						<span className="text-sm font-semibold text-foreground">
+							{entry.value} {entry.name.includes("Package") ? "LPA" : ""}
+						</span>
+					</div>
+				))}
+			</div>
+		</div>
+	);
+}
 
-export default function PlacementTimeline({ placements, getBranch }: Props) {
+export default function PlacementTimeline({ query, enabled }: Props) {
 	const [timeFrame, setTimeFrame] = useState<TimeFrame>("month");
 	const [view, setView] = useState<MetricView>("combined");
 	const [isCumulative, setIsCumulative] = useState(true);
-
-	// Process data into time buckets
-	const chartData = useMemo(() => {
-		if (!placements.length) return [];
-
-		// Helper to get date object from placement
-		const getPlacementDate = (p: Placement): Date | null => {
-			if (p.createdAt) return new Date(p.createdAt);
-			if (p.saved_at) return new Date(p.saved_at);
-			if (p._id) {
-				try {
-					const timestamp = parseInt(p._id.substring(0, 8), 16) * 1000;
-					return new Date(timestamp);
-				} catch {
-					return null;
-				}
-			}
-			return null;
-		};
-
-		// Helper to format date key
-		const getDateKey = (date: Date) => {
-			if (isNaN(date.getTime())) return "Unknown";
-
-			if (timeFrame === "month") {
-				return date.toLocaleString("default", {
-					month: "short",
-					year: "numeric",
-				});
-			}
-			return date.toISOString().split("T")[0]; // YYYY-MM-DD
-		};
-
-		// Sort placements by date
-		const sorted = [...placements]
-			.map((p) => ({ ...p, derivedDate: getPlacementDate(p) }))
-			.filter(
-				(p): p is Placement & { derivedDate: Date } => p.derivedDate !== null
-			)
-			.sort((a, b) => a.derivedDate.getTime() - b.derivedDate.getTime());
-
-		// Group by date first
-		const groups: Record<
-			string,
-			{
-				date: string;
-				originalDate: Date;
-				uniqueEnrollments: Set<string>;
-				totalOffers: number;
-				studentMaxPackages: Map<string, number>;
-			}
-		> = {};
-
-		sorted.forEach((p) => {
-			const key = getDateKey(p.derivedDate);
-			if (!groups[key]) {
-				groups[key] = {
-					date: key,
-					originalDate: p.derivedDate,
-					uniqueEnrollments: new Set(),
-					totalOffers: 0,
-					studentMaxPackages: new Map(),
-				};
-			}
-
-			// Process students
-			p.students_selected.forEach((s) => {
-				// Filter by branch
-				const branch = getBranch(s.enrollment_number);
-				if (EXCLUDED_BRANCHES.has(branch)) return;
-
-				// Add to stats
-				groups[key].totalOffers += 1;
-				if (s.enrollment_number) {
-					groups[key].uniqueEnrollments.add(s.enrollment_number);
-
-					const pkg = getStudentPackage(s, p);
-					if (pkg && pkg > 0) {
-						const currentMax =
-							groups[key].studentMaxPackages.get(s.enrollment_number) || 0;
-						if (pkg > currentMax) {
-							groups[key].studentMaxPackages.set(s.enrollment_number, pkg);
-						}
-					}
-				}
-			});
-		});
-
-		// Convert to array and sort by time
-		const sortedGroups = Object.values(groups)
-			.map((g) => ({
-				...g,
-				timestamp: g.originalDate.getTime(),
-			}))
-			.sort((a, b) => a.timestamp - b.timestamp);
-
-		// If cumulative, process running totals
-		if (isCumulative) {
-			const runningUniqueStudents = new Set<string>();
-			let runningTotalOffers = 0;
-			const runningStudentMaxPackages = new Map<string, number>();
-
-			return sortedGroups.map((g) => {
-				// Update running totals
-				g.uniqueEnrollments.forEach((s) => runningUniqueStudents.add(s));
-				runningTotalOffers += g.totalOffers;
-
-				// Update running max packages
-				g.studentMaxPackages.forEach((pkg, enrollment) => {
-					const current = runningStudentMaxPackages.get(enrollment) || 0;
-					if (pkg > current) {
-						runningStudentMaxPackages.set(enrollment, pkg);
-					}
-				});
-
-				const currentPackages = Array.from(runningStudentMaxPackages.values());
-
-				// Calculate cumulative stats
-				const avgPkg = currentPackages.length
-					? currentPackages.reduce((a, b) => a + b, 0) / currentPackages.length
-					: 0;
-
-				// Median
-				const sortedPkgs = [...currentPackages].sort((a, b) => a - b);
-				const medianPkg = sortedPkgs.length
-					? sortedPkgs.length % 2
-						? sortedPkgs[(sortedPkgs.length - 1) >> 1]
-						: (sortedPkgs[sortedPkgs.length / 2 - 1] +
-								sortedPkgs[sortedPkgs.length / 2]) /
-						  2
-					: 0;
-
-				return {
-					date: g.date,
-					timestamp: g.originalDate.getTime(),
-					uniqueStudents: runningUniqueStudents.size,
-					totalOffers: runningTotalOffers,
-					avgPackage: Number(avgPkg.toFixed(2)),
-					medianPackage: Number(medianPkg.toFixed(2)),
-				};
-			});
-		}
-
-		// Non-cumulative (Individual)
-		return sortedGroups.map((g) => {
-			const currentPackages = Array.from(g.studentMaxPackages.values());
-
-			const avgPkg = currentPackages.length
-				? currentPackages.reduce((a, b) => a + b, 0) / currentPackages.length
-				: 0;
-
-			const sortedPkgs = [...currentPackages].sort((a, b) => a - b);
-			const medianPkg = sortedPkgs.length
-				? sortedPkgs.length % 2
-					? sortedPkgs[(sortedPkgs.length - 1) >> 1]
-					: (sortedPkgs[sortedPkgs.length / 2 - 1] +
-							sortedPkgs[sortedPkgs.length / 2]) /
-					  2
-				: 0;
-
-			return {
-				date: g.date,
-				timestamp: g.originalDate.getTime(),
-				uniqueStudents: g.uniqueEnrollments.size,
-				totalOffers: g.totalOffers,
-				avgPackage: Number(avgPkg.toFixed(2)),
-				medianPackage: Number(medianPkg.toFixed(2)),
-			};
-		});
-	}, [placements, timeFrame, getBranch, isCumulative]);
-
-	const CustomTooltip = ({ active, payload, label }: any) => {
-		if (!active || !payload || !payload.length) return null;
-
-		return (
-			<div className="bg-card border border-border rounded-lg shadow-lg p-3">
-				<p className="font-semibold mb-2 text-foreground">
-					{label} {isCumulative ? "(Cumulative)" : ""}
-				</p>
-				<div className="space-y-1">
-					{payload.map((entry: any, index: number) => (
-						<div
-							key={index}
-							className="flex items-center justify-between gap-3"
-						>
-							<span className="text-sm text-muted-foreground flex items-center gap-2">
-								<div
-									className="w-2 h-2 rounded-full"
-									style={{ backgroundColor: entry.color }}
-								/>
-								{entry.name}:
-							</span>
-							<span className="text-sm font-semibold text-foreground">
-								{entry.value} {entry.name.includes("Package") ? "LPA" : ""}
-							</span>
-						</div>
-					))}
-				</div>
-			</div>
-		);
-	};
+	const timelineQuery = useTimelineStats(query, timeFrame, isCumulative, enabled);
+	const chartData = timelineQuery.data || [];
 
 	return (
 		<Card className="card-theme">
 			<CardHeader>
 				<CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-					<div className="flex items-center gap-2">
-						<span className="text-foreground">Placement Timeline</span>
-					</div>
-
+					<span className="text-foreground">Placement Timeline</span>
 					<div className="flex flex-wrap items-center gap-2">
 						<div className="flex items-center bg-muted rounded-lg p-1">
 							<Button
@@ -262,8 +87,6 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 							</Button>
 						</div>
 
-						<div className="w-px h-6 bg-border mx-1 hidden sm:block" />
-
 						<div className="flex items-center bg-muted rounded-lg p-1">
 							<Button
 								variant={timeFrame === "month" ? "secondary" : "ghost"}
@@ -282,8 +105,6 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 								Day
 							</Button>
 						</div>
-
-						<div className="w-px h-6 bg-border mx-1 hidden sm:block" />
 
 						<div className="flex items-center bg-muted rounded-lg p-1">
 							<Button
@@ -315,83 +136,84 @@ export default function PlacementTimeline({ placements, getBranch }: Props) {
 				</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<div className="h-[400px] w-full">
-					<ResponsiveContainer width="100%" height="100%">
-						<ComposedChart
-							data={chartData}
-							margin={{ top: 20, right: 20, bottom: 20, left: 0 }}
-						>
-							<CartesianGrid
-								strokeDasharray="3 3"
-								opacity={0.2}
-								vertical={false}
-							/>
-							<XAxis
-								dataKey="date"
-								tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
-								tickMargin={10}
-								minTickGap={30}
-							/>
-							<YAxis
-								yAxisId="left"
-								tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
-								tickFormatter={(value) => value.toLocaleString()}
-							/>
-							<YAxis
-								yAxisId="right"
-								orientation="right"
-								tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
-								unit=" LPA"
-								hide={view === "count"}
-							/>
-							<Tooltip content={<CustomTooltip />} />
-							<Legend wrapperStyle={{ paddingTop: "20px" }} />
-
-							<Bar
-								yAxisId="left"
-								dataKey="uniqueStudents"
-								name="Unique Students"
-								fill="var(--chart-1)"
-								radius={[4, 4, 0, 0]}
-								maxBarSize={50}
-								fillOpacity={0.8}
-								hide={view === "package"}
-							/>
-							<Bar
-								yAxisId="left"
-								dataKey="totalOffers"
-								name="Total Offers"
-								fill="var(--chart-2)"
-								radius={[4, 4, 0, 0]}
-								maxBarSize={50}
-								fillOpacity={0.8}
-								hide={view === "package"}
-							/>
-							<Line
-								yAxisId="right"
-								type="monotone"
-								dataKey="avgPackage"
-								name="Avg Package"
-								stroke="var(--chart-2)"
-								strokeWidth={2}
-								dot={{ r: 3, fill: "#f59e0b" }}
-								activeDot={{ r: 5 }}
-								hide={view === "count"}
-							/>
-							<Line
-								yAxisId="right"
-								type="monotone"
-								dataKey="medianPackage"
-								name="Median Package"
-								stroke="var(--chart-1)"
-								strokeWidth={2}
-								strokeDasharray="5 5"
-								dot={{ r: 3, fill: "#ec4899" }}
-								hide={view === "count"}
-							/>
-						</ComposedChart>
-					</ResponsiveContainer>
-				</div>
+				{timelineQuery.isLoading ? (
+					<div className="h-[400px] animate-pulse rounded-lg bg-muted" />
+				) : timelineQuery.error ? (
+					<div className="h-[400px] flex items-center justify-center text-destructive">
+						{timelineQuery.error instanceof Error
+							? timelineQuery.error.message
+							: "Failed to load timeline."}
+					</div>
+				) : chartData.length === 0 ? (
+					<div className="h-[400px] flex items-center justify-center text-muted-foreground">
+						No timeline data for current filters.
+					</div>
+				) : (
+					<div className="h-[400px] w-full">
+						<ResponsiveContainer width="100%" height="100%">
+							<ComposedChart
+								data={chartData}
+								margin={{ top: 20, right: 20, bottom: 20, left: 0 }}
+							>
+								<CartesianGrid strokeDasharray="3 3" opacity={0.2} vertical={false} />
+								<XAxis
+									dataKey="date"
+									tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
+									tickMargin={10}
+									minTickGap={30}
+								/>
+								<YAxis
+									yAxisId="left"
+									tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
+								/>
+								<YAxis
+									yAxisId="right"
+									orientation="right"
+									tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
+									unit=" LPA"
+									hide={view === "count"}
+								/>
+								<Tooltip content={<TimelineTooltip cumulative={isCumulative} />} />
+								<Legend wrapperStyle={{ paddingTop: "20px" }} />
+								<Bar
+									yAxisId="left"
+									dataKey="uniqueStudents"
+									name="Unique Students"
+									fill="var(--chart-1)"
+									radius={[4, 4, 0, 0]}
+									hide={view === "package"}
+								/>
+								<Bar
+									yAxisId="left"
+									dataKey="totalOffers"
+									name="Total Offers"
+									fill="var(--chart-2)"
+									radius={[4, 4, 0, 0]}
+									hide={view === "package"}
+								/>
+								<Line
+									yAxisId="right"
+									type="monotone"
+									dataKey="avgPackage"
+									name="Avg Package"
+									stroke="var(--chart-2)"
+									strokeWidth={2}
+									hide={view === "count"}
+								/>
+								<Line
+									yAxisId="right"
+									type="monotone"
+									dataKey="medianPackage"
+									name="Median Package"
+									stroke="var(--chart-1)"
+									strokeWidth={2}
+									strokeDasharray="5 5"
+									hide={view === "count"}
+								/>
+							</ComposedChart>
+						</ResponsiveContainer>
+					</div>
+				)}
 			</CardContent>
 		</Card>
 	);

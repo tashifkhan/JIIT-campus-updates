@@ -1,5 +1,6 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { usePlacementYear } from "@/components/PlacementYearProvider";
 import enrollmentRanges from "@/app/stats/enrollmemt_range.json";
 import studentCounts from "@/app/stats/student_count.json";
 import {
@@ -21,14 +22,18 @@ export const COMPANIES_LIMIT = 6;
 const EXCLUDED_BRANCHES = new Set(["JUIT", "Other", "MTech"]);
 
 export function useStatsData() {
+	const { year } = usePlacementYear();
 	const {
 		data,
 		isLoading: loading,
 		error,
 	} = useQuery({
-		queryKey: ["placement-offers"],
+		queryKey: ["placement-offers", year],
 		queryFn: async () => {
-			const res = await fetch("/api/placement-offers", { cache: "no-store" });
+			const res = await fetch(
+				`/api/placement-offers?year=${encodeURIComponent(year)}`,
+				{ cache: "no-store" },
+			);
 			const json = await res.json();
 			if (!json.ok) throw new Error(json.error || "Failed to load");
 			return json.data as Placement[];
@@ -39,33 +44,6 @@ export function useStatsData() {
 		() => (Array.isArray(data) ? (data as any) : []),
 		[data],
 	);
-
-	// Secret unlock state
-	const [unlocked, setUnlocked] = useState<boolean>(() => {
-		try {
-			return typeof window !== "undefined" && !!localStorage.getItem("shh");
-		} catch {
-			return false;
-		}
-	});
-
-	useEffect(() => {
-		try {
-			if (typeof window === "undefined") return;
-			const params = new URLSearchParams(window.location.search);
-			if (params.has("shh")) {
-				try {
-					localStorage.setItem("shh", "1");
-				} catch {}
-				setUnlocked(true);
-				params.delete("shh");
-				const newUrl = `${window.location.pathname}${
-					params.toString() ? `?${params.toString()}` : ""
-				}${window.location.hash || ""}`;
-				window.history.replaceState({}, "", newUrl);
-			}
-		} catch {}
-	}, []);
 
 	// Flattened students (+ placement context)
 	const allStudents: StudentWithPlacement[] = useMemo(
@@ -117,8 +95,6 @@ export function useStatsData() {
 		includedStudents,
 		branchTotalCounts,
 		loading,
-		unlocked,
-		setUnlocked,
 		EXCLUDED_BRANCHES,
 		enrollmentRanges,
 		studentCounts,

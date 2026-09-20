@@ -22,84 +22,18 @@ import {
 	UsersIcon,
 	GlobeIcon,
 } from "lucide-react";
-import { getCategoryClass } from "./helpers";
+import {
+	categoryMapping,
+	formatDate,
+	formatDateTime,
+	formatPackage,
+	getCategoryClass,
+} from "./helpers";
 import { cn } from "@/lib/utils";
+import { JobDocument } from "@/lib/jobs";
 
-interface Job {
-	id: string;
-	job_profile: string;
-	company: string;
-	placement_category_code: number;
-	placement_category: string;
-	createdAt: number;
-	deadline: number | null;
-	eligibility_marks: Array<{
-		level: string;
-		criteria: number;
-	}>;
-	eligibility_courses: string[];
-	allowed_genders: string[];
-	job_description: string;
-	location: string;
-	package: number;
-	package_info: string;
-	annum_months?: string;
-	required_skills: string[];
-	hiring_flow: string[];
-	placement_type: string | null;
-	documents?: Array<{
-		name: string;
-		identifier: string;
-		url: string;
-	}>;
-}
-
-export default function JobDetailClient({ job }: { job: Job }) {
+export default function JobDetailClient({ job }: { job: JobDocument }) {
 	const router = useRouter();
-
-	const category_mapping: Record<number, string> = {
-		1: "High",
-		2: "Middle",
-		3: "> 4.6L",
-		4: "Internship",
-	};
-
-	const formatDate = (timestamp: number) => {
-		const date = new Date(timestamp);
-		return date.toLocaleDateString("en-GB", {
-			day: "2-digit",
-			month: "short",
-			year: "numeric",
-		});
-	};
-
-	const formatDateTime = (timestamp: number) => {
-		const date = new Date(timestamp);
-		return date.toLocaleDateString("en-GB", {
-			day: "2-digit",
-			month: "short",
-			year: "numeric",
-			hour: "2-digit",
-			minute: "2-digit",
-			hour12: true,
-		});
-	};
-
-	const formatPackage = (job: Job) => {
-		const amount = job.package;
-		const annumMonths = job.annum_months;
-
-		const isMonthly =
-			annumMonths &&
-			(annumMonths.toUpperCase().startsWith("M") ||
-				annumMonths.toLowerCase().startsWith("m"));
-
-		if (amount >= 100000) {
-			const suffix = isMonthly ? "LPM" : "LPA";
-			return `₹${(amount / 100000).toFixed(1)} ${suffix}`;
-		}
-		return `₹${amount.toLocaleString()}`;
-	};
 
 	const handleShare = async () => {
 		try {
@@ -219,7 +153,7 @@ export default function JobDetailClient({ job }: { job: Job }) {
 										getCategoryClass(job.placement_category_code),
 									)}
 								>
-									{category_mapping[job.placement_category_code] ||
+									{categoryMapping[job.placement_category_code] ||
 										job.placement_category}
 								</Badge>
 								<h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground bg-clip-text">
@@ -486,10 +420,11 @@ export default function JobDetailClient({ job }: { job: Job }) {
 											</div>
 											<div className="grid grid-cols-2 gap-2 mt-auto">
 												<Button
-													variant="secondary"
-													size="sm"
-													className="w-full text-xs h-7"
-													onClick={() => window.open(doc.url, "_blank")}
+												variant="secondary"
+												size="sm"
+												className="w-full text-xs h-7"
+												onClick={() => doc.url && window.open(doc.url, "_blank")}
+												disabled={!doc.url}
 												>
 													<ExternalLinkIcon className="w-3 h-3 mr-2" />
 													View
@@ -497,16 +432,18 @@ export default function JobDetailClient({ job }: { job: Job }) {
 												<Button
 													variant="outline"
 													size="sm"
-													className="w-full text-xs h-7"
-													onClick={() => {
-														const link = document.createElement("a");
-														link.href = doc.url;
+												className="w-full text-xs h-7"
+												onClick={() => {
+													if (!doc.url) return;
+													const link = document.createElement("a");
+													link.href = doc.url;
 														link.download = doc.name;
 														link.target = "_blank";
 														document.body.appendChild(link);
 														link.click();
-														document.body.removeChild(link);
-													}}
+													document.body.removeChild(link);
+												}}
+												disabled={!doc.url}
 												>
 													<DownloadIcon className="w-3 h-3 mr-2" />
 													Save

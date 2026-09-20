@@ -49,20 +49,20 @@ export default function ThemeSwitcher({
 			variant="ghost"
 			size="sm"
 			onClick={toggleTheme}
-			className="w-full justify-center px-3 py-2 gap-3 hover:bg-accent/50"
+			className="h-9 flex-1 justify-start gap-2.5 px-2 rounded-lg text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent hover:text-sidebar-foreground"
 			aria-label={`Toggle theme, currently ${label}`}
 		>
 			{isLight ? (
 				<img
 					src="/icons/night-mode.png"
 					alt="Dark mode"
-					className="w-5 h-5 object-contain dark:invert"
+					className="w-4 h-4 object-contain dark:invert"
 				/>
 			) : (
 				<img
 					src="/icons/light-mode.png"
 					alt="Light mode"
-					className="w-5 h-5 object-contain dark:invert"
+					className="w-4 h-4 object-contain dark:invert"
 				/>
 			)}
 			<span className="text-sm font-medium">{label}</span>

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import ThemeSwitcher from "./ThemeSwitcher";
+import YearSelector from "./YearSelector";
 
 import { Bell, ArrowRight } from "lucide-react";
 
@@ -21,6 +22,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 		{ name: "Jobs", href: "/jobs", icon: "/icons/briefcase.png" },
 		{ name: "Stats", href: "/stats", icon: "/icons/diagram.png" },
 	];
+	const isNavigationItemActive = (href: string) =>
+		pathname === href ||
+		(href !== "/" && pathname.startsWith(`${href}/`));
 
 	// Check if we are on a detail page (job details, branch stats, company stats)
 	// These pages handle their own layout/containers and have sticky headers that need to be full width
@@ -49,6 +53,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 					</div>
 
 					<div className="flex items-center gap-2">
+						<YearSelector compact />
 						<ThemeSwitcher compact />
 						<Link
 							href="https://t.me/SupersetNotificationBot"
@@ -69,7 +74,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 							{navigation
 								.filter((item) => item.href !== "/policy")
 								.map((item) => {
-									const isActive = pathname === item.href;
+									const isActive = isNavigationItemActive(item.href);
 									return (
 										<Link
 											key={item.name}
@@ -107,18 +112,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 					<div className="flex flex-col w-64 border-r border-sidebar-border bg-sidebar text-sidebar-foreground h-full">
 						{/* Sidebar Header */}
 						<div className="px-5 py-6">
-							<div className="flex items-center gap-3 px-2">
-								<div className="relative w-8 h-8 rounded-lg overflow-hidden">
-									<Image
-										src="/logo.png"
-										alt="JIIT Placements"
-										fill
-										className="object-cover"
-									/>
+							<div className="flex items-center px-2">
+								<div className="flex items-center gap-3">
+									<div className="relative w-8 h-8 rounded-lg overflow-hidden">
+										<Image
+											src="/logo.png"
+											alt="JIIT Placements"
+											fill
+											className="object-cover"
+										/>
+									</div>
+									<span className="font-bold tracking-tight text-lg">
+										JIIT Placements
+									</span>
 								</div>
-								<span className="font-bold tracking-tight text-lg">
-									JIIT Placements
-								</span>
 							</div>
 						</div>
 
@@ -128,7 +135,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 								Platform
 							</div>
 							{navigation.map((item) => {
-								const isActive = pathname === item.href;
+								const isActive = isNavigationItemActive(item.href);
 								return (
 									<Link
 										key={item.name}
@@ -159,30 +166,40 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 						</nav>
 
 						{/* Sidebar Footer / CTA */}
-						<div className="p-4 mt-auto space-y-4">
-							<div className="rounded-xl bg-card border border-border p-4 shadow-sm relative overflow-hidden">
-								<div className="relative z-10">
-									<h3 className="font-semibold text-foreground text-sm mb-1">
+						<div className="mt-auto px-4 pb-4 pt-3">
+							<div className="h-px bg-sidebar-border" />
+
+							<Link
+								href="https://t.me/SupersetNotificationBot"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="group my-3 flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-3 shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+							>
+								<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+									<Bell className="h-4 w-4" />
+								</span>
+								<span className="min-w-0 flex-1">
+									<span className="block text-sm font-semibold leading-tight text-foreground">
 										Notifications
-									</h3>
-									<p className="text-xs text-muted-foreground mb-3 leading-relaxed">
-										Get instant updates via Telegram.
-									</p>
-									<Link
-										href="https://t.me/SupersetNotificationBot"
-										target="_blank"
-										rel="noopener noreferrer"
-										className="inline-flex items-center justify-center w-full px-3 py-2 rounded-lg text-xs font-medium bg-primary text-primary-foreground shadow hover:bg-primary/90 transition-all duration-200"
-									>
-										Connect Bot
-										<ArrowRight className="w-3 h-3 ml-2" />
-									</Link>
-								</div>
+									</span>
+									<span className="block text-[11px] leading-tight text-muted-foreground">
+										Instant Telegram updates
+									</span>
+								</span>
+								<ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-primary" />
+							</Link>
+
+							<div className="h-px bg-sidebar-border" />
+
+							<div className="py-3">
+								<YearSelector />
 							</div>
 
-							<div className="px-2 pt-2 border-t border-sidebar-border flex items-center justify-between">
+							<div className="h-px bg-sidebar-border" />
+
+							<div className="flex items-center gap-2 pt-2">
 								<ThemeSwitcher />
-								<span className="text-[10px] text-sidebar-foreground/40 font-medium">
+								<span className="shrink-0 pr-1 text-[10px] font-semibold tabular-nums text-sidebar-foreground/35">
 									v2.3.0
 								</span>
 							</div>

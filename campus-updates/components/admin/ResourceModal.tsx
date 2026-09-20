@@ -29,6 +29,7 @@ type ResourceModalProps = {
 	resourceType: "notices" | "placement-offers";
 	initialData?: any;
 	onSuccess: () => void;
+	year?: string;
 };
 
 export default function ResourceModal({
@@ -38,6 +39,7 @@ export default function ResourceModal({
 	resourceType,
 	initialData,
 	onSuccess,
+	year,
 }: ResourceModalProps) {
 	const [activeTab, setActiveTab] = useState("form");
 	const [formData, setFormData] = useState<any>({});
@@ -101,18 +103,13 @@ export default function ResourceModal({
 				throw new Error("Missing ID for update. Please refresh and try again.");
 			}
 
-			const url =
+			const baseUrl =
 				mode === "create"
 					? `/api/admin/${resourceType}`
 					: `/api/admin/${resourceType}/${resourceId}`;
-
-			console.log("ResourceModal submit:", {
-				resourceId,
-				resourceType,
-				url,
-				mode,
-				initialData,
-			});
+			const url = year
+				? `${baseUrl}?year=${encodeURIComponent(year)}`
+				: baseUrl;
 
 			const method = mode === "create" ? "POST" : "PUT";
 
@@ -291,7 +288,7 @@ export default function ResourceModal({
 									</div>
 								</div>
 								<p className="text-xs text-muted-foreground">
-									Modifying this changes the notice's position in the feed.
+									Modifying this changes the notice&apos;s position in the feed.
 								</p>
 							</div>
 							{/* Removed redundant read-only field */}

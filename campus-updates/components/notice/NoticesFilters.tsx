@@ -1,92 +1,95 @@
 "use client";
 
-import React from "react";
-import { Input } from "@/components/ui/input";
-import { ListFilter } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useMemo } from "react";
+import { Tags } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
-import {
-	DropdownMenu,
-	DropdownMenuCheckboxItem,
-	DropdownMenuContent,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { FilterChips, type FilterChip } from "@/components/ui/filter-chips";
+import { SearchInput } from "@/components/ui/search-input";
+import { SearchableFilterDropdown } from "@/components/ui/searchable-filter-dropdown";
 
 type Props = {
 	query: string;
-	setQuery: React.Dispatch<React.SetStateAction<string>>;
+	onQueryChange: (query: string) => void;
 	allCategories: string[];
 	selectedCategories: string[];
-	setSelectedCategories: React.Dispatch<React.SetStateAction<string[]>>;
+	onCategoriesChange: (categories: string[]) => void;
 	resultsCount: number;
 };
 
+function prettify(category: string): string {
+	return category
+		.split(" ")
+		.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+		.join(" ");
+}
+
 export default function NoticesFilters({
 	query,
-	setQuery,
+	onQueryChange,
 	allCategories,
 	selectedCategories,
-	setSelectedCategories,
+	onCategoriesChange,
 	resultsCount,
 }: Props) {
-	return (
-		<div>
-			{/* Filters */}
-			<div className="mb-4">
-				<div className="flex flex-row gap-3 items-center">
-					<div className="flex-1">
-						<Input
-							placeholder="Search company, role or details"
-							value={query}
-							onChange={(e) => setQuery(e.target.value)}
-						/>
-					</div>
-					<div className="flex gap-2 flex-wrap">
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button
-									variant="outline"
-									className="whitespace-nowrap px-3 md:px-4"
-								>
-									<ListFilter className="h-4 w-4 md:mr-2" />
-									<span className="hidden md:inline">Categories</span>
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent className="w-56 max-h-72 overflow-auto">
-								<DropdownMenuLabel>Select categories</DropdownMenuLabel>
-								<DropdownMenuSeparator />
-								{allCategories.map((cat) => (
-									<DropdownMenuCheckboxItem
-										key={cat}
-										checked={selectedCategories.includes(cat)}
-										onCheckedChange={(checked) => {
-											setSelectedCategories((prev) =>
-												checked
-													? [...prev, cat]
-													: prev.filter((c) => c !== cat),
-											);
-										}}
-									>
-										{cat
-											.split(" ")
-											.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-											.join(" ")}
-									</DropdownMenuCheckboxItem>
-								))}
-							</DropdownMenuContent>
-						</DropdownMenu>
+	const chips = useMemo<FilterChip[]>(() => {
+		const list: FilterChip[] = [];
+		if (query.trim()) {
+			list.push({
+				key: "query",
+				label: `“${query.trim()}”`,
+				onRemove: () => onQueryChange(""),
+			});
+		}
+		selectedCategories.forEach((cat) =>
+			list.push({
+				key: `cat-${cat}`,
+				label: prettify(cat),
+				onRemove: () =>
+					onCategoriesChange(selectedCategories.filter((c) => c !== cat)),
+			}),
+		);
+		return list;
+	}, [query, selectedCategories, onQueryChange, onCategoriesChange]);
 
-						<Badge
-							variant="secondary"
-							className="self-center hidden md:inline-flex"
-						>
-							{resultsCount} results
-						</Badge>
-					</div>
-				</div>
+	const clearAll = () => {
+		onQueryChange("");
+		onCategoriesChange([]);
+	};
+
+	return (
+		<div className="space-y-3">
+			<div className="flex flex-wrap items-center gap-2">
+				<SearchInput
+					placeholder="Search company, role or details"
+					value={query}
+					onValueChange={onQueryChange}
+					className="min-w-40 flex-1"
+					aria-label="Search notices"
+				/>
+
+				<SearchableFilterDropdown<string>
+					label="Categories"
+					icon={<Tags className="h-3.5 w-3.5 opacity-60" />}
+					options={allCategories.map((cat) => ({
+						value: cat,
+						label: prettify(cat),
+					}))}
+					selected={selectedCategories}
+					onChange={onCategoriesChange}
+					searchPlaceholder="Search categories..."
+					contentClassName="w-60"
+				/>
+
+				<Badge
+					variant="secondary"
+					className="ml-auto rounded-full bg-primary/15 px-3 py-1 text-sm font-semibold text-primary hover:bg-primary/20"
+				>
+					{resultsCount} results
+				</Badge>
 			</div>
+
+			<FilterChips chips={chips} onClearAll={clearAll} />
 		</div>
 	);
 }
