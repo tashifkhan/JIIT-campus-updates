@@ -87,7 +87,9 @@ const FloatingNav = ({
 					return (
 						<motion.button
 							key={item.name}
-							ref={(el) => (btnRefs.current[index] = el)}
+							ref={(el) => {
+								btnRefs.current[index] = el;
+							}}
 							onClick={() => handleClick(index, item)}
 							className={cn(
 								"relative flex flex-col items-center justify-center flex-1 px-2 py-2 text-sm font-medium overflow-visible",
