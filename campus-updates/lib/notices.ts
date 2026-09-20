@@ -401,7 +401,7 @@ export function normalizeNoticeDocument(document: Document): Notice {
 		package: cleanPackage(document.package) ?? cleanPackage(parsed.packageText),
 		package_breakdown: cleanPackageBreakdown(document.package_breakdown),
 		location: stringValue(document.location) ?? parsed.location,
-		deadline: stringValue(document.deadline) ?? parsed.deadline,
+		deadline: formatDeadline(document.deadline) ?? parsed.deadline,
 		eligibility_criteria: eligibility,
 		eligibility_requirements: parsed.requirements.length ? parsed.requirements : null,
 		hiring_flow: hiringFlow?.filter((step) => {
@@ -421,6 +421,46 @@ function joiningDate(value: unknown): string | undefined {
 		month: "short",
 		day: "numeric",
 	});
+}
+
+const IST_OFFSET_MINUTES = 5 * 60 + 30;
+
+function offsetToMinutes(offset: string): number {
+	if (offset === "Z") return 0;
+	const digits = offset.slice(1).replace(":", "");
+	const minutes = Number(digits.slice(0, 2)) * 60 + Number(digits.slice(2, 4));
+	return offset.startsWith("-") ? -minutes : minutes;
+}
+
+function formatDeadline(value: unknown): string | null {
+	const text = stringValue(value);
+	if (!text) return null;
+
+	const match =
+		/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::\d{2})?(?:\.\d+)?(Z|[+-]\d{2}:?\d{2})?$/.exec(
+			text,
+		);
+	if (!match) return text;
+
+	const [, year, month, day, hours, minutes, offset] = match;
+	const sourceOffset = offset ? offsetToMinutes(offset) : IST_OFFSET_MINUTES;
+	const istDate = new Date(
+		Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hours), Number(minutes)) -
+			sourceOffset * 60_000 +
+			IST_OFFSET_MINUTES * 60_000,
+	);
+
+	const dateText = istDate.toLocaleDateString("en-IN", {
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+		timeZone: "UTC",
+	});
+	if (istDate.getUTCHours() === 0 && istDate.getUTCMinutes() === 0) return dateText;
+
+	const hour = istDate.getUTCHours();
+	const minute = String(istDate.getUTCMinutes()).padStart(2, "0");
+	return `${dateText}, ${hour % 12 || 12}:${minute} ${hour < 12 ? "AM" : "PM"} IST`;
 }
 
 export function normalizePlacementOfferDocument(document: Document): Notice {
