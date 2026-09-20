@@ -1,0 +1,77 @@
+{
+	"_note": "Per placement-year batch config. student_counts is the single source for branch strength; per-branch totals and total_students are derived as sums. enrollment_ranges maps enrollment numbers -> branch. Year keys are compact (202526 = AY 2025-26, graduating batch 2026).",
+	"202526": {
+		"label": "2025-26",
+		"graduating_batch": "2026",
+		"student_counts": {
+			"CSE": { "62": 354, "128": 268 },
+			"ECE": { "62": 231, "128": 147 },
+			"IT": { "62": 64 },
+			"BT": { "62": 45 },
+			"Intg. MTech": { "CSE": 28, "ECE": 3, "BT": 9 }
+		},
+		"enrollment_ranges": {
+			"CSE": {
+				"62": { "start": 22103000, "end": 22104000 },
+				"128": { "start": 9922103000, "end": 9922104000 }
+			},
+			"ECE": {
+				"62": { "start": 22102000, "end": 22103000 },
+				"128": { "start": 9922102000, "end": 9922103000 }
+			},
+			"IT": {
+				"62": { "start": 22104000, "end": 22105000 }
+			},
+			"BT": {
+				"62": { "start": 22101000, "end": 22102000 }
+			},
+			"Intg. MTech": {
+				"CSE": { "start": 21803000, "end": 21804000 },
+				"ECE": { "start": 21802000, "end": 21803000 },
+				"BT": { "start": 21801000, "end": 21802000 }
+			}
+		},
+		"excluded_branches": ["JUIT", "Other", "MTech"]
+	},
+	"202627": {
+		"label": "2026-27",
+		"graduating_batch": "2027",
+		"student_counts": {
+			"CSE": { "62": 386, "128": 323 },
+			"ECE": { "62": 217, "128": 108 },
+			"EC-ACT": { "62": 52 },
+			"EE-VLSI": { "62": 62 },
+			"IT": { "62": 62 },
+			"BT": { "62": 55 },
+			"Intg. MTech": { "CSE": 31, "ECE": 15, "BT": 11 }
+		},
+		"enrollment_ranges": {
+			"CSE": {
+				"62": { "start": 23103000, "end": 23104000 },
+				"128": { "start": 9923103000, "end": 9923104000 }
+			},
+			"ECE": {
+				"62": { "start": 23102000, "end": 23103000 },
+				"128": { "start": 9923102000, "end": 9923103000 }
+			},
+			"EC-ACT": {
+				"62": { "start": 23119000, "end": 23120000 }
+			},
+			"EE-VLSI": {
+				"62": { "start": 23118000, "end": 23119000 }
+			},
+			"IT": {
+				"62": { "start": 23104000, "end": 23105000 }
+			},
+			"BT": {
+				"62": { "start": 23101000, "end": 23102000 }
+			},
+			"Intg. MTech": {
+				"CSE": { "start": 22903000, "end": 22904000 },
+				"ECE": { "start": 22802000, "end": 22803000 },
+				"BT": { "start": 22801000, "end": 22802000 }
+			}
+		},
+		"excluded_branches": ["JUIT", "Other", "MTech"]
+	}
+}
