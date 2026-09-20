@@ -28,12 +28,14 @@ import {
 	formatDateTime,
 	formatPackage,
 	getCategoryClass,
+	htmlToPlainText,
 } from "./helpers";
 import { cn } from "@/lib/utils";
 import { JobDocument } from "@/lib/jobs";
 
 export default function JobDetailClient({ job }: { job: JobDocument }) {
 	const router = useRouter();
+	const packageSummary = htmlToPlainText(job.package_info);
 
 	const handleShare = async () => {
 		try {
@@ -43,7 +45,7 @@ export default function JobDetailClient({ job }: { job: JobDocument }) {
 			if (navigator && (navigator as any).share) {
 				await (navigator as any).share({
 					title,
-					text: stripHtml(job.job_description).slice(0, 200),
+					text: htmlToPlainText(job.job_description).slice(0, 200),
 					url,
 				});
 				return;
@@ -65,13 +67,6 @@ export default function JobDetailClient({ job }: { job: JobDocument }) {
 		} catch (e) {
 			showToast("Unable to share");
 		}
-	};
-
-	const stripHtml = (html: string) => {
-		if (!html) return "";
-		const div = document.createElement("div");
-		div.innerHTML = html;
-		return div.textContent || div.innerText || "";
 	};
 
 	const showToast = (message: string) => {
@@ -187,8 +182,11 @@ export default function JobDetailClient({ job }: { job: JobDocument }) {
 								<p className="text-2xl font-bold text-foreground">
 									{formatPackage(job)}
 								</p>
-								<p className="text-xs text-muted-foreground mt-1 line-clamp-1">
-									{job.package_info || "Base + Variable"}
+								<p
+									className="text-xs text-muted-foreground mt-1 line-clamp-1"
+									title={packageSummary || undefined}
+								>
+									{packageSummary || "Base + Variable"}
 								</p>
 							</CardContent>
 						</Card>
@@ -309,7 +307,8 @@ export default function JobDetailClient({ job }: { job: JobDocument }) {
 								<Card className="card-subtle border-border/60 shadow-none">
 									<CardContent className="p-5">
 										<div
-											className="prose prose-sm max-w-none text-muted-foreground"
+											className="prose prose-sm max-w-none text-muted-foreground prose-headings:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-strong:text-foreground prose-a:text-primary hover:prose-a:text-primary/80"
+											style={{ wordBreak: "break-word" }}
 											dangerouslySetInnerHTML={{ __html: job.package_info }}
 										/>
 									</CardContent>

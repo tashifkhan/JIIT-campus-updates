@@ -125,6 +125,20 @@
   }
 }
 
+@layer base {
+  /* Scraped notices and job descriptions carry bare Google Form and Superset
+     URLs, which are single unbreakable tokens. Left alone they set the page's
+     minimum width on phones and everything else gets squeezed against them. */
+  .prose p,
+  .prose li,
+  .prose a,
+  .prose code,
+  .prose td,
+  .prose th {
+    overflow-wrap: anywhere;
+  }
+}
+
 @layer utilities {
   .card-theme {
     background-color: var(--card);

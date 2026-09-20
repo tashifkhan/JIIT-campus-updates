@@ -25,7 +25,7 @@ import { usePlacementYear } from "@/components/PlacementYearProvider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { formatDateTime, Notice } from "@/lib/notices";
+import { EligibilityRequirement, formatDateTime, Notice } from "@/lib/notices";
 import { serializeJobDetailQuery } from "@/lib/query-params";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -76,19 +76,101 @@ function packageLabel(value: string): string {
 	return trimmed.startsWith("₹") ? trimmed.slice(1).trim() : trimmed;
 }
 
+type CourseGroup = {
+	degree: string;
+	branches: string[];
+};
+
+type Eligibility = {
+	courses: CourseGroup[];
+	requirements: EligibilityRequirement[];
+	notes: string[];
+};
+
+const DEGREE_PATTERN =
+	/^(b\.?\s?tech|m\.?\s?tech|b\.?\s?e|m\.?\s?e|b\.?\s?sc|m\.?\s?sc|b\.?\s?des|m\.?\s?des|b\.?\s?com|m\.?\s?com|bca|mca|mba|ph\.?\s?d)\b/i;
+
+const COURSE_LABEL = /^(eligible\s+)?(courses?|branch(es)?|programs?|programmes?)\s*:\s*/i;
+
+/**
+ * `B.Tech - EE-VLSI` splits on the spaced dash so the branch keeps its own
+ * dash; `B.Tech-CSE` has no spaced dash, so fall back to the first one.
+ */
+function splitCourse(course: string): { degree: string; branch: string } {
+	const spaced = course.split(/\s+[-\u2013\u2014]\s+/);
+	const [degree, ...tail] =
+		spaced.length > 1 ? spaced : course.split(/[-\u2013\u2014]/);
+	return { degree: degree.trim(), branch: tail.join(" - ").trim() };
+}
+
+/** `M.Tech. - AI&DS, B.Tech - CSE` -> one row per degree, branches as chips. */
+function groupCourses(courses: string[]): CourseGroup[] {
+	const groups = new Map<string, CourseGroup>();
+	for (const course of courses) {
+		const { degree, branch } = splitCourse(course);
+		const key = degree.toLowerCase().replace(/[.\s]/g, "");
+		const group = groups.get(key) ?? { degree, branches: [] };
+		if (branch && !group.branches.includes(branch)) group.branches.push(branch);
+		groups.set(key, group);
+	}
+	return Array.from(groups.values()).sort((a, b) => a.degree.localeCompare(b.degree));
+}
+
+/**
+ * The criteria list arrives as free text: one long `Courses: ...` line plus
+ * odds and ends like `UG: 7.0 CGPA`. Split it into course chips, label/value
+ * pairs, and leftover prose so each gets its own layout.
+ */
+function parseEligibility(
+	criteria: string[] | null | undefined,
+	requirements: EligibilityRequirement[] | null | undefined,
+): Eligibility {
+	const courses: string[] = [];
+	const pairs: EligibilityRequirement[] = [...(requirements ?? [])];
+	const notes: string[] = [];
+
+	for (const raw of criteria ?? []) {
+		const criterion = raw.replace(/\s+/g, " ").trim();
+		if (!criterion) continue;
+
+		const parts = criterion
+			.replace(COURSE_LABEL, "")
+			.split(",")
+			.map((part) => part.trim())
+			.filter(Boolean);
+		if (parts.length && parts.every((part) => DEGREE_PATTERN.test(part))) {
+			courses.push(...parts);
+			continue;
+		}
+
+		const colon = criterion.indexOf(":");
+		if (colon > 0 && colon <= 24 && criterion.length > colon + 1) {
+			pairs.push({
+				label: criterion.slice(0, colon).trim(),
+				value: criterion.slice(colon + 1).trim(),
+			});
+			continue;
+		}
+
+		notes.push(criterion);
+	}
+
+	return { courses: groupCourses(courses), requirements: pairs, notes };
+}
+
 function NoticeDetails({ details }: { details: Detail[] }) {
 	if (!details.length) return null;
 	return (
 		<div className="rounded-xl border p-4 bg-primary/5 border-primary/20">
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 				{details.map(({ label, value, icon: Icon }) => (
-					<div key={label} className="flex items-center gap-3">
-						<div className="p-2 rounded-lg bg-background border border-primary/10">
+					<div key={label} className="flex min-w-0 items-center gap-3">
+						<div className="shrink-0 p-2 rounded-lg bg-background border border-primary/10">
 							<Icon className="w-4 h-4 text-primary" />
 						</div>
-						<div>
+						<div className="min-w-0">
 							<p className="text-xs text-muted-foreground font-medium">{label}</p>
-							<p className="font-medium text-foreground">{value}</p>
+							<p className="font-medium text-foreground break-words">{value}</p>
 						</div>
 					</div>
 				))}
@@ -106,14 +188,14 @@ function NoticeContent({
 }) {
 	if (!html && !markdown) return null;
 	return (
-		<div className="rounded-xl border p-4 bg-card border-border">
+		<div className="rounded-xl border p-4 bg-card border-border overflow-hidden">
 			{markdown ? (
-				<div className="prose prose-sm max-w-none text-foreground">
+				<div className="prose prose-sm max-w-none text-foreground prose-table:block prose-table:overflow-x-auto">
 					<ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
 				</div>
 			) : (
 				<div
-					className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-li:my-1"
+					className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-li:my-1 prose-table:block prose-table:overflow-x-auto"
 					dangerouslySetInnerHTML={{ __html: html || "" }}
 				/>
 			)}
@@ -143,6 +225,11 @@ export default function NoticeCard({
 		notice.eligibility_criteria?.length ||
 			notice.eligibility_requirements?.length ||
 			notice.hiring_flow?.length,
+	);
+
+	const eligibility = parseEligibility(
+		notice.eligibility_criteria,
+		notice.eligibility_requirements,
 	);
 
 	if (company) details.push({ label: "Company", value: company, icon: BuildingIcon });
@@ -230,7 +317,7 @@ export default function NoticeCard({
 
 			<CardContent className="pt-0 space-y-4">
 				{notice.title ? (
-					<h3 className="text-lg font-semibold leading-tight text-foreground">
+					<h3 className="text-lg font-semibold leading-tight text-foreground break-words">
 						{notice.title}
 					</h3>
 				) : null}
@@ -245,33 +332,86 @@ export default function NoticeCard({
 							markdown={notice.body}
 						/>
 
-						{notice.eligibility_criteria?.length ||
-						notice.eligibility_requirements?.length ? (
+						{eligibility.courses.length ||
+						eligibility.requirements.length ||
+						eligibility.notes.length ? (
 							<section className="rounded-xl border p-4 bg-primary/5 border-primary/20">
 								<h4 className="font-semibold mb-3 flex items-center text-foreground">
 									<UsersIcon className="w-4 h-4 mr-2 text-primary" />
 									Eligibility Criteria
 								</h4>
-								{notice.eligibility_criteria?.length ? (
-									<ul className="space-y-2 text-sm text-foreground">
-										{notice.eligibility_criteria.map((criterion, index) => (
-											<li key={`${index}-${criterion}`} className="flex items-start gap-2">
-												<span aria-hidden>•</span>
-												<span>{criterion}</span>
-											</li>
-										))}
-									</ul>
-								) : null}
-								{notice.eligibility_requirements?.length ? (
-									<dl className="flex flex-wrap gap-x-6 gap-y-2 mt-3 text-sm">
-										{notice.eligibility_requirements.map(({ label, value }) => (
-											<div key={`${label}-${value}`} className="flex items-baseline gap-2">
-												<dt className="text-primary">{label}</dt>
-												<dd className="font-medium text-foreground">{value}</dd>
+								<div className="space-y-4">
+									{eligibility.courses.length ? (
+										<div>
+											<p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">
+												Eligible Courses
+											</p>
+											<div className="space-y-1.5">
+												{eligibility.courses
+													.filter(({ branches }) => branches.length)
+													.map(({ degree, branches }) => (
+														<div
+															key={degree}
+															className="flex flex-wrap items-center gap-1.5"
+														>
+															<span className="w-full sm:w-32 shrink-0 text-xs font-semibold text-primary break-words">
+																{degree}
+															</span>
+															{branches.map((branch) => (
+																<Badge
+																	key={branch}
+																	variant="outline"
+																	className="bg-background text-foreground border-primary/20 text-xs font-normal"
+																>
+																	{branch}
+																</Badge>
+															))}
+														</div>
+													))}
+												{eligibility.courses.some(({ branches }) => !branches.length) ? (
+													<div className="flex flex-wrap items-center gap-1.5">
+														{eligibility.courses
+															.filter(({ branches }) => !branches.length)
+															.map(({ degree }) => (
+																<Badge
+																	key={degree}
+																	variant="outline"
+																	className="bg-background text-foreground border-primary/20 text-xs font-normal"
+																>
+																	{degree}
+																</Badge>
+															))}
+													</div>
+												) : null}
 											</div>
-										))}
-									</dl>
-								) : null}
+										</div>
+									) : null}
+
+									{eligibility.requirements.length ? (
+										<dl className="flex flex-wrap gap-1.5">
+											{eligibility.requirements.map(({ label, value }) => (
+												<div
+													key={`${label}-${value}`}
+													className="flex items-baseline gap-1.5 rounded-md border border-primary/20 bg-background px-2 py-1 text-xs"
+												>
+													<dt className="text-muted-foreground">{label}</dt>
+													<dd className="font-semibold text-foreground">{value}</dd>
+												</div>
+											))}
+										</dl>
+									) : null}
+
+									{eligibility.notes.length ? (
+										<ul className="space-y-2 text-sm text-foreground">
+											{eligibility.notes.map((note, index) => (
+												<li key={`${index}-${note}`} className="flex items-start gap-2">
+													<span aria-hidden>•</span>
+													<span className="min-w-0 break-words">{note}</span>
+												</li>
+											))}
+										</ul>
+									) : null}
+								</div>
 							</section>
 						) : null}
 
@@ -287,7 +427,7 @@ export default function NoticeCard({
 											<span className="w-6 h-6 rounded-full text-xs font-semibold flex items-center justify-center mr-3 flex-shrink-0 bg-primary text-primary-foreground">
 												{index + 1}
 											</span>
-											{step}
+											<span className="min-w-0 break-words">{step}</span>
 										</li>
 									))}
 								</ol>
@@ -295,7 +435,7 @@ export default function NoticeCard({
 						) : null}
 					</div>
 				) : COMPACT_CATEGORIES.has(notice.category) ? (					company || role || packageText ? (
-						<div className="rounded-xl p-4 border bg-primary/5 border-primary/20 flex flex-wrap gap-2">
+						<div className="rounded-xl p-4 border bg-primary/5 border-primary/20 flex flex-wrap gap-2 [&>div]:max-w-full [&>div]:whitespace-normal [&>div]:break-words">
 							{company ? <Badge variant="secondary">{company}</Badge> : null}
 							{role ? <Badge variant="secondary">{role}</Badge> : null}
 							{packageText && packageText.toLowerCase() !== "none" ? (
@@ -326,11 +466,11 @@ export default function NoticeCard({
 							className="w-full text-left rounded-xl p-4 border transition-all duration-200 group bg-primary/5 border-primary/20 hover:bg-primary/10 hover:shadow-sm"
 						>
 							<div className="flex items-start justify-between gap-4">
-								<div>
+								<div className="min-w-0">
 									<h4 className="font-medium mb-1 text-foreground">
 										Related Job Posting
 									</h4>
-									<p className="text-sm text-foreground">
+									<p className="text-sm text-foreground break-words">
 										{notice.matched_job.company} - {notice.matched_job.job_profile}
 									</p>
 									<p className="text-xs mt-1 text-muted-foreground">
@@ -339,7 +479,7 @@ export default function NoticeCard({
 											: "Open full job details"}
 									</p>
 								</div>
-								<ArrowRightIcon className="w-4 h-4 mt-2 group-hover:translate-x-0.5 transition-transform" />
+								<ArrowRightIcon className="w-4 h-4 mt-2 shrink-0 group-hover:translate-x-0.5 transition-transform" />
 							</div>
 						</button>
 					</div>

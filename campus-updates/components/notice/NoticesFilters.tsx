@@ -64,7 +64,7 @@ export default function NoticesFilters({
 					placeholder="Search company, role or details"
 					value={query}
 					onValueChange={onQueryChange}
-					className="min-w-40 flex-1"
+					className="w-full sm:w-auto sm:flex-1 sm:min-w-40"
 					aria-label="Search notices"
 				/>
 
@@ -78,7 +78,7 @@ export default function NoticesFilters({
 					selected={selectedCategories}
 					onChange={onCategoriesChange}
 					searchPlaceholder="Search categories..."
-					contentClassName="w-60"
+					contentClassName="w-60 max-w-[calc(100vw-1.5rem)]"
 				/>
 
 				<Badge

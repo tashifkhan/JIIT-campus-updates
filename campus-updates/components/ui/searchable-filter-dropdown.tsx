@@ -136,6 +136,7 @@ export function SearchableFilterDropdown<T extends string | number>({
 			</PopoverTrigger>
 			<PopoverContent
 				align={align}
+				collisionPadding={12}
 				className={cn(
 					"w-64 overflow-hidden rounded-xl border-border/60 p-0 shadow-lg",
 					contentClassName,
