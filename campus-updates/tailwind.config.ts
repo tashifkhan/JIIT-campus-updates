@@ -14,6 +14,11 @@ const config: Config = {
 				"gradient-conic":
 					"conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
 			},
+			// Tailwind only gained the numeric min-width/min-height scale in 3.4.
+			// Components here were written against it (min-w-40, min-w-5), so map
+			// the spacing scale in rather than rewriting every call site.
+			minWidth: ({ theme }) => ({ ...theme("spacing") }),
+			minHeight: ({ theme }) => ({ ...theme("spacing") }),
 			borderRadius: {
 				lg: "var(--radius)",
 				md: "calc(var(--radius) - 2px)",
@@ -69,6 +74,33 @@ const config: Config = {
 					"accent-foreground": "var(--sidebar-accent-foreground)",
 					border: "var(--sidebar-border)",
 					ring: "var(--sidebar-ring)",
+				},
+			},
+			// The typography plugin ships light-mode grays for bold text, bullets,
+			// links and table borders, which turn near-invisible on the dark
+			// background. Point them at the theme tokens instead, since those
+			// already flip under `.dark`.
+			typography: {
+				DEFAULT: {
+					css: {
+						"--tw-prose-body": "var(--muted-foreground)",
+						"--tw-prose-headings": "var(--foreground)",
+						"--tw-prose-lead": "var(--muted-foreground)",
+						"--tw-prose-links": "var(--primary)",
+						"--tw-prose-bold": "var(--foreground)",
+						"--tw-prose-counters": "var(--muted-foreground)",
+						"--tw-prose-bullets": "var(--primary)",
+						"--tw-prose-hr": "var(--border)",
+						"--tw-prose-quotes": "var(--foreground)",
+						"--tw-prose-quote-borders": "var(--border)",
+						"--tw-prose-captions": "var(--muted-foreground)",
+						"--tw-prose-kbd": "var(--foreground)",
+						"--tw-prose-code": "var(--foreground)",
+						"--tw-prose-pre-code": "var(--foreground)",
+						"--tw-prose-pre-bg": "var(--muted)",
+						"--tw-prose-th-borders": "var(--border)",
+						"--tw-prose-td-borders": "var(--border)",
+					},
 				},
 			},
 			fontFamily: {

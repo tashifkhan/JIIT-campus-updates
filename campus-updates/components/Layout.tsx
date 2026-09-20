@@ -208,7 +208,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 				</div>
 
 				{/* Main Content */}
-				<div className="flex-1 min-w-0 flex flex-col lg:overflow-hidden bg-background">
+				<div className="flex-1 min-w-0 flex flex-col overflow-x-hidden lg:overflow-hidden bg-background">
 					<main
 						className={cn(
 							"flex-1 lg:h-full lg:overflow-y-auto custom-scrollbar",

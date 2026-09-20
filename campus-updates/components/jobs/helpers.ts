@@ -86,3 +86,30 @@ export const handleShareUrl = async (
 	if (typeof window !== "undefined") window.open(url, "_blank");
 	return false;
 };
+
+const HTML_ENTITIES: Record<string, string> = {
+	"&nbsp;": " ",
+	"&amp;": "&",
+	"&lt;": "<",
+	"&gt;": ">",
+	"&quot;": '"',
+	"&#39;": "'",
+	"&apos;": "'",
+};
+
+/**
+ * Turn stored rich text (scraped email HTML) into a single line of plain text
+ * for places that render text only, like the CTC card subtitle. Regex based so
+ * it also runs during SSR, where there is no DOM.
+ */
+export const htmlToPlainText = (html?: string | null) => {
+	if (!html) return "";
+	return html
+		.replace(/<(script|style)[\s\S]*?<\/\1>/gi, "")
+		.replace(/<br\s*\/?>/gi, " ")
+		.replace(/<\/(p|div|li|tr|h[1-6]|blockquote)>/gi, " ")
+		.replace(/<[^>]*>/g, "")
+		.replace(/&[a-z#0-9]+;/gi, (entity) => HTML_ENTITIES[entity.toLowerCase()] ?? " ")
+		.replace(/\s+/g, " ")
+		.trim();
+};
