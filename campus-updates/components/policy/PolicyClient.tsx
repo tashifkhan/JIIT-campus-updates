@@ -26,6 +26,22 @@ interface PolicyClientProps {
 	initialSlug?: string;
 }
 
+// Nearest ancestor that scrolls, or null when the window does the scrolling.
+function findScrollParent(node: HTMLElement): HTMLElement | null {
+	let parent = node.parentElement;
+	while (parent) {
+		const overflowY = getComputedStyle(parent).overflowY;
+		if (
+			(overflowY === "auto" || overflowY === "scroll") &&
+			parent.scrollHeight > parent.clientHeight
+		) {
+			return parent;
+		}
+		parent = parent.parentElement;
+	}
+	return null;
+}
+
 export default function PolicyClient({
 	initialSlug = "placement-policy-2026",
 }: PolicyClientProps) {
@@ -122,23 +138,67 @@ export default function PolicyClient({
 		return () => clearTimeout(timer);
 	}, [policy, loading]);
 
+	// Reading progress. On desktop the page itself never scrolls: Layout puts
+	// the content inside <main class="lg:overflow-y-auto"> and globals.css sets
+	// overflow:hidden on html/body at lg, so window.scrollY stays 0 forever.
+	// Measure against whichever ancestor actually scrolls instead.
 	useEffect(() => {
-		const onScroll = () => {
-			const el = contentRef.current;
-			if (!el) return;
+		const el = contentRef.current;
+		if (!el) return;
 
-			const total = el.scrollHeight - window.innerHeight;
-			const scrolled = Math.min(
-				Math.max(window.scrollY - el.offsetTop, 0),
-				total,
-			);
-			const pct = total > 0 ? (scrolled / total) * 100 : 0;
-			setProgress(pct);
+		let scroller = findScrollParent(el);
+		let frame = 0;
+
+		const measure = () => {
+			frame = 0;
+			const rect = el.getBoundingClientRect();
+			const viewTop = scroller ? scroller.getBoundingClientRect().top : 0;
+			const viewHeight = scroller ? scroller.clientHeight : window.innerHeight;
+
+			// How much of the article sits outside the viewport, and how much of
+			// that the reader has already pushed past the top edge.
+			const scrollable = rect.height - viewHeight;
+			const passed = viewTop - rect.top;
+			const pct = scrollable > 0 ? (passed / scrollable) * 100 : 100;
+
+			setProgress(Math.min(100, Math.max(0, pct)));
 		};
-		window.addEventListener("scroll", onScroll, { passive: true });
-		// Trigger once
-		onScroll();
-		return () => window.removeEventListener("scroll", onScroll);
+
+		const schedule = () => {
+			if (frame) return;
+			frame = requestAnimationFrame(measure);
+		};
+
+		const listen = () =>
+			(scroller ?? window).addEventListener("scroll", schedule, {
+				passive: true,
+			});
+		const unlisten = () =>
+			(scroller ?? window).removeEventListener("scroll", schedule);
+
+		// Crossing the lg breakpoint swaps the scroll container.
+		const onResize = () => {
+			unlisten();
+			scroller = findScrollParent(el);
+			listen();
+			schedule();
+		};
+
+		listen();
+		window.addEventListener("resize", onResize);
+
+		// Markdown, tables and images settle after the first paint.
+		const resizeObserver = new ResizeObserver(schedule);
+		resizeObserver.observe(el);
+
+		schedule();
+
+		return () => {
+			unlisten();
+			window.removeEventListener("resize", onResize);
+			resizeObserver.disconnect();
+			if (frame) cancelAnimationFrame(frame);
+		};
 	}, [policy, headings]); // Re-bind if policy/headings change
 
 	// Scroll Spy
