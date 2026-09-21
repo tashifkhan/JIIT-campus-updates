@@ -9,7 +9,6 @@ import {
 	BellIcon,
 	BuildingIcon,
 	CalendarIcon,
-	GraduationCapIcon,
 	IndianRupeeIcon,
 	MapPinIcon,
 	PencilIcon,
@@ -219,10 +218,6 @@ export default function NoticeCard({
 	const company = notice.job_company || notice.matched_job?.company || "";
 	const role = notice.job_role || notice.matched_job?.job_profile || "";
 	const packageText = notice.package || "";
-	const campusConfidence =
-		notice.likely_on_campus && notice.on_campus_confidence != null
-			? Math.round(notice.on_campus_confidence * 100)
-			: null;
 	const students = notice.shortlisted_students || [];
 	const details: Detail[] = [];
 
@@ -293,16 +288,6 @@ export default function NoticeCard({
 							<Icon className="w-3 h-3 mr-2" />
 							{categoryLabel(notice.category)}
 						</Badge>
-						{campusConfidence != null ? (
-							<Badge
-								variant="outline"
-								className="px-3 py-1 rounded-full border-amber-500/40 bg-amber-500/10 text-amber-800 dark:text-amber-200"
-								aria-label={`Likely on campus with ${campusConfidence}% confidence`}
-							>
-								<GraduationCapIcon className="w-3 h-3 mr-2" />
-								Likely on campus · {campusConfidence}%
-							</Badge>
-						) : null}
 						{isAdmin ? (
 							<Button
 								variant="ghost"

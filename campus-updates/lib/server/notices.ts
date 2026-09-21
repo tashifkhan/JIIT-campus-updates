@@ -36,8 +36,6 @@ const NOTICE_PROJECTION = {
 	time_sent: 1,
 	matched_job: 1,
 	matched_job_id: 1,
-	likely_on_campus: 1,
-	on_campus_confidence: 1,
 	job_company: 1,
 	job_role: 1,
 	package: 1,

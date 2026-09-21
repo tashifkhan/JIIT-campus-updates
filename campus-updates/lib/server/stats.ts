@@ -57,6 +57,8 @@ const PLACEMENT_PROJECTION = {
 	created_at: 1,
 	time_sent: 1,
 	saved_at: 1,
+	likely_on_campus: 1,
+	on_campus_confidence: 1,
 } as const;
 
 type MutableBranchStats = {
@@ -118,7 +120,14 @@ function normalizePlacement(value: Record<string, unknown>): Placement {
 		created_at: dateValue(value.created_at) as string | undefined,
 		time_sent: dateValue(value.time_sent) as string | undefined,
 		saved_at: dateValue(value.saved_at) as string | undefined,
+		likely_on_campus: value.likely_on_campus === true,
+		on_campus_confidence: confidenceValue(value.on_campus_confidence),
 	};
+}
+
+function confidenceValue(value: unknown): number | null {
+	const number = numericValue(value);
+	return number == null ? null : Math.min(1, Math.max(0, number));
 }
 
 // Per-year branch ranges, cached by placement year. The batch config holds
@@ -261,6 +270,8 @@ export async function getStatsSummary(year: string, query: string): Promise<Stat
 		).size;
 	const overallPlaced = placedInCountedBranches(included);
 	const filteredPlaced = placedInCountedBranches(filtered);
+	const onCampus = filtered.filter((student) => student.placement.likely_on_campus);
+	const filteredCompanies = new Set(filtered.map((student) => student.company));
 
 	return {
 		placement: {
@@ -284,6 +295,13 @@ export async function getStatsSummary(year: string, query: string): Promise<Stat
 			totalUniqueStudents: uniqueStudentCount(included),
 			filteredTotalOffers: filtered.length,
 			totalOffers: included.length,
+		},
+		campus: {
+			likelyOffers: onCampus.length,
+			totalOffers: filtered.length,
+			pct: filtered.length ? (onCampus.length / filtered.length) * 100 : 0,
+			likelyCompanies: new Set(onCampus.map((student) => student.company)).size,
+			totalCompanies: filteredCompanies.size,
 		},
 	};
 }
@@ -388,7 +406,12 @@ export async function getCompanyStats(year: string, query: string): Promise<Comp
 		: allStudents;
 	const companies = new Map<
 		string,
-		{ studentsCount: number; packages: number[]; fallbackPackage: number }
+		{
+			studentsCount: number;
+			packages: number[];
+			fallbackPackage: number;
+			onCampusConfidence: number | null;
+		}
 	>();
 
 	for (const student of students) {
@@ -403,6 +426,9 @@ export async function getCompanyStats(year: string, query: string): Promise<Comp
 				studentsCount: 0,
 				packages: [],
 				fallbackPackage: rolePackages.length ? Math.max(...rolePackages) : 0,
+				onCampusConfidence: student.placement.likely_on_campus
+					? student.placement.on_campus_confidence ?? null
+					: null,
 			});
 		}
 		const company = companies.get(student.company)!;
@@ -416,6 +442,7 @@ export async function getCompanyStats(year: string, query: string): Promise<Comp
 		studentsCount: stats.studentsCount,
 		avgPackage: average(stats.packages),
 		fallbackPackage: stats.fallbackPackage,
+		onCampusConfidence: stats.onCampusConfidence,
 	})).sort((left, right) => left.company.localeCompare(right.company));
 	return { companies: data, total: data.length };
 }

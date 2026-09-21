@@ -26,6 +26,14 @@ export type StatsSummary = {
 		filteredTotalOffers: number;
 		totalOffers: number;
 	};
+	campus: {
+		/** Offers from companies tagged likely on campus. */
+		likelyOffers: number;
+		totalOffers: number;
+		pct: number;
+		likelyCompanies: number;
+		totalCompanies: number;
+	};
 };
 
 export type BranchStats = {
@@ -62,6 +70,8 @@ export type CompanyStats = {
 	studentsCount: number;
 	avgPackage: number;
 	fallbackPackage: number;
+	/** Confidence (0..1) when the company's offers are tagged likely on campus. */
+	onCampusConfidence: number | null;
 };
 
 export type CompanyStatsData = {

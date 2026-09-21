@@ -28,6 +28,9 @@ export interface Placement {
   time_sent?: string;
   createdAt?: string | number;
   _id?: string;
+  /** Offer came through a campus drive, per the backend LLM judge. */
+  likely_on_campus?: boolean;
+  on_campus_confidence?: number | null;
 }
 
 export type StudentWithPlacement = Student & {
