@@ -76,23 +76,6 @@ function DistributionTooltip({ active, payload, label }: any) {
 	);
 }
 
-function ChartAxes() {
-	return (
-		<>
-			<CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-			<XAxis
-				dataKey="range"
-				tick={{ fill: "var(--label-color)" }}
-				angle={-45}
-				textAnchor="end"
-				height={60}
-			/>
-			<YAxis tick={{ fill: "var(--label-color)" }} width={35} />
-			<Tooltip content={<DistributionTooltip />} />
-		</>
-	);
-}
-
 export default function PlacementDistributionChart({ data }: Props) {
 	const [selectedBranches, setSelectedBranches] = useState<Set<string>>(() =>
 		initialBranches(data.availableBranches),
@@ -226,7 +209,10 @@ export default function PlacementDistributionChart({ data }: Props) {
 										<ResponsiveContainer width="100%" height="100%">
 											{chartType === "area" ? (
 												<AreaChart data={data.points}>
-													<ChartAxes />
+													<CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+													<XAxis dataKey="range" tick={{ fill: "var(--label-color)" }} angle={-45} textAnchor="end" height={60} />
+													<YAxis tick={{ fill: "var(--label-color)" }} width={35} />
+													<Tooltip content={<DistributionTooltip />} cursor={{ stroke: "var(--border)", strokeWidth: 1 }} wrapperStyle={{ zIndex: 50, outline: "none" }} allowEscapeViewBox={{ x: true, y: true }} />
 													<Area
 														type="monotone"
 														dataKey={branch}
@@ -238,7 +224,10 @@ export default function PlacementDistributionChart({ data }: Props) {
 												</AreaChart>
 											) : (
 												<LineChart data={data.points}>
-													<ChartAxes />
+													<CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+													<XAxis dataKey="range" tick={{ fill: "var(--label-color)" }} angle={-45} textAnchor="end" height={60} />
+													<YAxis tick={{ fill: "var(--label-color)" }} width={35} />
+													<Tooltip content={<DistributionTooltip />} cursor={{ stroke: "var(--border)", strokeWidth: 1 }} wrapperStyle={{ zIndex: 50, outline: "none" }} allowEscapeViewBox={{ x: true, y: true }} />
 													<Line
 														type="monotone"
 														dataKey={branch}
@@ -259,7 +248,10 @@ export default function PlacementDistributionChart({ data }: Props) {
 							<ResponsiveContainer width="100%" height="100%">
 								{chartType === "area" ? (
 									<AreaChart data={data.points}>
-										<ChartAxes />
+										<CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+													<XAxis dataKey="range" tick={{ fill: "var(--label-color)" }} angle={-45} textAnchor="end" height={60} />
+													<YAxis tick={{ fill: "var(--label-color)" }} width={35} />
+													<Tooltip content={<DistributionTooltip />} cursor={{ stroke: "var(--border)", strokeWidth: 1 }} wrapperStyle={{ zIndex: 50, outline: "none" }} allowEscapeViewBox={{ x: true, y: true }} />
 										<Legend />
 										{selected.map((branch) => (
 											<Area
@@ -283,7 +275,10 @@ export default function PlacementDistributionChart({ data }: Props) {
 									</AreaChart>
 								) : (
 									<LineChart data={data.points}>
-										<ChartAxes />
+										<CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+													<XAxis dataKey="range" tick={{ fill: "var(--label-color)" }} angle={-45} textAnchor="end" height={60} />
+													<YAxis tick={{ fill: "var(--label-color)" }} width={35} />
+													<Tooltip content={<DistributionTooltip />} cursor={{ stroke: "var(--border)", strokeWidth: 1 }} wrapperStyle={{ zIndex: 50, outline: "none" }} allowEscapeViewBox={{ x: true, y: true }} />
 										<Legend />
 										{selected.map((branch) => (
 											<Line
