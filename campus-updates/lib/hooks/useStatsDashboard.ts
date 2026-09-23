@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { usePlacementYear } from "@/components/PlacementYearProvider";
 import {
 	BranchStatsData,
+	CampusStatsData,
 	CompanyStatsData,
 	StatsApiResponse,
 	StatsSummary,
@@ -90,6 +91,18 @@ export function useTimelineStats(
 			if (query) params.set("q", query);
 			return fetchStats(`/api/stats/timeline?${params.toString()}`, signal);
 		},
+		enabled,
+		placeholderData: keepPreviousData,
+		staleTime: 5 * 60 * 1000,
+		refetchOnWindowFocus: false,
+	});
+}
+
+export function useCampusStats(query: string, enabled: boolean) {
+	const { year } = usePlacementYear();
+	return useQuery<CampusStatsData>({
+		queryKey: ["stats-campus", year, query],
+		queryFn: ({ signal }) => fetchStats(statsPath("campus", year, query), signal),
 		enabled,
 		placeholderData: keepPreviousData,
 		staleTime: 5 * 60 * 1000,

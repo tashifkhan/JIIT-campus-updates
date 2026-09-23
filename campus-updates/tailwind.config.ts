@@ -65,6 +65,11 @@ const config: Config = {
 					"4": "var(--chart-4)",
 					"5": "var(--chart-5)",
 				},
+				campus: {
+					on: "var(--campus-on)",
+					off: "var(--campus-off)",
+					ppo: "var(--campus-ppo)",
+				},
 				sidebar: {
 					DEFAULT: "var(--sidebar)",
 					foreground: "var(--sidebar-foreground)",
