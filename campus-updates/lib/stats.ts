@@ -31,6 +31,14 @@ export interface Placement {
   /** Offer came through a campus drive, per the backend LLM judge. */
   likely_on_campus?: boolean;
   on_campus_confidence?: number | null;
+  /** False when the judge never ran (no candidate drive was found). */
+  campus_tagged?: boolean;
+  /** The judge's one-line explanation, when the backend stored one. */
+  on_campus_reason?: string | null;
+  /** The judge flagged the offer as a pre-placement offer. */
+  on_campus_ppo?: boolean;
+  email_subject?: string | null;
+  matched_job_id?: string | null;
 }
 
 export type StudentWithPlacement = Student & {
@@ -111,4 +119,28 @@ export const getStudentPackage = (
     return Math.max(...viable.map((r) => r.package as number));
 
   return null;
+};
+
+/**
+ * How an offer reached the student.
+ * - "on": the backend judge matched it to a campus drive.
+ * - "ppo": a pre-placement or internship conversion offer. The mail says so in
+ *   the subject, so it is split out even when the judge tagged it on campus,
+ *   because nobody sat a drive for it this season.
+ * - "off": everything else.
+ */
+export type CampusRoute = "on" | "ppo" | "off";
+
+// "Internship to PPO" in a hiring mail is a drive, not a conversion, so a bare
+// "PPO" is not enough on its own.
+const PPO_SUBJECT = /pre[\s-]?placement|internship offer|offers? for [^|]*internship/i;
+
+export const isPpoOffer = (
+  placement: Pick<Placement, "email_subject" | "on_campus_ppo">,
+): boolean =>
+  placement.on_campus_ppo === true || PPO_SUBJECT.test(placement.email_subject || "");
+
+export const getCampusRoute = (placement: Placement): CampusRoute => {
+  if (isPpoOffer(placement)) return "ppo";
+  return placement.likely_on_campus ? "on" : "off";
 };
