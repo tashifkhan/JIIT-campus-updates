@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useQueryState } from "nuqs";
 
 import BranchSection from "@/components/stats/BranchSection";
+import CampusSection from "@/components/stats/CampusSection";
 import CompanySection from "@/components/stats/CompanySection";
 import ExpandingSearch from "@/components/stats/ExpandingSearch";
 import OfficialPlacements from "@/components/stats/OfficialPlacements";
@@ -16,13 +17,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
 	useBranchStats,
+	useCampusStats,
 	useCompanyStats,
 	useDebouncedStatsSearch,
 	useStatsSummary,
 } from "@/lib/hooks/useStatsDashboard";
 import { serializeStatsQuery, statsQueryParams } from "@/lib/query-params";
 
-export type StatsSection = "branches" | "companies" | "distribution" | "timeline";
+export type StatsSection = "branches" | "companies" | "distribution" | "timeline" | "campus";
 
 type StatsDashboardProps = {
 	section: StatsSection;
@@ -103,6 +105,11 @@ export default function StatsDashboard({ section }: StatsDashboardProps) {
 		unlocked === true && section === "companies",
 	);
 
+	const campusQuery = useCampusStats(
+		query,
+		unlocked === true && section === "campus",
+	);
+
 	const handleSearchChange = (value: string) => {
 		void setSearchQuery(value.trim() ? value : null);
 	};
@@ -147,7 +154,8 @@ export default function StatsDashboard({ section }: StatsDashboardProps) {
 
 	if (summaryQuery.isLoading) return <DashboardSkeleton />;
 
-	const error = summaryQuery.error || branchQuery.error || companyQuery.error;
+	const error =
+		summaryQuery.error || branchQuery.error || companyQuery.error || campusQuery.error;
 	if (error || !summaryQuery.data) {
 		return (
 			<Card className="max-w-3xl mx-auto border-destructive/40">
@@ -185,7 +193,7 @@ export default function StatsDashboard({ section }: StatsDashboardProps) {
 			<SummaryCards {...summary} />
 
 			<Tabs value={section} className="w-full">
-				<TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 max-w-2xl h-auto">
+				<TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 max-w-3xl h-auto">
 					<TabsTrigger value="branches" asChild>
 						<Link href={statsHref("/stats/branches")}>Branches</Link>
 					</TabsTrigger>
@@ -197,6 +205,9 @@ export default function StatsDashboard({ section }: StatsDashboardProps) {
 					</TabsTrigger>
 					<TabsTrigger value="timeline" asChild>
 						<Link href={statsHref("/stats/timeline")}>Timeline</Link>
+					</TabsTrigger>
+					<TabsTrigger value="campus" asChild>
+						<Link href={statsHref("/stats/campus")}>On campus</Link>
 					</TabsTrigger>
 				</TabsList>
 
@@ -230,6 +241,14 @@ export default function StatsDashboard({ section }: StatsDashboardProps) {
 						/>
 					) : (
 						<SectionSkeleton cards={COMPANIES_LIMIT} />
+					)}
+				</TabsContent>
+
+				<TabsContent value="campus" className="mt-6">
+					{campusQuery.data ? (
+						<CampusSection data={campusQuery.data} buildHref={statsHref} />
+					) : (
+						<ChartSkeleton />
 					)}
 				</TabsContent>
 
