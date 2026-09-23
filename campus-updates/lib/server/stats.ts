@@ -26,6 +26,7 @@ import {
 	StudentWithPlacement,
 	getCampusRoute,
 	getStudentOfferDate,
+	isCampusInternPpo,
 	getStudentPackage,
 } from "@/lib/stats";
 import { getCollection } from "@/lib/server/data";
@@ -431,6 +432,7 @@ export async function getCompanyStats(year: string, query: string): Promise<Comp
 			fallbackPackage: number;
 			onCampusConfidence: number | null;
 			campusRoute: CampusRoute;
+			campusIntern: boolean;
 		}
 	>();
 
@@ -450,6 +452,7 @@ export async function getCompanyStats(year: string, query: string): Promise<Comp
 					? student.placement.on_campus_confidence ?? null
 					: null,
 				campusRoute: getCampusRoute(student.placement),
+				campusIntern: isCampusInternPpo(student.placement),
 			});
 		}
 		const company = companies.get(student.company)!;
@@ -465,6 +468,7 @@ export async function getCompanyStats(year: string, query: string): Promise<Comp
 		fallbackPackage: stats.fallbackPackage,
 		onCampusConfidence: stats.onCampusConfidence,
 		campusRoute: stats.campusRoute,
+		campusIntern: stats.campusIntern,
 	})).sort((left, right) => left.company.localeCompare(right.company));
 	return { companies: data, total: data.length };
 }
@@ -677,7 +681,12 @@ function monthKey(date: Date): string {
 	return date.toLocaleString("en-US", { month: "short", year: "numeric" });
 }
 
-export async function getCampusStats(year: string, query: string): Promise<CampusStatsData> {
+export async function getCampusStats(
+	year: string,
+	query: string,
+	campusInternPpoAsOn = false,
+): Promise<CampusStatsData> {
+	const routeOf = (placement: Placement) => getCampusRoute(placement, { campusInternPpoAsOn });
 	const [placements, jobs] = await Promise.all([loadPlacements(year), loadJobSummaries(year)]);
 	const students = includedStudents(flattenStudents(placements), year).filter((student) =>
 		matchesSearch(student, query),
@@ -685,7 +694,7 @@ export async function getCampusStats(year: string, query: string): Promise<Campu
 	const byRoute = Object.fromEntries(
 		CAMPUS_ROUTES.map((route) => [
 			route,
-			students.filter((student) => getCampusRoute(student.placement) === route),
+			students.filter((student) => routeOf(student.placement) === route),
 		]),
 	) as Record<CampusRoute, StudentWithPlacement[]>;
 
@@ -693,7 +702,7 @@ export async function getCampusStats(year: string, query: string): Promise<Campu
 	const perStudent = new Map<string, { routes: Set<CampusRoute>; best: number; bestRoute: CampusRoute; offers: number; branch: string }>();
 	for (const student of students) {
 		if (!student.enrollment_number) continue;
-		const route = getCampusRoute(student.placement);
+		const route = routeOf(student.placement);
 		const packageValue = getStudentPackage(student, student.placement) ?? 0;
 		const entry = perStudent.get(student.enrollment_number) ?? {
 			routes: new Set<CampusRoute>(),
@@ -751,7 +760,7 @@ export async function getCampusStats(year: string, query: string): Promise<Campu
 			ppo: 0,
 			off: 0,
 		};
-		bucket[getCampusRoute(student.placement)] += 1;
+		bucket[routeOf(student.placement)] += 1;
 		months.set(key, bucket);
 	}
 
@@ -780,7 +789,7 @@ export async function getCampusStats(year: string, query: string): Promise<Campu
 		({ placement, students: companyStudents }) => {
 			const tokens = companyTokens(placement.company);
 			const job = jobs.find((candidate) => sameCompany(tokens, candidate.tokens));
-			const route = getCampusRoute(placement);
+			const route = routeOf(placement);
 			const jobPosted = Boolean(placement.matched_job_id || job);
 			const packages = companyStudents
 				.map((student) => getStudentPackage(student, student.placement) ?? 0)
@@ -788,6 +797,7 @@ export async function getCampusStats(year: string, query: string): Promise<Campu
 			return {
 				company: placement.company,
 				route,
+				campusIntern: isCampusInternPpo(placement),
 				students: companyStudents.length,
 				avgPackage: average(packages),
 				confidence: placement.on_campus_confidence ?? null,
@@ -837,7 +847,15 @@ export async function getCampusStats(year: string, query: string): Promise<Campu
 		categories.set(key, entry);
 	}
 
+	const campusInternStudents = students.filter((student) => isCampusInternPpo(student.placement));
+
 	return {
+		campusInternPpoAsOn,
+		campusInternPpo: {
+			offers: campusInternStudents.length,
+			students: uniqueStudentCount(campusInternStudents),
+			companies: new Set(campusInternStudents.map((student) => student.company)).size,
+		},
 		batchTotal: getTotalStudentsForYear(year),
 		placedStudents: perStudent.size,
 		routes: {

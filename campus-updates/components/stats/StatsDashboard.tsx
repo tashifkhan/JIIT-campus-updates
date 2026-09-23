@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useQueryState } from "nuqs";
+import { parseAsBoolean, useQueryState } from "nuqs";
 
 import BranchSection from "@/components/stats/BranchSection";
 import CampusSection from "@/components/stats/CampusSection";
@@ -105,8 +105,13 @@ export default function StatsDashboard({ section }: StatsDashboardProps) {
 		unlocked === true && section === "companies",
 	);
 
+	const [campusInternPpoAsOn, setCampusInternPpoAsOn] = useQueryState(
+		"ppoCampus",
+		parseAsBoolean.withDefault(false).withOptions({ history: "replace", shallow: true }),
+	);
 	const campusQuery = useCampusStats(
 		query,
+		campusInternPpoAsOn,
 		unlocked === true && section === "campus",
 	);
 
@@ -246,7 +251,14 @@ export default function StatsDashboard({ section }: StatsDashboardProps) {
 
 				<TabsContent value="campus" className="mt-6">
 					{campusQuery.data ? (
-						<CampusSection data={campusQuery.data} buildHref={statsHref} />
+						<CampusSection
+							data={campusQuery.data}
+							buildHref={statsHref}
+							campusInternPpoAsOn={campusInternPpoAsOn}
+							onCampusInternPpoAsOnChange={(next) =>
+								void setCampusInternPpoAsOn(next ? true : null)
+							}
+						/>
 					) : (
 						<ChartSkeleton />
 					)}

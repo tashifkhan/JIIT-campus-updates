@@ -66,6 +66,7 @@ export default function CompanySection({
 										<CampusBadge
 											route={company.campusRoute}
 											confidence={company.onCampusConfidence}
+											campusIntern={company.campusIntern}
 											className="mb-3"
 										/>
 										<div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
