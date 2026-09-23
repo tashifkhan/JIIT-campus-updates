@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ChevronDown, GraduationCap, Users } from "lucide-react";
+import { ChevronDown, Users } from "lucide-react";
 
+import CampusBadge from "@/components/stats/CampusBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,18 +63,11 @@ export default function CompanySection({
 										>
 											{company.company}
 										</h3>
-										{company.onCampusConfidence != null ? (
-											<Badge
-												variant="outline"
-												className="mb-3 px-2.5 py-0.5 rounded-full border-amber-500/40 bg-amber-500/10 text-amber-800 dark:text-amber-200"
-												aria-label={`Likely on campus with ${Math.round(company.onCampusConfidence * 100)}% confidence`}
-											>
-												<GraduationCap className="w-3 h-3 mr-1.5" />
-												Likely on campus · {Math.round(company.onCampusConfidence * 100)}%
-											</Badge>
-										) : (
-											<div className="mb-3" />
-										)}
+										<CampusBadge
+											route={company.campusRoute}
+											confidence={company.onCampusConfidence}
+											className="mb-3"
+										/>
 										<div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
 											<div>
 												<p className="text-xs text-muted-foreground">Students Placed</p>
