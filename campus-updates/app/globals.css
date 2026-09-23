@@ -32,7 +32,8 @@
        mode because the pairs that stay apart are not the same in light and dark. */
     --campus-on: var(--chart-5);
     --campus-ppo: var(--chart-2);
-    --campus-off: var(--chart-3);
+    /* chart-3 is a pale yellow that vanishes on the cream cards. */
+    --campus-off: var(--muted-foreground);
     --sidebar: oklch(0.9140 0.0424 343.0913);
     --sidebar-foreground: oklch(0.3211 0 0);
     --sidebar-primary: oklch(0.6559 0.2118 354.3084);
