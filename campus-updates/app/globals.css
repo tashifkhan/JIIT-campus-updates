@@ -28,10 +28,11 @@
     --chart-3: oklch(0.9195 0.0801 87.6670);
     --chart-4: oklch(0.7998 0.1110 348.1791);
     --chart-5: oklch(0.6197 0.1899 353.9091);
-    /* How an offer was won. Validated as a set for CVD separation. */
-    --campus-on: #2a78d6;
-    --campus-off: #eb6834;
-    --campus-ppo: #1baf7a;
+    /* How an offer was won, drawn from the chart palette. The slots differ per
+       mode because the pairs that stay apart are not the same in light and dark. */
+    --campus-on: var(--chart-5);
+    --campus-ppo: var(--chart-2);
+    --campus-off: var(--chart-3);
     --sidebar: oklch(0.9140 0.0424 343.0913);
     --sidebar-foreground: oklch(0.3211 0 0);
     --sidebar-primary: oklch(0.6559 0.2118 354.3084);
@@ -84,9 +85,9 @@
     --chart-3: oklch(0.6699 0.0988 356.9762);
     --chart-4: oklch(0.7208 0.0902 217.0848);
     --chart-5: oklch(0.7513 0.1086 305.5780);
-    --campus-on: #3987e5;
-    --campus-off: #d95926;
-    --campus-ppo: #199e70;
+    --campus-on: var(--chart-1);
+    --campus-ppo: var(--chart-5);
+    --campus-off: var(--chart-3);
     --sidebar: oklch(0.2303 0.0270 235.9743);
     --sidebar-foreground: oklch(0.9670 0.0029 264.5419);
     --sidebar-primary: oklch(0.6559 0.2118 354.3084);
