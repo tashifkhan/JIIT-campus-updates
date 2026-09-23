@@ -75,6 +75,8 @@ export type CompanyStats = {
 	/** Confidence (0..1) when the company's offers are tagged likely on campus. */
 	onCampusConfidence: number | null;
 	campusRoute: CampusRoute;
+	/** PPO whose internship came through a campus drive. */
+	campusIntern: boolean;
 };
 
 export type CompanyStatsData = {
@@ -112,6 +114,8 @@ export type CampusRouteSummary = {
 export type CampusCompany = {
 	company: string;
 	route: CampusRoute;
+	/** PPO whose internship came through a campus drive. */
+	campusIntern: boolean;
 	students: number;
 	avgPackage: number;
 	confidence: number | null;
@@ -129,6 +133,10 @@ export type CampusCompany = {
 };
 
 export type CampusStatsData = {
+	/** Whether campus-intern PPOs are counted under "on" in this response. */
+	campusInternPpoAsOn: boolean;
+	/** PPOs whose internship came through a campus drive, whichever way they are counted. */
+	campusInternPpo: { offers: number; students: number; companies: number };
 	batchTotal: number;
 	placedStudents: number;
 	routes: Record<CampusRoute, CampusRouteSummary>;

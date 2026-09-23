@@ -17,7 +17,14 @@ export async function GET(request: NextRequest) {
 		}
 		const query = (request.nextUrl.searchParams.get("q") || "").trim().toLowerCase();
 		return NextResponse.json(
-			{ ok: true, data: await getCampusStats(year, query) },
+			{
+				ok: true,
+				data: await getCampusStats(
+					year,
+					query,
+					request.nextUrl.searchParams.get("ppoCampus") === "1",
+				),
+			},
 			{ headers: { "cache-control": "no-store" } },
 		);
 	} catch (error) {

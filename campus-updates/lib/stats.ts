@@ -140,7 +140,24 @@ export const isPpoOffer = (
 ): boolean =>
   placement.on_campus_ppo === true || PPO_SUBJECT.test(placement.email_subject || "");
 
-export const getCampusRoute = (placement: Placement): CampusRoute => {
-  if (isPpoOffer(placement)) return "ppo";
+/**
+ * A PPO whose internship came through a campus drive: the judge matched the
+ * offer to one of the year's posted drives.
+ */
+export const isCampusInternPpo = (placement: Placement): boolean =>
+  isPpoOffer(placement) && placement.likely_on_campus === true;
+
+export type CampusRouteOptions = {
+  /** Count PPOs from campus internships as on campus instead of PPO. */
+  campusInternPpoAsOn?: boolean;
+};
+
+export const getCampusRoute = (
+  placement: Placement,
+  options: CampusRouteOptions = {},
+): CampusRoute => {
+  if (isPpoOffer(placement)) {
+    return options.campusInternPpoAsOn && placement.likely_on_campus ? "on" : "ppo";
+  }
   return placement.likely_on_campus ? "on" : "off";
 };
