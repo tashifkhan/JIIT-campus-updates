@@ -91,7 +91,7 @@ function BranchCard({ branch, stats }: { branch: string; stats: BranchStats }) {
 }
 
 export default function BranchSection({ limit, branches, buildHref }: Props) {
-	const [showAll, setShowAll] = useState(false);
+	const [showAll, setShowAll] = useState(true);
 	const entries = Object.entries(branches).sort(
 		(left, right) => right[1].count - left[1].count,
 	);
