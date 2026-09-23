@@ -48,6 +48,8 @@ type Props = {
 	route: CampusRoute;
 	/** Judge confidence, 0..1. Only drawn for on-campus offers. */
 	confidence?: number | null;
+	/** PPO whose internship came through a campus drive. */
+	campusIntern?: boolean;
 	size?: "sm" | "md";
 	className?: string;
 };
@@ -57,14 +59,24 @@ type Props = {
  * for the judge's confidence, so a 70% match reads weaker than a 95% one
  * without the reader parsing a number.
  */
-export default function CampusBadge({ route, confidence, size = "sm", className }: Props) {
+export default function CampusBadge({
+	route,
+	confidence,
+	campusIntern = false,
+	size = "sm",
+	className,
+}: Props) {
 	const meta = ROUTE_META[route];
 	const showMeter = route === "on" && confidence != null;
 	const tier = showMeter ? confidenceTier(confidence) : null;
 	const percent = showMeter ? Math.round(confidence * 100) : null;
+	// Shown on a PPO, or on an on-campus offer that is a PPO counted as on campus.
+	const internNote = campusIntern ? (route === "ppo" ? "campus intern" : "PPO") : null;
+	const label = internNote ? `${meta.label} · ${internNote}` : meta.label;
+	const internHint = campusIntern ? " The internship behind this PPO came through a campus drive." : "";
 	const description = showMeter
-		? `${meta.label}, ${percent}% confidence (${tier!.label}). ${meta.hint}.`
-		: `${meta.label}. ${meta.hint}.`;
+		? `${label}, ${percent}% confidence (${tier!.label}). ${meta.hint}.${internHint}`
+		: `${label}. ${meta.hint}.${internHint}`;
 
 	return (
 		<span
@@ -85,7 +97,7 @@ export default function CampusBadge({ route, confidence, size = "sm", className 
 				className={size === "sm" ? "w-3 h-3" : "w-3.5 h-3.5"}
 				style={{ color: meta.color }}
 			/>
-			{meta.label}
+			{label}
 			{showMeter ? (
 				<span aria-hidden className="flex items-center gap-1 pl-1 ml-0.5 border-l border-border">
 					<span className="flex items-end gap-[2px] h-2.5">

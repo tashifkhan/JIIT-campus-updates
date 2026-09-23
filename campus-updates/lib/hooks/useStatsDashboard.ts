@@ -98,11 +98,14 @@ export function useTimelineStats(
 	});
 }
 
-export function useCampusStats(query: string, enabled: boolean) {
+export function useCampusStats(query: string, campusInternPpoAsOn: boolean, enabled: boolean) {
 	const { year } = usePlacementYear();
 	return useQuery<CampusStatsData>({
-		queryKey: ["stats-campus", year, query],
-		queryFn: ({ signal }) => fetchStats(statsPath("campus", year, query), signal),
+		queryKey: ["stats-campus", year, query, campusInternPpoAsOn],
+		queryFn: ({ signal }) => {
+			const path = statsPath("campus", year, query);
+			return fetchStats(campusInternPpoAsOn ? `${path}&ppoCampus=1` : path, signal);
+		},
 		enabled,
 		placeholderData: keepPreviousData,
 		staleTime: 5 * 60 * 1000,

@@ -16,6 +16,7 @@ import {
 
 import CampusBadge, { CAMPUS_ROUTE_LABELS, campusRouteColor } from "@/components/stats/CampusBadge";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { CampusCompany, CampusStatsData } from "@/lib/stats-api";
 import { formatPackage, formatPercent, type CampusRoute } from "@/lib/stats";
@@ -28,6 +29,8 @@ type CompanyFilter = "all" | CampusRoute | "review";
 type Props = {
 	data: CampusStatsData;
 	buildHref: (pathname: string) => string;
+	campusInternPpoAsOn: boolean;
+	onCampusInternPpoAsOnChange: (next: boolean) => void;
 };
 
 function RouteTooltip({ active, payload, label, unit }: any) {
@@ -152,7 +155,12 @@ const REVIEW_TEXT: Record<NonNullable<CampusCompany["review"]>, string> = {
 	"no-drive": "Tagged on campus, but no SuperSet drive was found for this company",
 };
 
-export default function CampusSection({ data, buildHref }: Props) {
+export default function CampusSection({
+	data,
+	buildHref,
+	campusInternPpoAsOn,
+	onCampusInternPpoAsOnChange,
+}: Props) {
 	const [filter, setFilter] = useState<CompanyFilter>("all");
 	const [showAll, setShowAll] = useState(false);
 	const { routes, students, jobs } = data;
@@ -178,6 +186,24 @@ export default function CampusSection({ data, buildHref }: Props) {
 
 	return (
 		<div className="space-y-6">
+			<label className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 cursor-pointer">
+				<Switch
+					checked={campusInternPpoAsOn}
+					onCheckedChange={onCampusInternPpoAsOnChange}
+					className="mt-0.5"
+				/>
+				<span className="text-sm">
+					<span className="font-medium text-foreground">
+						Count PPOs from campus internships as on campus
+					</span>
+					<span className="block text-xs text-muted-foreground">
+						{data.campusInternPpo.students} students ({data.campusInternPpo.offers} offers from{" "}
+						{data.campusInternPpo.companies} companies) converted an internship they got through a
+						campus drive.
+					</span>
+				</span>
+			</label>
+
 			<div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
 				<Tile
 					label="Placed on campus"
@@ -432,7 +458,11 @@ export default function CampusSection({ data, buildHref }: Props) {
 										) : null}
 									</td>
 									<td className="py-2.5 px-3">
-										<CampusBadge route={company.route} confidence={company.confidence} />
+										<CampusBadge
+											route={company.route}
+											confidence={company.confidence}
+											campusIntern={company.campusIntern}
+										/>
 									</td>
 									<td className="py-2.5 px-3 text-right tabular-nums">{company.students}</td>
 									<td className="py-2.5 px-3 text-right tabular-nums">{formatPackage(company.avgPackage)}</td>
