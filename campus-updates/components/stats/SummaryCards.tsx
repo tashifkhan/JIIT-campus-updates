@@ -20,13 +20,6 @@ type Props = {
 		filteredTotalOffers: number;
 		totalOffers: number;
 	};
-	campus?: {
-		likelyOffers: number;
-		totalOffers: number;
-		pct: number;
-		likelyCompanies: number;
-		totalCompanies: number;
-	};
 };
 
 type StatCardProps = {
@@ -83,7 +76,6 @@ export default function SummaryCards({
 	packages,
 	companies,
 	offers,
-	campus,
 }: Props) {
 	return (
 		<div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-7">
@@ -199,30 +191,6 @@ export default function SummaryCards({
 				/>
 			)}
 
-			{/* Likely on campus: offers from companies matched to a campus drive */}
-			{campus && (
-				<StatCard
-					title="Likely on Campus"
-					value={
-						<span className="flex items-baseline gap-1">
-							{campus.likelyOffers}
-							<span className="text-sm font-normal text-muted-foreground">
-								/ {campus.totalOffers}
-							</span>
-						</span>
-					}
-					subValue={
-						<div className="flex flex-col gap-0.5">
-							<span className="text-amber-700 dark:text-amber-300 font-semibold">
-								{formatPercent(campus.pct)} of offers
-							</span>
-							<span className="opacity-80">
-								{campus.likelyCompanies} of {campus.totalCompanies} companies
-							</span>
-						</div>
-					}
-				/>
-			)}
 		</div>
 	);
 }
