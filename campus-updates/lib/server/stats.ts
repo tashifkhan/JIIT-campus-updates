@@ -75,7 +75,6 @@ const PLACEMENT_PROJECTION = {
 	on_campus_ppo: 1,
 	on_campus_signals: 1,
 	on_campus_job_id: 1,
-	on_campus_model: 1,
 } as const;
 
 type MutableBranchStats = {
@@ -147,7 +146,6 @@ function normalizePlacement(value: Record<string, unknown>): Placement {
 			? value.on_campus_signals.map(String)
 			: [],
 		on_campus_job_id: value.on_campus_job_id == null ? null : String(value.on_campus_job_id),
-		on_campus_model: value.on_campus_model == null ? null : String(value.on_campus_model),
 		email_subject: value.email_subject == null ? null : String(value.email_subject),
 		matched_job_id:
 			value.matched_job_id == null && value.related_job_id == null
@@ -243,10 +241,8 @@ function campusDetail(placement: Placement, route: CampusRoute): CampusDetail {
 		confidence: placement.on_campus_confidence ?? null,
 		reason: placement.on_campus_reason ?? null,
 		signals: placement.on_campus_signals ?? [],
-		model: placement.on_campus_model ?? null,
 		drive: placement.campus_drive ?? null,
 		review: getCampusReview(placement),
-		emailSubject: placement.email_subject ?? null,
 	};
 }
 

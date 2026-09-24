@@ -79,10 +79,8 @@ export type CampusDetail = {
 	confidence: number | null;
 	reason: string | null;
 	signals: string[];
-	model: string | null;
 	drive: CampusDrive | null;
 	review: CampusReview | null;
-	emailSubject: string | null;
 };
 
 export type CompanyStats = {

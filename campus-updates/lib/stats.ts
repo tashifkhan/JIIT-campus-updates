@@ -43,7 +43,6 @@ export interface Placement {
   on_campus_signals?: string[];
   /** Job the judge picked, even when it fell under the threshold. */
   on_campus_job_id?: string | null;
-  on_campus_model?: string | null;
   /**
    * The posted drive backing this offer, set on the server once jobs are
    * loaded: null when none was found, undefined when nobody checked.

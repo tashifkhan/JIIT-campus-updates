@@ -10,6 +10,9 @@ const SENSITIVE_OFFER_FIELDS = [
 	"email_sender",
 	"email_subject",
 	"additional_info",
+	// Stored for auditing the campus tag; not for clients.
+	"on_campus_model",
+	"on_campus_reasoning",
 ] as const;
 
 const SENSITIVE_STUDENT_FIELDS = [
