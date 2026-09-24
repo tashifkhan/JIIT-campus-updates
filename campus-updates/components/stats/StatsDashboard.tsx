@@ -198,7 +198,7 @@ export default function StatsDashboard({ section }: StatsDashboardProps) {
 			<SummaryCards {...summary} />
 
 			<Tabs value={section} className="w-full">
-				<TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 max-w-3xl h-auto">
+				<TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 h-auto">
 					<TabsTrigger value="branches" asChild>
 						<Link href={statsHref("/stats/branches")}>Branches</Link>
 					</TabsTrigger>
