@@ -135,10 +135,10 @@ export type CampusRoute = "on" | "ppo" | "off";
 // "PPO" is not enough on its own.
 const PPO_SUBJECT = /pre[\s-]?placement|internship offer|offers? for [^|]*internship/i;
 
-export const isPpoOffer = (
-  placement: Pick<Placement, "email_subject" | "on_campus_ppo">,
-): boolean =>
-  placement.on_campus_ppo === true || PPO_SUBJECT.test(placement.email_subject || "");
+// The judge's on_campus_ppo flag is not used: it also fires on hiring drives
+// that promise a PPO after the internship, which are campus drives.
+export const isPpoOffer = (placement: Pick<Placement, "email_subject">): boolean =>
+  PPO_SUBJECT.test(placement.email_subject || "");
 
 /**
  * A PPO whose internship came through a campus drive: the judge matched the
