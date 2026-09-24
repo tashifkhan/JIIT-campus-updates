@@ -1,4 +1,4 @@
-import type { CampusRoute } from "@/lib/stats";
+import type { CampusDrive, CampusReview, CampusRoute } from "@/lib/stats";
 
 export type StatsPackageSummary = {
 	avg: number;
@@ -67,6 +67,24 @@ export type BranchStatsData = {
 	};
 };
 
+/** Everything the hover card shows about how an offer was classified. */
+export type CampusDetail = {
+	route: CampusRoute;
+	/** PPO whose internship came through a campus drive. */
+	campusIntern: boolean;
+	/** The judge's raw tag, before the drive check. */
+	taggedOnCampus: boolean;
+	/** False when the judge never ran because no candidate drive was found. */
+	judged: boolean;
+	confidence: number | null;
+	reason: string | null;
+	signals: string[];
+	model: string | null;
+	drive: CampusDrive | null;
+	review: CampusReview | null;
+	emailSubject: string | null;
+};
+
 export type CompanyStats = {
 	company: string;
 	studentsCount: number;
@@ -77,6 +95,7 @@ export type CompanyStats = {
 	campusRoute: CampusRoute;
 	/** PPO whose internship came through a campus drive. */
 	campusIntern: boolean;
+	campus: CampusDetail;
 };
 
 export type CompanyStatsData = {
@@ -114,22 +133,9 @@ export type CampusRouteSummary = {
 export type CampusCompany = {
 	company: string;
 	route: CampusRoute;
-	/** PPO whose internship came through a campus drive. */
-	campusIntern: boolean;
 	students: number;
 	avgPackage: number;
-	confidence: number | null;
-	/** False when the judge never ran because no drive candidate was found. */
-	tagged: boolean;
-	/** The judge's stated reason, once the backfill has stored one. */
-	reason: string | null;
-	/** A SuperSet job exists for this company in the year's Jobs collection. */
-	jobPosted: boolean;
-	jobCategory: string | null;
-	/** Package on the matched job, LPA. */
-	jobPackage: number | null;
-	/** Set when the tag and the job cross-check disagree. */
-	review: "drive-exists" | "no-drive" | null;
+	detail: CampusDetail;
 };
 
 export type CampusStatsData = {

@@ -39,6 +39,27 @@ export interface Placement {
   on_campus_ppo?: boolean;
   email_subject?: string | null;
   matched_job_id?: string | null;
+  /** Evidence phrases the judge relied on. */
+  on_campus_signals?: string[];
+  /** Job the judge picked, even when it fell under the threshold. */
+  on_campus_job_id?: string | null;
+  on_campus_model?: string | null;
+  /**
+   * The posted drive backing this offer, set on the server once jobs are
+   * loaded: null when none was found, undefined when nobody checked.
+   */
+  campus_drive?: CampusDrive | null;
+}
+
+export type CampusDrive = {
+  id: string;
+  company: string;
+  profile: string | null;
+  category: string | null;
+  /** Package on the posted job, LPA. */
+  lpa: number | null;
+  /** How the drive was found. */
+  via: "judge" | "link" | "name";
 }
 
 export type StudentWithPlacement = Student & {
@@ -145,7 +166,25 @@ export const isPpoOffer = (placement: Pick<Placement, "email_subject">): boolean
  * offer to one of the year's posted drives.
  */
 export const isCampusInternPpo = (placement: Placement): boolean =>
-  isPpoOffer(placement) && placement.likely_on_campus === true;
+  isPpoOffer(placement) && isBackedOnCampus(placement);
+
+/**
+ * Tagged likely on campus and backed by a posted drive. The tag alone is not
+ * enough: an offer with no drive behind it counts as off campus.
+ */
+export const isBackedOnCampus = (placement: Placement): boolean =>
+  placement.likely_on_campus === true && placement.campus_drive !== null;
+
+/** Why a company's route deserves a second look, if it does. */
+export type CampusReview = "drive-exists" | "no-drive";
+
+export const getCampusReview = (placement: Placement): CampusReview | null => {
+  if (placement.likely_on_campus && placement.campus_drive === null) return "no-drive";
+  if (!placement.likely_on_campus && !isPpoOffer(placement) && placement.campus_drive) {
+    return "drive-exists";
+  }
+  return null;
+};
 
 export type CampusRouteOptions = {
   /** Count PPOs from campus internships as on campus instead of PPO. */
@@ -157,7 +196,7 @@ export const getCampusRoute = (
   options: CampusRouteOptions = {},
 ): CampusRoute => {
   if (isPpoOffer(placement)) {
-    return options.campusInternPpoAsOn && placement.likely_on_campus ? "on" : "ppo";
+    return options.campusInternPpoAsOn && isBackedOnCampus(placement) ? "on" : "ppo";
   }
-  return placement.likely_on_campus ? "on" : "off";
+  return isBackedOnCampus(placement) ? "on" : "off";
 };
