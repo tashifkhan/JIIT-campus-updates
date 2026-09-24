@@ -157,7 +157,6 @@ export function CampusDetailCard({ detail }: { detail: CampusDetail }) {
 						<span className="text-muted-foreground">None found</span>
 					)}
 				</Row>
-				{detail.model ? <Row label="Classified by">{detail.model.replace(/^go\//, "")}</Row> : null}
 			</dl>
 
 			{detail.reason ? (
@@ -185,11 +184,6 @@ export function CampusDetailCard({ detail }: { detail: CampusDetail }) {
 				</div>
 			) : null}
 
-			{detail.emailSubject ? (
-				<p className="border-t border-border pt-2 text-muted-foreground">
-					Mail: <span className="text-foreground">{detail.emailSubject.replace(/\s+/g, " ")}</span>
-				</p>
-			) : null}
 		</div>
 	);
 }
