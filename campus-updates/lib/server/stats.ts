@@ -29,6 +29,7 @@ import {
 	getCampusRoute,
 	getStudentOfferDate,
 	isCampusInternPpo,
+	isPpoOffer,
 	getStudentPackage,
 } from "@/lib/stats";
 import { getCollection } from "@/lib/server/data";
@@ -905,6 +906,9 @@ export async function getCampusStats(
 	}
 
 	const campusInternStudents = students.filter((student) => isCampusInternPpo(student.placement));
+	const offCampusPpoStudents = students.filter(
+		(student) => isPpoOffer(student.placement) && !isCampusInternPpo(student.placement),
+	);
 
 	return {
 		campusInternPpoAsOn,
@@ -912,6 +916,11 @@ export async function getCampusStats(
 			offers: campusInternStudents.length,
 			students: uniqueStudentCount(campusInternStudents),
 			companies: new Set(campusInternStudents.map((student) => student.company)).size,
+		},
+		offCampusPpo: {
+			offers: offCampusPpoStudents.length,
+			students: uniqueStudentCount(offCampusPpoStudents),
+			companies: new Set(offCampusPpoStudents.map((student) => student.company)).size,
 		},
 		batchTotal: getTotalStudentsForYear(year),
 		placedStudents: perStudent.size,

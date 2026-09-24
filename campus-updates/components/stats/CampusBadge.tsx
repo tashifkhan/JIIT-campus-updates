@@ -49,6 +49,12 @@ const DRIVE_VIA: Record<NonNullable<CampusDetail["drive"]>["via"], string> = {
 	name: "company name match",
 };
 
+/** Suffix naming where a PPO's internship likely came from. */
+function ppoNote(route: CampusRoute, campusIntern: boolean): string | null {
+	if (campusIntern) return route === "ppo" ? "likely on campus" : "PPO";
+	return route === "ppo" ? "likely off campus" : null;
+}
+
 export function campusRouteColor(route: CampusRoute): string {
 	return ROUTE_META[route].color;
 }
@@ -98,10 +104,17 @@ export function CampusDetailCard({ detail }: { detail: CampusDetail }) {
 				<meta.Icon className="h-4 w-4 shrink-0" style={{ color: meta.color }} aria-hidden />
 				<p className="text-sm font-semibold text-foreground">
 					{meta.label}
-					{detail.campusIntern ? (detail.route === "ppo" ? " · campus intern" : " · PPO") : ""}
+					{ppoNote(detail.route, detail.campusIntern) ? ` · ${ppoNote(detail.route, detail.campusIntern)}` : ""}
 				</p>
 			</div>
 			<p className="text-muted-foreground">{meta.hint}.</p>
+			{detail.route === "ppo" || detail.campusIntern ? (
+				<p className="text-foreground">
+					{detail.campusIntern
+						? "The internship behind this PPO came through a posted campus drive."
+						: "No posted campus drive backs the internship behind this PPO, so it likely came from off campus."}
+				</p>
+			) : null}
 
 			{detail.review ? (
 				<p className="flex gap-1.5 rounded-md border border-border bg-muted/50 p-2 text-foreground">
@@ -208,7 +221,7 @@ export default function CampusBadge({
 	const meta = ROUTE_META[route];
 	const showMeter = route === "on" && confidence != null;
 	const percent = showMeter ? Math.round(confidence * 100) : null;
-	const internNote = campusIntern ? (route === "ppo" ? "campus intern" : "PPO") : null;
+	const internNote = ppoNote(route, campusIntern);
 	const label = internNote ? `${meta.label} · ${internNote}` : meta.label;
 	const description = showMeter
 		? `${label}, ${percent}% confidence. ${meta.hint}.`
