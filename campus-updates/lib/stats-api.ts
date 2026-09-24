@@ -143,6 +143,8 @@ export type CampusStatsData = {
 	campusInternPpoAsOn: boolean;
 	/** PPOs whose internship came through a campus drive, whichever way they are counted. */
 	campusInternPpo: { offers: number; students: number; companies: number };
+	/** PPOs whose internship no posted drive backs, so likely off campus. */
+	offCampusPpo: { offers: number; students: number; companies: number };
 	batchTotal: number;
 	placedStudents: number;
 	routes: Record<CampusRoute, CampusRouteSummary>;

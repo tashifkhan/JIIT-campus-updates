@@ -214,7 +214,16 @@ export default function CampusSection({
 					label="Via PPO"
 					color="var(--campus-ppo)"
 					value={routes.ppo.students}
-					detail={`${routes.ppo.offers} conversion offers · median ${formatPackage(routes.ppo.medianPackage)}`}
+					detail={
+						<>
+							{routes.ppo.offers} conversion offers · median {formatPackage(routes.ppo.medianPackage)}
+							<span className="block mt-1 text-foreground">
+								{data.offCampusPpo.companies} of {routes.ppo.companies} PPO companies (
+								{data.offCampusPpo.offers} of {routes.ppo.offers} offers) likely came from off-campus
+								internships.
+							</span>
+						</>
+					}
 				/>
 				<Tile
 					label="Likely off campus"
