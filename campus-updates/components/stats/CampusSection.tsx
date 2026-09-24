@@ -14,11 +14,15 @@ import {
 	YAxis,
 } from "recharts";
 
-import CampusBadge, { CAMPUS_ROUTE_LABELS, campusRouteColor } from "@/components/stats/CampusBadge";
+import CampusBadge, {
+	CAMPUS_REVIEW_TEXT,
+	CAMPUS_ROUTE_LABELS,
+	campusRouteColor,
+} from "@/components/stats/CampusBadge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { CampusCompany, CampusStatsData } from "@/lib/stats-api";
+import type { CampusStatsData } from "@/lib/stats-api";
 import { formatPackage, formatPercent, type CampusRoute } from "@/lib/stats";
 import { cn } from "@/lib/utils";
 
@@ -150,11 +154,6 @@ function MeterRow({
 	);
 }
 
-const REVIEW_TEXT: Record<NonNullable<CampusCompany["review"]>, string> = {
-	"drive-exists": "Tagged off campus, but a SuperSet drive exists for this company",
-	"no-drive": "Tagged on campus, but no SuperSet drive was found for this company",
-};
-
 export default function CampusSection({
 	data,
 	buildHref,
@@ -164,7 +163,7 @@ export default function CampusSection({
 	const [filter, setFilter] = useState<CompanyFilter>("all");
 	const [showAll, setShowAll] = useState(false);
 	const { routes, students, jobs } = data;
-	const needsReview = data.companies.filter((company) => company.review);
+	const needsReview = data.companies.filter((company) => company.detail.review);
 	const visibleCompanies = useMemo(() => {
 		const rows =
 			filter === "all"
@@ -194,7 +193,7 @@ export default function CampusSection({
 				/>
 				<span className="text-sm">
 					<span className="font-medium text-foreground">
-						Count PPOs from campus internships as on campus
+						Count PPOs from campus internships as likely on campus
 					</span>
 					<span className="block text-xs text-muted-foreground">
 						{data.campusInternPpo.students} students ({data.campusInternPpo.offers} offers from{" "}
@@ -206,7 +205,7 @@ export default function CampusSection({
 
 			<div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
 				<Tile
-					label="Placed on campus"
+					label="Likely placed on campus"
 					color="var(--campus-on)"
 					value={students.anyOn}
 					detail={`${formatPercent(data.batchTotal ? (students.anyOn / data.batchTotal) * 100 : 0)} of the ${data.batchTotal} batch · ${formatPercent(data.placedStudents ? (students.anyOn / data.placedStudents) * 100 : 0)} of placed`}
@@ -218,7 +217,7 @@ export default function CampusSection({
 					detail={`${routes.ppo.offers} conversion offers · median ${formatPackage(routes.ppo.medianPackage)}`}
 				/>
 				<Tile
-					label="Off campus"
+					label="Likely off campus"
 					color="var(--campus-off)"
 					value={routes.off.students}
 					detail={`${routes.off.offers} offers from ${routes.off.companies} companies`}
@@ -302,7 +301,7 @@ export default function CampusSection({
 							<thead>
 								<tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
 									<th className="py-2 pr-3 font-medium">Branch</th>
-									<th className="py-2 px-3 font-medium w-[40%]">On campus, share of branch</th>
+									<th className="py-2 px-3 font-medium w-[40%]">Likely on campus, share of branch</th>
 									<th className="py-2 px-3 font-medium text-right">PPO</th>
 									<th className="py-2 px-3 font-medium text-right">Off</th>
 									<th className="py-2 pl-3 font-medium text-right">Avg on / other</th>
@@ -357,8 +356,8 @@ export default function CampusSection({
 							/>
 						))}
 						<p className="pt-2 text-xs text-muted-foreground">
-							On-campus offers only. The backend judge needs 70% to tag an offer on campus, so
-							the 70-80% row holds the near calls.
+							Likely on-campus offers only. The tagger needs 70% to call an offer on campus,
+							so the 70-80% row holds the near calls. Hover any badge for its reasoning.
 						</p>
 					</CardContent>
 				</Card>
@@ -445,30 +444,34 @@ export default function CampusSection({
 										>
 											{company.company}
 										</Link>
-										{company.reason ? (
+										{company.detail.reason ? (
 											<p className="mt-0.5 max-w-md text-xs text-muted-foreground">
-												{company.reason}
+												{company.detail.reason}
 											</p>
 										) : null}
-										{company.review ? (
+										{company.detail.review ? (
 											<p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
 												<AlertTriangle className="h-3 w-3 shrink-0" />
-												{REVIEW_TEXT[company.review]}
+												{CAMPUS_REVIEW_TEXT[company.detail.review]}
 											</p>
 										) : null}
 									</td>
 									<td className="py-2.5 px-3">
 										<CampusBadge
 											route={company.route}
-											confidence={company.confidence}
-											campusIntern={company.campusIntern}
+											confidence={company.detail.confidence}
+											campusIntern={company.detail.campusIntern}
+											detail={company.detail}
 										/>
 									</td>
 									<td className="py-2.5 px-3 text-right tabular-nums">{company.students}</td>
 									<td className="py-2.5 px-3 text-right tabular-nums">{formatPackage(company.avgPackage)}</td>
-									<td className={cn("py-2.5 pl-3 text-xs", !company.jobPosted && "text-muted-foreground")}>
-										{company.jobPosted
-											? [company.jobCategory, company.jobPackage ? formatPackage(company.jobPackage) : null]
+									<td className={cn("py-2.5 pl-3 text-xs", !company.detail.drive && "text-muted-foreground")}>
+										{company.detail.drive
+											? [
+													company.detail.drive.category,
+													company.detail.drive.lpa ? formatPackage(company.detail.drive.lpa) : null,
+												]
 													.filter(Boolean)
 													.join(" · ") || "Linked"
 											: "None found"}

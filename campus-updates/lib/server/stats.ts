@@ -10,6 +10,7 @@ import {
 import {
 	BranchStatsData,
 	CampusCompany,
+	CampusDetail,
 	CampusRouteSummary,
 	CampusStatsData,
 	CompanyStatsData,
@@ -24,6 +25,7 @@ import {
 	Role,
 	Student,
 	StudentWithPlacement,
+	getCampusReview,
 	getCampusRoute,
 	getStudentOfferDate,
 	isCampusInternPpo,
@@ -70,6 +72,9 @@ const PLACEMENT_PROJECTION = {
 	related_job_id: 1,
 	on_campus_reason: 1,
 	on_campus_ppo: 1,
+	on_campus_signals: 1,
+	on_campus_job_id: 1,
+	on_campus_model: 1,
 } as const;
 
 type MutableBranchStats = {
@@ -137,6 +142,11 @@ function normalizePlacement(value: Record<string, unknown>): Placement {
 		on_campus_reason:
 			typeof value.on_campus_reason === "string" ? value.on_campus_reason : null,
 		on_campus_ppo: value.on_campus_ppo === true,
+		on_campus_signals: Array.isArray(value.on_campus_signals)
+			? value.on_campus_signals.map(String)
+			: [],
+		on_campus_job_id: value.on_campus_job_id == null ? null : String(value.on_campus_job_id),
+		on_campus_model: value.on_campus_model == null ? null : String(value.on_campus_model),
 		email_subject: value.email_subject == null ? null : String(value.email_subject),
 		matched_job_id:
 			value.matched_job_id == null && value.related_job_id == null
@@ -191,6 +201,52 @@ export function getStatsBranch(enrollment: string, year?: string | null): string
 		if (number >= range.start && number < range.end) return range.branch;
 	}
 	return "Other";
+}
+
+/**
+ * Placements with the posted drive behind each one attached as campus_drive.
+ * The judge's own pick wins, then the stored job link, then a company name
+ * match. Also returns the jobs so callers do not load them twice.
+ */
+async function loadPlacementsWithDrives(
+	year: string,
+): Promise<{ placements: Placement[]; jobs: JobSummary[] }> {
+	const [placements, jobs] = await Promise.all([loadPlacements(year), loadJobSummaries(year)]);
+	const byId = new Map(jobs.map((job) => [job.id, job]));
+	for (const placement of placements) {
+		const judged = placement.on_campus_job_id ? byId.get(placement.on_campus_job_id) : undefined;
+		const linked = placement.matched_job_id ? byId.get(placement.matched_job_id) : undefined;
+		const tokens = companyTokens(placement.company);
+		const named = judged || linked ? undefined : jobs.find((job) => sameCompany(tokens, job.tokens));
+		const job = judged ?? linked ?? named;
+		placement.campus_drive = job
+			? {
+					id: job.id,
+					company: job.company,
+					profile: job.profile,
+					category: job.category,
+					lpa: job.lpa,
+					via: judged ? "judge" : linked ? "link" : "name",
+				}
+			: null;
+	}
+	return { placements, jobs };
+}
+
+function campusDetail(placement: Placement, route: CampusRoute): CampusDetail {
+	return {
+		route,
+		campusIntern: isCampusInternPpo(placement),
+		taggedOnCampus: placement.likely_on_campus === true,
+		judged: placement.campus_tagged === true,
+		confidence: placement.on_campus_confidence ?? null,
+		reason: placement.on_campus_reason ?? null,
+		signals: placement.on_campus_signals ?? [],
+		model: placement.on_campus_model ?? null,
+		drive: placement.campus_drive ?? null,
+		review: getCampusReview(placement),
+		emailSubject: placement.email_subject ?? null,
+	};
 }
 
 async function loadPlacements(year: string): Promise<Placement[]> {
@@ -272,7 +328,7 @@ function uniqueStudentCount(students: StudentWithPlacement[]): number {
 }
 
 export async function getStatsSummary(year: string, query: string): Promise<StatsSummary> {
-	const placements = await loadPlacements(year);
+	const { placements } = await loadPlacementsWithDrives(year);
 	const allStudents = flattenStudents(placements);
 	const included = includedStudents(allStudents, year);
 	const filtered = included.filter((student) => matchesSearch(student, query));
@@ -419,7 +475,7 @@ export async function getBranchStats(year: string, query: string): Promise<Branc
 }
 
 export async function getCompanyStats(year: string, query: string): Promise<CompanyStatsData> {
-	const placements = await loadPlacements(year);
+	const { placements } = await loadPlacementsWithDrives(year);
 	const allStudents = flattenStudents(placements);
 	const students = query
 		? includedStudents(allStudents, year).filter((student) => matchesSearch(student, query))
@@ -433,6 +489,7 @@ export async function getCompanyStats(year: string, query: string): Promise<Comp
 			onCampusConfidence: number | null;
 			campusRoute: CampusRoute;
 			campusIntern: boolean;
+			campus: CampusDetail;
 		}
 	>();
 
@@ -453,6 +510,7 @@ export async function getCompanyStats(year: string, query: string): Promise<Comp
 					: null,
 				campusRoute: getCampusRoute(student.placement),
 				campusIntern: isCampusInternPpo(student.placement),
+				campus: campusDetail(student.placement, getCampusRoute(student.placement)),
 			});
 		}
 		const company = companies.get(student.company)!;
@@ -469,6 +527,7 @@ export async function getCompanyStats(year: string, query: string): Promise<Comp
 		onCampusConfidence: stats.onCampusConfidence,
 		campusRoute: stats.campusRoute,
 		campusIntern: stats.campusIntern,
+		campus: stats.campus,
 	})).sort((left, right) => left.company.localeCompare(right.company));
 	return { companies: data, total: data.length };
 }
@@ -635,6 +694,8 @@ function sameCompany(left: string[][], right: string[][]): boolean {
 
 type JobSummary = {
 	id: string;
+	company: string;
+	profile: string | null;
 	tokens: string[][];
 	category: string | null;
 	lpa: number | null;
@@ -645,7 +706,16 @@ async function loadJobSummaries(year: string): Promise<JobSummary[]> {
 	const documents = await collection
 		.find(
 			{},
-			{ projection: { id: 1, company: 1, package: 1, annum_months: 1, placement_category: 1 } },
+			{
+				projection: {
+					id: 1,
+					company: 1,
+					job_profile: 1,
+					package: 1,
+					annum_months: 1,
+					placement_category: 1,
+				},
+			},
 		)
 		.toArray();
 	return documents.map((document) => {
@@ -653,6 +723,8 @@ async function loadJobSummaries(year: string): Promise<JobSummary[]> {
 		const monthly = String(document.annum_months || "").toLowerCase().startsWith("month");
 		return {
 			id: String(document.id ?? document._id),
+			company: String(document.company || ""),
+			profile: document.job_profile ? String(document.job_profile) : null,
 			tokens: companyTokens(String(document.company || "")),
 			category: document.placement_category ? String(document.placement_category) : null,
 			lpa: amount && amount > 0 ? (monthly ? (amount * 12) / 1e5 : amount / 1e5) : null,
@@ -687,7 +759,7 @@ export async function getCampusStats(
 	campusInternPpoAsOn = false,
 ): Promise<CampusStatsData> {
 	const routeOf = (placement: Placement) => getCampusRoute(placement, { campusInternPpoAsOn });
-	const [placements, jobs] = await Promise.all([loadPlacements(year), loadJobSummaries(year)]);
+	const { placements, jobs } = await loadPlacementsWithDrives(year);
 	const students = includedStudents(flattenStudents(placements), year).filter((student) =>
 		matchesSearch(student, query),
 	);
@@ -787,31 +859,16 @@ export async function getCampusStats(
 	}
 	const companies: CampusCompany[] = Array.from(placementsInScope.values()).map(
 		({ placement, students: companyStudents }) => {
-			const tokens = companyTokens(placement.company);
-			const job = jobs.find((candidate) => sameCompany(tokens, candidate.tokens));
 			const route = routeOf(placement);
-			const jobPosted = Boolean(placement.matched_job_id || job);
 			const packages = companyStudents
 				.map((student) => getStudentPackage(student, student.placement) ?? 0)
 				.filter((value) => value > 0);
 			return {
 				company: placement.company,
 				route,
-				campusIntern: isCampusInternPpo(placement),
 				students: companyStudents.length,
 				avgPackage: average(packages),
-				confidence: placement.on_campus_confidence ?? null,
-				tagged: placement.campus_tagged === true,
-				reason: placement.on_campus_reason ?? null,
-				jobPosted,
-				jobCategory: job?.category ?? null,
-				jobPackage: job?.lpa ?? null,
-				review:
-					route === "off" && jobPosted
-						? "drive-exists"
-						: route === "on" && !jobPosted
-							? "no-drive"
-							: null,
+				detail: campusDetail(placement, route),
 			};
 		},
 	);
@@ -822,9 +879,9 @@ export async function getCampusStats(
 		const inBucket = companies.filter(
 			(company) =>
 				company.route === "on" &&
-				company.confidence != null &&
-				company.confidence >= bucket.min &&
-				company.confidence < ceiling,
+				company.detail.confidence != null &&
+				company.detail.confidence >= bucket.min &&
+				company.detail.confidence < ceiling,
 		);
 		return {
 			bucket: bucket.label,
@@ -880,11 +937,7 @@ export async function getCampusStats(
 			total: jobs.length,
 			companies: jobCompanyList.length,
 			companiesWithOffers: jobCompanyList.filter(hasOffer).length,
-			offersLinked: placements.filter(
-				(placement) =>
-					placement.matched_job_id ||
-					jobs.some((job) => sameCompany(companyTokens(placement.company), job.tokens)),
-			).length,
+			offersLinked: placements.filter((placement) => placement.campus_drive).length,
 			offerDocs: placements.length,
 			byCategory: Array.from(categories, ([category, value]) => ({ category, ...value })).sort(
 				(left, right) => right.companies - left.companies,

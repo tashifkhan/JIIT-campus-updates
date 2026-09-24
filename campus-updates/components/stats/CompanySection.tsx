@@ -67,6 +67,7 @@ export default function CompanySection({
 											route={company.campusRoute}
 											confidence={company.onCampusConfidence}
 											campusIntern={company.campusIntern}
+											detail={company.campus}
 											className="mb-3"
 										/>
 										<div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
